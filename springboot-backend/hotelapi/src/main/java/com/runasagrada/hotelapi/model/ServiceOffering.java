@@ -2,6 +2,8 @@ package com.runasagrada.hotelapi.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -57,10 +59,12 @@ public class ServiceOffering {
     private double longitude;
 
     // Relation with other entities
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "hotel_id")
     private Hotel hotel;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "service", fetch = FetchType.EAGER, orphanRemoval = true)
     @OrderBy("startTime ASC")
     private List<ServiceSchedule> schedules;

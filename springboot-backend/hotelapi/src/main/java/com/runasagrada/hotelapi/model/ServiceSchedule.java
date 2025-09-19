@@ -1,12 +1,21 @@
 package com.runasagrada.hotelapi.model;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.EnumSet;
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -24,11 +33,26 @@ public class ServiceSchedule {
     @Column(name = "service_schedule_id")
     private Long id;
 
-    @ManyToOne
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private ServiceOffering service;
 
-    @Column(name = "date", nullable = false)
-    private String daysOfWeek;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "service_schedule_days", joinColumns = @JoinColumn(name = "service_schedule_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "day_of_week", nullable = false, length = 16)
+    private Set<DayWeek> daysOfWeek = EnumSet.noneOf(DayWeek.class);
+
+    public enum DayWeek {
+        MONDAY,
+        TUESDAY,
+        WEDNESDAY,
+        THURSDAY,
+        FRIDAY,
+        SATURDAY,
+        SUNDAY,
+        DAILY
+    }
 
     @Column(name = "start_time", nullable = false)
     private LocalTime startTime;
