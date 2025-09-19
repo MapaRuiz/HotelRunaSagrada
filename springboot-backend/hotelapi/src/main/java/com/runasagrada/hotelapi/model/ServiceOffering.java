@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -42,14 +43,18 @@ public class ServiceOffering {
     private String description;
 
     @Column(nullable = false)
+    @Schema(name = "base_price")
     private double basePrice;
 
     @Column(name = "duration_minutes", nullable = false)
+    @Schema(name = "duration_minutes")
     private int durationMinutes;
 
+    @Schema(name = "image_urls")
     private List<String> imageUrls;
 
     @Column(name = "max_participants", nullable = false)
+    @Schema(name = "max_participants")
     private int maxParticipants;
 
     @Column(nullable = false)

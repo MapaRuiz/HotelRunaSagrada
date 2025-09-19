@@ -25,11 +25,10 @@ import com.runasagrada.hotelapi.model.ServiceOffering;
 import com.runasagrada.hotelapi.model.ServiceSchedule;
 import com.runasagrada.hotelapi.service.ServiceOfferingService;
 import com.runasagrada.hotelapi.service.ServiceScheduleService;
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 @RestController
@@ -211,11 +210,17 @@ public class ServiceOfferingController {
 
     @Data
     static class ScheduleRequest {
+        @Schema(name = "days_of_week")
         private Set<ServiceSchedule.DayWeek> daysOfWeek;
+
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+        @Schema(name = "start_time", type = "string", pattern = "^\\d{2}:\\d{2}$", example = "08:00")
         private LocalTime startTime;
+
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+        @Schema(name = "end_time", type = "string", pattern = "^\\d{2}:\\d{2}$", example = "09:30")
         private LocalTime endTime;
+
         private Boolean active;
     }
 }
