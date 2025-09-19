@@ -2,6 +2,7 @@ package com.runasagrada.hotelapi.service;
 
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,5 +41,10 @@ public class ServiceScheduleServiceImpl implements ServiceScheduleService {
     @Override
     public void delete(Long id) {
         serviceScheduleRepository.deleteById(id);
+    }
+
+    @Override
+    public Optional<ServiceSchedule> findById(Long id) {
+        return serviceScheduleRepository.findById(id);
     }
 }

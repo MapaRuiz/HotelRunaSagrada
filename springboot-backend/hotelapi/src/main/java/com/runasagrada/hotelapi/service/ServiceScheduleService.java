@@ -2,6 +2,7 @@ package com.runasagrada.hotelapi.service;
 
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import com.runasagrada.hotelapi.model.ServiceOffering;
 import com.runasagrada.hotelapi.model.ServiceSchedule;
@@ -17,4 +18,6 @@ public interface ServiceScheduleService {
     void save(ServiceSchedule serviceSchedule);
 
     void delete(Long id);
+
+    Optional<ServiceSchedule> findById(Long id);
 }

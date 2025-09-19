@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import java.util.EnumSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
@@ -54,10 +55,12 @@ public class ServiceSchedule {
         DAILY
     }
 
-    @Column(name = "start_time", nullable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+    @Column(name = "start_time", nullable = true)
     private LocalTime startTime;
 
-    @Column(name = "end_time", nullable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+    @Column(name = "end_time", nullable = true)
     private LocalTime endTime;
 
     @Column(name = "is_active", nullable = false)
