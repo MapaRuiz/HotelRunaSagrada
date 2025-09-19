@@ -1,1 +1,32 @@
 /* You can add global styles to this file, and also import other style files */
+:root {
+    --bg: #0c1411;
+    --panel: #62646c;
+    --muted: #94a3b8;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    font-family: 'Inter', system-ui, Arial, Helvetica, sans-serif;
+    background: linear-gradient(135deg, #0b1a3a 0%, #0c4332 35%, #67b6a2 100%);
+    color: #e6e8ec;
+}
+
+.card {
+    background: var(--panel);
+    border: 0;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .25);
+}
+
+.badge {
+    border-radius: 999px;
+}
+
+a,
+.nav-link {
+    color: #dbe3ff;
+}

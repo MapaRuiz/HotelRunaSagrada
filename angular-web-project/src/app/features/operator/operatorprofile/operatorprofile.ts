@@ -10,6 +10,7 @@ import { UsersService } from '../../../services/users';
   imports: [CommonModule, ReactiveFormsModule],
   template: `
   <h4>Perfil (Operador)</h4>
+  
   <form [formGroup]="form" (ngSubmit)="save()" class="mt-3" style="max-width:520px">
     <input class="form-control mb-2" formControlName="full_name" placeholder="Nombre">
     <input class="form-control mb-2" formControlName="email" placeholder="Email" type="email" [disabled]="true">

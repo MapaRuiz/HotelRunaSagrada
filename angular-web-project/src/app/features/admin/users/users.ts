@@ -1,9 +1,9 @@
-// app/src/app/features/admin/users/users.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { UsersService } from '../../../services/users';
-import { User, Role } from '../../../model/user';
+import { User, Role, RoleEntity } from '../../../model/user';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   standalone: true,
@@ -12,19 +12,110 @@ import { User, Role } from '../../../model/user';
   template: `
   <h4>Usuarios</h4>
 
-  <table class="table table-striped mt-3" *ngIf="users.length; else empty">
+  <!-- Crear -->
+  <details class="mt-3" open>
+    <summary class="mb-2">Crear usuario</summary>
+    <div class="card card-body">
+      <form #f="ngForm" (ngSubmit)="create(f)">
+        <div class="row g-2">
+          <div class="col-md-4">
+            <label class="form-label">Email *</label>
+            <input class="form-control" name="email" [(ngModel)]="createForm.email" required
+                   [class.is-invalid]="createTouched && !isEmailValid(createForm.email)">
+            <div class="invalid-feedback">Ingresa un correo válido.</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Contraseña *</label>
+            <input class="form-control" type="password" name="password" [(ngModel)]="createForm.password" required
+                   [class.is-invalid]="createTouched && !isPasswordOk(createForm.password)">
+            <div class="invalid-feedback">Mínimo 6 caracteres.</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Confirmar contraseña *</label>
+            <input class="form-control" type="password" name="password2" [(ngModel)]="createForm.password2" required
+                   [class.is-invalid]="createTouched && !passwordsMatch(createForm.password, createForm.password2)">
+            <div class="invalid-feedback">Las contraseñas no coinciden.</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Nombre completo</label>
+            <input class="form-control" name="full_name" [(ngModel)]="createForm.full_name">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Teléfono</label>
+            <input class="form-control" name="phone" [(ngModel)]="createForm.phone">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Documento</label>
+            <input class="form-control" name="national_id" [(ngModel)]="createForm.national_id">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Rol</label>
+            <select class="form-select" name="role" [(ngModel)]="createForm.role">
+              <option *ngFor="let r of allRoles" [value]="r">{{r}}</option>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Activo</label>
+            <div>
+              <input class="form-check-input" type="checkbox" id="enabledCreate" [(ngModel)]="createForm.enabled" name="enabled">
+              <label class="form-check-label ms-1" for="enabledCreate">Sí</label>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Imagen (ruta/URL)</label>
+            <input class="form-control" name="selected_pet" [(ngModel)]="createForm.selected_pet"
+                   placeholder="/images/icons/icono1.png o https://...">
+            <div class="mt-2" *ngIf="createForm.selected_pet as src">
+              <img [src]="img(src)" (error)="imgBrokenCreate=true" (load)="imgBrokenCreate=false"
+                   style="width:64px;height:64px;object-fit:cover;border-radius:50%;">
+              <div class="text-danger small mt-1" *ngIf="imgBrokenCreate">No se pudo cargar la imagen.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3 d-flex gap-2">
+          <button class="btn btn-primary"
+                  (click)="createTouched = true"
+                  [disabled]="!isEmailValid(createForm.email) || !isPasswordOk(createForm.password) || !passwordsMatch(createForm.password, createForm.password2)">
+            Crear
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="resetCreate()">Limpiar</button>
+        </div>
+      </form>
+    </div>
+  </details>
+
+  <!-- Lista -->
+  <table class="table table-striped mt-4" *ngIf="users.length; else empty">
     <thead>
       <tr>
-        <th>ID</th><th>Nombre</th><th>Email</th><th>Rol</th><th>Activo</th><th class="text-end">Acciones</th>
+        <th>ID</th><th>Usuario</th><th>Roles</th><th>Activo</th><th class="text-end">Acciones</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let u of users">
         <ng-container *ngIf="editId !== u.user_id; else editRow">
           <td>{{u.user_id}}</td>
-          <td>{{u.full_name}}</td>
-          <td>{{u.email}}</td>
-          <td>{{ (u.roles?.[0]) || '—' }}</td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <img *ngIf="u.selected_pet" [src]="img(u.selected_pet)" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
+              <div>
+                <div class="fw-semibold">{{u.full_name || '—'}}</div>
+                <div class="text-muted small">{{u.email}}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span *ngFor="let r of roleNames(u.roles)" class="badge text-bg-secondary me-1">{{r}}</span>
+          </td>
           <td>
             <span class="badge" [class.text-bg-success]="u.enabled !== false" [class.text-bg-secondary]="u.enabled === false">
               {{ u.enabled === false ? 'No' : 'Sí' }}
@@ -39,21 +130,29 @@ import { User, Role } from '../../../model/user';
         <ng-template #editRow>
           <td>{{u.user_id}}</td>
           <td>
-            <input class="form-control form-control-sm" [(ngModel)]="draft.full_name" placeholder="Nombre completo">
-          </td>
-          <td>
-            <div class="d-flex align-items-center gap-2">
-              <span>{{u.email}}</span>
-              <button class="btn btn-link btn-sm p-0" (click)="toggleEmailEdit()">
-                {{ draft.changeEmail ? 'Cancelar email' : 'Cambiar email' }}
-              </button>
-            </div>
-
-            <div *ngIf="draft.changeEmail" class="mt-2">
-              <input class="form-control form-control-sm" [(ngModel)]="draft.email" placeholder="Nuevo email"
-                     [class.is-invalid]="draft.emailTouched && !isEmailValid(draft.email)"
-                     (blur)="draft.emailTouched = true">
-              <div class="invalid-feedback">Email inválido.</div>
+            <div class="row g-2">
+              <div class="col-md-6">
+                <input class="form-control form-control-sm mb-1" [(ngModel)]="draft.full_name" placeholder="Nombre completo">
+                <input class="form-control form-control-sm mb-1" [(ngModel)]="draft.email" placeholder="Email"
+                       [class.is-invalid]="editTouched && !isEmailValid(draft.email)">
+                <div class="invalid-feedback">Email inválido.</div>
+              </div>
+              <div class="col-md-6">
+                <input class="form-control form-control-sm mb-1" [(ngModel)]="draft.selected_pet" placeholder="/images/icons/icono1.png o https://...">
+                <div class="mt-1" *ngIf="draft.selected_pet as src">
+                  <img [src]="img(src)" (error)="imgBrokenEdit=true" (load)="imgBrokenEdit=false"
+                       style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
+                  <div class="text-danger small mt-1" *ngIf="imgBrokenEdit">No se pudo cargar la imagen.</div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <input class="form-control form-control-sm" [(ngModel)]="draft.password" type="password" placeholder="Nueva contraseña (opcional)">
+                <div class="form-text" *ngIf="draft.password">Mín. 6 caracteres.</div>
+              </div>
+              <div class="col-md-6" *ngIf="draft.password">
+                <input class="form-control form-control-sm" [(ngModel)]="draft.password2" type="password" placeholder="Confirmar contraseña">
+                <div class="text-danger small" *ngIf="editTouched && !passwordsMatch(draft.password, draft.password2)">No coincide</div>
+              </div>
             </div>
           </td>
           <td>
@@ -65,52 +164,13 @@ import { User, Role } from '../../../model/user';
             <input type="checkbox" class="form-check-input" [(ngModel)]="draft.enabled" id="chk{{u.user_id}}">
           </td>
           <td class="text-end">
-            <div class="d-flex flex-column align-items-end gap-2">
-              <button class="btn btn-sm btn-outline-secondary" (click)="togglePasswordEdit()">
-                {{ draft.changePassword ? 'Cancelar contraseña' : 'Cambiar contraseña' }}
-              </button>
-
-              <div *ngIf="draft.changePassword" class="border rounded p-2" style="min-width: 280px;">
-                <div class="mb-2">
-                  <div class="input-group input-group-sm">
-                    <input [type]="showPwd ? 'text' : 'password'" class="form-control"
-                           [(ngModel)]="draft.password" placeholder="Nueva contraseña"
-                           [class.is-invalid]="draft.passwordTouched && !isPasswordStrong(draft.password)"
-                           (blur)="draft.passwordTouched = true">
-                    <button class="btn btn-outline-secondary" type="button" (click)="showPwd = !showPwd">
-                      {{ showPwd ? 'Ocultar' : 'Mostrar' }}
-                    </button>
-                  </div>
-                  <div class="invalid-feedback d-block" *ngIf="draft.passwordTouched && !isPasswordStrong(draft.password)">
-                    Debe tener mínimo 8 caracteres, con letras y números.
-                  </div>
-                </div>
-                <div>
-                  <input [type]="showPwd ? 'text' : 'password'" class="form-control form-control-sm"
-                         [(ngModel)]="draft.password2" placeholder="Confirmar contraseña"
-                         [class.is-invalid]="draft.password2Touched && !passwordsMatch()"
-                         (blur)="draft.password2Touched = true">
-                  <div class="invalid-feedback">Las contraseñas no coinciden.</div>
-                </div>
-              </div>
-
-              <div *ngIf="confirming" class="alert alert-warning py-2 px-3 mb-0" style="max-width: 360px;">
-                <div class="small mb-2 fw-semibold">Confirmación requerida</div>
-                <ul class="small mb-2 ps-3">
-                  <li *ngIf="draft.changeEmail">Email: {{u.email}} → <strong>{{draft.email}}</strong></li>
-                  <li *ngIf="draft.changePassword">Contraseña: se actualizará</li>
-                </ul>
-                <div class="d-flex gap-2 justify-content-end">
-                  <button class="btn btn-sm btn-secondary" (click)="cancelConfirm()">Cancelar</button>
-                  <button class="btn btn-sm btn-primary" (click)="save(u, true)">Confirmar</button>
-                </div>
-              </div>
-
-              <div class="d-flex gap-2" *ngIf="!confirming">
-                <button class="btn btn-sm btn-primary" (click)="save(u)">Guardar</button>
-                <button class="btn btn-sm btn-secondary" (click)="cancel()">Cancelar</button>
-              </div>
-            </div>
+            <button class="btn btn-sm btn-primary me-2"
+                    (click)="save(u)"
+                    (mousedown)="editTouched = true"
+                    [disabled]="!isEmailValid(draft.email) || (draft.password && (!isPasswordOk(draft.password) || !passwordsMatch(draft.password, draft.password2)))">
+              Guardar
+            </button>
+            <button class="btn btn-sm btn-secondary" (click)="cancel()">Cancelar</button>
           </td>
         </ng-template>
       </tr>
@@ -128,141 +188,168 @@ export class Users implements OnInit {
   users: User[] = [];
   meId: number | null = null;
 
-  editId: number | null = null;
-  confirming = false;
-  showPwd = false;
-
-  allRoles: Role[] = ['ADMIN','OPERATOR','CLIENT'] as const;
-
-  draft: {
-    full_name: string;
-    role: Role;
-    enabled: boolean;
-    national_id?: string;
-    phone?: string;
-    // sensibles:
-    changeEmail: boolean;
+  // Crear
+  createForm: {
     email: string;
-    emailTouched?: boolean;
-
-    changePassword: boolean;
     password: string;
     password2: string;
-    passwordTouched?: boolean;
-    password2Touched?: boolean;
+    full_name?: string;
+    phone?: string;
+    national_id?: string;
+    selected_pet?: string;
+    role: Role;
+    enabled: boolean;
+  } = { email: '', password: '', password2: '', role: 'CLIENT', enabled: true };
+  createTouched = false;
+  imgBrokenCreate = false;
+
+  // Editar
+  editId: number | null = null;
+  draft: {
+    email: string;
+    full_name?: string;
+    phone?: string;
+    national_id?: string;
+    selected_pet?: string;
+    password?: string;
+    password2?: string;
+    role: Role;
+    enabled: boolean;
   } = this.emptyDraft();
+  editTouched = false;
+  imgBrokenEdit = false;
 
-  ngOnInit() { this.load(); }
+  allRoles: Role[] = ['ADMIN','OPERATOR','CLIENT'];
 
-  emptyDraft() {
-    return {
-      full_name: '', role: 'CLIENT' as Role, enabled: true,
-      changeEmail: false, email: '',
-      changePassword: false, password: '', password2: ''
-    };
-  }
+  // Base del backend para imágenes (/images/...) – usa backendBaseUrl si existe; si no, deriva de apiBaseUrl
+  private backendBase = (environment as any).backendBaseUrl
+    || (environment.apiBaseUrl ? environment.apiBaseUrl.replace(/\/api\/?$/, '') : '');
 
-  load() {
-    this.api.getAll().subscribe(d => this.users = d);
+  ngOnInit() {
+    this.load();
     const me = JSON.parse(localStorage.getItem('user') || 'null') as User | null;
     this.meId = me?.user_id ?? null;
   }
 
+  emptyDraft() {
+    return { email: '', role: 'CLIENT' as Role, enabled: true };
+  }
+
+  load() {
+    // conserva tu método actual
+    this.api.getAll().subscribe(d => this.users = d.sort((a,b)=>(a.user_id||0)-(b.user_id||0)));
+  }
+
+  // Helpers
+  img(path?: string) {
+    if (!path) return '';
+    return path.startsWith('http') ? path : `${this.backendBase}${path}`;
+  }
+
+  roleNames(roles?: RoleEntity[] | string[]): string[] {
+    if (!roles) return [];
+    if (typeof roles[0] === 'string') return roles as string[];
+    return (roles as RoleEntity[]).map(r => r.name);
+  }
+
   isSelf(u: User) { return this.meId && u.user_id === this.meId; }
 
+  // Validaciones suaves
+  isEmailValid(v?: string) { return !!v && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+  isPasswordOk(v?: string) { return !!v && v.length >= 6; }
+  passwordsMatch(a?: string, b?: string) { return (a || '') === (b || ''); }
+
+  // Crear
+  resetCreate() {
+    this.createForm = { email: '', password: '', password2: '', role: 'CLIENT', enabled: true };
+    this.createTouched = false;
+    this.imgBrokenCreate = false;
+  }
+
+  create(f: NgForm) {
+    this.createTouched = true;
+    if (!this.isEmailValid(this.createForm.email) ||
+        !this.isPasswordOk(this.createForm.password) ||
+        !this.passwordsMatch(this.createForm.password, this.createForm.password2)) {
+      return;
+    }
+
+    const body: any = {
+      email: this.createForm.email,
+      password: this.createForm.password,
+      full_name: this.createForm.full_name,
+      phone: this.createForm.phone,
+      national_id: this.createForm.national_id,
+      selected_pet: this.createForm.selected_pet,
+      enabled: this.createForm.enabled,
+      roles: [this.createForm.role] // nombres de rol, como ya usabas
+    };
+
+    this.api.create(body).subscribe({
+      next: u => {
+        this.users = [u, ...this.users];
+        this.resetCreate();
+        f.resetForm();
+      },
+      error: err => alert(err?.error?.message || err.message || 'Error al crear usuario')
+    });
+  }
+
+  // Editar
   beginEdit(u: User) {
     this.editId = u.user_id;
-    this.confirming = false;
-    this.showPwd = false;
+    this.editTouched = false;
+    this.imgBrokenEdit = false;
     this.draft = {
-      ...this.emptyDraft(),
-      full_name: u.full_name,
-      role: (u.roles?.[0] as Role) ?? 'CLIENT',
-      enabled: u.enabled !== false,
-      national_id: u.national_id,
-      phone: u.phone,
       email: u.email,
+      full_name: u.full_name,
+      phone: u.phone,
+      national_id: u.national_id,
+      selected_pet: u.selected_pet,
+      role: (this.roleNames(u.roles)[0] as Role) || 'CLIENT',
+      enabled: u.enabled !== false
     };
   }
 
   cancel() {
     this.editId = null;
-    this.confirming = false;
+    this.editTouched = false;
+    this.imgBrokenEdit = false;
     this.draft = this.emptyDraft();
   }
 
-  toggleEmailEdit() { this.draft.changeEmail = !this.draft.changeEmail; }
-  togglePasswordEdit() { this.draft.changePassword = !this.draft.changePassword; }
-
-  isEmailValid(v?: string) {
-    if (!this.draft.changeEmail) return true;
-    if (!v) return false;
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-  }
-
-  isPasswordStrong(v?: string) {
-    if (!this.draft.changePassword) return true;
-    if (!v) return false;
-    const long = v.length >= 8;
-    const hasLetters = /[A-Za-z]/.test(v);
-    const hasDigits = /\d/.test(v);
-    return long && hasLetters && hasDigits;
-  }
-
-  passwordsMatch() {
-    if (!this.draft.changePassword) return true;
-    return this.draft.password === this.draft.password2 && this.draft.password.length > 0;
-  }
-
-  cancelConfirm() { this.confirming = false; }
-
-  save(u: User, forceConfirm = false) {
-    // Validaciones
-    if (this.draft.changeEmail) {
-      this.draft.emailTouched = true;
-      if (!this.isEmailValid(this.draft.email)) return;
-    }
-    if (this.draft.changePassword) {
-      this.draft.passwordTouched = this.draft.password2Touched = true;
-      if (!this.isPasswordStrong(this.draft.password) || !this.passwordsMatch()) return;
-    }
-
-    const hasSensitiveChange = this.draft.changeEmail || this.draft.changePassword;
-
-    // Paso de confirmación inline (sin modal)
-    if (hasSensitiveChange && !forceConfirm && !this.confirming) {
-      this.confirming = true;
+  save(u: User) {
+    this.editTouched = true;
+    if (!this.isEmailValid(this.draft.email)) return;
+    if (this.draft.password && (!this.isPasswordOk(this.draft.password) || !this.passwordsMatch(this.draft.password, this.draft.password2))) {
       return;
     }
 
-    const payload: Partial<User> & { roles: string[] } = {
+    const body: any = {
+      email: this.draft.email,
       full_name: this.draft.full_name,
       phone: this.draft.phone,
       national_id: this.draft.national_id,
+      selected_pet: this.draft.selected_pet,
       enabled: this.draft.enabled,
       roles: [this.draft.role]
     };
-    if (this.draft.changeEmail) payload.email = this.draft.email;
-    if (this.draft.changePassword) payload.password = this.draft.password;
+    if (this.draft.password) body.password = this.draft.password;
 
-    this.api.update(u.user_id, payload).subscribe({
-      next: updated => {
-        this.users = this.users.map(x => x.user_id === updated.user_id ? updated : x);
-        this.editId = null;
-        this.confirming = false;
+    this.api.update(u.user_id, body).subscribe({
+      next: upd => {
+        this.users = this.users.map(x => x.user_id === upd.user_id ? upd : x);
+        this.cancel();
       },
-      error: err => {
-        const msg = (err?.error?.message || err?.error?.error || err?.message || 'Error desconocido');
-        alert('No se pudo actualizar: ' + msg);
-      }
+      error: err => alert(err?.error?.message || err.message || 'Error al actualizar usuario')
     });
   }
 
   remove(u: User) {
-    if (!confirm(`¿Eliminar a ${u.full_name}?`)) return;
+    if (!confirm(`¿Eliminar a ${u.full_name || u.email}?`)) return;
     this.api.delete(u.user_id).subscribe({
       next: () => this.users = this.users.filter(x => x.user_id !== u.user_id),
-      error: err => alert('No se pudo eliminar: ' + (err?.error?.error || err.message))
+      error: err => alert(err?.error?.message || err.message || 'Error al eliminar usuario')
     });
   }
 }

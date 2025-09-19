@@ -11,9 +11,21 @@ export const routes: Routes = [
   // operator
   { path: 'operator/profile', loadComponent: () => import('./features/operator/operatorprofile/operatorprofile').then(m => m.OperatorProfile) },
 
-  // admin
-  { path: 'admin/users', loadComponent: () => import('./features/admin/users/users').then(m => m.Users) },
+  // ADMIN - shell con children
+  {
+    path: 'admin',
+    loadComponent: () => import('./features/admin/shell/admin-shell/admin-shell')
+      .then(m => m.AdminShellComponent),
+    children: [
+      { path: '', pathMatch: 'full',
+        loadComponent: () => import('./features/admin/dashboard/admin-dashboard/admin-dashboard')
+          .then(m => m.AdminDashboardComponent)
+      },
+      { path: 'users', loadComponent: () => import('./features/admin/users/users').then(m => m.Users) },
+      { path: 'hotels', loadComponent: () => import('./features/admin/hotels/hotels').then(m => m.HotelsComponent) },
+      { path: 'amenities', loadComponent: () => import('./features/admin/amenities/amenities').then(m => m.AmenitiesComponent) },
+    ]
+  },
 
   { path: '**', redirectTo: '' }
 ];
-

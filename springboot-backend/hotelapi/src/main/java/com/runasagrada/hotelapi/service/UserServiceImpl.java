@@ -6,6 +6,7 @@ import com.runasagrada.hotelapi.repository.RoleRepository;
 import com.runasagrada.hotelapi.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -61,7 +62,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> findAll() {
-        return users.findAll();
+        return users.findAll(Sort.by(Sort.Direction.ASC, "userId"));
     }
 
     @Override
