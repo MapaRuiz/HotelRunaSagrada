@@ -1,94 +1,106 @@
 {
-  "hash": "c4fd641a",
-  "configHash": "6fcefa76",
-  "lockfileHash": "85166d35",
-  "browserHash": "13ffd9fc",
+  "hash": "a027d2a1",
+  "configHash": "6db7df5a",
+  "lockfileHash": "4c6574eb",
+  "browserHash": "c2552694",
   "optimized": {
     "@angular/common": {
       "src": "../../../../../../node_modules/@angular/common/fesm2022/common.mjs",
       "file": "@angular_common.js",
-      "fileHash": "2be4a249",
+      "fileHash": "1d93c123",
       "needsInterop": false
     },
     "@angular/common/http": {
       "src": "../../../../../../node_modules/@angular/common/fesm2022/http.mjs",
       "file": "@angular_common_http.js",
-      "fileHash": "df0ad2c0",
+      "fileHash": "4fd4d9bb",
       "needsInterop": false
     },
     "@angular/core": {
       "src": "../../../../../../node_modules/@angular/core/fesm2022/core.mjs",
       "file": "@angular_core.js",
-      "fileHash": "f3599557",
+      "fileHash": "8872b9a7",
       "needsInterop": false
     },
     "@angular/forms": {
       "src": "../../../../../../node_modules/@angular/forms/fesm2022/forms.mjs",
       "file": "@angular_forms.js",
-      "fileHash": "c858b5b8",
+      "fileHash": "43324764",
       "needsInterop": false
     },
     "@angular/platform-browser": {
       "src": "../../../../../../node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs",
       "file": "@angular_platform-browser.js",
-      "fileHash": "5e2655fb",
+      "fileHash": "88ff93bc",
       "needsInterop": false
     },
     "@angular/router": {
       "src": "../../../../../../node_modules/@angular/router/fesm2022/router.mjs",
       "file": "@angular_router.js",
-      "fileHash": "fc0d980d",
+      "fileHash": "2f752b19",
       "needsInterop": false
     },
     "ag-grid-angular": {
       "src": "../../../../../../node_modules/ag-grid-angular/fesm2022/ag-grid-angular.mjs",
       "file": "ag-grid-angular.js",
-      "fileHash": "3ea61fbb",
+      "fileHash": "0ec11977",
+      "needsInterop": false
+    },
+    "bootstrap": {
+      "src": "../../../../../../node_modules/bootstrap/dist/js/bootstrap.esm.js",
+      "file": "bootstrap.js",
+      "fileHash": "bcdaaf02",
       "needsInterop": false
     },
     "ng-apexcharts": {
       "src": "../../../../../../node_modules/ng-apexcharts/fesm2022/ng-apexcharts.mjs",
       "file": "ng-apexcharts.js",
-      "fileHash": "38446790",
+      "fileHash": "bf043f41",
       "needsInterop": false
     },
     "rxjs": {
       "src": "../../../../../../node_modules/rxjs/dist/esm5/index.js",
       "file": "rxjs.js",
-      "fileHash": "680ccaf3",
+      "fileHash": "e0be812a",
       "needsInterop": false
     },
     "zone.js": {
       "src": "../../../../../../node_modules/zone.js/fesm2015/zone.js",
       "file": "zone__js.js",
-      "fileHash": "4faf99e5",
+      "fileHash": "eec0d78e",
+      "needsInterop": true
+    },
+    "bootstrap/dist/js/bootstrap.bundle.min.js": {
+      "src": "../../../../../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
+      "file": "bootstrap_dist_js_bootstrap__bundle__min__js.js",
+      "fileHash": "1bc4acb4",
       "needsInterop": true
     }
   },
   "chunks": {
-    "apexcharts.esm-3HV7K4RM": {
-      "file": "apexcharts__esm-3HV7K4RM.js"
+    "apexcharts.esm-KBGOWLQA": {
+      "file": "apexcharts__esm-KBGOWLQA.js"
     },
-    "chunk-QM5PCCWE": {
-      "file": "chunk-QM5PCCWE.js"
+    "chunk-JWGH7SRI": {
+      "file": "chunk-JWGH7SRI.js"
     },
-    "chunk-Y6JMTMCS": {
-      "file": "chunk-Y6JMTMCS.js"
+    "chunk-ZR52S3XN": {
+      "file": "chunk-ZR52S3XN.js"
     },
-    "chunk-WLXYXWI6": {
-      "file": "chunk-WLXYXWI6.js"
+    "chunk-FGKPK4LD": {
+      "file": "chunk-FGKPK4LD.js"
     },
     "chunk-ZJ25XCV3": {
       "file": "chunk-ZJ25XCV3.js"
     },
-    "chunk-YLQLXMYK": {
-      "file": "chunk-YLQLXMYK.js"
+    "chunk-EADMNSOE": {
+      "file": "chunk-EADMNSOE.js"
     },
     "chunk-RSS3ODKE": {
       "file": "chunk-RSS3ODKE.js"
     },
-    "chunk-GOMI4DH3": {
-      "file": "chunk-GOMI4DH3.js"
+    "chunk-D7MF2QZF": {
+      "file": "chunk-D7MF2QZF.js"
     }
   }
 }

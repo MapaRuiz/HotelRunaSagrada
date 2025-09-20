@@ -1,34 +1,55 @@
-<div>
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Name</th>
-      <th>Category</th>
-      <th>Subcategory</th>
-      <th>Description</th>
-      <th>Base Price</th>
-      <th>Duracion</th>
-      <th>Cupo maximo</th>
-      <th>Coordenadas</th>
-      <th>Hotel</th>
-      <th>Acciones</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let servOff of serviceOfferingList">
-      <td>{{ servOff.id }}</td>
-      <td>{{ servOff.name }}</td>
-      <td>{{ servOff.category }}</td>
-      <td>{{ servOff.subcategory }}</td>
-      <td>{{ servOff.description }}</td>
-      <td>{{ servOff.base_price }}</td>
-      <td>{{ servOff.duration_minutes }}</td>
-      <td>{{ servOff.max_participants }}</td>
-      <td>({{ servOff.latitude }}, {{ servOff.longitude }})</td>
-      <td>{{ servOff.hotel?.name }}</td>
-      <td>
-        <button (click)="deleteServiceOffering(servOff)" class="btn btn-danger">Eliminar</button>
-      </td>
-    </tr>
-  </tbody>
+<!-- Lista -->
+<div *ngIf="!editing; else editForm" class="row justify-content-center">
+  <div class="table-responsive-md table-responsive-lg table-responsive">
+    <table
+      class="table table-striped mt-4 responsive-table"
+      *ngIf="serviceOfferingList.length; else empty"
+    >
+      <thead>
+        <tr>
+          <th class="table-col-id">ID</th>
+          <th class="table-col-name">Nombre</th>
+          <th class="table-col-category">Categoria</th>
+          <th class="table-col-price">Precio base</th>
+          <th class="table-col-capacity">Cupo maximo</th>
+          <th class="table-col-hotel">Hotel</th>
+          <th class="table-col-actions">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let servOff of serviceOfferingList">
+          <td class="table-col-id">{{ servOff.id }}</td>
+          <td class="table-col-name">{{ servOff.name }}</td>
+          <td class="table-col-category">{{ servOff.category }}</td>
+          <td class="table-col-price">{{ servOff.base_price | currency : 'USD' }}</td>
+          <td class="table-col-capacity">{{ servOff.max_participants }}</td>
+          <td class="table-col-hotel">{{ servOff.hotel?.name }}</td>
+          <!--Actions-->
+          <td class="table-col-actions text-end">
+            <button class="btn btn-sm btn-outline-primary me-2" (click)="beginEdit(servOff)">
+              Editar
+            </button>
+            <button class="btn btn-sm btn-outline-danger" (click)="deleteServiceOffering(servOff)">
+              Eliminar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
+
+<ng-template #empty>
+  <div class="alert alert-info mt-3">No hay servicios.</div>
+</ng-template>
+
+<ng-template #editForm>
+  <app-services-form
+    [draft]="draft"
+    [hotels]="hotelOptions"
+    [loading]="loading"
+    (cancel)="cancelEdit()"
+    (save)="saveEdit($event)"
+  >
+  </app-services-form>
+</ng-template>

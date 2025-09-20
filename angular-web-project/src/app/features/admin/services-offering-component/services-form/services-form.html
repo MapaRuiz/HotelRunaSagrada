@@ -1,1 +1,254 @@
-<p>services-form works!</p>
+<form (ngSubmit)="submit()" #form="ngForm" class="card mt-4 col-md-6 col-lg-10 col-lx-12">
+  <div class="card-body row g-3">
+    <h5 class="card-title col-12">Editar servicio</h5>
+
+    <div class="col-md-6">
+      <label class="form-label">Nombre</label>
+      <input class="form-control" [(ngModel)]="draft.name" name="name" required />
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Hotel</label>
+      <select class="form-select" [(ngModel)]="draft.hotel_id" name="hotel" required>
+        <option [ngValue]="undefined">Selecciona hotel…</option>
+        <option *ngFor="let h of hotels" [ngValue]="h.id">{{ h.name }}</option>
+      </select>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Categoria</label>
+      <select class="form-select" [(ngModel)]="draft.category" name="category" required>
+        <option [ngValue]="undefined">Selecciona categoria…</option>
+        <option *ngFor="let cat of categorias" [ngValue]="cat">{{ cat }}</option>
+      </select>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Subcategoria</label>
+      <input class="form-control" [(ngModel)]="draft.subcategory" name="subcategory" required />
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Descripcion</label>
+      <input class="form-control" [(ngModel)]="draft.description" name="description" required />
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Duracion</label>
+      <input
+        type="number"
+        class="form-control"
+        [(ngModel)]="draft.duration_minutes"
+        name="duration_minutes"
+        min="0"
+        required
+      />
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Cupo maximo</label>
+      <input
+        type="number"
+        class="form-control"
+        [(ngModel)]="draft.max_participants"
+        name="max_participants"
+        min="0"
+        required
+      />
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Precio base</label>
+      <input
+        type="number"
+        class="form-control"
+        [(ngModel)]="draft.base_price"
+        name="base_price"
+        min="0"
+        required
+      />
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Coordenadas</label>
+      <div class="row g-2">
+        <div class="col-6">
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="draft.latitude"
+            name="latitude"
+            required
+          />
+        </div>
+        <div class="col-6">
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="draft.longitude"
+            name="longitude"
+            required
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- image_urls-->
+    <div class="col-12">
+      <div class="imagenes-wrapper">
+        <div
+          class="imagenes-header d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2"
+        >
+          <label class="form-label mb-0">Imágenes</label>
+          <div class="btn-group btn-group-sm" role="group">
+            <button
+              type="button"
+              class="btn btn-outline-primary"
+              [class.active]="displayMode === 'carousel'"
+              (click)="setDisplayMode('carousel')"
+            >
+              Carrusel
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-primary"
+              [class.active]="displayMode === 'list'"
+              (click)="setDisplayMode('list')"
+            >
+              Lista
+            </button>
+          </div>
+        </div>
+
+        <div class="imagenes-input input-group mb-3">
+          <input
+            type="url"
+            class="form-control"
+            placeholder="https://ejemplo.com/imagen.jpg"
+            [(ngModel)]="newImageUrl"
+            name="newImageUrl"
+          />
+          <button class="btn btn-outline-primary" type="button" (click)="addImage()">Añadir</button>
+        </div>
+
+        <div *ngIf="draft.image_urls?.length; else noImages" class="imagenes-body">
+          <ng-container [ngSwitch]="displayMode">
+            <div
+              *ngSwitchCase="'carousel'"
+              class="carousel slide mb-3 position-relative imagenes-content"
+            >
+              <div class="carousel-inner carousel-stage">
+                <div
+                  *ngFor="let src of draft.image_urls; let i = index; trackBy: trackByIndex"
+                  class="carousel-item"
+                  [class.active]="i === activeSlide"
+                  [attr.aria-hidden]="i !== activeSlide"
+                >
+                  <div class="carousel-frame">
+                    <img
+                      [src]="src"
+                      class="carousel-img"
+                      alt="Imagen {{ i + 1 }}"
+                      (load)="onImageLoaded(i)"
+                      (error)="onImageError(i)"
+                      [class.opacity-0]="imageStatus[i] !== 'loaded'"
+                    />
+                    <div
+                      *ngIf="imageStatus[i] === 'idle'"
+                      class="carousel-overlay carousel-overlay-light"
+                    >
+                      <span class="fw-bold text-secondary">Cargando…</span>
+                    </div>
+                    <div
+                      *ngIf="imageStatus[i] === 'error'"
+                      class="carousel-overlay carousel-overlay-error"
+                    >
+                      <i class="bi bi-exclamation-triangle-fill fs-2"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button
+                class="carousel-control-prev"
+                type="button"
+                (click)="prev()"
+                [disabled]="(draft.image_urls?.length ?? 0) < 2"
+              >
+                <span class="carousel-control-prev-icon"></span>
+                <span class="visually-hidden">Anterior</span>
+              </button>
+              <button
+                class="carousel-control-next"
+                type="button"
+                (click)="next()"
+                [disabled]="(draft.image_urls?.length ?? 0) < 2"
+              >
+                <span class="carousel-control-next-icon"></span>
+                <span class="visually-hidden">Siguiente</span>
+              </button>
+            </div>
+
+            <div *ngSwitchCase="'list'" class="imagenes-content imagenes-list">
+              <ul class="list-group">
+                <li
+                  *ngFor="let src of draft.image_urls; let i = index; trackBy: trackByIndex"
+                  class="list-group-item d-flex justify-content-between align-items-center"
+                >
+                  <div class="me-2 text-truncate" style="max-width: 70%">
+                    {{ src }}
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <span *ngIf="imageStatus[i] === 'error'" class="badge text-bg-danger"
+                      >Error</span
+                    >
+                    <span *ngIf="imageStatus[i] === 'loaded'" class="badge text-bg-success"
+                      >OK</span
+                    >
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      (click)="removeImage(i)"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+      <div
+        *ngIf="displayMode === 'carousel'"
+        class="d-flex flex-wrap justify-content-end gap-2 mb-3"
+      >
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-danger"
+          (click)="removeActiveImage()"
+          [disabled]="(draft.image_urls?.length ?? 0) === 0"
+        >
+          Quitar imagen actual
+        </button>
+      </div>
+    </div>
+
+    <ng-template #noImages>
+      <div class="text-muted fst-italic">No hay imágenes todavía.</div>
+    </ng-template>
+
+    <div class="col-12 text-end">
+      <button
+        type="button"
+        class="btn btn-secondary me-2"
+        (click)="cancel.emit()"
+        [disabled]="loading"
+      >
+        Cancelar
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="loading || form.invalid">
+        Guardar
+      </button>
+    </div>
+  </div>
+</form>
