@@ -20,6 +20,9 @@ export class ServicesTable {
   serviceOfferingList: ServiceOffering[] = [];
   hotelsList: Hotel[] = [];
   hotelOptions: { id: number; name: string }[] = [];
+  showCreate = false;
+  createDraft: Partial<ServiceOffering> = this.buildEmptyDraft();
+  createLoading = false;
 
   constructor(
     private serviceOfferingService: ServiceOfferingService,
@@ -40,6 +43,66 @@ export class ServicesTable {
         hotel: hotels.find(hotel => hotel.hotel_id === service.hotel_id)
       }));
     });
+  }
+
+  toggleCreate(): void {
+    this.showCreate = !this.showCreate;
+    if (this.showCreate) {
+      this.createDraft = this.buildEmptyDraft();
+    }
+  }
+
+  cancelCreate(): void {
+    this.showCreate = false;
+    this.createDraft = this.buildEmptyDraft();
+    this.createLoading = false;
+  }
+
+  saveCreate(payload: Partial<ServiceOffering>): void {
+    this.createLoading = true;
+    const request = {
+      name: payload.name ?? '',
+      category: payload.category ?? '',
+      subcategory: payload.subcategory ?? '',
+      description: payload.description ?? '',
+      base_price: Number(payload.base_price ?? 0),
+      duration_minutes: Number(payload.duration_minutes ?? 0),
+      image_urls: payload.image_urls ?? [],
+      max_participants: Number(payload.max_participants ?? 0),
+      latitude: Number(payload.latitude ?? 0),
+      longitude: Number(payload.longitude ?? 0),
+      hotel_id: Number(payload.hotel_id ?? 0)
+    };
+
+    this.serviceOfferingService.create(request).subscribe({
+      next: created => {
+        const withHotel: ServiceOffering = {
+          ...created,
+          hotel: this.hotelsList.find(h => h.hotel_id === created.hotel_id)
+        } as ServiceOffering;
+        this.serviceOfferingList = [withHotel, ...this.serviceOfferingList];
+        this.cancelCreate();
+      },
+      error: () => {
+        this.createLoading = false;
+      }
+    });
+  }
+
+  private buildEmptyDraft(): Partial<ServiceOffering> {
+    return {
+      name: '',
+      category: undefined,
+      subcategory: '',
+      description: '',
+      base_price: undefined,
+      duration_minutes: undefined,
+      image_urls: [],
+      max_participants: undefined,
+      latitude: undefined,
+      longitude: undefined,
+      hotel_id: undefined
+    };
   }
 
   deleteServiceOffering(serviceOffering: ServiceOffering): void {

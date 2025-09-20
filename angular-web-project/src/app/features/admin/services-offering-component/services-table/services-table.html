@@ -1,41 +1,73 @@
+<div class="row justify-content-center mb-4" *ngIf="!editing">
+  <div class="col-12">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2 class="h5 mb-0">Servicios</h2>
+      <button
+        class="btn btn-sm btn-primary"
+        type="button"
+        (click)="toggleCreate()"
+        [attr.aria-expanded]="showCreate"
+      >
+        {{ showCreate ? 'Cerrar formulario' : 'Nuevo servicio' }}
+      </button>
+    </div>
+    <div class="collapse mt-3" [class.show]="showCreate">
+      <div>
+        <app-services-form
+          [draft]="createDraft"
+          [hotels]="hotelOptions"
+          [loading]="createLoading"
+          (cancel)="cancelCreate()"
+          (save)="saveCreate($event)"
+        ></app-services-form>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Lista -->
 <div *ngIf="!editing; else editForm" class="row justify-content-center">
-  <div class="table-responsive-md table-responsive-lg table-responsive">
-    <table
-      class="table table-striped mt-4 responsive-table"
-      *ngIf="serviceOfferingList.length; else empty"
-    >
-      <thead>
-        <tr>
-          <th class="table-col-id">ID</th>
-          <th class="table-col-name">Nombre</th>
-          <th class="table-col-category">Categoria</th>
-          <th class="table-col-price">Precio base</th>
-          <th class="table-col-capacity">Cupo maximo</th>
-          <th class="table-col-hotel">Hotel</th>
-          <th class="table-col-actions">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let servOff of serviceOfferingList">
-          <td class="table-col-id">{{ servOff.id }}</td>
-          <td class="table-col-name">{{ servOff.name }}</td>
-          <td class="table-col-category">{{ servOff.category }}</td>
-          <td class="table-col-price">{{ servOff.base_price | currency : 'USD' }}</td>
-          <td class="table-col-capacity">{{ servOff.max_participants }}</td>
-          <td class="table-col-hotel">{{ servOff.hotel?.name }}</td>
-          <!--Actions-->
-          <td class="table-col-actions text-end">
-            <button class="btn btn-sm btn-outline-primary me-2" (click)="beginEdit(servOff)">
-              Editar
-            </button>
-            <button class="btn btn-sm btn-outline-danger" (click)="deleteServiceOffering(servOff)">
-              Eliminar
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="col-12">
+    <div class="table-responsive-md table-responsive-lg table-responsive">
+      <table
+        class="table table-striped mt-4 responsive-table"
+        *ngIf="serviceOfferingList.length; else empty"
+      >
+        <thead>
+          <tr>
+            <th class="table-col-id">ID</th>
+            <th class="table-col-name">Nombre</th>
+            <th class="table-col-category">Categoria</th>
+            <th class="table-col-price">Precio base</th>
+            <th class="table-col-capacity">Cupo maximo</th>
+            <th class="table-col-hotel">Hotel</th>
+            <th class="table-col-actions">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let servOff of serviceOfferingList">
+            <td class="table-col-id">{{ servOff.id }}</td>
+            <td class="table-col-name">{{ servOff.name }}</td>
+            <td class="table-col-category">{{ servOff.category }}</td>
+            <td class="table-col-price">{{ servOff.base_price | currency : 'USD' }}</td>
+            <td class="table-col-capacity">{{ servOff.max_participants }}</td>
+            <td class="table-col-hotel">{{ servOff.hotel?.name }}</td>
+            <!--Actions-->
+            <td class="table-col-actions text-end">
+              <button class="btn btn-sm btn-outline-primary me-2" (click)="beginEdit(servOff)">
+                Editar
+              </button>
+              <button
+                class="btn btn-sm btn-outline-danger"
+                (click)="deleteServiceOffering(servOff)"
+              >
+                Eliminar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
