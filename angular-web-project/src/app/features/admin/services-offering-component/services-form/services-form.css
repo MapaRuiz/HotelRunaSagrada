@@ -1,0 +1,157 @@
+.services-form {
+  max-width: 720px; /* adjust as needed */
+  margin: 0 auto;
+}
+
+.carousel-stage {
+  max-width: 100%;
+}
+
+.carousel-item {
+  display: none;
+}
+
+.carousel-item.active {
+  display: block;
+}
+
+.carousel-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 70vh;
+  min-height: 240px;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.carousel-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: inherit;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.carousel-frame.cover .carousel-img .carousel-overlay {
+  object-fit: cover;
+}
+
+.carousel-overlay {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: inherit;
+  object-fit: contain;
+  padding: 1rem;
+}
+
+.carousel-overlay-light {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #212529;
+}
+
+.carousel-overlay-error {
+  background: rgba(220, 53, 69, 0.92);
+  color: #fff;
+}
+
+.carousel-overlay-error i {
+  font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+}
+
+.imagenes-wrapper {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.imagenes-input,
+.imagenes-body,
+.imagenes-content {
+  width: 100%;
+}
+
+.imagenes-body {
+  display: flex;
+  justify-content: center;
+}
+
+.imagenes-content {
+  max-width: 100%;
+}
+
+.imagenes-list .list-group {
+  width: 100%;
+  margin: 0;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+  width: 3rem;
+  height: 3rem;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.carousel-control-prev[disabled],
+.carousel-control-next[disabled] {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.carousel-control-prev:hover,
+.carousel-control-next:hover {
+  background-color: rgba(184, 184, 184, 0.5);
+}
+
+.carousel-control-prev {
+  left: 0.75rem;
+}
+
+.carousel-control-next {
+  right: 0.75rem;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  filter: invert(1);
+}
+
+@media (min-width: 576px) {
+  .carousel-frame {
+    aspect-ratio: 4 / 3;
+    max-height: 70vh;
+    min-height: 280px;
+  }
+}
+
+@media (min-width: 768px) {
+  .carousel-frame {
+    aspect-ratio: 3 / 2;
+    max-height: 75vh;
+    min-height: 320px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .carousel-frame {
+    aspect-ratio: 21 / 9;
+    max-height: 80vh;
+    min-height: 360px;
+  }
+}

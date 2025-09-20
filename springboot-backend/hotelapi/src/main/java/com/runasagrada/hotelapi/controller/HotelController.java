@@ -24,7 +24,7 @@ public class HotelController {
     }
 
     @GetMapping("/hotels/{id}")
-    public Hotel get(@PathVariable Integer id) {
+    public Hotel get(@PathVariable Long id) {
         return service.get(id);
     }
 
@@ -43,7 +43,7 @@ public class HotelController {
     }
 
     @PutMapping("/hotels/{id}")
-    public ResponseEntity<Hotel> update(@PathVariable Integer id, @RequestBody HotelRequest body) {
+    public ResponseEntity<Hotel> update(@PathVariable Long id, @RequestBody HotelRequest body) {
         Hotel p = new Hotel();
         p.setName(body.getName());
         p.setLatitude(body.getLatitude());
@@ -57,7 +57,7 @@ public class HotelController {
     }
 
     @DeleteMapping("/hotels/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }

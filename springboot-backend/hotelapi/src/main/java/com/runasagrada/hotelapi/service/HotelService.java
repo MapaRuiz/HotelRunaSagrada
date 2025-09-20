@@ -7,11 +7,11 @@ import java.util.List;
 public interface HotelService {
     List<Hotel> list();
 
-    Hotel get(Integer id);
+    Hotel get(Long id);
 
     Hotel create(Hotel h, List<Integer> amenityIds);
 
-    Hotel update(Integer id, Hotel partial, List<Integer> amenityIds);
+    Hotel update(Long id, Hotel partial, List<Integer> amenityIds);
 
-    void delete(Integer id);
+    void delete(Long id);
 }

@@ -24,6 +24,7 @@ export const routes: Routes = [
       { path: 'users', loadComponent: () => import('./features/admin/users/users').then(m => m.Users) },
       { path: 'hotels', loadComponent: () => import('./features/admin/hotels/hotels').then(m => m.HotelsComponent) },
       { path: 'amenities', loadComponent: () => import('./features/admin/amenities/amenities').then(m => m.AmenitiesComponent) },
+      { path: 'services', loadComponent: () => import('./features/admin/services-offering-component/services-offering-component').then(m => m.ServicesOfferingComponent) }
     ]
   },
 
