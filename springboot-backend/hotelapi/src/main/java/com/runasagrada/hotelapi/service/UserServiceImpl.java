@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -21,6 +23,19 @@ public class UserServiceImpl implements UserService {
     private UserRepository users;
     @Autowired
     private RoleRepository roles;
+    @Autowired
+    private JdbcTemplate jdbc;
+
+    private void resyncIdentity(String table, String idCol) {
+        try {
+            Integer max = jdbc.queryForObject(
+                    "SELECT COALESCE(MAX(" + idCol + "),0) FROM " + table, Integer.class);
+            int next = (max == null ? 0 : max) + 1;
+            jdbc.execute("ALTER TABLE " + table + " ALTER COLUMN " + idCol + " RESTART WITH " + next);
+        } catch (Exception ignored) {
+            // Si no es H2 u otra BD no soporta el ALTER, se ignora silenciosamente.
+        }
+    }
 
     @Override
     public User register(User u, String roleName) {
@@ -28,6 +43,7 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("email in use");
         Role r = roles.findByName(roleName == null ? "CLIENT" : roleName).orElseThrow();
         u.getRoles().add(r);
+        resyncIdentity("users", "user_id");
         return users.save(u);
     }
 
@@ -68,6 +84,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void delete(Integer id) {
         users.deleteById(id);
+        resyncIdentity("users", "user_id");
     }
 
     @Override

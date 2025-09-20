@@ -6,6 +6,7 @@ import com.runasagrada.hotelapi.repository.AmenityRepository;
 import com.runasagrada.hotelapi.repository.HotelRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,19 @@ public class AmenityServiceImpl implements AmenityService {
 
     @Autowired
     private HotelRepository hotels;
+    @Autowired
+    private JdbcTemplate jdbc;
+
+    private void resyncIdentity(String table, String idCol) {
+        try {
+            Integer max = jdbc.queryForObject(
+                    "SELECT COALESCE(MAX(" + idCol + "),0) FROM " + table, Integer.class);
+            int next = (max == null ? 0 : max) + 1;
+            jdbc.execute("ALTER TABLE " + table + " ALTER COLUMN " + idCol + " RESTART WITH " + next);
+        } catch (Exception ignored) {
+            // Si no es H2 u otra BD no soporta el ALTER, se ignora silenciosamente.
+        }
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -32,8 +46,11 @@ public class AmenityServiceImpl implements AmenityService {
     public Amenity create(Amenity a) {
         if (a.getName() == null || a.getName().isBlank())
             throw new IllegalArgumentException("Amenity name is required");
+        if (a.getType() == null)
+            throw new IllegalArgumentException("Amenity type is required");
         if (amenities.existsByName(a.getName()))
             throw new IllegalArgumentException("Amenity already exists");
+        resyncIdentity("amenities", "amenity_id");
         return amenities.save(a);
     }
 
@@ -42,6 +59,10 @@ public class AmenityServiceImpl implements AmenityService {
         Amenity db = amenities.findById(id).orElseThrow(() -> new NoSuchElementException("Amenity not found"));
         if (partial.getName() != null && !partial.getName().isBlank())
             db.setName(partial.getName());
+        if (partial.getImage() != null)
+            db.setImage(partial.getImage());
+        if (partial.getType() != null)
+            db.setType(partial.getType());
         return amenities.save(db);
     }
 
@@ -55,5 +76,6 @@ public class AmenityServiceImpl implements AmenityService {
         }
         hotels.saveAll(withAmenity);
         amenities.delete(a);
+        resyncIdentity("amenities", "amenity_id");
     }
 }

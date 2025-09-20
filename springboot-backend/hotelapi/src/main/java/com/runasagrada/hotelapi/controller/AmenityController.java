@@ -1,6 +1,7 @@
 package com.runasagrada.hotelapi.controller;
 
 import com.runasagrada.hotelapi.model.Amenity;
+import com.runasagrada.hotelapi.model.AmenityType;
 import com.runasagrada.hotelapi.service.AmenityService;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ public class AmenityController {
 
     @PostMapping("/amenities")
     public ResponseEntity<Amenity> create(@RequestBody AmenityRequest body) {
-        Amenity a = new Amenity(null, body.getName());
+        Amenity a = new Amenity(null, body.getName(), body.getImage(), body.getType());
         return ResponseEntity.ok(service.create(a));
     }
 
@@ -32,6 +33,8 @@ public class AmenityController {
     public ResponseEntity<Amenity> update(@PathVariable Integer id, @RequestBody AmenityRequest body) {
         Amenity p = new Amenity();
         p.setName(body.getName());
+        p.setImage(body.getImage());
+        p.setType(body.getType());
         return ResponseEntity.ok(service.update(id, p));
     }
 
@@ -44,5 +47,7 @@ public class AmenityController {
     @Data
     public static class AmenityRequest {
         private String name;
+        private String image;
+        private AmenityType type;
     }
 }

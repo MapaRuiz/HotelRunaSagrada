@@ -79,10 +79,16 @@ public class DatabaseInit implements CommandLineRunner {
 
         // --- Hoteles + amenities (auto-creación de amenities faltantes) ---
         if (hotels.count() == 0) {
-            // Mapa por nombre para armar sets; puede venir vacío si no hay amenities
-            // creadas aún
             Map<String, Amenity> A = amenities.findAll().stream()
                     .collect(Collectors.toMap(Amenity::getName, a -> a));
+
+            // Crear amenities de ROOM explícitamente
+            List<String> roomAmenities = List.of(
+                    "TV", "Aire acondicionado", "Minibar", "Caja fuerte", "Secador de pelo", "Cafetera", "Plancha",
+                    "Balcon", "Cocineta", "Ropa de cama premium");
+            for (String r : roomAmenities) {
+                mustAmenity(A, r);
+            }
 
             Hotel cartagena = new Hotel();
             cartagena.setName("Runa Sagrada Cartagena");
@@ -158,10 +164,89 @@ public class DatabaseInit implements CommandLineRunner {
     private Amenity mustAmenity(Map<String, Amenity> map, String name) {
         Amenity a = map.get(name);
         if (a == null) {
-            a = amenities.save(new Amenity(null, name));
+            AmenityType type = determineAmenityType(name);
+            // Imagen real de Unsplash o similar para cada amenity
+            String image = switch (name) {
+                case "Restaurante" ->
+                    "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80";
+                case "Bar" ->
+                    "https://images.unsplash.com/photo-1514361892635-cebbd6b7a2c4?auto=format&fit=crop&w=400&q=80";
+                case "Wifi gratis" ->
+                    "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80";
+                case "Parqueadero gratis" ->
+                    "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80";
+                case "Traslado aeropuerto" ->
+                    "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&fit=crop&w=400&q=80";
+                case "Gimnasio" ->
+                    "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80";
+                case "Spa/Sauna" ->
+                    "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80";
+                case "Piscina al aire libre" ->
+                    "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80";
+                case "Aseo diario" ->
+                    "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80";
+                case "CCTV en zonas comunes" ->
+                    "https://images.unsplash.com/photo-1465101178521-c1a4c8a0a8c7?auto=format&fit=crop&w=400&q=80";
+                case "Terraza" ->
+                    "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80";
+                case "Salón de eventos" ->
+                    "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80";
+                case "Desayuno incluido" ->
+                    "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80";
+                case "Jardín" ->
+                    "https://images.unsplash.com/photo-1465101178521-c1a4c8a0a8c7?auto=format&fit=crop&w=400&q=80";
+                case "Jacuzzi" ->
+                    "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80";
+                case "Frente a la playa" ->
+                    "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80";
+                case "Alojamiento libre de humo" ->
+                    "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80";
+                case "Se admiten mascotas" ->
+                    "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80";
+                case "Se habla español" ->
+                    "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&fit=crop&w=400&q=80";
+                case "Se habla inglés" ->
+                    "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80";
+                // Amenities de habitación
+                case "TV" ->
+                    "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80";
+                case "Aire acondicionado" ->
+                    "https://images.unsplash.com/photo-1465101178521-c1a4c8a0a8c7?auto=format&fit=crop&w=400&q=80";
+                case "Minibar" ->
+                    "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80";
+                case "Caja fuerte" ->
+                    "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&fit=crop&w=400&q=80";
+                case "Secador de pelo" ->
+                    "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80";
+                case "Cafetera" ->
+                    "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80";
+                case "Plancha" ->
+                    "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80";
+                case "Balcon" ->
+                    "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80";
+                case "Cocineta" ->
+                    "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80";
+                case "Ropa de cama premium" ->
+                    "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80";
+                default -> type == AmenityType.HOTEL
+                        ? "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80"
+                        : "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80";
+            };
+            a = amenities.save(new Amenity(null, name, image, type));
             map.put(name, a);
         }
         return a;
+    }
+
+    // Determina el tipo de amenity basado en su nombre
+    private AmenityType determineAmenityType(String name) {
+        // Lista de amenities típicas de habitación
+        List<String> roomAmenities = List.of(
+                "TV", "Aire acondicionado", "Minibar",
+                "Caja fuerte", "Secador de pelo", "Cafetera", "Plancha",
+                "Balcon", "Cocineta", "Ropa de cama premium");
+
+        return roomAmenities.contains(name) ? AmenityType.ROOM : AmenityType.HOTEL;
     }
 
     private Set<Amenity> amenSet(Map<String, Amenity> map, String... names) {

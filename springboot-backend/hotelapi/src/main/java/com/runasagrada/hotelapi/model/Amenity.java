@@ -18,4 +18,11 @@ public class Amenity {
 
     @Column(name = "name", length = 60, nullable = false, unique = true)
     private String name;
+
+    @Column(name = "image", length = 255)
+    private String image;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", length = 10, nullable = false)
+    private AmenityType type;
 }
