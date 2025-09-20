@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,29 +45,19 @@ public class ServiceOfferingController {
     @Autowired
     private ServiceScheduleService serviceScheduleService;
 
-    @GetMapping("/services")
+    @GetMapping("/servoffering")
     public List<ServiceOffering> getAllServices() {
         return serviceOfferingService.getAllServiceOfferings();
     }
 
-    @GetMapping("/services/{id}")
+    @GetMapping("/servoffering/{id}")
     public ResponseEntity<ServiceOffering> getServiceById(@PathVariable("id") Long identifier) {
         return serviceOfferingService.searchById(identifier)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/services/admin")
-    public List<ServiceOffering> getAdminServices() {
-        return serviceOfferingService.getAllServiceOfferings();
-    }
-
-    @GetMapping("/services/available")
-    public List<ServiceOffering> getAvailableServices() {
-        return serviceOfferingService.getAllServiceOfferings();
-    }
-
-    @PostMapping("/services/add")
+    @PostMapping("/servoffering/add")
     public ResponseEntity<ServiceOffering> createService(@RequestBody ServiceOfferingRequest request) {
         if (request.getHotelId() == null) {
             return ResponseEntity.badRequest().<ServiceOffering>build();
@@ -77,7 +68,7 @@ public class ServiceOfferingController {
         return ResponseEntity.status(HttpStatus.CREATED).body(newService);
     }
 
-    @PutMapping("/services/update/{id}")
+    @PutMapping("/servoffering/update/{id}")
     public ResponseEntity<ServiceOffering> updateService(@PathVariable("id") Long id,
             @RequestBody ServiceOfferingRequest request) {
         return serviceOfferingService.searchById(id)
@@ -116,7 +107,7 @@ public class ServiceOfferingController {
         target.setLongitude(request.getLongitude());
     }
 
-    @PostMapping("/services/{serviceId}/schedules/add")
+    @PostMapping("/servoffering/{serviceId}/schedules/add")
     public ResponseEntity<ServiceSchedule> createSchedule(@PathVariable("serviceId") Long serviceId,
             @RequestBody ScheduleRequest request) {
         return serviceOfferingService.searchById(serviceId)
@@ -146,7 +137,7 @@ public class ServiceOfferingController {
         return ResponseEntity.status(HttpStatus.CREATED).body(schedule);
     }
 
-    @PutMapping("/services/schedules/update/{scheduleId}")
+    @PutMapping("/servoffering/schedules/update/{scheduleId}")
     public ResponseEntity<ServiceSchedule> updateSchedule(@PathVariable("scheduleId") Long scheduleId,
             @RequestBody ScheduleRequest request) {
         return serviceScheduleService.findById(scheduleId).map(existing -> {
@@ -170,7 +161,7 @@ public class ServiceOfferingController {
         }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
     }
 
-    @GetMapping("/services/available/{id}")
+    @GetMapping("/servoffering/available/{id}")
     public ResponseEntity<Map<String, Object>> getServiceDetail(@PathVariable("id") Long identifier) {
         return serviceOfferingService.searchById(identifier)
                 .map(service -> {
@@ -183,7 +174,7 @@ public class ServiceOfferingController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/services/gastronomy")
+    @GetMapping("/servoffering/gastronomy")
     public Map<String, List<ServiceOffering>> getGastronomyServices() {
         List<ServiceOffering> allServices = serviceOfferingService.getAllServiceOfferings();
         Map<String, List<ServiceOffering>> payload = new HashMap<>();
@@ -197,7 +188,7 @@ public class ServiceOfferingController {
         return payload;
     }
 
-    @GetMapping("/services/tours")
+    @GetMapping("/servoffering/tours")
     public Map<String, List<ServiceOffering>> getTourServices() {
         List<ServiceOffering> allServices = serviceOfferingService.getAllServiceOfferings();
         Map<String, List<ServiceOffering>> payload = new HashMap<>();
@@ -214,7 +205,7 @@ public class ServiceOfferingController {
         return payload;
     }
 
-    @GetMapping("/services/amenities")
+    @GetMapping("/servoffering/amenities")
     public Map<String, List<ServiceOffering>> getAmenityServices() {
         List<ServiceOffering> allServices = serviceOfferingService.getAllServiceOfferings();
         Map<String, List<ServiceOffering>> payload = new HashMap<>();
@@ -232,6 +223,18 @@ public class ServiceOfferingController {
                         && !item.getName().contains("Suite")
                         && !item.getName().contains("Cabañas")));
         return payload;
+    }
+
+    @DeleteMapping("/servoffering/delete/{id}")
+    public ResponseEntity<Void> deleteService(@PathVariable("id") Long identifier) {
+        return serviceOfferingService.searchById(identifier)
+                .map(this::buildDeleteResponse)
+                .orElseGet(() -> ResponseEntity.notFound().<Void>build());
+    }
+
+    private ResponseEntity<Void> buildDeleteResponse(ServiceOffering existing) {
+        serviceOfferingService.delete(existing.getId());
+        return ResponseEntity.noContent().build();
     }
 
     private List<ServiceOffering> filter(List<ServiceOffering> source, Predicate<ServiceOffering> predicate) {

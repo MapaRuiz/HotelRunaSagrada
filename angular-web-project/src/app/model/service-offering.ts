@@ -2,7 +2,7 @@ import { Hotel } from "./hotel";
 import { ServiceSchedule } from "./service-schedule";
 
 export interface ServiceOffering {
-    service_offering_id: number;
+    id: number;
     name: string;
     category: string;
     subcategory: string;
@@ -14,5 +14,6 @@ export interface ServiceOffering {
     latitude: number;
     longitude: number;
     schedules?: ServiceSchedule[];
-    hotel: Hotel;
+    hotel?: Hotel;
+    hotel_id: number;
 }

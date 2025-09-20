@@ -1,7 +1,10 @@
+import { ServiceOffering } from "./service-offering";
+
 export interface ServiceSchedule {
-    service_schedule_id: number;
+    id: number;
     days_of_week: string[];
     start_time: string;
     end_time: string;
-    is_active: boolean;
+    active: boolean;
+    service_offering?: ServiceOffering;
 }

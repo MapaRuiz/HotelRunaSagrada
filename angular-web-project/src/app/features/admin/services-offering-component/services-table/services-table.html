@@ -1,0 +1,34 @@
+<div>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Category</th>
+      <th>Subcategory</th>
+      <th>Description</th>
+      <th>Base Price</th>
+      <th>Duracion</th>
+      <th>Cupo maximo</th>
+      <th>Coordenadas</th>
+      <th>Hotel</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let servOff of serviceOfferingList">
+      <td>{{ servOff.id }}</td>
+      <td>{{ servOff.name }}</td>
+      <td>{{ servOff.category }}</td>
+      <td>{{ servOff.subcategory }}</td>
+      <td>{{ servOff.description }}</td>
+      <td>{{ servOff.base_price }}</td>
+      <td>{{ servOff.duration_minutes }}</td>
+      <td>{{ servOff.max_participants }}</td>
+      <td>({{ servOff.latitude }}, {{ servOff.longitude }})</td>
+      <td>{{ servOff.hotel?.name }}</td>
+      <td>
+        <button (click)="deleteServiceOffering(servOff)" class="btn btn-danger">Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+</div>
