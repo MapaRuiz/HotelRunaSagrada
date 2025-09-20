@@ -10,7 +10,7 @@ public interface ServiceOfferingService {
 
     public List<ServiceOffering> getAllServiceOfferings();
 
-    public void save(ServiceOffering serviceOffering);
+    public void save(ServiceOffering serviceOffering, Long hotelId);
 
     public void delete(Long id);
 }

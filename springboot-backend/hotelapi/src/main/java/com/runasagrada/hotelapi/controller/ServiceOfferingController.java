@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.runasagrada.hotelapi.model.Hotel;
 import com.runasagrada.hotelapi.model.ServiceOffering;
 import com.runasagrada.hotelapi.model.ServiceSchedule;
 import com.runasagrada.hotelapi.service.ServiceOfferingService;
@@ -29,6 +30,8 @@ import com.runasagrada.hotelapi.service.ServiceScheduleService;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Data;
 
 @RestController
@@ -64,21 +67,53 @@ public class ServiceOfferingController {
     }
 
     @PostMapping("/services/add")
-    public ResponseEntity<ServiceOffering> createService(@RequestBody ServiceOffering serviceOffering) {
-        serviceOffering.setId(null);
-        serviceOfferingService.save(serviceOffering);
-        return ResponseEntity.status(HttpStatus.CREATED).body(serviceOffering);
+    public ResponseEntity<ServiceOffering> createService(@RequestBody ServiceOfferingRequest request) {
+        if (request.getHotelId() == null) {
+            return ResponseEntity.badRequest().<ServiceOffering>build();
+        }
+        ServiceOffering newService = new ServiceOffering();
+        applyRequestToServiceOffering(newService, request);
+        serviceOfferingService.save(newService, request.getHotelId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(newService);
     }
 
     @PutMapping("/services/update/{id}")
     public ResponseEntity<ServiceOffering> updateService(@PathVariable("id") Long id,
-            @RequestBody ServiceOffering serviceOffering) {
-        if (serviceOfferingService.searchById(id).isEmpty()) {
-            return ResponseEntity.notFound().build();
+            @RequestBody ServiceOfferingRequest request) {
+        return serviceOfferingService.searchById(id)
+                .map(existing -> buildServiceUpdateResponse(existing, request, id))
+                .orElseGet(() -> ResponseEntity.notFound().<ServiceOffering>build());
+    }
+
+    private ResponseEntity<ServiceOffering> buildServiceUpdateResponse(ServiceOffering existing,
+            ServiceOfferingRequest request, Long id) {
+        applyRequestToServiceOffering(existing, request);
+        existing.setId(id);
+
+        Long targetHotelId = request.getHotelId();
+        if (targetHotelId == null) {
+            Hotel currentHotel = existing.getHotel();
+            if (currentHotel == null || currentHotel.getHotelId() == null) {
+                return ResponseEntity.badRequest().<ServiceOffering>build();
+            }
+            targetHotelId = currentHotel.getHotelId().longValue();
         }
-        serviceOffering.setId(id);
-        serviceOfferingService.save(serviceOffering);
-        return ResponseEntity.ok(serviceOffering);
+
+        serviceOfferingService.save(existing, targetHotelId);
+        return ResponseEntity.ok(existing);
+    }
+
+    private void applyRequestToServiceOffering(ServiceOffering target, ServiceOfferingRequest request) {
+        target.setName(request.getName());
+        target.setCategory(request.getCategory());
+        target.setSubcategory(request.getSubcategory());
+        target.setDescription(request.getDescription());
+        target.setBasePrice(request.getBasePrice());
+        target.setDurationMinutes(request.getDurationMinutes());
+        target.setImageUrls(request.getImageUrls());
+        target.setMaxParticipants(request.getMaxParticipants());
+        target.setLatitude(request.getLatitude());
+        target.setLongitude(request.getLongitude());
     }
 
     @PostMapping("/services/{serviceId}/schedules/add")
@@ -222,5 +257,21 @@ public class ServiceOfferingController {
         private LocalTime endTime;
 
         private Boolean active;
+    }
+
+    @Data
+    static class ServiceOfferingRequest {
+        private String name;
+        private String category;
+        private String subcategory;
+        private String description;
+        private double basePrice;
+        private int durationMinutes;
+        private List<String> imageUrls;
+        private int maxParticipants;
+        private double latitude;
+        private double longitude;
+        @JsonProperty("hotel_id")
+        private Long hotelId;
     }
 }

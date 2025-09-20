@@ -30,7 +30,7 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     @Transactional(readOnly = true)
-    public Hotel get(Integer id) {
+    public Hotel get(Long id) {
         return hotels.findById(id).orElseThrow(() -> new NoSuchElementException("Hotel not found"));
     }
 
@@ -45,7 +45,7 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
-    public Hotel update(Integer id, Hotel partial, List<Integer> amenityIds) {
+    public Hotel update(Long id, Hotel partial, List<Integer> amenityIds) {
         Hotel db = get(id);
 
         if (partial.getName() != null && !partial.getName().isBlank())
@@ -74,7 +74,7 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
-    public void delete(Integer id) {
+    public void delete(Long id) {
         Hotel db = get(id);
         db.getAmenities().clear();
         hotels.delete(db);

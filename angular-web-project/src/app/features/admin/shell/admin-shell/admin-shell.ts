@@ -28,6 +28,9 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
         <a routerLink="/admin/amenities" class="nav-link px-2 py-2 rounded-3" routerLinkActive="active">
           <i class="bi bi-list-check me-2"></i> Amenities
         </a>
+        <a routerLink="/admin/services" class="nav-link px-2 py-2 rounded-3" routerLinkActive="active">
+          <i class="bi bi-gear me-2"></i> Servicios
+        </a>
       </nav>
 
       <div class="mt-auto small text-secondary">

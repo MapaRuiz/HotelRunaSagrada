@@ -3,6 +3,7 @@ package com.runasagrada.hotelapi.model;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
@@ -73,4 +74,9 @@ public class ServiceOffering {
     @OneToMany(mappedBy = "service", fetch = FetchType.EAGER, orphanRemoval = true)
     @OrderBy("startTime ASC")
     private List<ServiceSchedule> schedules;
+
+    @JsonProperty("hotel_id")
+    public Long getHotelId() {
+        return this.hotel.getHotelId();
+    }
 }

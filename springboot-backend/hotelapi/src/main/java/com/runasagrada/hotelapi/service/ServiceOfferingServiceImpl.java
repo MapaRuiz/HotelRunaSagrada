@@ -6,14 +6,21 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.runasagrada.hotelapi.model.Hotel;
 import com.runasagrada.hotelapi.model.ServiceOffering;
+import com.runasagrada.hotelapi.repository.HotelRepository;
 import com.runasagrada.hotelapi.repository.ServiceOfferingRepository;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class ServiceOfferingServiceImpl implements ServiceOfferingService {
 
     @Autowired
     private ServiceOfferingRepository serviceOfferingRepository;
+
+    @Autowired
+    private HotelRepository hotelRepository;
 
     @Override
     public Optional<ServiceOffering> searchById(Long id) {
@@ -26,7 +33,10 @@ public class ServiceOfferingServiceImpl implements ServiceOfferingService {
     }
 
     @Override
-    public void save(ServiceOffering serviceOffering) {
+    public void save(ServiceOffering serviceOffering, Long hotelId) {
+        Hotel hotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new EntityNotFoundException("Hotel not found"));
+        serviceOffering.setHotel(hotel);
         serviceOfferingRepository.save(serviceOffering);
     }
 

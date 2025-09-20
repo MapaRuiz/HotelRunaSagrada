@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface HotelRepository extends JpaRepository<Hotel, Integer> {
+public interface HotelRepository extends JpaRepository<Hotel, Long> {
     boolean existsByName(String name);
 
     List<Hotel> findByAmenities_AmenityId(Integer amenityId);
