@@ -8,11 +8,13 @@
 html,
 body {
     height: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 body {
     font-family: 'Inter', system-ui, Arial, Helvetica, sans-serif;
-    background: linear-gradient(135deg, #0b1a3a 0%, #0c4332 35%, #67b6a2 100%);
+    background: rgb(236, 249, 236);
     color: #e6e8ec;
 }
 

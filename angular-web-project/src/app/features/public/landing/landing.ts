@@ -1,7 +1,19 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ScrollExpandMedia } from './scroll-expand-media/scroll-expand-media';
+import { InteractiveBentoGallery } from './interactive-bento-gallery/interactive-bento-gallery';
+import { TestimonialsSection } from './testimonials/testimonials-section'; 
+
 @Component({
-  standalone: true,
   selector: 'app-landing',
-  template: `<h3>Bienvenido 👋</h3><p>Usa el menú para Login o Registro.</p>`
+  standalone: true,
+  imports: [
+    CommonModule,
+    ScrollExpandMedia,
+    InteractiveBentoGallery,
+    TestimonialsSection
+  ],
+  templateUrl: './landing.html',
+  styleUrls: ['./landing.css']
 })
 export class Landing {}

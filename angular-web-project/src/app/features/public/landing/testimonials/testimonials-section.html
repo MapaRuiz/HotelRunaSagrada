@@ -1,0 +1,39 @@
+<div class="testimonials-section">
+  <div class="section-header">
+    <h2>Lo que dicen nuestros clientes</h2>
+    <p>Testimonios reales de huéspedes</p>
+  </div>
+
+  <!-- Carrusel vertical -->
+  <div class="marquee">
+    <div class="marquee-content">
+      <!-- Primer bloque de tarjetas -->
+      <div class="testimonials-container">
+        <div class="testimonial-card" *ngFor="let t of testimonials">
+          <p class="testimonial-text">“{{ t.text }}”</p>
+          <div class="testimonial-author">
+            <img [src]="t.img" alt="{{ t.name }}" class="author-avatar" />
+            <div class="author-info">
+              <span class="author-name">{{ t.name }}</span>
+              <span class="author-role">{{ t.role }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Duplicamos para loop infinito -->
+      <div class="testimonials-container">
+        <div class="testimonial-card" *ngFor="let t of testimonials">
+          <p class="testimonial-text">“{{ t.text }}”</p>
+          <div class="testimonial-author">
+            <img [src]="t.img" alt="{{ t.name }}" class="author-avatar" />
+            <div class="author-info">
+              <span class="author-name">{{ t.name }}</span>
+              <span class="author-role">{{ t.role }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
