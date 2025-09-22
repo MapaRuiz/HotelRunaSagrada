@@ -1,0 +1,176 @@
+<h4 class="mb-3">Rooms</h4>
+
+<!-- Filtros -->
+<div class="row g-2 align-items-end mb-3">
+  <div class="col-sm-4">
+    <label class="form-label">Hotel</label>
+    <select class="form-select" [(ngModel)]="hotelId" (ngModelChange)="applyFilters()">
+      <option [ngValue]="undefined">Todos</option>
+      <option *ngFor="let h of hotels" [ngValue]="h.hotel_id">{{ h.name }}</option>
+    </select>
+  </div>
+  <div class="col-sm-4">
+    <label class="form-label">Tipo de habitación</label>
+    <select class="form-select" [(ngModel)]="roomTypeId" (ngModelChange)="applyFilters()">
+      <option [ngValue]="undefined">Todos</option>
+      <option *ngFor="let t of types" [ngValue]="t.room_type_id">{{ t.name }}</option>
+    </select>
+  </div>
+  <div class="col-sm-4 text-sm-end">
+    <button class="btn btn-primary mt-3 mt-sm-0" (click)="new()">Nueva habitación</button>
+  </div>
+</div>
+
+<div *ngIf="loading" class="text-muted mb-2">Cargando…</div>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Hotel</th>
+      <th>Número</th>
+      <th>Piso</th>
+      <th>Tipo</th>
+      <th>Res</th>
+      <th>Cle</th>
+      <th>Portada</th>
+      <th class="text-end">Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let r of rooms; trackBy: trackById">
+      <td>{{ r.room_id }}</td>
+      <td>{{ r.hotel?.name || r.hotel_id }}</td>
+      <td>{{ r.number }}</td>
+      <td>{{ r.floor }}</td>
+      <td>{{ r.room_type?.name || r.room_type_id }}</td>
+      <td>{{ r.res_status }}</td>
+      <td>{{ r.cle_status }}</td>
+      <td>
+        <img
+          *ngIf="r.images?.length"
+          [src]="r.images[0]"
+          style="width: 56px; height: 40px; object-fit: cover; border-radius: 6px"
+        />
+      </td>
+      <td class="text-end">
+        <button class="btn btn-sm btn-outline-primary me-2" (click)="edit(r)">Editar</button>
+        <button class="btn btn-sm btn-outline-danger" (click)="remove(r)">Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Form inline -->
+<div *ngIf="showForm" class="card mt-3">
+  <div class="card-body">
+    <h5 class="card-title">{{ editingId ? 'Editar habitación' : 'Nueva habitación' }}</h5>
+
+    <div class="row g-2">
+      <div class="col-sm-4">
+        <label class="form-label">Hotel</label>
+        <select class="form-select" [(ngModel)]="draft_hotel_id">
+          <option [ngValue]="undefined" disabled>Selecciona…</option>
+          <option *ngFor="let h of hotels" [ngValue]="h.hotel_id">{{ h.name }}</option>
+        </select>
+      </div>
+      <div class="col-sm-4">
+        <label class="form-label">Tipo</label>
+        <select class="form-select" [(ngModel)]="draft_room_type_id">
+          <option [ngValue]="undefined" disabled>Selecciona…</option>
+          <option *ngFor="let t of types" [ngValue]="t.room_type_id">{{ t.name }}</option>
+        </select>
+      </div>
+      <div class="col-sm-2">
+        <label class="form-label">Número</label>
+        <input class="form-control" [(ngModel)]="draft.number" placeholder="1-101" />
+      </div>
+      <div class="col-sm-2">
+        <label class="form-label">Piso</label>
+        <input type="number" class="form-control" min="1" [(ngModel)]="draft.floor" />
+      </div>
+
+      <div class="col-sm-3">
+        <label class="form-label">Reserva</label>
+        <select class="form-select" [(ngModel)]="draft.res_status">
+          <option value="AVAILABLE">AVAILABLE</option>
+          <option value="BOOKED">BOOKED</option>
+          <option value="OCCUPIED">OCCUPIED</option>
+          <option value="MAINTENANCE">MAINTENANCE</option>
+        </select>
+      </div>
+      <div class="col-sm-3">
+        <label class="form-label">Limpieza</label>
+        <select class="form-select" [(ngModel)]="draft.cle_status">
+          <option value="CLEAN">CLEAN</option>
+          <option value="DIRTY">DIRTY</option>
+        </select>
+      </div>
+      <div class="col-sm-6">
+        <label class="form-label">Tema</label>
+        <input
+          class="form-control"
+          [(ngModel)]="draft.theme_name"
+          placeholder="Balcones Coloniales"
+        />
+      </div>
+    </div>
+
+    <!-- Galería -->
+    <div class="mt-3">
+      <label class="form-label">Imágenes (URLs)</label>
+      <div class="input-group mb-2">
+        <input class="form-control" [(ngModel)]="newImageUrl" placeholder="https://…" />
+        <button class="btn btn-outline-primary" type="button" (click)="addImage()">Añadir</button>
+      </div>
+
+      <ul class="list-group">
+        <li
+          class="list-group-item d-flex justify-content-between align-items-center"
+          *ngFor="let src of draft.images; let i = index"
+        >
+          <div class="d-flex align-items-center gap-2">
+            <img
+              [src]="src"
+              (load)="onImgLoad(i)"
+              (error)="onImgError(i)"
+              style="width: 72px; height: 54px; object-fit: cover; border-radius: 6px"
+            />
+            <div class="small text-truncate" style="max-width: 380px">{{ src }}</div>
+            <span *ngIf="imageStatus[i] === 'error'" class="badge text-bg-danger">Error</span>
+            <span *ngIf="imageStatus[i] === 'loaded'" class="badge text-bg-success">OK</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <button
+              class="btn btn-sm btn-outline-secondary"
+              (click)="moveImage(i, -1)"
+              [disabled]="i === 0"
+            >
+              ↑
+            </button>
+            <button
+              class="btn btn-sm btn-outline-secondary"
+              (click)="moveImage(i, 1)"
+              [disabled]="i === (draft.images.length || 1) - 1"
+            >
+              ↓
+            </button>
+            <button
+              class="btn btn-sm btn-outline-primary"
+              (click)="setCover(i)"
+              [disabled]="i === 0"
+            >
+              Portada
+            </button>
+            <button class="btn btn-sm btn-outline-danger" (click)="removeImage(i)">Eliminar</button>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="mt-3 d-flex gap-2">
+      <button class="btn btn-success" (click)="save()">Guardar</button>
+      <button class="btn btn-secondary" (click)="cancel()">Cancelar</button>
+    </div>
+  </div>
+</div>

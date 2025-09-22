@@ -70,6 +70,12 @@
       "fileHash": "f0cbaac9",
       "needsInterop": false
     },
+    "bootstrap/js/dist/toast": {
+      "src": "../../../../../../node_modules/bootstrap/js/dist/toast.js",
+      "file": "bootstrap_js_dist_toast.js",
+      "fileHash": "8279b0f6",
+      "needsInterop": true
+    },
     "express": {
       "src": "../../../../../../node_modules/express/index.js",
       "file": "express.js",
