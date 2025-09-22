@@ -1,25 +1,28 @@
-import { Hotel } from "./hotel";
-import { Reservation } from "./reservation";
-import { RoomLock } from "./room-lock";
-import { RoomType } from "./room-type";
+import { RoomType } from './room-type';
+export type ReservationStatus = 'AVAILABLE' | 'BOOKED' | 'OCCUPIED' | 'MAINTENANCE';
+export type CleaningStatus    = 'CLEAN' | 'DIRTY';
 
-export type room_status = 'AVAILABLE' | 'OCCUPIED' | 'MAINTENANCE' | string;
-export type cleaning_status = 'CLEAN' | 'DIRTY' | string;
-// Temporal
 export interface Room {
-  room_id: number;
-  hotel_id: number;
-  room_type_id: number;
-  number: string;      
+  room_id?: number;
+
+  // Ids “planos” (opcionales en el draft del form)
+  hotel_id?: number;
+  room_type_id?: number;
+
+  number: string;
   floor: number;
-  status: room_status; 
-  cleaning_status: cleaning_status;
-  theme_name: string;
+
+  // estados en UPPERCASE, snake_case en la clave
+  res_status: ReservationStatus;
+  cle_status: CleaningStatus;
+
+  theme_name?: string;
+
+  // galería (mismo patrón que Services)
   images: string[];
-  // Rel
-  hotel?: Hotel;
+
+  // Asociaciones embebidas cuando el back las envía (opcionales)
+  hotel?: import('./hotel').Hotel;
   room_type?: RoomType;
-  locks?: RoomLock[];
-  reservations?: Reservation[];
-  tasks?: Task[];
 }
+
