@@ -1,0 +1,50 @@
+.marquee {
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  gap: var(--gap, 1rem);
+  padding: 0.5rem;
+}
+
+.marquee.vertical {
+  flex-direction: column;
+}
+
+.marquee-content {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: space-around;
+  animation: marquee var(--duration, 40s) linear infinite;
+}
+
+.marquee.vertical .marquee-content {
+  flex-direction: column;
+  animation: marquee-vertical var(--duration, 40s) linear infinite;
+}
+
+.marquee.reverse .marquee-content {
+  animation-direction: reverse;
+}
+
+.marquee.pause-hover:hover .marquee-content {
+  animation-play-state: paused;
+}
+
+/* Animaciones */
+@keyframes marquee {
+  from {
+    transform: translateX(0%);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-vertical {
+  from {
+    transform: translateY(0%);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}

@@ -1,0 +1,15 @@
+<div
+  class="marquee"
+  [ngClass]="{
+    'vertical': vertical,
+    'reverse': reverse,
+    'pause-hover': pauseOnHover
+  }"
+>
+  <div
+    class="marquee-content"
+    *ngFor="let r of [].constructor(repeat)"
+  >
+    <ng-content></ng-content>
+  </div>
+</div>

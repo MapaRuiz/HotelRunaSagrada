@@ -1,0 +1,74 @@
+<section class="scroll-expand-media">
+  <!-- Fondo -->
+  <div
+    class="bg-image"
+    [style.opacity]="1 - scrollProgress"
+    [style.background-image]="'url(' + bgImageSrc + ')'"
+  ></div>
+
+  <!-- Media principal -->
+  <div
+    class="media-container"
+    [style.width.px]="mediaWidth"
+    [style.height.px]="mediaHeight"
+  >
+    <ng-container [ngSwitch]="mediaType">
+      <video
+        *ngSwitchCase="'video'"
+        [src]="mediaSrc"
+        [poster]="posterSrc"
+        autoplay
+        muted
+        loop
+        playsinline
+        class="media"
+      ></video>
+
+      <img
+        *ngSwitchCase="'image'"
+        [src]="mediaSrc"
+        [alt]="title"
+        class="media"
+      />
+    </ng-container>
+
+    <div class="media-overlay"></div>
+
+    <div class="text-meta">
+      <p
+        class="date"
+        [style.transform]="'translateX(-' + textTranslateX + 'vw)'"
+      >
+        {{ date }}
+      </p>
+      <p
+        class="expand-text"
+        [style.transform]="'translateX(' + textTranslateX + 'vw)'"
+      >
+        {{ scrollToExpand }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Título -->
+  <div
+    class="title"
+    [ngClass]="{ 'blend': textBlend }"
+  >
+    <h2
+      [style.transform]="'translateX(-' + textTranslateX + 'vw)'"
+    >
+      {{ firstWord }}
+    </h2>
+    <h2
+      [style.transform]="'translateX(' + textTranslateX + 'vw)'"
+    >
+      {{ restOfTitle }}
+    </h2>
+  </div>
+
+  <!-- Contenido expandido -->
+  <section class="content" [style.opacity]="showContent ? 1 : 0">
+    <ng-content></ng-content>
+  </section>
+</section>

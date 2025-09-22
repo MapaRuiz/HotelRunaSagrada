@@ -1,0 +1,24 @@
+<div class="media-item">
+  <ng-container [ngSwitch]="type">
+    <video
+      *ngSwitchCase="'video'"
+      [src]="src"
+      [poster]="poster"
+      autoplay
+      muted
+      loop
+      playsinline
+      class="media"
+    ></video>
+
+    <img
+      *ngSwitchCase="'image'"
+      [src]="src"
+      [alt]="alt || title"
+      class="media"
+    />
+  </ng-container>
+
+  <div class="media-overlay"></div>
+  <div class="text-meta">{{ title }}</div>
+</div>
