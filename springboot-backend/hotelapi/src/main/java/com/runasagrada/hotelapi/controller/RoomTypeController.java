@@ -11,24 +11,24 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/room-types")
+@RequestMapping("/api")
 @CrossOrigin(origins = "http://localhost:4200")
 @RequiredArgsConstructor
 public class RoomTypeController {
 
     private final RoomTypeService service;
 
-    @GetMapping
+    @GetMapping("/room-types")
     public List<RoomType> list() {
         return service.findAll();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/room-types/{id}")
     public ResponseEntity<RoomType> get(@PathVariable Integer id) {
         return service.findById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
+    @PostMapping("/room-types")
     public ResponseEntity<RoomType> create(@RequestBody RoomTypeRequest body) {
         RoomType rt = new RoomType();
         rt.setName(body.getName());
@@ -40,7 +40,7 @@ public class RoomTypeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/room-types/{id}")
     public ResponseEntity<RoomType> update(@PathVariable Integer id, @RequestBody RoomTypeRequest body) {
         RoomType data = new RoomType();
         data.setName(body.getName());
@@ -51,7 +51,7 @@ public class RoomTypeController {
         return ResponseEntity.ok(service.update(id, data));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/room-types/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         service.delete(id);
         return ResponseEntity.noContent().build();

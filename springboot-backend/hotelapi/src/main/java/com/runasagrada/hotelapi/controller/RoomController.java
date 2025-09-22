@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/rooms")
+@RequestMapping("/api")
 @CrossOrigin(origins = "http://localhost:4200")
 @RequiredArgsConstructor
 public class RoomController {
 
     private final RoomService service;
 
-    @GetMapping
+    @GetMapping("/rooms")
     public List<Room> list(
             @RequestParam(required = false) Long hotelId,
             @RequestParam(required = false) Integer roomTypeId) {
@@ -28,12 +28,12 @@ public class RoomController {
         return service.findAll();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/rooms/{id}")
     public ResponseEntity<Room> get(@PathVariable Integer id) {
         return service.findById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
+    @PostMapping("/rooms")
     public ResponseEntity<Room> create(@RequestBody RoomRequest body) {
         Room r = new Room();
         r.setNumber(body.getNumber());
@@ -47,7 +47,7 @@ public class RoomController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/rooms/{id}")
     public ResponseEntity<Room> update(@PathVariable Integer id, @RequestBody RoomRequest body) {
         Room data = new Room();
         data.setNumber(body.getNumber());
@@ -61,7 +61,7 @@ public class RoomController {
         return ResponseEntity.ok(saved);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/rooms/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
