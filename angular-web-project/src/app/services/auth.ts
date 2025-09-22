@@ -1,4 +1,5 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -9,22 +10,30 @@ import { User } from '../model/user';
 export class AuthService {
   private http = inject(HttpClient);
   private base = environment.apiBaseUrl;
+  private platformId = inject(PLATFORM_ID);
 
   private currentUserSubject = new BehaviorSubject<User | null>(this.loadUser());
   currentUser$ = this.currentUserSubject.asObservable();
 
   private loadUser(): User | null {
-    const raw = localStorage.getItem('user');
-    return raw ? JSON.parse(raw) : null;
+    if (isPlatformBrowser(this.platformId)) {
+      const raw = localStorage.getItem('user');
+      return raw ? JSON.parse(raw) : null;
+    }
+    return null;
   }
   private persist(session: LoginResponse) {
-    localStorage.setItem('access_token', session.access_token);
-    localStorage.setItem('user', JSON.stringify(session.user));
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('access_token', session.access_token);
+      localStorage.setItem('user', JSON.stringify(session.user));
+    }
     this.currentUserSubject.next(session.user);
   }
   logout() {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('user');
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user');
+    }
     this.currentUserSubject.next(null);
   }
 
@@ -38,7 +47,12 @@ export class AuthService {
   }
   me() {
     return this.http.get<User>(`${this.base}/auth/me`).pipe(
-      tap(u => { localStorage.setItem('user', JSON.stringify(u)); this.currentUserSubject.next(u); })
+      tap(u => {
+        if (isPlatformBrowser(this.platformId)) {
+          localStorage.setItem('user', JSON.stringify(u));
+        }
+        this.currentUserSubject.next(u);
+      })
     );
   }
   userSnapshot() { return this.currentUserSubject.value; }
