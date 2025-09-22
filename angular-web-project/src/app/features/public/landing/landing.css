@@ -1,0 +1,95 @@
+.landing-container {
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+.landing-header {
+  padding: 50px 20px;
+  background: linear-gradient(135deg, #0078d7, #00c6ff);
+  color: white;
+}
+
+
+
+.services-container {
+  text-align: center;
+  width: 100%; /* ocupa todo el ancho */
+  padding: 6rem 2rem;
+  background: url("https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1920&auto=format&fit=crop") center/cover no-repeat;
+  position: relative;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  margin: 0; /* quita espacios en los lados */
+}
+
+/* Overlay para oscurecer un poco la imagen */
+.services-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 0;
+}
+
+.services-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 3rem;
+  color: #f5f5f5;
+  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.6);
+  position: relative;
+  z-index: 1;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2.5rem;
+  justify-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.service-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 24px;
+  padding: 3.5rem 2rem 2rem;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.service-card:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+}
+
+.service-card img {
+  width: 90px;
+  height: 90px;
+  margin: 0 auto;
+  display: block;
+  background: #fff;
+  border-radius: 50%;
+  padding: 12px;
+  object-fit: contain;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  position: absolute;
+  top: -45px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.service-card h3 {
+  font-size: 1.4rem;
+  margin: 1.5rem 0 0.5rem;
+  color: #0d4a1d;
+  font-weight: 600;
+}
+
+.service-card p {
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.6;
+}
