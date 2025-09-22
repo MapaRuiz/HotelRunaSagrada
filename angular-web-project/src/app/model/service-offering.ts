@@ -1,4 +1,5 @@
 import { Hotel } from "./hotel";
+import { ReservationService } from "./reservation-service";
 import { ServiceSchedule } from "./service-schedule";
 
 export interface ServiceOffering {
@@ -13,7 +14,10 @@ export interface ServiceOffering {
     max_participants: number;
     latitude: number;
     longitude: number;
-    schedules?: ServiceSchedule[];
-    hotel?: Hotel;
     hotel_id: number;
+
+    //Rel
+    hotel?: Hotel;
+    schedules?: ServiceSchedule[];
+    reservation_services?: ReservationService[];
 }
