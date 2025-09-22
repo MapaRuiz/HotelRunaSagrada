@@ -1,120 +1,73 @@
 {
-<<<<<<< HEAD
-  "hash": "328630eb",
-  "configHash": "081339a8",
-  "lockfileHash": "1431651b",
-  "browserHash": "34bd0e50",
-=======
-  "hash": "7b4827c8",
-  "configHash": "3faf181e",
+  "hash": "cf1deafe",
+  "configHash": "9c5697af",
   "lockfileHash": "0ae39278",
-  "browserHash": "2228af4e",
->>>>>>> aad09fef842dbbfd19dee16df1a3b0a53f832788
+  "browserHash": "916e1f20",
   "optimized": {
     "@angular/cdk/drag-drop": {
       "src": "../../../../../../node_modules/@angular/cdk/fesm2022/drag-drop.mjs",
       "file": "@angular_cdk_drag-drop.js",
-      "fileHash": "dd05efa0",
+      "fileHash": "7a592d4f",
       "needsInterop": false
     },
     "@angular/common": {
       "src": "../../../../../../node_modules/@angular/common/fesm2022/common.mjs",
       "file": "@angular_common.js",
-<<<<<<< HEAD
-      "fileHash": "6dea7175",
-=======
-      "fileHash": "01a77e37",
->>>>>>> aad09fef842dbbfd19dee16df1a3b0a53f832788
+      "fileHash": "ce4e66e4",
       "needsInterop": false
     },
     "@angular/common/http": {
       "src": "../../../../../../node_modules/@angular/common/fesm2022/http.mjs",
       "file": "@angular_common_http.js",
-<<<<<<< HEAD
-      "fileHash": "8f72a35e",
-=======
-      "fileHash": "ca79583d",
->>>>>>> aad09fef842dbbfd19dee16df1a3b0a53f832788
+      "fileHash": "e4dbb300",
       "needsInterop": false
     },
     "@angular/core": {
       "src": "../../../../../../node_modules/@angular/core/fesm2022/core.mjs",
       "file": "@angular_core.js",
-<<<<<<< HEAD
-      "fileHash": "23d5c5e7",
-=======
-      "fileHash": "be5f90ef",
->>>>>>> aad09fef842dbbfd19dee16df1a3b0a53f832788
+      "fileHash": "dfb87aba",
       "needsInterop": false
     },
     "@angular/forms": {
       "src": "../../../../../../node_modules/@angular/forms/fesm2022/forms.mjs",
       "file": "@angular_forms.js",
-<<<<<<< HEAD
-      "fileHash": "439faf19",
-=======
-      "fileHash": "3c8c6829",
->>>>>>> aad09fef842dbbfd19dee16df1a3b0a53f832788
+      "fileHash": "10fb58f7",
       "needsInterop": false
     },
     "@angular/platform-browser": {
       "src": "../../../../../../node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs",
       "file": "@angular_platform-browser.js",
-<<<<<<< HEAD
-      "fileHash": "0ca98f17",
-=======
-      "fileHash": "e0d79da3",
->>>>>>> aad09fef842dbbfd19dee16df1a3b0a53f832788
+      "fileHash": "c8ca364b",
       "needsInterop": false
     },
     "@angular/router": {
       "src": "../../../../../../node_modules/@angular/router/fesm2022/router.mjs",
       "file": "@angular_router.js",
-<<<<<<< HEAD
-      "fileHash": "ad95fc64",
-=======
-      "fileHash": "6ffeaf95",
->>>>>>> aad09fef842dbbfd19dee16df1a3b0a53f832788
+      "fileHash": "24814b87",
       "needsInterop": false
     },
     "ag-grid-angular": {
       "src": "../../../../../../node_modules/ag-grid-angular/fesm2022/ag-grid-angular.mjs",
       "file": "ag-grid-angular.js",
-<<<<<<< HEAD
-      "fileHash": "569c05be",
-=======
-      "fileHash": "0e06e837",
->>>>>>> aad09fef842dbbfd19dee16df1a3b0a53f832788
+      "fileHash": "cf858040",
       "needsInterop": false
     },
     "ng-apexcharts": {
       "src": "../../../../../../node_modules/ng-apexcharts/fesm2022/ng-apexcharts.mjs",
       "file": "ng-apexcharts.js",
-<<<<<<< HEAD
-      "fileHash": "e6df499a",
-=======
-      "fileHash": "170842a0",
->>>>>>> aad09fef842dbbfd19dee16df1a3b0a53f832788
+      "fileHash": "fade69db",
       "needsInterop": false
     },
     "rxjs": {
       "src": "../../../../../../node_modules/rxjs/dist/esm5/index.js",
       "file": "rxjs.js",
-<<<<<<< HEAD
-      "fileHash": "5b390a69",
-=======
-      "fileHash": "6e4cc38f",
->>>>>>> aad09fef842dbbfd19dee16df1a3b0a53f832788
+      "fileHash": "4d1dcfb9",
       "needsInterop": false
     },
     "zone.js": {
       "src": "../../../../../../node_modules/zone.js/fesm2015/zone.js",
       "file": "zone__js.js",
-<<<<<<< HEAD
-      "fileHash": "1424e325",
-=======
-      "fileHash": "5de70e8d",
->>>>>>> aad09fef842dbbfd19dee16df1a3b0a53f832788
+      "fileHash": "f4db07da",
       "needsInterop": true
     }
   },
