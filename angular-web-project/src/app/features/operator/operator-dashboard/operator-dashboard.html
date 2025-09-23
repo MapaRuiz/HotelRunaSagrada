@@ -1,4 +1,4 @@
-<!-- Cards KPI -->
+<!-- KPI -->
 <div class="row g-3">
   <div class="col-md-3" *ngFor="let c of cards">
     <div class="card-elev p-3 h-100">
@@ -20,14 +20,11 @@
   </div>
 </div>
 
-<!-- Chart + resumen -->
+<!-- Chart -->
 <div class="row g-3 mt-1">
   <div class="col-lg-8">
     <div class="card-elev p-3">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <div class="fw-semibold">Reservas (demo)</div>
-        <div class="small text-secondary">Este mes</div>
-      </div>
+      <div class="fw-semibold mb-2">Servicios por día</div>
       <apx-chart
         #chart
         [series]="chartOptions.series"
@@ -39,33 +36,28 @@
         [legend]="chartOptions.legend"
         [fill]="chartOptions.fill"
         [colors]="chartOptions.colors || []"
-      >
-      </apx-chart>
+      ></apx-chart>
     </div>
   </div>
   <div class="col-lg-4">
     <div class="card-elev p-3 h-100 d-flex">
-      <div class="fw-semibold mb-2">Resumen</div>
-      <div class="small text-secondary">Hoteles: {{ hotels.length }}</div>
-      <div class="small text-secondary">Amenities: {{ amenitiesCount }}</div>
-      <div class="mt-auto small text-muted">*Datos de demo para gráfico</div>
+      <div class="fw-semibold mb-2">Resumen rápido</div>
+      <div class="small text-secondary">Activos: 5</div>
+      <div class="small text-secondary">Pendientes: 3</div>
+      <div class="small text-secondary">Completados: 18</div>
+      <div class="mt-auto small text-muted">Datos de ejemplo</div>
     </div>
   </div>
 </div>
 
 <!-- Tabla -->
 <div class="card-elev p-3 mt-3">
-  <div class="d-flex justify-content-between align-items-center mb-2">
-    <div class="fw-semibold">Hoteles recientes</div>
-    <a routerLink="/admin/hotels" class="btn btn-sm btn-olive">Ver todos</a>
-  </div>
-
+  <div class="fw-semibold mb-2">Servicios recientes</div>
   <ag-grid-angular
     class="ag-theme-quartz soft-grid"
     style="width: 100%; height: 360px"
-    [rowData]="hotels"
+    [rowData]="services"
     [columnDefs]="colDefs"
     [rowHeight]="46"
-  >
-  </ag-grid-angular>
+  ></ag-grid-angular>
 </div>
