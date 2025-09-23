@@ -1,0 +1,11 @@
+<div class="min-h-screen">
+	<app-card
+		*ngFor="let card of hotels; let i = index"
+		[title]="card.title"
+		[description]="card.description"
+		[color]="card.color"
+		[textColor]="card.textColor"
+		[src]="card.src"
+		[i]="i"
+	></app-card>
+</div>
