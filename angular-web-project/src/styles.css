@@ -7,6 +7,35 @@
 
   --page-bg: #f2f3ed; /* de la paleta */
   --text-ink: #151513;
+
+}
+body {
+  background: var(--page-bg);
+  color: var(--text-ink);
+}
+
+.auth-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(21, 21, 19, 0.12);
+  border: 1px solid rgba(21, 21, 19, 0.06);
+}
+.btn-olive {
+  background: var(--c-olive);
+  border-color: var(--c-olive);
+  color: #fff;
+}
+.btn-olive:hover {
+  filter: brightness(0.95);
+}
+.link-ink {
+  color: var(--c-ink);
+}
+.link-ink:hover {
+  color: #000;
+}
+
+=======
 }
 body {
   background: var(--page-bg);

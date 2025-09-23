@@ -1,0 +1,138 @@
+/* =========================
+   Footer
+   ========================= */
+.footer {
+  background: linear-gradient(135deg, #778E69, #BCC399, #778E69); /* Gradiente con verdes de la paleta */
+  color: #F2F3ED; /* Texto claro */
+  text-align: center;
+  padding: 3rem 2rem;
+  margin-top: 5rem;
+  font-family: 'Georgia', serif;
+  position: relative;
+}
+
+.footer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("https://www.transparenttextures.com/patterns/cream-pixels.png");
+  opacity: 0.08;
+  z-index: 0;
+}
+
+.footer-content {
+  position: relative;
+  z-index: 1;
+}
+
+.footer h3 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: #F2F3ED;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.footer p {
+  font-size: 1rem;
+  margin: 0.3rem 0;
+  color: #f7f3ee; /* Texto beige claro */
+}
+
+.footer-social {
+  margin: 1.5rem 0;
+}
+
+.footer-social a {
+  display: inline-block;
+  margin: 0 10px;
+  font-size: 1.4rem;
+  color: #F2F3ED;
+  background: rgba(224, 212, 190, 0.2); /* Fondo beige translúcido */
+  padding: 12px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.footer-social a:hover {
+  background: #E0D4BE; /* Beige sólido */
+  color: #778E69; /* Verde medio */
+  transform: translateY(-4px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(224, 212, 190, 0.4); /* Línea beige translúcida */
+  margin-top: 2rem;
+  padding-top: 1rem;
+  font-size: 0.9rem;
+  color: #E0D4BE; /* Texto beige */
+}
+
+.footer-section {
+  background: #111;
+  color: #eee;
+  padding: 40px 0;
+  font-size: 14px;
+}
+
+.footer-logo {
+  width: 200px;
+  height: auto;
+  margin-bottom: 10px;
+}
+
+.footer-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 10px 0 5px;
+  color: #fff;
+}
+
+.footer-description {
+  font-size: 13px;
+  color: #ccc;
+}
+
+.footer-heading {
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #fff;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin-bottom: 8px;
+}
+
+.footer-links a {
+  color: #aaa;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-links a:hover {
+  color: #fff;
+}
+
+.footer-contact p {
+  margin: 5px 0;
+  color: #ccc;
+}
+
+.footer-bottom {
+  border-top: 1px solid #333;
+  margin-top: 20px;
+  padding-top: 15px;
+  font-size: 13px;
+  color: #999;
+}
+
+.footer-love .heart {
+  color: red;
+}

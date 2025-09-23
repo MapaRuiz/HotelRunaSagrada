@@ -1,0 +1,33 @@
+<div class="h-screen flex items-center justify-center sticky top-0 md:p-0 px-4">
+  <div
+    class="relative flex flex-col h-[300px] w-[700px] py-12 px-10 md:px-12
+           rotate-0 md:h-[400px] md:w-[600px] items-center justify-center mx-auto
+           shadow-md pr-3 pl-3 pt-3 pb-4"
+    [style.backgroundColor]="color"
+  >
+    <span class="font-bold relative text-5xl md:text-7xl mt-5">
+      <span
+        class="relative z-10 font-tiemposHeadline font-black tracking-tight"
+        [style.color]="textColor"
+      >
+        {{ title }}
+      </span>
+    </span>
+
+    <div
+      class="font-manrope text-lg md:text-2xl font-medium text-center mb-0 z-50 mt-2 lowercase tracking-wide"
+      [style.color]="textColor"
+      style="line-height: 1.4;"
+    >
+      {{ description }}
+    </div>
+
+    <div class="absolute inset-0 z-0">
+      <img
+        class="w-full h-full object-cover"
+        [src]="src"
+        alt="Background"
+      />
+    </div>
+  </div>
+</div>

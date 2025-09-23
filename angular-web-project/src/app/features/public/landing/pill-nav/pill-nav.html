@@ -1,0 +1,89 @@
+<div class="pill-nav-container">
+  <nav
+    class="pill-nav {{ className }}"
+    [ngStyle]="{
+      '--base': baseColor,
+      '--pill-bg': pillColor,
+      '--hover-text': hoveredPillTextColor,
+      '--pill-text': pillTextColor || baseColor
+    }"
+  >
+    <!-- Logo -->
+    <a class="pill-logo" routerLink="/" aria-label="Home">
+      <img [src]="logo" [alt]="logoAlt" />
+    </a>
+
+    <!-- Desktop items -->
+    <div class="pill-nav-items desktop-only">
+      <ul class="pill-list">
+        <li *ngFor="let item of items; let i = index">
+          <a
+            *ngIf="item.href.startsWith('/'); else externalLink"
+            [routerLink]="item.href"
+            class="pill"
+            [class.is-active]="activeHref === item.href"
+            (mouseenter)="handleEnter(i)"
+            (mouseleave)="handleLeave(i)"
+          >
+            <span class="hover-circle" #circleRef></span>
+            <span class="label-stack">
+              <span class="pill-label">{{ item.label }}</span>
+              <span class="pill-label-hover">{{ item.label }}</span>
+            </span>
+          </a>
+          <ng-template #externalLink>
+            <a
+              [href]="item.href"
+              class="pill"
+              [class.is-active]="activeHref === item.href"
+              (mouseenter)="handleEnter(i)"
+              (mouseleave)="handleLeave(i)"
+            >
+              <span class="hover-circle" #circleRef></span>
+              <span class="label-stack">
+                <span class="pill-label">{{ item.label }}</span>
+                <span class="pill-label-hover">{{ item.label }}</span>
+              </span>
+            </a>
+          </ng-template>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Mobile button -->
+    <button
+      class="mobile-menu-button mobile-only"
+      (click)="toggleMobileMenu()"
+    >
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div class="mobile-menu-popover mobile-only" *ngIf="isMobileMenuOpen()">
+    <ul class="mobile-menu-list">
+      <li *ngFor="let item of items">
+        <a
+          *ngIf="item.href.startsWith('/'); else mobileExternal"
+          [routerLink]="item.href"
+          class="mobile-menu-link"
+          [class.is-active]="activeHref === item.href"
+          (click)="isMobileMenuOpen.set(false)"
+        >
+          {{ item.label }}
+        </a>
+        <ng-template #mobileExternal>
+          <a
+            [href]="item.href"
+            class="mobile-menu-link"
+            [class.is-active]="activeHref === item.href"
+            (click)="isMobileMenuOpen.set(false)"
+          >
+            {{ item.label }}
+          </a>
+        </ng-template>
+      </li>
+    </ul>
+  </div>
+</div>

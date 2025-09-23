@@ -1,15 +1,46 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+
+
+
 <app-scroll-expand-media
   mediaType="video"
   mediaSrc="https://me7aitdbxq.ufs.sh/f/2wsMIGDMQRdYuZ5R8ahEEZ4aQK56LizRdfBSqeDMsmUIrJN1"
-  bgImageSrc="https://images.unsplash.com/photo-1532443603613-61fa154742cd?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+  bgImageSrc="https://images.unsplash.com/photo-1532443603613-61fa154742cd?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.1.0"
   title="Hotel Runa Sagrada"
   date="Colombia tradicional"
   [textBlend]="true"
 >
 </app-scroll-expand-media>
 
-<!-- Galería interactiva -->
-<app-interactive-bento-gallery></app-interactive-bento-gallery>
+
+<pill-nav
+  class="pill-nav-container"
+  [ngClass]="{ 'visible': showNav }"
+  [logo]="'/logo.png'"
+  logoAlt="Runa Sagrada"
+  [items]="[
+    { label: 'HotelApp', href: '/' },
+    { label: 'Login', href: '/login' },
+    { label: 'Registro', href: '/register' }
+  ]"
+  activeHref="/"
+  baseColor="#778E69"
+  pillColor="#ffffff"
+  hoveredPillTextColor="#ffffff"
+  pillTextColor="#778E69">
+</pill-nav>
+
+
+<!-- Encabezado -->
+<div class="landing-header">
+  <h1 class="landing-title">Nuestras Runas</h1>
+  <p class="landing-subtitle">Una colección de refugios únicos</p>
+</div>
+
+<!-- Sección de tarjetas con efecto parallax -->
+<app-cards-parallax></app-cards-parallax>
+
 
 <section class="services-container">
   <h2 class="services-title">Nuestros Servicios</h2>
@@ -41,4 +72,8 @@
   </div>
 </section>
 
+
+<!-- Testimonios -->
 <app-testimonials-section></app-testimonials-section>
+
+<app-footer></app-footer>
