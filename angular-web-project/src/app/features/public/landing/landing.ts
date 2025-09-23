@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ScrollExpandMedia } from './scroll-expand-media/scroll-expand-media';
 import { TestimonialsSection } from './testimonials/testimonials-section';
 import { CardsParallaxComponent } from './cards-parallax/cards-parallax';
-import { PillNav } from './pill-nav/pill-nav';  
+import { PillNav } from './pill-nav/pill-nav';
+import { Footer } from './footer/footer';  
 
 @Component({
   selector: 'app-landing',
@@ -13,7 +14,8 @@ import { PillNav } from './pill-nav/pill-nav';
     ScrollExpandMedia,
     TestimonialsSection,
     CardsParallaxComponent,
-    PillNav  
+    PillNav,
+    Footer  
   ],
   templateUrl: './landing.html',
   styleUrls: ['./landing.css']
@@ -26,8 +28,7 @@ export class Landing {
     const hero = document.querySelector('app-scroll-expand-media');
     if (hero) {
       const rect = hero.getBoundingClientRect();
-     
-      this.showNav = rect.bottom <= 80; 
+      this.showNav = rect.bottom <= 80;
     }
   }
 }
