@@ -1,116 +1,160 @@
-/* Estilos globales para la landing page */
+body {
+  padding-top: 80px; /* ajusta según la altura real del nav */
+  background-color: #F2F3ED; /* Color de fondo principal */
+  color: #151513; /* Color de texto principal */
+}
+
+/* =========================
+   NAVBAR (pill-nav)
+   ========================= */
+pill-nav {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100%);
+  width: max-content; /* que se ajuste a su contenido */
+  margin: 0 auto;
+  z-index: 1000; /* para que quede encima del resto */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  background-color: #778E69; /* Color de fondo del nav */
+}
+
+pill-nav.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+@media (max-width: 768px) {
+  pill-nav {
+    width: 100%;
+    left: 0;
+    transform: translateY(-100%);
+  }
+  pill-nav.visible {
+    transform: translateY(0);
+  }
+}
+
+/* =========================
+   LANDING GENERAL
+   ========================= */
 .landing-container {
-	font-family: 'Georgia', serif; /* Fuente con serifa para un look clásico */
-	text-align: center;
-	color: #333;
+  font-family: 'Georgia', serif; /* Fuente con serifa para un look clásico */
+  text-align: center;
+  color: #151513;
 }
 
 /* Encabezado Principal */
 .landing-header {
-	padding: 80px 20px;
-	background: #e6f0e3; /* Verde claro suave */
-	text-align: center;
-	color: #1a4314; /* Verde oscuro para el texto */
+  padding: 80px 20px;
+  background: #BCC399; /* Verde claro de la paleta */
+  text-align: center;
+  color: #151513; /* Texto oscuro */
 }
 
 .landing-title {
-	font-size: 3.5rem;
-	font-weight: bold;
-	margin-bottom: 0.5rem;
-	color: #215e21; /* Verde más profundo para un toque natural */
+  font-size: 3.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: #778E69; /* Verde medio */
 }
 
 .landing-subtitle {
-	font-size: 1.25rem;
-	color: #4a6c4a; /* Tono verde terroso */
+  font-size: 1.25rem;
+  color: #151513; /* Texto oscuro */
 }
 
-/* Sección de Servicios */
+/* =========================
+   Servicios
+   ========================= */
 .services-container {
-	padding: 8rem 2rem;
-	background: url("https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1920&auto=format&fit=crop")
-		center/cover no-repeat;
-	position: relative;
-	color: #fff;
-	font-family: 'Georgia', serif;
+  padding: 8rem 2rem;
+  background: url("https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1920&auto=format&fit=crop")
+    center/cover no-repeat;
+  position: relative;
+  color: #F2F3ED; /* Texto claro */
+  font-family: 'Georgia', serif;
 }
 
-/* Efecto de superposición para mejorar la legibilidad */
 .services-container::before {
-	content: "";
-	position: absolute;
-	inset: 0;
-	background: rgba(43, 89, 43, 0.65); /* Verde oscuro semi-transparente */
-	z-index: 0;
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(119, 142, 105, 0.65); /* Overlay con el verde medio */
+  z-index: 0;
 }
 
 .services-title {
-	font-size: 3rem;
-	font-weight: bold;
-	margin-bottom: 4rem;
-	color: #f5f5f5;
-	text-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
-	position: relative;
-	z-index: 1;
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 4rem;
+  color: #F2F3ED;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+  position: relative;
+  z-index: 1;
 }
 
 .services-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-	gap: 3rem;
-	justify-items: center;
-	position: relative;
-	z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 3rem;
+  justify-items: center;
+  position: relative;
+  z-index: 1;
 }
 
 .service-card {
-	background: rgba(255, 255, 255, 0.95);
-	border-radius: 24px;
-	padding: 3.5rem 2rem 2rem;
-	text-align: center;
-	position: relative;
-	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-	transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
-		box-shadow 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  background: #E0D4BE; /* Color beige de la paleta */
+  border-radius: 24px;
+  padding: 3.5rem 2rem 2rem;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .service-card:hover {
-	transform: translateY(-15px) scale(1.02);
-	box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  transform: translateY(-15px) scale(1.02);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
 }
 
 .service-card img {
-	width: 100px;
-	height: 100px;
-	background: #fff;
-	border-radius: 50%;
-	padding: 15px;
-	object-fit: contain;
-	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
-	position: absolute;
-	top: -50px;
-	left: 50%;
-	transform: translateX(-50%);
+  width: 100px;
+  height: 100px;
+  background: #F2F3ED; /* Fondo claro */
+  border-radius: 50%;
+  padding: 15px;
+  object-fit: contain;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .service-card h3 {
-	font-size: 1.5rem;
-	margin: 2rem 0 0.75rem;
-	color: #215e21; /* Verde más oscuro */
-	font-weight: bold;
+  font-size: 1.5rem;
+  margin: 2rem 0 0.75rem;
+  color: #778E69; /* Verde medio */
+  font-weight: bold;
 }
 
 .service-card p {
-	font-size: 1rem;
-	color: #555;
-	line-height: 1.6;
+  font-size: 1rem;
+  color: #151513; /* Texto oscuro */
+  line-height: 1.6;
 }
+
 /* =========================
    Footer
    ========================= */
 .footer {
-  background: linear-gradient(135deg, #1a4314, #2d5d2a, #173d12); /* Verde profundo elegante */
-  color: #f5f5f5;
+  background: linear-gradient(135deg, #778E69, #BCC399, #778E69); /* Gradiente con verdes de la paleta */
+  color: #F2F3ED; /* Texto claro */
   text-align: center;
   padding: 3rem 2rem;
   margin-top: 5rem;
@@ -123,7 +167,7 @@
   position: absolute;
   inset: 0;
   background: url("https://www.transparenttextures.com/patterns/cream-pixels.png");
-  opacity: 0.08; /* textura sutil */
+  opacity: 0.08;
   z-index: 0;
 }
 
@@ -135,7 +179,7 @@
 .footer h3 {
   font-size: 2rem;
   margin-bottom: 0.5rem;
-  color: #e6f5e6;
+  color: #F2F3ED;
   font-weight: bold;
   letter-spacing: 1px;
 }
@@ -143,10 +187,9 @@
 .footer p {
   font-size: 1rem;
   margin: 0.3rem 0;
-  color: #d6e6d6;
+  color: #f7f3ee; /* Texto beige claro */
 }
 
-/* Redes sociales */
 .footer-social {
   margin: 1.5rem 0;
 }
@@ -155,25 +198,24 @@
   display: inline-block;
   margin: 0 10px;
   font-size: 1.4rem;
-  color: #f5f5f5;
-  background: rgba(255, 255, 255, 0.08);
+  color: #F2F3ED;
+  background: rgba(224, 212, 190, 0.2); /* Fondo beige translúcido */
   padding: 12px;
   border-radius: 50%;
   transition: all 0.3s ease;
 }
 
 .footer-social a:hover {
-  background: #e6f0e3;
-  color: #1a4314;
+  background: #E0D4BE; /* Beige sólido */
+  color: #778E69; /* Verde medio */
   transform: translateY(-4px);
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
 }
 
-/* Línea inferior */
 .footer-bottom {
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgba(224, 212, 190, 0.4); /* Línea beige translúcida */
   margin-top: 2rem;
   padding-top: 1rem;
   font-size: 0.9rem;
-  color: #bcd5bc;
+  color: #E0D4BE; /* Texto beige */
 }

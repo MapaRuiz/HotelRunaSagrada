@@ -1,3 +1,5 @@
+import { Reservation } from "./reservation";
+import { ReservationService } from "./reservation-service";
 import { ServiceOffering } from "./service-offering";
 
 export interface ServiceSchedule {
@@ -6,5 +8,7 @@ export interface ServiceSchedule {
     start_time: string;
     end_time: string;
     active: boolean;
+    //Rel
     service_offering?: ServiceOffering;
+    reservation_services?: ReservationService[];
 }

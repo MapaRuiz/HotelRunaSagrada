@@ -1,14 +1,36 @@
-/* You can add global styles to this file, and also import other style files */
 :root {
-    --bg: #0c1411;
-    --panel: #62646c;
-    --muted: #94a3b8;
+  --c-sand: #e0d4be;
+  --c-ivory: #f2f3ed;
+  --c-sage: #bcc399;
+  --c-olive: #778e69;
+  --c-ink: #151513;
+
+  --page-bg: #f2f3ed; /* de la paleta */
+  --text-ink: #151513;
+}
+body {
+  background: var(--page-bg);
+  color: var(--text-ink);
 }
 
-html,
-body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
+.auth-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(21, 21, 19, 0.12);
+  border: 1px solid rgba(21, 21, 19, 0.06);
+}
+.btn-olive {
+  background: var(--c-olive);
+  border-color: var(--c-olive);
+  color: #fff;
+}
+.btn-olive:hover {
+  filter: brightness(0.95);
+}
+.link-ink {
+  color: var(--c-ink);
+}
+.link-ink:hover {
+  color: #000;
 }
 

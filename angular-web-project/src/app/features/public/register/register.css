@@ -1,0 +1,28 @@
+/* Reutiliza estilos del login */
+@import url('../login/login.css');
+
+/* Ajustes específicos para el medidor de contraseña */
+.pw-meter {
+  height: 8px;
+  background: #eef2f6;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.pw-bar {
+  height: 100%;
+  width: 0%;
+  transition: width 220ms ease;
+  background: linear-gradient(90deg, #e65050, #ef984a);
+}
+.pw-bar.ok {
+  background: linear-gradient(90deg, #ef984a, #c2b56b);
+}
+.pw-bar.good {
+  background: linear-gradient(90deg, #c2b56b, #778e69);
+}
+.pw-label {
+  margin-top: 6px;
+  font-size: 0.82rem;
+  color: #6b7280;
+}

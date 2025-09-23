@@ -1,6 +1,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<!-- Hero con video de fondo -->
+
+
+
 <app-scroll-expand-media
   mediaType="video"
   mediaSrc="https://me7aitdbxq.ufs.sh/f/2wsMIGDMQRdYuZ5R8ahEEZ4aQK56LizRdfBSqeDMsmUIrJN1"
@@ -11,6 +13,24 @@
 >
 </app-scroll-expand-media>
 
+<pill-nav
+  class="pill-nav-container"
+  [ngClass]="{ 'visible': showNav }"
+  [logo]="'/logo.png'"
+  logoAlt="Runa Sagrada"
+  [items]="[
+    { label: 'HotelApp', href: '/' },
+    { label: 'Login', href: '/login' },
+    { label: 'Registro', href: '/register' }
+  ]"
+  activeHref="/"
+  baseColor="#778E69"
+  pillColor="#ffffff"
+  hoveredPillTextColor="#ffffff"
+  pillTextColor="#778E69">
+</pill-nav>
+
+
 <!-- Encabezado -->
 <div class="landing-header">
   <h1 class="landing-title">Nuestras Runas</h1>
@@ -20,13 +40,16 @@
 <!-- Sección de tarjetas con efecto parallax -->
 <app-cards-parallax></app-cards-parallax>
 
-<!-- Servicios -->
+
 <section class="services-container">
   <h2 class="services-title">Nuestros Servicios</h2>
 
   <div class="services-grid">
     <div class="service-card">
-      <img src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" alt="Gastronomía Ancestral" />
+      <img
+        src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png"
+        alt="Gastronomía Ancestral"
+      />
       <h3>Gastronomía Ancestral</h3>
       <p>Sabores autóctonos que conectan con la tradición de la región.</p>
     </div>
@@ -38,12 +61,16 @@
     </div>
 
     <div class="service-card">
-      <img src="https://cdn-icons-png.flaticon.com/512/1046/1046857.png" alt="Amenidades del Hotel" />
+      <img
+        src="https://cdn-icons-png.flaticon.com/512/1046/1046857.png"
+        alt="Amenidades del Hotel"
+      />
       <h3>Amenidades del Hotel</h3>
       <p>Confort, relajación y servicios exclusivos para tu bienestar.</p>
     </div>
   </div>
 </section>
+
 
 <!-- Testimonios -->
 <app-testimonials-section></app-testimonials-section>

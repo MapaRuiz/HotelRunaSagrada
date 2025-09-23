@@ -1,1 +1,60 @@
-<p>login works!</p>
+<app-blinds-bg
+  [colors]="['#f2f3ed', '#e0d4be', '#bcc399', '#778E69']"
+  [angleDeg]="-22"
+  [blindCount]="18"
+  [blindMinWidth]="64"
+  [noise]="0.1"
+  [mirror]="true"
+  [stripeStrength]="0.2"
+></app-blinds-bg>
+
+<div class="auth-wrap">
+  <div class="card">
+    <div class="logo-row">
+      <img [src]="img('/images/logito.png')" alt="Logo" class="logo" />
+    </div>
+
+    <!-- Toast local -->
+    <div *ngIf="flash()" class="toast" [class.toast--error]="flash()?.type === 'error'">
+      {{ flash()?.text }}
+    </div>
+
+    <h3 class="title">Login</h3>
+    <p class="subtitle">Por favor ingrese sus datos</p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" [attr.action]="null" novalidate>
+      <div class="field" [class.invalid]="f.email.invalid && (f.email.touched || f.email.dirty)">
+        <input type="email" formControlName="email" placeholder="Email" autocomplete="email" />
+        <div class="hint" *ngIf="f.email.errors && (f.email.touched || f.email.dirty)">
+          <span *ngIf="f.email.errors['required']">El email es obligatorio.</span>
+          <span *ngIf="f.email.errors['email']">Formato de email inválido.</span>
+        </div>
+      </div>
+
+      <div
+        class="field"
+        [class.invalid]="f.password.invalid && (f.password.touched || f.password.dirty)"
+      >
+        <input
+          type="password"
+          formControlName="password"
+          placeholder="Contraseña"
+          autocomplete="current-password"
+        />
+        <div class="hint" *ngIf="f.password.errors && (f.password.touched || f.password.dirty)">
+          <span *ngIf="f.password.errors['required']">La contraseña es obligatoria.</span>
+        </div>
+      </div>
+
+      <button class="btn" [disabled]="form.invalid || loading()">
+        <span *ngIf="!loading()">Entrar</span>
+        <span *ngIf="loading()" class="spinner"></span>
+      </button>
+    </form>
+
+    <p class="muted">
+      ¿No tienes cuenta?
+      <a routerLink="/register">Crear cuenta</a>
+    </p>
+  </div>
+</div>

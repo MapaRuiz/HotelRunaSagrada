@@ -1,43 +1,48 @@
 package com.runasagrada.hotelapi.model;
 
-import com.runasagrada.hotelapi.repository.AmenityRepository;
-import com.runasagrada.hotelapi.repository.HotelRepository;
-import com.runasagrada.hotelapi.repository.RoleRepository;
-import com.runasagrada.hotelapi.repository.ServiceOfferingRepository;
-import com.runasagrada.hotelapi.repository.ServiceScheduleRepository;
-import com.runasagrada.hotelapi.repository.UserRepository;
+import com.runasagrada.hotelapi.repository.*;
+import com.runasagrada.hotelapi.service.ServiceScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import com.runasagrada.hotelapi.model.ServiceSchedule.DayWeek;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Component
+@Profile("dev")
 @RequiredArgsConstructor
 public class DatabaseInit implements CommandLineRunner {
 
+    // Repositorios originales
     private final RoleRepository roleRepo;
     private final UserRepository userRepo;
     private final HotelRepository hotels;
     private final AmenityRepository amenities;
+
+    // Nuevos repositorios para servicios y habitaciones
     private final ServiceOfferingRepository serviceRepository;
-    private final ServiceScheduleRepository serviceScheduleRepository;
-    private List<Hotel> hotelCache;
+    private final ServiceScheduleService scheduleService;
+    private final RoomTypeRepository roomTypeRepository;
+    private final RoomRepository roomRepository;
 
     @Override
     public void run(String... args) {
+        // Datos originales: roles, usuarios y hoteles
+        seedBasicData();
 
+        // Nuevos datos: habitaciones y servicios
+        List<Hotel> hotelList = hotels.findAll();
+        seedRoomTypesAndRooms(hotelList);
+        seedServicesForAllHotels(hotelList);
+    }
+
+    private void seedBasicData() {
         // --- Roles base ---
         Role adminRole = roleRepo.findByName("ADMIN").orElseGet(() -> roleRepo.save(new Role(null, "ADMIN")));
         Role operatorRole = roleRepo.findByName("OPERATOR").orElseGet(() -> roleRepo.save(new Role(null, "OPERATOR")));
@@ -56,7 +61,7 @@ public class DatabaseInit implements CommandLineRunner {
             return userRepo.save(u);
         });
 
-        // --- 5 Operadores (op1…op5) ---
+        // --- 5 Operadores ---
         IntStream.rangeClosed(1, 5).forEach(i -> {
             String email = "op" + i + "@hotel.com";
             userRepo.findByEmail(email).orElseGet(() -> {
@@ -66,13 +71,13 @@ public class DatabaseInit implements CommandLineRunner {
                 u.setFullName("Operador Hotel " + i);
                 u.setPhone("301000000" + i);
                 u.setNationalId("OP-" + String.format("%03d", i));
-                u.setSelectedPet(pickIcon(i)); // solo 3 íconos
+                u.setSelectedPet(pickIcon(i));
                 u.setRoles(Set.of(operatorRole));
                 return userRepo.save(u);
             });
         });
 
-        // --- 10 Clientes (client01…client10) ---
+        // --- 10 Clientes ---
         IntStream.rangeClosed(1, 10).forEach(i -> {
             String email = "client" + String.format("%02d", i) + "@demo.com";
             userRepo.findByEmail(email).orElseGet(() -> {
@@ -82,13 +87,13 @@ public class DatabaseInit implements CommandLineRunner {
                 u.setFullName("Cliente " + String.format("%02d", i));
                 u.setPhone("30200000" + String.format("%02d", i));
                 u.setNationalId("CLI-" + String.format("%04d", i));
-                u.setSelectedPet(pickIcon(i)); // solo 3 íconos
+                u.setSelectedPet(pickIcon(i));
                 u.setRoles(Set.of(clientRole));
                 return userRepo.save(u);
             });
         });
 
-        // --- Hoteles + amenities (auto-creación de amenities faltantes) ---
+        // --- Hoteles + amenities ---
         if (hotels.count() == 0) {
             Map<String, Amenity> A = amenities.findAll().stream()
                     .collect(Collectors.toMap(Amenity::getName, a -> a));
@@ -103,8 +108,8 @@ public class DatabaseInit implements CommandLineRunner {
 
             Hotel cartagena = new Hotel();
             cartagena.setName("Runa Sagrada Cartagena");
-            cartagena.setLatitude("10.39972"); // verificado
-            cartagena.setLongitude("-75.51444"); // verificado
+            cartagena.setLatitude("10.39972");
+            cartagena.setLongitude("-75.51444");
             cartagena.setDescription(
                     "Hotel boutique dentro de la Ciudad Amurallada, con terraza rooftop para ver el atardecer, piscina al aire libre y habitaciones con toques coloniales a pasos de las plazas y murallas.");
             cartagena.setCheckInAfter("15:00");
@@ -117,8 +122,8 @@ public class DatabaseInit implements CommandLineRunner {
 
             Hotel eje = new Hotel();
             eje.setName("Runa Sagrada Eje Cafetero");
-            eje.setLatitude("5.070275"); // Manizales como referencia
-            eje.setLongitude("-75.513817"); // verificado
+            eje.setLatitude("5.070275");
+            eje.setLongitude("-75.513817");
             eje.setDescription(
                     "Retiro estilo hacienda en el corazón del Paisaje Cultural Cafetero: jardines, senderos entre cafetales, catas de café y espacios de descanso con vista a las montañas.");
             eje.setCheckInAfter("15:00");
@@ -130,8 +135,8 @@ public class DatabaseInit implements CommandLineRunner {
 
             Hotel sanandres = new Hotel();
             sanandres.setName("Runa Sagrada San Andrés");
-            sanandres.setLatitude("12.542499"); // verificado
-            sanandres.setLongitude("-81.718369"); // verificado
+            sanandres.setLatitude("12.542499");
+            sanandres.setLongitude("-81.718369");
             sanandres.setDescription(
                     "Resort frente al mar de los siete colores con acceso directo a la playa, club de snorkel y piscina con hidromasaje; suites luminosas con balcón y brisa caribeña.");
             sanandres.setCheckInAfter("15:00");
@@ -143,8 +148,8 @@ public class DatabaseInit implements CommandLineRunner {
 
             Hotel santamarta = new Hotel();
             santamarta.setName("Runa Sagrada Santa Marta");
-            santamarta.setLatitude("11.24079"); // verificado
-            santamarta.setLongitude("-74.19904"); // verificado
+            santamarta.setLatitude("11.24079");
+            santamarta.setLongitude("-74.19904");
             santamarta.setDescription(
                     "Eco-hotel a minutos del Parque Tayrona: integración selva-mar, piscina rodeada de vegetación, terrazas para relajarse y cocina local con ingredientes frescos.");
             santamarta.setCheckInAfter("15:00");
@@ -156,8 +161,8 @@ public class DatabaseInit implements CommandLineRunner {
 
             Hotel leyva = new Hotel();
             leyva.setName("Runa Sagrada Villa de Leyva");
-            leyva.setLatitude("5.6333"); // verificado
-            leyva.setLongitude("-73.5333"); // verificado
+            leyva.setLatitude("5.6333");
+            leyva.setLongitude("-73.5333");
             leyva.setDescription(
                     "Casa colonial restaurada alrededor de un patio empedrado; chimeneas, salones acogedores y gastronomía de autor a pocos pasos de la Plaza Mayor.");
             leyva.setCheckInAfter("15:00");
@@ -169,1006 +174,1070 @@ public class DatabaseInit implements CommandLineRunner {
 
             hotels.saveAll(List.of(cartagena, eje, sanandres, santamarta, leyva));
         }
-
-        seedServiceOfferings();
     }
 
-    private void seedServiceOfferings() {
-        if (serviceRepository.count() > 0) {
+    /*
+     * ============================================================
+     * ROOM TYPES & ROOMS
+     * ============================================================
+     */
+    private void seedRoomTypesAndRooms(List<Hotel> hotelList) {
+        // Crear tipos de habitación si no existen
+        Map<String, RoomType> typesByName = roomTypeRepository.findAll().stream()
+                .collect(Collectors.toMap(rt -> rt.getName().toLowerCase(Locale.ROOT), rt -> rt,
+                        (a, b) -> a, LinkedHashMap::new));
+
+        RoomType rtStd = ensureType(typesByName, "Estándar Regional",
+                "Habitaciones cómodas con decoración típica de cada región colombiana",
+                new BigDecimal("120000"), 2, "https://picsum.photos/seed/rt_std/640/420");
+        RoomType rtDel = ensureType(typesByName, "Deluxe Cultural",
+                "Habitaciones amplias con elementos culturales auténticos de la región",
+                new BigDecimal("180000"), 3, "https://picsum.photos/seed/rt_del/640/420");
+        RoomType rtSuite = ensureType(typesByName, "Suite Ancestral",
+                "Suites de lujo con sala separada y diseño premium colombiano",
+                new BigDecimal("280000"), 4, "https://picsum.photos/seed/rt_suite/640/420");
+        RoomType rtFam = ensureType(typesByName, "Familiar Colombiana",
+                "Habitaciones familiares amplias con espacios conectados y temática local",
+                new BigDecimal("220000"), 6, "https://picsum.photos/seed/rt_fam/640/420");
+        RoomType rtEco = ensureType(typesByName, "Eco Boutique",
+                "Habitación eco-friendly con materiales locales y energía renovable",
+                new BigDecimal("200000"), 3, "https://picsum.photos/seed/rt_eco/640/420");
+
+        Map<Integer, RoomType> typeByFloor = Map.of(
+                1, rtStd, 2, rtDel, 3, rtSuite, 4, rtFam, 5, rtEco);
+
+        // Crear habitaciones si no existen
+        if (roomRepository.count() == 0L && !hotelList.isEmpty()) {
+            int hotelsToUse = Math.min(5, hotelList.size());
+            for (int idx = 0; idx < hotelsToUse; idx++) {
+                Hotel hotel = hotelList.get(idx);
+                int hotelOrdinal = idx + 1;
+                for (int floor = 1; floor <= 5; floor++) {
+                    RoomType t = typeByFloor.get(floor);
+                    for (int i = 1; i <= 4; i++) {
+                        Room r = new Room();
+                        r.setHotel(hotel);
+                        r.setRoomType(t);
+                        r.setNumber(String.format("%d-%d0%d", hotelOrdinal, floor, i));
+                        r.setFloor(floor);
+
+                        Room.ReservationStatus res = switch (i) {
+                            case 2 -> Room.ReservationStatus.BOOKED;
+                            case 3 -> Room.ReservationStatus.MAINTENANCE;
+                            default -> Room.ReservationStatus.AVAILABLE;
+                        };
+                        r.setResStatus(res);
+                        r.setCleStatus((i % 2 == 0) ? Room.CleaningStatus.DIRTY : Room.CleaningStatus.CLEAN);
+                        r.setThemeName(themeNameFor(hotelOrdinal, floor));
+                        r.getImages().add(
+                                "https://picsum.photos/seed/room" + hotelOrdinal + "-" + floor + "-" + i + "/800/600");
+
+                        roomRepository.save(r);
+                    }
+                }
+            }
+        }
+    }
+
+    /*
+     * ============================================================
+     * SERVICIOS ESPECÍFICOS POR HOTEL
+     * ============================================================
+     */
+    private void seedServicesForAllHotels(List<Hotel> hotelList) {
+        if (serviceRepository.count() > 0)
             return;
+
+        // Servicios base que van a todos los hoteles (comidas y talleres)
+        List<ServiceOffering> commonServices = createCommonServices();
+
+        // Servicios específicos por hotel
+        for (int i = 0; i < hotelList.size(); i++) {
+            Hotel hotel = hotelList.get(i);
+            List<ServiceOffering> specificServices = createSpecificServicesForHotel(i + 1);
+
+            // Asignar hotel a todos los servicios
+            commonServices.forEach(s -> {
+                ServiceOffering copy = copyService(s);
+                copy.setHotel(hotel);
+                serviceRepository.save(copy);
+            });
+
+            specificServices.forEach(s -> {
+                s.setHotel(hotel);
+                serviceRepository.save(s);
+            });
         }
 
-        // Experiencias principales
-        createDefaultSchedules(createService(
-                "Gastronomía Ancestral",
-                "Comida",
-                "",
-                "Sabores auténticos de la cocina tradicional colombiana, preparados con ingredientes locales y técnicas ancestrales.",
-                45900,
-                60,
-                List.of(ImageUrls.GASTRONOMIA_1, ImageUrls.GASTRONOMIA_2, ImageUrls.GASTRONOMIA_3),
-                10,
-                10.3910,
-                -75.4794));
+        createSampleSchedules();
+    }
 
-        createDefaultSchedules(createService(
-                "Tours Sagrados",
-                "Tours",
-                "",
-                "Expediciones guiadas por lugares místicos y sitios arqueológicos, conectando con la sabiduría ancestral.",
-                65500,
-                60,
-                List.of(ImageUrls.TOURS_ARQUEOLOGICOS_1, ImageUrls.TOURS_ARQUEOLOGICOS_2,
-                        ImageUrls.TOURS_ARQUEOLOGICOS_3),
-                10,
-                5.6333,
-                -73.5333));
+    private List<ServiceOffering> createCommonServices() {
+        List<ServiceOffering> services = new ArrayList<>();
 
-        createDefaultSchedules(createService(
-                "Rituales de Bienestar",
-                "Hotel",
-                "",
-                "Terapias tradicionales y ceremonias de sanación inspiradas en las prácticas indígenas colombianas.",
-                75000,
-                60,
-                List.of(ImageUrls.RITUALES_1, ImageUrls.RITUALES_2, ImageUrls.RITUALES_3),
-                10,
-                4.7109,
-                -74.0721));
+        // === COMIDAS TRADICIONALES (24) ===
+        // Platos Principales
+        // Bandeja Paisa
+        ServiceOffering bandejaPaisa = new ServiceOffering();
+        bandejaPaisa.setName("Bandeja Paisa Auténtica");
+        bandejaPaisa.setCategory("Gastronomía");
+        bandejaPaisa.setSubcategory("Antioquia");
+        bandejaPaisa
+                .setDescription("Bandeja paisa tradicional con frijoles, chicharrón, chorizo, morcilla, arepa y huevo");
+        bandejaPaisa.setBasePrice(38000);
+        bandejaPaisa.setDurationMinutes(60);
+        bandejaPaisa.setImageUrls(List.of("https://i.blogs.es/bb0cca/bandeja_paisa/1200_900.jpg"));
+        bandejaPaisa.setMaxParticipants(10);
+        bandejaPaisa.setLatitude(6.2442);
+        bandejaPaisa.setLongitude(-75.5736);
+        services.add(bandejaPaisa);
 
-        createDefaultSchedules(createService(
-                "Hospedaje Boutique",
-                "Hotel",
-                "",
-                "Habitaciones únicas diseñadas con elementos artesanales y decoración inspirada en culturas precolombinas.",
-                120000,
-                60,
-                List.of(ImageUrls.HOSPEDAJE_BOUTIQUE_1, ImageUrls.HOSPEDAJE_BOUTIQUE_2, ImageUrls.HOSPEDAJE_BOUTIQUE_3),
-                10,
-                4.6370,
-                -75.5710));
+        ServiceOffering ajiacoSantafereño = new ServiceOffering();
+        ajiacoSantafereño.setName("Ajiaco Santafereño");
+        ajiacoSantafereño.setCategory("Gastronomía");
+        ajiacoSantafereño.setSubcategory("Cundinamarca");
+        ajiacoSantafereño.setDescription("Sopa de tres papas con pollo, mazorca, alcaparras y crema de leche");
+        ajiacoSantafereño.setBasePrice(32000);
+        ajiacoSantafereño.setDurationMinutes(60);
+        ajiacoSantafereño.setImageUrls(List.of("https://www.semana.com/resizer/v2/GBBYJH5YMZC6PEINHE3HZZH4TY.jpg?auth=f21d7fbf15c15316b80dd213fb2c635e4445db8e08133172d69a4956d7f417db&smart=true&quality=75&width=1920&height=1080&fitfill=false"));
+        ajiacoSantafereño.setMaxParticipants(10);
+        ajiacoSantafereño.setLatitude(4.7109);
+        ajiacoSantafereño.setLongitude(-74.0721);
+        services.add(ajiacoSantafereño);
 
-        createDefaultSchedules(createService(
-                "Ecoturismo",
-                "Tours",
-                "",
-                "Experiencias sostenibles que preservan y celebran la biodiversidad única de los ecosistemas colombianos.",
-                55750,
-                60,
-                List.of(ImageUrls.ECOTURISMO_1, ImageUrls.ECOTURISMO_2, ImageUrls.ECOTURISMO_3),
-                10,
-                12.5847,
-                -81.7005));
+        ServiceOffering sancochoCosteño = new ServiceOffering();
+        sancochoCosteño.setName("Sancocho Costeño");
+        sancochoCosteño.setCategory("Gastronomía");
+        sancochoCosteño.setSubcategory("Costa Caribe");
+        sancochoCosteño.setDescription("Sancocho de pescado con yuca, ñame, plátano verde y cilantro cimarrón");
+        sancochoCosteño.setBasePrice(35000);
+        sancochoCosteño.setDurationMinutes(60);
+        sancochoCosteño.setImageUrls(List.of("https://www.cheekyfoods.com.au/cdn/shop/articles/Untitled_design_87.jpg?v=1698649815"));
+        sancochoCosteño.setMaxParticipants(10);
+        sancochoCosteño.setLatitude(10.3910);
+        sancochoCosteño.setLongitude(-75.4794);
+        services.add(sancochoCosteño);
 
-        createDefaultSchedules(createService(
-                "Cultura Viva",
-                "Tours",
-                "",
-                "Talleres de artesanías, música tradicional y danzas folclóricas con maestros de comunidades locales.",
-                35000,
-                60,
-                List.of(ImageUrls.CULTURA_1, ImageUrls.CULTURA_2, ImageUrls.CULTURA_3),
-                10,
-                11.2408,
-                -74.1990));
+        ServiceOffering lechonaTolimense = new ServiceOffering();
+        lechonaTolimense.setName("Lechona Tolimense");
+        lechonaTolimense.setCategory("Gastronomía");
+        lechonaTolimense.setSubcategory("Tolima");
+        lechonaTolimense.setDescription("Cerdo relleno con arroz, arvejas y especias, asado en horno de barro");
+        lechonaTolimense.setBasePrice(42000);
+        lechonaTolimense.setDurationMinutes(60);
+        lechonaTolimense.setImageUrls(List.of("https://media.istockphoto.com/id/1442283646/photo/lechona-with-rice-arepa-and-potato-on-a-white-plate-and-a-background-with-plants.jpg"));
+        lechonaTolimense.setMaxParticipants(10);
+        lechonaTolimense.setLatitude(4.4389);
+        lechonaTolimense.setLongitude(-75.2322);
+        services.add(lechonaTolimense);
 
-        createDefaultSchedules(createService(
+        ServiceOffering tamalesBogotanos = new ServiceOffering();
+        tamalesBogotanos.setName("Tamales Bogotanos");
+        tamalesBogotanos.setCategory("Gastronomía");
+        tamalesBogotanos.setSubcategory("Cundinamarca");
+        tamalesBogotanos.setDescription("Masa de maíz rellena de pollo, cerdo y verduras, envuelta en hojas de plátano");
+        tamalesBogotanos.setBasePrice(28000);
+        tamalesBogotanos.setDurationMinutes(60);
+        tamalesBogotanos.setImageUrls(List.of("https://www.eltiempo.com/files/image_1200_600/uploads/2023/11/23/655f995f17c49.jpeg"));
+        tamalesBogotanos.setMaxParticipants(10);
+        tamalesBogotanos.setLatitude(4.7110);
+        tamalesBogotanos.setLongitude(-74.0721);
+        services.add(tamalesBogotanos);
+
+        ServiceOffering cazuelaDeMariscos = new ServiceOffering();
+        cazuelaDeMariscos.setName("Cazuela de Mariscos");
+        cazuelaDeMariscos.setCategory("Gastronomía");
+        cazuelaDeMariscos.setSubcategory("Costa Caribe");
+        cazuelaDeMariscos.setDescription("Cazuela con camarones, langostinos, pescado y moluscos en leche de coco");
+        cazuelaDeMariscos.setBasePrice(48000);
+        cazuelaDeMariscos.setDurationMinutes(60);
+        cazuelaDeMariscos.setImageUrls(List.of("https://media.istockphoto.com/id/607991782/es/foto/paella-tradicional-espa%C3%B1ola-con-marisco-y-pollo.jpg"));
+        cazuelaDeMariscos.setMaxParticipants(10);
+        cazuelaDeMariscos.setLatitude(10.3910);
+        cazuelaDeMariscos.setLongitude(-75.4794);
+        services.add(cazuelaDeMariscos);
+
+        ServiceOffering moteDeQueso = new ServiceOffering();
+        moteDeQueso.setName("Mote de Queso Costeño");
+        moteDeQueso.setCategory("Gastronomía");
+        moteDeQueso.setSubcategory("Costa Caribe");
+        moteDeQueso.setDescription("Sopa espesa de ñame con queso costeño en cubos y un sofrito de cebolla y ajo");
+        moteDeQueso.setBasePrice(30000);
+        moteDeQueso.setDurationMinutes(60);
+        moteDeQueso.setImageUrls(List.of("https://i.ytimg.com/vi/h5a-fB9s3fA/maxresdefault.jpg"));
+        moteDeQueso.setMaxParticipants(10);
+        moteDeQueso.setLatitude(10.3910);
+        moteDeQueso.setLongitude(-75.4794);
+        services.add(moteDeQueso);
+
+        ServiceOffering changuaBogotana = new ServiceOffering();
+        changuaBogotana.setName("Changua Bogotana");
+        changuaBogotana.setCategory("Gastronomía");
+        changuaBogotana.setSubcategory("Cundinamarca");
+        changuaBogotana.setDescription("Sopa de leche con huevos, cebolla larga y cilantro, servida con pan tostado");
+        changuaBogotana.setBasePrice(18000);
+        changuaBogotana.setDurationMinutes(30);
+        changuaBogotana.setImageUrls(List.of("https://i.ytimg.com/vi/r4FgfmO3zLg/maxresdefault.jpg"));
+        changuaBogotana.setMaxParticipants(10);
+        changuaBogotana.setLatitude(4.7109);
+        changuaBogotana.setLongitude(-74.0721);
+        services.add(changuaBogotana);
+
+        // Postres (8)
+        ServiceOffering tresLechesCosteño = new ServiceOffering();
+        tresLechesCosteño.setName("Tres Leches Costeño");
+        tresLechesCosteño.setCategory("Gastronomía");
+        tresLechesCosteño.setSubcategory("Postre");
+        tresLechesCosteño.setDescription("Torta de tres leches con frutas tropicales");
+        tresLechesCosteño.setBasePrice(15000);
+        tresLechesCosteño.setDurationMinutes(30);
+        tresLechesCosteño.setImageUrls(List.of("https://easyways.cl/storage/20211229090337postre-tres-leches.jpg"));
+        tresLechesCosteño.setMaxParticipants(10);
+        tresLechesCosteño.setLatitude(10.3910);
+        tresLechesCosteño.setLongitude(-75.4794);
+        services.add(tresLechesCosteño);
+
+        ServiceOffering arequipeConBrevas = new ServiceOffering();
+        arequipeConBrevas.setName("Arequipe con Brevas");
+        arequipeConBrevas.setCategory("Gastronomía");
+        arequipeConBrevas.setSubcategory("Postre");
+        arequipeConBrevas.setDescription("Brevas con dulce de leche, especialidad antioqueña");
+        arequipeConBrevas.setBasePrice(12000);
+        arequipeConBrevas.setDurationMinutes(30);
+        arequipeConBrevas.setImageUrls(List.of("https://elrinconcolombiano.com/wp-content/uploads/2023/04/Manjar-blanco-receta-colombiana.jpg"));
+        arequipeConBrevas.setMaxParticipants(10);
+        arequipeConBrevas.setLatitude(6.2442);
+        arequipeConBrevas.setLongitude(-75.5736);
+        services.add(arequipeConBrevas);
+
+        ServiceOffering cocadasIsleñas = new ServiceOffering();
+        cocadasIsleñas.setName("Cocadas Isleñas");
+        cocadasIsleñas.setCategory("Gastronomía");
+        cocadasIsleñas.setSubcategory("Postre");
+        cocadasIsleñas.setDescription("Dulces de coco de la tradición isleña de San Andrés");
+        cocadasIsleñas.setBasePrice(8000);
+        cocadasIsleñas.setDurationMinutes(20);
+        cocadasIsleñas.setImageUrls(List.of("https://www.shutterstock.com/image-photo/peruvian-cocadas-traditional-coconut-dessert-600nw-380640118.jpg"));
+        cocadasIsleñas.setMaxParticipants(10);
+        cocadasIsleñas.setLatitude(12.542499);
+        cocadasIsleñas.setLongitude(-81.718369);
+        services.add(cocadasIsleñas);
+
+        ServiceOffering buñuelosDeYuca = new ServiceOffering();
+        buñuelosDeYuca.setName("Buñuelos de Yuca");
+        buñuelosDeYuca.setCategory("Gastronomía");
+        buñuelosDeYuca.setSubcategory("Postre");
+        buñuelosDeYuca.setDescription("Buñuelos esponjosos de yuca con queso, tradicionales de temporada navideña");
+        buñuelosDeYuca.setBasePrice(12000);
+        buñuelosDeYuca.setDurationMinutes(30);
+        buñuelosDeYuca.setImageUrls(List.of("https://cdn.colombia.com/gastronomia/2011/08/03/chicha-1604.gif"));
+        buñuelosDeYuca.setMaxParticipants(10);
+        buñuelosDeYuca.setLatitude(4.7109);
+        buñuelosDeYuca.setLongitude(-74.0721);
+        services.add(buñuelosDeYuca);
+
+        ServiceOffering natillaColombiana = new ServiceOffering();
+        natillaColombiana.setName("Natilla Colombiana");
+        natillaColombiana.setCategory("Gastronomía");
+        natillaColombiana.setSubcategory("Postre");
+        natillaColombiana.setDescription("Natilla cremosa con canela y pasas, postre tradicional navideño");
+        natillaColombiana.setBasePrice(10000);
+        natillaColombiana.setDurationMinutes(30);
+        natillaColombiana.setImageUrls(List.of("https://www.elespectador.com/resizer/VQS-41ig6YKYg4qcH5zr5B1XXBw=/arc-anglerfish-arc2-prod-elespectador/public/GTELHVJGBZARLL3GLVUEGRCMJY.JPG"));
+        natillaColombiana.setMaxParticipants(10);
+        natillaColombiana.setLatitude(4.7109);
+        natillaColombiana.setLongitude(-74.0721);
+        services.add(natillaColombiana);
+
+        ServiceOffering cuajadaConMelao = new ServiceOffering();
+        cuajadaConMelao.setName("Cuajada con Melao");
+        cuajadaConMelao.setCategory("Gastronomía");
+        cuajadaConMelao.setSubcategory("Postre");
+        cuajadaConMelao.setDescription("Queso fresco boyacense con miel de caña y almojábana");
+        cuajadaConMelao.setBasePrice(9000);
+        cuajadaConMelao.setDurationMinutes(20);
+        cuajadaConMelao.setImageUrls(List.of("https://static.bainet.es/clip/315db07b-3610-42cc-9c94-8abe9baef742_source-aspect-ratio_1600w_0.jpg"));
+        cuajadaConMelao.setMaxParticipants(10);
+        cuajadaConMelao.setLatitude(5.6333);
+        cuajadaConMelao.setLongitude(-73.5333);
+        services.add(cuajadaConMelao);
+
+        ServiceOffering bocadilloConQueso = new ServiceOffering();
+        bocadilloConQueso.setName("Bocadillo con Queso");
+        bocadilloConQueso.setCategory("Gastronomía");
+        bocadilloConQueso.setSubcategory("Postre");
+        bocadilloConQueso.setDescription("Dulce de guayaba con queso fresco, combinación tradicional santandereana");
+        bocadilloConQueso.setBasePrice(7000);
+        bocadilloConQueso.setDurationMinutes(15);
+        bocadilloConQueso.setImageUrls(List.of("https://api.photon.aremedia.net.au/wp-content/uploads/sites/4/2021/07/23/12909/HL1121E15-scaled.jpg"));
+        bocadilloConQueso.setMaxParticipants(10);
+        bocadilloConQueso.setLatitude(7.1193);
+        bocadilloConQueso.setLongitude(-73.1227);
+        services.add(bocadilloConQueso);
+
+        ServiceOffering empanadasVallecaucanas = new ServiceOffering();
+        empanadasVallecaucanas.setName("Empanadas Vallecaucanas");
+        empanadasVallecaucanas.setCategory("Gastronomía");
+        empanadasVallecaucanas.setSubcategory("Aperitivo");
+        empanadasVallecaucanas.setDescription("Empanadas de masa de maíz rellenas de papa y carne, fritas en aceite");
+        empanadasVallecaucanas.setBasePrice(15000);
+        empanadasVallecaucanas.setDurationMinutes(30);
+        empanadasVallecaucanas.setImageUrls(List.of("https://imagenes.eltiempo.com/files/image_1200_535/uploads/2024/02/20/65d4e89c2c395.jpeg"));
+        empanadasVallecaucanas.setMaxParticipants(10);
+        empanadasVallecaucanas.setLatitude(3.4516);
+        empanadasVallecaucanas.setLongitude(-76.5319);
+        services.add(empanadasVallecaucanas);
+
+        // Bebidas (8)
+        ServiceOffering cafeDeOrigenEspecial = new ServiceOffering();
+        cafeDeOrigenEspecial.setName("Café de Origen Especial");
+        cafeDeOrigenEspecial.setCategory("Gastronomía");
+        cafeDeOrigenEspecial.setSubcategory("Bebida");
+        cafeDeOrigenEspecial.setDescription("Café de origen único de fincas locales");
+        cafeDeOrigenEspecial.setBasePrice(8000);
+        cafeDeOrigenEspecial.setDurationMinutes(15);
+        cafeDeOrigenEspecial.setImageUrls(List.of("https://st2.depositphotos.com/1773130/7605/i/450/depositphotos_76054953-stock-photo-iced-coffee-in-a-tall.jpg"));
+        cafeDeOrigenEspecial.setMaxParticipants(10);
+        cafeDeOrigenEspecial.setLatitude(5.070275);
+        cafeDeOrigenEspecial.setLongitude(-75.513817);
+        services.add(cafeDeOrigenEspecial);
+
+        ServiceOffering aguaDePanelaConLimon = new ServiceOffering();
+        aguaDePanelaConLimon.setName("Agua de Panela con Limón");
+        aguaDePanelaConLimon.setCategory("Gastronomía");
+        aguaDePanelaConLimon.setSubcategory("Bebida");
+        aguaDePanelaConLimon.setDescription("Agua de panela con limón, refresco tradicional");
+        aguaDePanelaConLimon.setBasePrice(5000);
+        aguaDePanelaConLimon.setDurationMinutes(10);
+        aguaDePanelaConLimon.setImageUrls(List.of("https://media.istockphoto.com/id/1181234339/es/foto/aguapanela-casera-fresca-agua-de-panela-o-aguadulce-una-popular-bebida-dulce-latinoamericana.jpg"));
+        aguaDePanelaConLimon.setMaxParticipants(10);
+        aguaDePanelaConLimon.setLatitude(4.7109);
+        aguaDePanelaConLimon.setLongitude(-74.0721);
+        services.add(aguaDePanelaConLimon);
+
+        ServiceOffering luladaCalena = new ServiceOffering();
+        luladaCalena.setName("Lulada Caleña");
+        luladaCalena.setCategory("Gastronomía");
+        luladaCalena.setSubcategory("Bebida");
+        luladaCalena.setDescription("Bebida refrescante de lulo con hielo, limón y azúcar");
+        luladaCalena.setBasePrice(7000);
+        luladaCalena.setDurationMinutes(10);
+        luladaCalena.setImageUrls(List.of("https://www.elespectador.com/resizer/VQS-41ig6YKYg4qcH5zr5B1XXBw=/arc-anglerfish-arc2-prod-elespectador/public/GTELHVJGBZARLL3GLVUEGRCMJY.JPG"));
+        luladaCalena.setMaxParticipants(10);
+        luladaCalena.setLatitude(3.4516);
+        luladaCalena.setLongitude(-76.5319);
+        services.add(luladaCalena);
+
+        ServiceOffering chocolateSantafereño = new ServiceOffering();
+        chocolateSantafereño.setName("Chocolate Santafereño");
+        chocolateSantafereño.setCategory("Gastronomía");
+        chocolateSantafereño.setSubcategory("Bebida");
+        chocolateSantafereño.setDescription("Chocolate caliente con queso, tradición bogotana");
+        chocolateSantafereño.setBasePrice(9000);
+        chocolateSantafereño.setDurationMinutes(20);
+        chocolateSantafereño.setImageUrls(List.of("https://sabor.eluniverso.com/wp-content/uploads/2023/12/shutterstock_1665115558-1024x683.jpg"));
+        chocolateSantafereño.setMaxParticipants(10);
+        chocolateSantafereño.setLatitude(4.7109);
+        chocolateSantafereño.setLongitude(-74.0721);
+        services.add(chocolateSantafereño);
+
+        ServiceOffering jugoDeCorozo = new ServiceOffering();
+        jugoDeCorozo.setName("Jugo de Corozo");
+        jugoDeCorozo.setCategory("Gastronomía");
+        jugoDeCorozo.setSubcategory("Bebida");
+        jugoDeCorozo.setDescription("Jugo de fruta de palma corozo, especialidad caribeña");
+        jugoDeCorozo.setBasePrice(7000);
+        jugoDeCorozo.setDurationMinutes(10);
+        jugoDeCorozo.setImageUrls(List.of("https://imagenes.eltiempo.com/files/image_1200_535/uploads/2024/02/20/65d4e89c2c395.jpeg"));
+        jugoDeCorozo.setMaxParticipants(10);
+        jugoDeCorozo.setLatitude(10.3910);
+        jugoDeCorozo.setLongitude(-75.4794);
+        services.add(jugoDeCorozo);
+
+        ServiceOffering chichaDeMaiz = new ServiceOffering();
+        chichaDeMaiz.setName("Chicha de Maíz");
+        chichaDeMaiz.setCategory("Gastronomía");
+        chichaDeMaiz.setSubcategory("Bebida");
+        chichaDeMaiz.setDescription("Bebida tradicional de maíz de cultura indígena");
+        chichaDeMaiz.setBasePrice(6000);
+        chichaDeMaiz.setDurationMinutes(20);
+        chichaDeMaiz.setImageUrls(List.of("https://cdn.colombia.com/gastronomia/2011/08/03/chicha-1604.gif"));
+        chichaDeMaiz.setMaxParticipants(10);
+        chichaDeMaiz.setLatitude(4.7109);
+        chichaDeMaiz.setLongitude(-74.0721);
+        services.add(chichaDeMaiz);
+
+        ServiceOffering cocoLocoIsleno = new ServiceOffering();
+        cocoLocoIsleno.setName("Coco Loco Isleño");
+        cocoLocoIsleno.setCategory("Gastronomía");
+        cocoLocoIsleno.setSubcategory("Bebida");
+        cocoLocoIsleno.setDescription("Cóctel de coco con ron local");
+        cocoLocoIsleno.setBasePrice(15000);
+        cocoLocoIsleno.setDurationMinutes(15);
+        cocoLocoIsleno.setImageUrls(List.of("https://jappi.com.co/wp-content/uploads/2023/03/Jappi-Final.webp"));
+        cocoLocoIsleno.setMaxParticipants(10);
+        cocoLocoIsleno.setLatitude(12.542499);
+        cocoLocoIsleno.setLongitude(-81.718369);
+        services.add(cocoLocoIsleno);
+
+        ServiceOffering cataDeAguardiente = new ServiceOffering();
+        cataDeAguardiente.setName("Cata de Aguardiente");
+        cataDeAguardiente.setCategory("Gastronomía");
+        cataDeAguardiente.setSubcategory("Bebida");
+        cataDeAguardiente.setDescription("Degustación de aguardientes regionales con maridaje de aperitivos típicos");
+        cataDeAguardiente.setBasePrice(25000);
+        cataDeAguardiente.setDurationMinutes(45);
+        cataDeAguardiente.setImageUrls(List.of("https://desquite.com/en/wp-content/uploads/2025/03/Desquite-Tradicion-Artisanal-Authentic-Colombian-Aguardiente-m.webp"));
+        cataDeAguardiente.setMaxParticipants(10);
+        cataDeAguardiente.setLatitude(6.2442);
+        cataDeAguardiente.setLongitude(-75.5736);
+        services.add(cataDeAguardiente);
+
+        // === TALLERES Y DANZAS CULTURALES (8) ===
+        
+        ServiceOffering tallerDeCumbia = new ServiceOffering();
+        tallerDeCumbia.setName("Taller de Cumbia");
+        tallerDeCumbia.setCategory("Cultural");
+        tallerDeCumbia.setSubcategory("Danza");
+        tallerDeCumbia.setDescription("Aprende los pasos tradicionales de cumbia con vestuario y música en vivo");
+        tallerDeCumbia.setBasePrice(35000);
+        tallerDeCumbia.setDurationMinutes(90);
+        tallerDeCumbia.setImageUrls(List.of("https://www.infobae.com/resizer/v2/H4BSBL5F7JEH7ELIPDGLKO5OBQ.jpg?auth=da6890b5ced46d170fe76fcc186b721e5495c108b33bec0fff4cfd53e527e538&smart=true&width=1200&height=900&quality=85"));
+        tallerDeCumbia.setMaxParticipants(12);
+        tallerDeCumbia.setLatitude(10.3910);
+        tallerDeCumbia.setLongitude(-75.4794);
+        services.add(tallerDeCumbia);
+
+        ServiceOffering tallerDeVallenato = new ServiceOffering();
+        tallerDeVallenato.setName("Taller de Vallenato");
+        tallerDeVallenato.setCategory("Cultural");
+        tallerDeVallenato.setSubcategory("Música");
+        tallerDeVallenato.setDescription("Taller de acordeón, caja y guacharaca con maestros vallenatos");
+        tallerDeVallenato.setBasePrice(45000);
+        tallerDeVallenato.setDurationMinutes(120);
+        tallerDeVallenato.setImageUrls(List.of("https://live.staticflickr.com/4136/4925539026_db69e6ec6e_b.jpg"));
+        tallerDeVallenato.setMaxParticipants(10);
+        tallerDeVallenato.setLatitude(10.4597);
+        tallerDeVallenato.setLongitude(-73.2532);
+        services.add(tallerDeVallenato);
+
+        ServiceOffering tallerDeBambuco = new ServiceOffering();
+        tallerDeBambuco.setName("Taller de Bambuco");
+        tallerDeBambuco.setCategory("Cultural");
+        tallerDeBambuco.setSubcategory("Danza");
+        tallerDeBambuco.setDescription("Danza tradicional andina con pasos clásicos y vestuario típico");
+        tallerDeBambuco.setBasePrice(30000);
+        tallerDeBambuco.setDurationMinutes(90);
+        tallerDeBambuco.setImageUrls(List.of("https://visitvalle.travel/wp-content/uploads/2024/08/festival-de-la-bandola-sevilla.webp"));
+        tallerDeBambuco.setMaxParticipants(12);
+        tallerDeBambuco.setLatitude(4.7109);
+        tallerDeBambuco.setLongitude(-74.0721);
+        services.add(tallerDeBambuco);
+
+        ServiceOffering tallerDeMapale = new ServiceOffering();
+        tallerDeMapale.setName("Taller de Mapalé");
+        tallerDeMapale.setCategory("Cultural");
+        tallerDeMapale.setSubcategory("Danza");
+        tallerDeMapale.setDescription("Danza afrocolombiana con tambores y coreografía ancestral");
+        tallerDeMapale.setBasePrice(40000);
+        tallerDeMapale.setDurationMinutes(90);
+        tallerDeMapale.setImageUrls(List.of("https://regionesnaturalescolombia.com/wp-content/uploads/2023/03/Traje-tipico-de-la-region-insular.png"));
+        tallerDeMapale.setMaxParticipants(12);
+        tallerDeMapale.setLatitude(10.3910);
+        tallerDeMapale.setLongitude(-75.4794);
+        services.add(tallerDeMapale);
+
+        ServiceOffering tallerDeCurrulao = new ServiceOffering();
+        tallerDeCurrulao.setName("Taller de Currulao");
+        tallerDeCurrulao.setCategory("Cultural");
+        tallerDeCurrulao.setSubcategory("Música");
+        tallerDeCurrulao.setDescription("Ritmo del Pacífico con marimba, cununos y guasá");
+        tallerDeCurrulao.setBasePrice(50000);
+        tallerDeCurrulao.setDurationMinutes(120);
+        tallerDeCurrulao.setImageUrls(List.of("https://pbs.twimg.com/media/DUa0PLFUQAAlYJl.jpg"));
+        tallerDeCurrulao.setMaxParticipants(10);
+        tallerDeCurrulao.setLatitude(3.8890);
+        tallerDeCurrulao.setLongitude(-77.0316);
+        services.add(tallerDeCurrulao);
+
+        ServiceOffering tallerDeCeramica = new ServiceOffering();
+        tallerDeCeramica.setName("Taller de Cerámica Precolombina");
+        tallerDeCeramica.setCategory("Cultural");
+        tallerDeCeramica.setSubcategory("Artesanía");
+        tallerDeCeramica.setDescription("Técnicas ancestrales de alfarería con arcillas locales y motivos indígenas");
+        tallerDeCeramica.setBasePrice(55000);
+        tallerDeCeramica.setDurationMinutes(180);
+        tallerDeCeramica.setImageUrls(List.of("https://media-cdn.tripadvisor.com/media/photo-s/10/c7/82/f1/getlstd-property-photo.jpg"));
+        tallerDeCeramica.setMaxParticipants(8);
+        tallerDeCeramica.setLatitude(4.7109);
+        tallerDeCeramica.setLongitude(-74.0721);
+        services.add(tallerDeCeramica);
+
+        ServiceOffering tallerDeTextiles = new ServiceOffering();
+        tallerDeTextiles.setName("Taller de Textiles Wayuu");
+        tallerDeTextiles.setCategory("Cultural");
+        tallerDeTextiles.setSubcategory("Artesanía");
+        tallerDeTextiles.setDescription("Tejido tradicional wayuu con técnicas milenarias y colores naturales");
+        tallerDeTextiles.setBasePrice(65000);
+        tallerDeTextiles.setDurationMinutes(240);
+        tallerDeTextiles.setImageUrls(List.of("https://educafes.com/wp-content/uploads/2018/06/whatsapp-image-2018-06-25-at-4-59-55-pm3.jpeg"));
+        tallerDeTextiles.setMaxParticipants(6);
+        tallerDeTextiles.setLatitude(11.5444);
+        tallerDeTextiles.setLongitude(-72.9088);
+        services.add(tallerDeTextiles);
+
+        ServiceOffering tallerDeJoyeria = new ServiceOffering();
+        tallerDeJoyeria.setName("Taller de Joyería Precolombina");
+        tallerDeJoyeria.setCategory("Cultural");
+        tallerDeJoyeria.setSubcategory("Artesanía");
+        tallerDeJoyeria.setDescription("Técnicas de orfebrería inspiradas en culturas Muisca, Tairona y Quimbaya");
+        tallerDeJoyeria.setBasePrice(75000);
+        tallerDeJoyeria.setDurationMinutes(180);
+        tallerDeJoyeria.setImageUrls(List.of("https://cafedecolombia.us/wp-content/uploads/2024/10/WhatsApp-Image-2024-10-14-at-6.19.32-PM-scaled.jpeg"));
+        tallerDeJoyeria.setMaxParticipants(6);
+        tallerDeJoyeria.setLatitude(4.7109);
+        tallerDeJoyeria.setLongitude(-74.0721);
+        services.add(tallerDeJoyeria);
+
+        return services;
+    }
+
+    private List<ServiceOffering> createSpecificServicesForHotel(int hotelId) {
+        List<ServiceOffering> services = new ArrayList<>();
+
+        switch (hotelId) {
+            case 1: // Cartagena
+                ServiceOffering tourCiudadAmurallada = new ServiceOffering();
+                tourCiudadAmurallada.setName("Tour Ciudad Amurallada");
+                tourCiudadAmurallada.setCategory("Tours");
+                tourCiudadAmurallada.setSubcategory("Cultural");
+                tourCiudadAmurallada.setDescription("Recorrido histórico por Cartagena colonial con guía especializado");
+                tourCiudadAmurallada.setBasePrice(65000);
+                tourCiudadAmurallada.setDurationMinutes(180);
+                tourCiudadAmurallada.setImageUrls(List.of("https://viajerofacil.com/wp-content/uploads/2019/07/Webp.net-resizeimage-11-min.jpg"));
+                tourCiudadAmurallada.setMaxParticipants(15);
+                tourCiudadAmurallada.setLatitude(10.39972);
+                tourCiudadAmurallada.setLongitude(-75.51444);
+                services.add(tourCiudadAmurallada);
+
+                ServiceOffering islasDelRosario = new ServiceOffering();
+                islasDelRosario.setName("Islas del Rosario");
+                islasDelRosario.setCategory("Tours");
+                islasDelRosario.setSubcategory("Naturaleza");
+                islasDelRosario.setDescription("Excursión en bote a islas coralinas con snorkel y tiempo de playa");
+                islasDelRosario.setBasePrice(120000);
+                islasDelRosario.setDurationMinutes(480);
+                islasDelRosario.setImageUrls(List.of("https://www.cartagenaexplorer.com/wp-content/uploads/2020/07/Depositphotos_156273740_xl-2015-scaled.jpg"));
+                islasDelRosario.setMaxParticipants(15);
+                islasDelRosario.setLatitude(10.1667);
+                islasDelRosario.setLongitude(-75.7500);
+                services.add(islasDelRosario);
+
+                ServiceOffering palenqueCultural = new ServiceOffering();
+                palenqueCultural.setName("Palenque Cultural");
+                palenqueCultural.setCategory("Tours");
+                palenqueCultural.setSubcategory("Cultural");
+                palenqueCultural.setDescription("Visita a San Basilio de Palenque, primer pueblo africano libre en América");
+                palenqueCultural.setBasePrice(85000);
+                palenqueCultural.setDurationMinutes(360);
+                palenqueCultural.setImageUrls(List.of("https://turismo.encolombia.com/wp-content/uploads/2019/09/Cartagena-de-Indias.jpg"));
+                palenqueCultural.setMaxParticipants(12);
+                palenqueCultural.setLatitude(10.2484);
+                palenqueCultural.setLongitude(-75.2070);
+                services.add(palenqueCultural);
+
+                ServiceOffering ceremoniaDelCacaoSagrado = new ServiceOffering();
+                ceremoniaDelCacaoSagrado.setName("Ceremonia del Cacao Sagrado");
+                ceremoniaDelCacaoSagrado.setCategory("Experiencia");
+                ceremoniaDelCacaoSagrado.setSubcategory("Ritual");
+                ceremoniaDelCacaoSagrado.setDescription("Ritual ancestral de conexión espiritual con el cacao como medicina sagrada");
+                ceremoniaDelCacaoSagrado.setBasePrice(95000);
+                ceremoniaDelCacaoSagrado.setDurationMinutes(120);
+                ceremoniaDelCacaoSagrado.setImageUrls(List.of("https://wakana.es/wp-content/uploads/2019/01/M-OF-W-YogaDSCF0152w.jpg"));
+                ceremoniaDelCacaoSagrado.setMaxParticipants(8);
+                ceremoniaDelCacaoSagrado.setLatitude(10.39972);
+                ceremoniaDelCacaoSagrado.setLongitude(-75.51444);
+                services.add(ceremoniaDelCacaoSagrado);
+
+                ServiceOffering buceoArqueologico = new ServiceOffering();
+                buceoArqueologico.setName("Buceo Arqueológico");
+                buceoArqueologico.setCategory("Tours");
+                buceoArqueologico.setSubcategory("Aventura");
+                buceoArqueologico.setDescription("Inmersiones en sitios arqueológicos submarinos con certificación PADI");
+                buceoArqueologico.setBasePrice(180000);
+                buceoArqueologico.setDurationMinutes(240);
+                buceoArqueologico.setImageUrls(List.of("https://tutourencartagena.com/wp-content/uploads/2017/01/buceo-en-cartagena-cartagena-colombia-tutourencartagena.jpg"));
+                buceoArqueologico.setMaxParticipants(8);
+                buceoArqueologico.setLatitude(10.39972);
+                buceoArqueologico.setLongitude(-75.51444);
+                services.add(buceoArqueologico);
+                break;
+
+            case 2: // Eje Cafetero
+                ServiceOffering fincaCafeteraTradicional = new ServiceOffering();
+                fincaCafeteraTradicional.setName("Finca Cafetera Tradicional");
+                fincaCafeteraTradicional.setCategory("Tours");
+                fincaCafeteraTradicional.setSubcategory("Cultural");
+                fincaCafeteraTradicional.setDescription("Experiencia en finca cafetera con cosecha, procesamiento y degustación");
+                fincaCafeteraTradicional.setBasePrice(75000);
+                fincaCafeteraTradicional.setDurationMinutes(240);
+                fincaCafeteraTradicional.setImageUrls(List.of("https://dynamic-media-cdn.tripadvisor.com/media/photo-o/07/19/08/27/finca-el-ocaso-salento.jpg"));
+                fincaCafeteraTradicional.setMaxParticipants(15);
+                fincaCafeteraTradicional.setLatitude(4.6370);
+                fincaCafeteraTradicional.setLongitude(-75.5710);
+                services.add(fincaCafeteraTradicional);
+
+                ServiceOffering valleDeCocoraPremium = new ServiceOffering();
+                valleDeCocoraPremium.setName("Valle de Cocora Premium");
+                valleDeCocoraPremium.setCategory("Tours");
+                valleDeCocoraPremium.setSubcategory("Naturaleza");
+                valleDeCocoraPremium.setDescription("Trekking privado por bosque de palmas de cera con biólogo especialista");
+                valleDeCocoraPremium.setBasePrice(110000);
+                valleDeCocoraPremium.setDurationMinutes(360);
+                valleDeCocoraPremium.setImageUrls(List.of("https://content-viajes.nationalgeographic.com.es/medio/2020/04/03/y-por-fin-el-valle_a092a848_1257x835.jpg"));
+                valleDeCocoraPremium.setMaxParticipants(12);
+                valleDeCocoraPremium.setLatitude(4.6333);
+                valleDeCocoraPremium.setLongitude(-75.4831);
+                services.add(valleDeCocoraPremium);
+
+                ServiceOffering puebloPatrimonioSalamina = new ServiceOffering();
+                puebloPatrimonioSalamina.setName("Pueblo Patrimonio Salamina");
+                puebloPatrimonioSalamina.setCategory("Tours");
+                puebloPatrimonioSalamina.setSubcategory("Cultural");
+                puebloPatrimonioSalamina.setDescription("Tour por pueblo colonial con arquitectura tradicional y artesanías");
+                puebloPatrimonioSalamina.setBasePrice(55000);
+                puebloPatrimonioSalamina.setDurationMinutes(240);
+                puebloPatrimonioSalamina.setImageUrls(List.of("https://www.infobae.com/new-resizer/GTDQWXVcyONBZkezz8NbuyrMMa4=/arc-anglerfish-arc2-prod-infobae/public/3WMFVPC5OFBF3LI652Z6V4LS2Q.jpg"));
+                puebloPatrimonioSalamina.setMaxParticipants(15);
+                puebloPatrimonioSalamina.setLatitude(5.4072);
+                puebloPatrimonioSalamina.setLongitude(-75.4881);
+                services.add(puebloPatrimonioSalamina);
+
+                ServiceOffering cabalgataAndina = new ServiceOffering();
+                cabalgataAndina.setName("Cabalgata Andina");
+                cabalgataAndina.setCategory("Tours");
+                cabalgataAndina.setSubcategory("Aventura");
+                cabalgataAndina.setDescription("Recorrido a caballo por senderos andinos con caballos criollos colombianos");
+                cabalgataAndina.setBasePrice(100000);
+                cabalgataAndina.setDurationMinutes(240);
+                cabalgataAndina.setImageUrls(List.of("https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTgxMTg3OTI=/original/318d3435-c2ea-4b59-94e9-fba4f10b99cd.jpeg"));
+                cabalgataAndina.setMaxParticipants(10);
+                cabalgataAndina.setLatitude(5.070275);
+                cabalgataAndina.setLongitude(-75.513817);
+                services.add(cabalgataAndina);
+
+                ServiceOffering cataDeVinosDeAltura = new ServiceOffering();
+                cataDeVinosDeAltura.setName("Cata de Vinos de Altura");
+                cataDeVinosDeAltura.setCategory("Experiencia");
+                cataDeVinosDeAltura.setSubcategory("Gastronomía");
+                cataDeVinosDeAltura.setDescription("Degustación de vinos colombianos de alta montaña con sommelier experto");
+                cataDeVinosDeAltura.setBasePrice(125000);
+                cataDeVinosDeAltura.setDurationMinutes(120);
+                cataDeVinosDeAltura.setImageUrls(List.of("https://raizdeguzman.com/wp-content/uploads/2019/05/vinedos-raiz.png"));
+                cataDeVinosDeAltura.setMaxParticipants(12);
+                cataDeVinosDeAltura.setLatitude(5.070275);
+                cataDeVinosDeAltura.setLongitude(-75.513817);
+                services.add(cataDeVinosDeAltura);
+                break;
+
+            case 3: // San Andrés
+                ServiceOffering hoyoSopladorYCuevaMorgan = new ServiceOffering();
+                hoyoSopladorYCuevaMorgan.setName("Hoyo Soplador y Cueva Morgan");
+                hoyoSopladorYCuevaMorgan.setCategory("Tours");
+                hoyoSopladorYCuevaMorgan.setSubcategory("Naturaleza");
+                hoyoSopladorYCuevaMorgan.setDescription("Exploración de géiser natural y cueva de piratas en San Andrés");
+                hoyoSopladorYCuevaMorgan.setBasePrice(45000);
+                hoyoSopladorYCuevaMorgan.setDurationMinutes(240);
+                hoyoSopladorYCuevaMorgan.setImageUrls(List.of("https://www.regiocantabrorum.es/img/publicaciones/441/cueva_los_tornillos_index.jpg"));
+                hoyoSopladorYCuevaMorgan.setMaxParticipants(15);
+                hoyoSopladorYCuevaMorgan.setLatitude(12.5847);
+                hoyoSopladorYCuevaMorgan.setLongitude(-81.7005);
+                services.add(hoyoSopladorYCuevaMorgan);
+
+                ServiceOffering culturaRaizal = new ServiceOffering();
+                culturaRaizal.setName("Cultura Raizal");
+                culturaRaizal.setCategory("Tours");
+                culturaRaizal.setSubcategory("Cultural");
+                culturaRaizal.setDescription("Inmersión en cultura raizal con música, danza y gastronomía auténtica");
+                culturaRaizal.setBasePrice(70000);
+                culturaRaizal.setDurationMinutes(240);
+                culturaRaizal.setImageUrls(List.of("https://regionesnaturalescolombia.com/wp-content/uploads/2023/03/Traje-tipico-de-la-region-insular.png"));
+                culturaRaizal.setMaxParticipants(12);
+                culturaRaizal.setLatitude(12.542499);
+                culturaRaizal.setLongitude(-81.718369);
+                services.add(culturaRaizal);
+
+                ServiceOffering acuarioYJohnnyCay = new ServiceOffering();
+                acuarioYJohnnyCay.setName("Acuario y Johnny Cay");
+                acuarioYJohnnyCay.setCategory("Tours");
+                acuarioYJohnnyCay.setSubcategory("Naturaleza");
+                acuarioYJohnnyCay.setDescription("Viaje en bote a acuario natural y playa prístina con snorkel");
+                acuarioYJohnnyCay.setBasePrice(95000);
+                acuarioYJohnnyCay.setDurationMinutes(360);
+                acuarioYJohnnyCay.setImageUrls(List.of("https://www.arserver.info/img/excursions/40/acuario-rio-de-janeiro-aquario-16.jpg"));
+                acuarioYJohnnyCay.setMaxParticipants(15);
+                acuarioYJohnnyCay.setLatitude(12.5333);
+                acuarioYJohnnyCay.setLongitude(-81.7167);
+                services.add(acuarioYJohnnyCay);
+
+                ServiceOffering safariDeAvesMarinas = new ServiceOffering();
+                safariDeAvesMarinas.setName("Safari de Aves Marinas");
+                safariDeAvesMarinas.setCategory("Tours");
+                safariDeAvesMarinas.setSubcategory("Naturaleza");
+                safariDeAvesMarinas.setDescription("Observación de aves marinas y endémicas del Caribe con ornitólogos");
+                safariDeAvesMarinas.setBasePrice(80000);
+                safariDeAvesMarinas.setDurationMinutes(300);
+                safariDeAvesMarinas.setImageUrls(List.of("https://cdn.prod.website-files.com/64df6dd37ac6a0dbb9d03cb3/659bfb376102d36e421df403_6-resultado.jpeg"));
+                safariDeAvesMarinas.setMaxParticipants(12);
+                safariDeAvesMarinas.setLatitude(12.542499);
+                safariDeAvesMarinas.setLongitude(-81.718369);
+                services.add(safariDeAvesMarinas);
+
+                ServiceOffering vueloEnParapente = new ServiceOffering();
+                vueloEnParapente.setName("Vuelo en Parapente");
+                vueloEnParapente.setCategory("Tours");
+                vueloEnParapente.setSubcategory("Aventura");
+                vueloEnParapente.setDescription("Vuelo en parapente biplaza sobre el mar de siete colores con instructor certificado");
+                vueloEnParapente.setBasePrice(200000);
+                vueloEnParapente.setDurationMinutes(120);
+                vueloEnParapente.setImageUrls(List.of("https://www.esariri.com/wp-content/uploads/2022/09/296122789_3527452994148567_1098327290177545856_n.jpg"));
+                vueloEnParapente.setMaxParticipants(2);
+                vueloEnParapente.setLatitude(12.542499);
+                vueloEnParapente.setLongitude(-81.718369);
+                services.add(vueloEnParapente);
+                break;
+
+            case 4: // Santa Marta
+                ServiceOffering tayronaAncestral = new ServiceOffering();
+                tayronaAncestral.setName("Tayrona Ancestral");
+                tayronaAncestral.setCategory("Tours");
+                tayronaAncestral.setSubcategory("Cultural");
+                tayronaAncestral.setDescription("Caminata a sitios arqueológicos indígenas Tayrona con guías nativos");
+                tayronaAncestral.setBasePrice(90000);
+                tayronaAncestral.setDurationMinutes(480);
+                tayronaAncestral.setImageUrls(List.of("https://ciudadperdidacolombia.com/wp-content/uploads/2023/12/todo-sobre-los-tairona.jpg"));
+                tayronaAncestral.setMaxParticipants(12);
+                tayronaAncestral.setLatitude(11.3088);
+                tayronaAncestral.setLongitude(-73.9650);
+                services.add(tayronaAncestral);
+
+                ServiceOffering ciudadPerdidaTeyuna = new ServiceOffering();
+                ciudadPerdidaTeyuna.setName("Ciudad Perdida Teyuna");
+                ciudadPerdidaTeyuna.setCategory("Tours");
+                ciudadPerdidaTeyuna.setSubcategory("Aventura");
+                ciudadPerdidaTeyuna.setDescription("Expedición de 4 días a la Ciudad Perdida con guías indígenas Kogui");
+                ciudadPerdidaTeyuna.setBasePrice(450000);
+                ciudadPerdidaTeyuna.setDurationMinutes(5760);
+                ciudadPerdidaTeyuna.setImageUrls(List.of("https://content-viajes.nationalgeographic.com.es/medio/2019/09/16/istock-501625632_0eac7a9a_1200x630.jpg"));
+                ciudadPerdidaTeyuna.setMaxParticipants(12);
+                ciudadPerdidaTeyuna.setLatitude(11.2442);
+                ciudadPerdidaTeyuna.setLongitude(-73.7256);
+                services.add(ciudadPerdidaTeyuna);
+
+                ServiceOffering avistamientoAvesSierraNevada = new ServiceOffering();
+                avistamientoAvesSierraNevada.setName("Avistamiento Aves Sierra Nevada");
+                avistamientoAvesSierraNevada.setCategory("Tours");
+                avistamientoAvesSierraNevada.setSubcategory("Naturaleza");
+                avistamientoAvesSierraNevada.setDescription("Observación de aves en la cordillera costera más alta del mundo");
+                avistamientoAvesSierraNevada.setBasePrice(75000);
+                avistamientoAvesSierraNevada.setDurationMinutes(300);
+                avistamientoAvesSierraNevada.setImageUrls(List.of("https://media.istockphoto.com/id/153187546/es/foto/p%C3%A1jaro-watcher-silueta.jpg"));
+                avistamientoAvesSierraNevada.setMaxParticipants(10);
+                avistamientoAvesSierraNevada.setLatitude(10.8400);
+                avistamientoAvesSierraNevada.setLongitude(-73.7200);
+                services.add(avistamientoAvesSierraNevada);
+
+                ServiceOffering temazcalAncestral = new ServiceOffering();
+                temazcalAncestral.setName("Temazcal Ancestral");
+                temazcalAncestral.setCategory("Experiencia");
+                temazcalAncestral.setSubcategory("Ritual");
+                temazcalAncestral.setDescription("Ceremonia de purificación en casa de sudor tradicional con plantas medicinales");
+                temazcalAncestral.setBasePrice(115000);
+                temazcalAncestral.setDurationMinutes(180);
+                temazcalAncestral.setImageUrls(List.of("https://blumont.org/wp-content/uploads/2020/02/Apagada-del-fuego_17_VPeretti-1024x683.jpg"));
+                temazcalAncestral.setMaxParticipants(8);
+                temazcalAncestral.setLatitude(11.24079);
+                temazcalAncestral.setLongitude(-74.19904);
+                services.add(temazcalAncestral);
+
+                ServiceOffering rappelEnCascadas = new ServiceOffering();
+                rappelEnCascadas.setName("Rappel en Cascadas");
+                rappelEnCascadas.setCategory("Tours");
+                rappelEnCascadas.setSubcategory("Aventura");
+                rappelEnCascadas.setDescription("Descenso en rappel por cascadas naturales con equipo profesional");
+                rappelEnCascadas.setBasePrice(160000);
+                rappelEnCascadas.setDurationMinutes(240);
+                rappelEnCascadas.setImageUrls(List.of("https://colombiavisible.com/wp-content/uploads/2023/04/Senderismo-Bogota-1-1024x576.jpg"));
+                rappelEnCascadas.setMaxParticipants(8);
+                rappelEnCascadas.setLatitude(11.24079);
+                rappelEnCascadas.setLongitude(-74.19904);
+                services.add(rappelEnCascadas);
+                break;
+
+            case 5: // Villa de Leyva
+                ServiceOffering rutaDeLosFosiles = new ServiceOffering();
+                rutaDeLosFosiles.setName("Ruta de los Fósiles");
+                rutaDeLosFosiles.setCategory("Tours");
+                rutaDeLosFosiles.setSubcategory("Educativo");
+                rutaDeLosFosiles.setDescription("Tour paleontológico con descubrimientos de fósiles y museos especializados");
+                rutaDeLosFosiles.setBasePrice(55000);
+                rutaDeLosFosiles.setDurationMinutes(240);
+                rutaDeLosFosiles.setImageUrls(List.of("https://humanidades.com/wp-content/uploads/2018/09/fosiles-e1579375905679.jpg"));
+                rutaDeLosFosiles.setMaxParticipants(15);
+                rutaDeLosFosiles.setLatitude(5.6333);
+                rutaDeLosFosiles.setLongitude(-73.5333);
+                services.add(rutaDeLosFosiles);
+
+                ServiceOffering observatorioAstronomicoMuisca = new ServiceOffering();
+                observatorioAstronomicoMuisca.setName("Observatorio Astronómico Muisca");
+                observatorioAstronomicoMuisca.setCategory("Tours");
+                observatorioAstronomicoMuisca.setSubcategory("Cultural");
+                observatorioAstronomicoMuisca.setDescription("Observación estelar combinada con cosmogonía muisca en observatorio");
+                observatorioAstronomicoMuisca.setBasePrice(65000);
+                observatorioAstronomicoMuisca.setDurationMinutes(180);
+                observatorioAstronomicoMuisca.setImageUrls(List.of("https://pbs.twimg.com/media/DUa0PLFUQAAlYJl.jpg"));
+                observatorioAstronomicoMuisca.setMaxParticipants(15);
+                observatorioAstronomicoMuisca.setLatitude(5.6333);
+                observatorioAstronomicoMuisca.setLongitude(-73.5333);
+                services.add(observatorioAstronomicoMuisca);
+
+                ServiceOffering vinedosBoyacenses = new ServiceOffering();
+                vinedosBoyacenses.setName("Viñedos Boyacenses");
+                vinedosBoyacenses.setCategory("Tours");
+                vinedosBoyacenses.setSubcategory("Cultural");
+                vinedosBoyacenses.setDescription("Tour de degustación de vinos en viñedos de alta altitud de Boyacá");
+                vinedosBoyacenses.setBasePrice(85000);
+                vinedosBoyacenses.setDurationMinutes(240);
+                vinedosBoyacenses.setImageUrls(List.of("https://raizdeguzman.com/wp-content/uploads/2019/05/vinedos-raiz.png"));
+                vinedosBoyacenses.setMaxParticipants(12);
+                vinedosBoyacenses.setLatitude(5.7833);
+                vinedosBoyacenses.setLongitude(-73.0167);
+                services.add(vinedosBoyacenses);
+
+                ServiceOffering consultaConChaman = new ServiceOffering();
+                consultaConChaman.setName("Consulta con Chamán");
+                consultaConChaman.setCategory("Experiencia");
+                consultaConChaman.setSubcategory("Sanación");
+                consultaConChaman.setDescription("Sesión de sanación tradicional con chamán autorizado de comunidades locales");
+                consultaConChaman.setBasePrice(150000);
+                consultaConChaman.setDurationMinutes(90);
+                consultaConChaman.setImageUrls(List.of("https://www.cric-colombia.org/portal/wp-content/uploads/2024/06/IMG-20240621-WA0120-scaled.jpg"));
+                consultaConChaman.setMaxParticipants(1);
+                consultaConChaman.setLatitude(5.6333);
+                consultaConChaman.setLongitude(-73.5333);
+                services.add(consultaConChaman);
+
+                ServiceOffering retiroDeContemplacion = new ServiceOffering();
+                retiroDeContemplacion.setName("Retiro de Contemplación");
+                retiroDeContemplacion.setCategory("Experiencia");
+                retiroDeContemplacion.setSubcategory("Bienestar");
+                retiroDeContemplacion.setDescription("Retiro de silencio y meditación en entornos naturales sagrados");
+                retiroDeContemplacion.setBasePrice(95000);
+                retiroDeContemplacion.setDurationMinutes(480);
+                retiroDeContemplacion.setImageUrls(List.of("https://elsolazsuites.com/wp-content/uploads/2022/06/ecoturismo-en-villa-de-leyva.jpg"));
+                retiroDeContemplacion.setMaxParticipants(8);
+                retiroDeContemplacion.setLatitude(5.6333);
+                retiroDeContemplacion.setLongitude(-73.5333);
+                services.add(retiroDeContemplacion);
+                break;
+        }
+
+        return services;
+    }
+
+    private ServiceOffering copyService(ServiceOffering original) {
+        ServiceOffering copy = new ServiceOffering();
+        copy.setName(original.getName());
+        copy.setCategory(original.getCategory());
+        copy.setSubcategory(original.getSubcategory());
+        copy.setDescription(original.getDescription());
+        copy.setBasePrice(original.getBasePrice());
+        copy.setDurationMinutes(original.getDurationMinutes());
+        copy.setImageUrls(new ArrayList<>(original.getImageUrls()));
+        copy.setMaxParticipants(original.getMaxParticipants());
+        copy.setLatitude(original.getLatitude());
+        copy.setLongitude(original.getLongitude());
+        return copy;
+    }
+
+    private void createSampleSchedules() {
+        LocalDate baseDate = LocalDate.now();
+
+        // Crear schedules para algunos servicios destacados
+        List<String> servicesForSchedules = List.of(
                 "Ceremonia del Cacao Sagrado",
-                "Tours",
-                "",
-                "Participa en un ritual ancestral de conexión espiritual con el cacao como elemento sagrado.",
-                85000,
-                60,
-                List.of(ImageUrls.CACAO_1, ImageUrls.CACAO_2, ImageUrls.CACAO_3),
-                10,
-                5.6333,
-                -73.5333));
-
-        createDefaultSchedules(createService(
-                "Avistamiento de Aves",
-                "Tours",
-                "",
-                "Descubre la biodiversidad de Colombia a través de sus especies de aves más representativas.",
-                40000,
-                60,
-                List.of(ImageUrls.AVES_1, ImageUrls.AVES_2, ImageUrls.AVES_3),
-                10,
-                4.7109,
-                -74.0721));
-
-        createDefaultSchedules(createService(
-                "Senderismo Místico",
-                "Tours",
-                "",
-                "Explora caminos ancestrales y conecta con la naturaleza en rutas llenas de energía y tradición.",
-                50000,
-                60,
-                List.of(ImageUrls.SENDERISMO_1, ImageUrls.SENDERISMO_2, ImageUrls.SENDERISMO_3),
-                10,
-                11.2408,
-                -74.1990));
-
-        createDefaultSchedules(createService(
-                "Suite Presidencial",
-                "Hotel",
-                "",
-                "La experiencia más exclusiva con vista panorámica, jacuzzi privado y servicio de mayordomo 24/7.",
-                350.00,
-                60,
-                List.of(ImageUrls.SUITE_PRESIDENCIAL_1, ImageUrls.SUITE_PRESIDENCIAL_2, ImageUrls.SUITE_PRESIDENCIAL_3),
-                2,
-                4.6014,
-                -74.0661));
-
-        createDefaultSchedules(createService(
-                "Cabañas Ecológicas",
-                "Hotel",
-                "",
-                "Alojamiento sostenible en medio de la naturaleza, construido con materiales autóctonos y energía solar.",
-                95.00,
-                60,
-                List.of(ImageUrls.CABANAS_1, ImageUrls.CABANAS_2, ImageUrls.CABANAS_3),
-                4,
-                6.2442,
-                -75.5736));
-
-        createDefaultSchedules(createService(
-                "Taller de Café Premium",
-                "Comida",
-                "",
-                "Aprende sobre el proceso del café colombiano desde el grano hasta la taza, con cata guiada.",
-                30.00,
-                60,
-                List.of(ImageUrls.CAFE_1, ImageUrls.CAFE_2, ImageUrls.CAFE_3),
-                10,
-                5.0689,
-                -75.5174));
-
-        createDefaultSchedules(createService(
-                "Cena con Chef Estrella",
-                "Comida",
-                "",
-                "Menú degustación de 7 platos con maridaje de vinos, preparado por nuestro chef galardonado.",
-                120.00,
-                60,
-                List.of(ImageUrls.CHEF_1, ImageUrls.CHEF_2, ImageUrls.CHEF_3),
-                10,
-                6.2518,
-                -75.5636));
-
-        createDefaultSchedules(createService(
-                "Desayuno Tradicional",
-                "Comida",
-                "",
-                "Desayuno completo con arepas, huevos pericos, chocolate caliente y frutas tropicales.",
-                15.50,
-                60,
-                List.of(ImageUrls.DESAYUNO_1, ImageUrls.DESAYUNO_2, ImageUrls.DESAYUNO_3),
-                10,
-                10.9639,
-                -74.7964));
-
-        // Amenidades
-        createDefaultSchedules(createService(
-                "Piscina Infinity",
-                "Hotel",
-                "Piscina",
-                "Piscina infinita con vistas panorámicas",
-                49900,
-                60,
-                List.of(ImageUrls.PISCINA),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Spa Ancestral",
-                "Hotel",
-                "Spa",
-                "Terapias de sanación tradicional con técnicas indígenas",
-                52900,
-                60,
-                List.of(ImageUrls.SPA),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Restaurante Gourmet",
-                "Hotel",
-                "Restaurante",
-                "Gastronomía fina con cocina regional colombiana",
-                57900,
-                60,
-                List.of(ImageUrls.RESTAURANTE),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Bar de Cócteles",
-                "Hotel",
-                "Bar",
-                "Cócteles artesanales con frutas y licores locales",
-                45900,
-                60,
-                List.of(ImageUrls.BAR),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Taller de Artesanías",
-                "Hotel",
-                "Taller",
-                "Talleres prácticos con artesanos locales",
-                48900,
-                90,
-                List.of(ImageUrls.ARTESANIAS),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Biblioteca Cultural",
-                "Hotel",
-                "Biblioteca",
-                "Colección de literatura e historia colombiana",
-                41900,
-                60,
-                List.of(ImageUrls.BIBLIOTECA),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Gimnasio Eco",
-                "Hotel",
-                "Gimnasio",
-                "Centro de fitness con equipos sostenibles",
-                39900,
-                60,
-                List.of(ImageUrls.GIMNASIO),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Jardín Botánico",
-                "Hotel",
-                "Jardín",
-                "Jardín de plantas nativas con hierbas medicinales",
-                44900,
-                60,
-                List.of(ImageUrls.JARDIN),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Salón de Eventos",
-                "Hotel",
-                "Eventos",
-                "Espacio versátil para celebraciones y reuniones",
-                55900,
-                120,
-                List.of(ImageUrls.SALON),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Terraza Mirador",
-                "Hotel",
-                "Terraza",
-                "Terraza en azotea con vistas regionales",
-                42900,
-                60,
-                List.of(ImageUrls.TERRAZA),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Centro de Negocios",
-                "Hotel",
-                "Negocios",
-                "Centro de negocios con tecnología moderna",
-                53900,
-                60,
-                List.of(ImageUrls.NEGOSCIOS),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Servicio de Concierge",
-                "Hotel",
-                "Concierge",
-                "Asistencia personalizada al huésped 24/7",
-                46900,
-                30,
-                List.of(ImageUrls.CONCIERGE),
-                10,
-                10.3910,
-                -75.4794));
-
-        // Comida - Platos principales
-        createDefaultSchedules(createService(
-                "Bandeja Paisa Tradicional",
-                "Comida",
-                "Plato Principal",
-                "Plato paisa completo con frijoles, arroz, chicharrón y arepa",
-                35000,
-                60,
-                List.of(ImageUrls.BANDEJA),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Sancocho Costeño",
-                "Comida",
-                "Plato Principal",
-                "Guiso tradicional costeño con pescado, yuca y plátano",
-                32000,
-                60,
-                List.of(ImageUrls.SANCOCHO),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Ajiaco Santafereño",
-                "Comida",
-                "Plato Principal",
-                "Sopa de pollo y papa estilo Bogotá con mazorca y alcaparras",
-                28000,
-                60,
-                List.of(ImageUrls.AJIACO),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Pescado Frito Isleño",
-                "Comida",
-                "Plato Principal",
-                "Pescado frito con arroz de coco y patacones, estilo San Andrés",
-                38000,
-                60,
-                List.of(ImageUrls.PESCADO),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Lechona Tolimense",
-                "Comida",
-                "Plato Principal",
-                "Cerdo relleno asado con arroz y arvejas, tradición tolimense",
-                42000,
-                60,
-                List.of(ImageUrls.LECHONA),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Mondongo Antioqueño",
-                "Comida",
-                "Plato Principal",
-                "Sopa tradicional de mondongo con verduras y hierbas",
-                30000,
-                60,
-                List.of(ImageUrls.MONDONGO),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Cazuela de Mariscos",
-                "Comida",
-                "Plato Principal",
-                "Cazuela de mariscos con leche de coco, estilo caribeño",
-                45000,
-                60,
-                List.of(ImageUrls.CAZUELA),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Trucha a la Plancha",
-                "Comida",
-                "Plato Principal",
-                "Trucha a la plancha con hierbas de los Andes",
-                36000,
-                60,
-                List.of(ImageUrls.TRUCHA),
-                10,
-                10.3910,
-                -75.4794));
-
-        // Postres
-        createDefaultSchedules(createService(
-                "Tres Leches Costeño",
-                "Comida",
-                "Postre",
-                "Torta de tres leches con frutas tropicales",
-                15000,
-                30,
-                List.of(ImageUrls.TRELECHES),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Arequipe con Brevas",
-                "Comida",
-                "Postre",
-                "Brevas con dulce de leche, especialidad antioqueña",
-                12000,
-                30,
-                List.of(ImageUrls.AREQUIPE),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Cocadas Isleñas",
-                "Comida",
-                "Postre",
-                "Dulces de coco de la tradición isleña de San Andrés",
-                8000,
-                20,
-                List.of(ImageUrls.COCADAS),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Cuajada con Melao",
-                "Comida",
-                "Postre",
-                "Queso fresco con miel de caña, estilo boyacense",
-                10000,
-                20,
-                List.of(ImageUrls.CUAJADA),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Torta de Natas",
-                "Comida",
-                "Postre",
-                "Torta de natas de la costa caribeña",
-                14000,
-                30,
-                List.of(ImageUrls.TORTA),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Manjar Blanco",
-                "Comida",
-                "Postre",
-                "Delicia blanca del Valle del Cauca",
-                11000,
-                20,
-                List.of(ImageUrls.MANJAR),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Postre de Níspero",
-                "Comida",
-                "Postre",
-                "Postre de níspero de la región cafetera",
-                13000,
-                20,
-                List.of(ImageUrls.NISPERO),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Dulce de Papayuela",
-                "Comida",
-                "Postre",
-                "Conserva dulce de papayuela de montaña",
-                9000,
-                20,
-                List.of(ImageUrls.PAPAYUELA),
-                10,
-                10.3910,
-                -75.4794));
-
-        // Bebidas
-        createDefaultSchedules(createService(
-                "Café de Origen Especial",
-                "Comida",
-                "Bebida",
-                "Café de origen único de fincas locales",
-                8000,
-                15,
-                List.of(ImageUrls.BEBIDACAFE),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Agua de Panela con Limón",
-                "Comida",
-                "Bebida",
-                "Agua de panela con limón, refresco tradicional",
-                5000,
-                10,
-                List.of(ImageUrls.AGUAPANELA),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Jugo de Corozo",
-                "Comida",
-                "Bebida",
-                "Jugo de fruta de palma corozo, especialidad caribeña",
-                7000,
-                10,
-                List.of(ImageUrls.COROZO),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Chicha de Maíz",
-                "Comida",
-                "Bebida",
-                "Bebida tradicional de maíz de cultura indígena",
-                6000,
-                20,
-                List.of(ImageUrls.CHICHA),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Lulada Vallecaucana",
-                "Comida",
-                "Bebida",
-                "Bebida de lulo con hielo y limón",
-                8000,
-                15,
-                List.of(ImageUrls.LULADA),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Chocolate Santafereño",
-                "Comida",
-                "Bebida",
-                "Chocolate caliente con queso, tradición bogotana",
-                9000,
-                20,
-                List.of(ImageUrls.CHOCOLATE),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Coco Loco Isleño",
-                "Comida",
-                "Bebida",
-                "Cóctel de coco con ron local",
-                15000,
-                15,
-                List.of(ImageUrls.COCO),
-                10,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Aguardiente Antioqueño",
-                "Comida",
-                "Bebida",
-                "Experiencia de degustación de licor de anís tradicional",
-                12000,
-                30,
-                List.of(ImageUrls.AGUARDIENTE),
-                10,
-                10.3910,
-                -75.4794));
-
-        // Tours Cartagena
-        createDefaultSchedules(createService(
+                "Taller de Cumbia",
+                "Bandeja Paisa Auténtica",
                 "Tour Ciudad Amurallada",
-                "Tours",
-                "Cultural",
-                "Tour caminando por la Cartagena colonial con perspectivas históricas",
-                45000,
-                180,
-                List.of(ImageUrls.AMURALLADA),
-                15,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Islas del Rosario",
-                "Tours",
-                "Naturaleza",
-                "Excursión en bote a islas coralinas con snorkel y tiempo de playa",
-                85000,
-                480,
-                List.of(ImageUrls.ISLAS),
-                15,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Palenque Cultural",
-                "Tours",
-                "Cultural",
-                "Visita a San Basilio de Palenque, primer pueblo africano libre en América",
-                65000,
-                360,
-                List.of(ImageUrls.PALENQUE),
-                15,
-                10.3910,
-                -75.4794));
-
-        // Tours Eje Cafetero
-        createDefaultSchedules(createService(
                 "Finca Cafetera Tradicional",
-                "Tours",
-                "Cultural",
-                "Experiencia en finca cafetera con cosecha y degustación",
-                55000,
-                240,
-                List.of(ImageUrls.FINCA),
-                15,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Valle de Cocora",
-                "Tours",
-                "Naturaleza",
-                "Caminata por bosque de palmas de cera, árbol nacional de Colombia",
-                70000,
-                300,
-                List.of(ImageUrls.COCORA),
-                15,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Pueblo Patrimonio Salamina",
-                "Tours",
-                "Cultural",
-                "Tour por pueblo colonial con arquitectura tradicional y artesanías",
-                40000,
-                240,
-                List.of(ImageUrls.PUEBLO),
-                15,
-                10.3910,
-                -75.4794));
-
-        // Tours San Andrés
-        createDefaultSchedules(createService(
-                "Hoyo Soplador y Cueva Morgan",
-                "Tours",
-                "Naturaleza",
-                "Exploración de géiser natural y cueva de piratas",
-                35000,
-                240,
-                List.of(ImageUrls.CUEVA),
-                15,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Cultura Raizal",
-                "Tours",
-                "Cultural",
-                "Inmersión en cultura raizal con música, danza y gastronomía",
-                50000,
-                240,
-                List.of(ImageUrls.RAIZAL),
-                15,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
                 "Acuario y Johnny Cay",
-                "Tours",
-                "Naturaleza",
-                "Viaje en bote a acuario natural y playa prístina",
-                75000,
-                360,
-                List.of(ImageUrls.ACUARIO),
-                15,
-                10.3910,
-                -75.4794));
-
-        // Tours Santa Marta
-        createDefaultSchedules(createService(
                 "Tayrona Ancestral",
-                "Tours",
-                "Cultural",
-                "Caminata a sitios arqueológicos indígenas Tayrona",
-                80000,
-                480,
-                List.of(ImageUrls.TAYRONA),
-                15,
-                10.3910,
-                -75.4794));
+                "Observatorio Astronómico Muisca");
 
-        createDefaultSchedules(createService(
-                "Ciudad Perdida Teyuna",
-                "Tours",
-                "Aventura",
-                "Caminata de varios días a la Ciudad Perdida de la civilización Tayrona",
-                450000,
-                4320,
-                List.of(ImageUrls.TEYUNA),
-                12,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Avistamiento de Aves Sierra Nevada",
-                "Tours",
-                "Naturaleza",
-                "Observación de aves en la cordillera costera más alta del mundo",
-                60000,
-                300,
-                List.of(ImageUrls.AVES),
-                12,
-                10.3910,
-                -75.4794));
-
-        // Tours Villa de Leyva
-        createDefaultSchedules(createService(
-                "Ruta de los Fósiles",
-                "Tours",
-                "Educativo",
-                "Tour paleontológico con descubrimientos de fósiles y museos",
-                35000,
-                240,
-                List.of(ImageUrls.FOSILES),
-                15,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Observatorio Astronómico",
-                "Tours",
-                "Educativo",
-                "Experiencia de observación estelar con perspectivas astronómicas precolombinas",
-                45000,
-                180,
-                List.of(ImageUrls.OBSERVATORIO),
-                15,
-                10.3910,
-                -75.4794));
-
-        createDefaultSchedules(createService(
-                "Viñedos Boyacenses",
-                "Tours",
-                "Cultural",
-                "Tour de degustación de vinos en viñedos de alta altitud de Boyacá",
-                65000,
-                240,
-                List.of(ImageUrls.VINO),
-                15,
-                10.3910,
-                -75.4794));
-    }
-
-    private ServiceOffering createService(String name,
-            String category,
-            String subcategory,
-            String description,
-            double basePrice,
-            int durationMinutes,
-            List<String> imageUrls,
-            int maxParticipants,
-            double latitude,
-            double longitude) {
-        ServiceOffering service = new ServiceOffering();
-        service.setName(name);
-        service.setCategory(category);
-        service.setSubcategory(subcategory == null ? "" : subcategory);
-        service.setDescription(description);
-        service.setBasePrice(basePrice);
-        service.setDurationMinutes(durationMinutes);
-        service.setImageUrls(imageUrls == null ? new ArrayList<>() : new ArrayList<>(imageUrls));
-        service.setMaxParticipants(maxParticipants);
-        service.setLatitude(latitude);
-        service.setLongitude(longitude);
-        Hotel hotel = findNearestHotel(latitude, longitude);
-        if (hotel != null) {
-            service.setHotel(hotel);
-        }
-        service.setSchedules(new ArrayList<>());
-        return serviceRepository.save(service);
-    }
-
-    private void createDefaultSchedules(ServiceOffering service) {
-        List<ServiceSchedule> schedules = new ArrayList<>();
-        if ("Comida".equalsIgnoreCase(service.getCategory()) || "Hotel".equalsIgnoreCase(service.getCategory())) {
-            schedules.add(schedule(service, LocalTime.of(8, 0), DayWeek.DAILY));
-            schedules.add(schedule(service, LocalTime.of(12, 0), DayWeek.DAILY));
-            schedules.add(schedule(service, LocalTime.of(18, 0), DayWeek.DAILY));
-        } else if ("Tours".equalsIgnoreCase(service.getCategory())) {
-            schedules.add(schedule(service, LocalTime.of(8, 0), DayWeek.MONDAY));
-            schedules.add(schedule(service, LocalTime.of(8, 0), DayWeek.WEDNESDAY));
-            schedules.add(schedule(service, LocalTime.of(6, 30), DayWeek.SATURDAY));
-        } else {
-            schedules.add(schedule(service, LocalTime.of(15, 0), DayWeek.FRIDAY));
-            schedules.add(schedule(service, LocalTime.of(10, 0), DayWeek.SUNDAY));
-        }
-
-        List<ServiceSchedule> saved = serviceScheduleRepository.saveAll(schedules);
-        service.setSchedules(new ArrayList<>(saved));
-        serviceRepository.save(service);
-    }
-
-    private ServiceSchedule schedule(ServiceOffering service, LocalTime startTime, DayWeek... days) {
-        if (days == null || days.length == 0) {
-            throw new IllegalArgumentException("At least one day must be provided");
-        }
-        ServiceSchedule schedule = new ServiceSchedule();
-        schedule.setService(service);
-        schedule.setDaysOfWeek(EnumSet.copyOf(Arrays.asList(days)));
-        schedule.setStartTime(startTime);
-        schedule.setEndTime(calculateEnd(startTime, service.getDurationMinutes()));
-        schedule.setActive(true);
-        return schedule;
-    }
-
-    private LocalTime calculateEnd(LocalTime startTime, int durationMinutes) {
-        int clamped = Math.max(30, Math.min(durationMinutes, 480));
-        return startTime.plusMinutes(clamped);
-    }
-
-    private Hotel findNearestHotel(double latitude, double longitude) {
-        if (hotelCache == null || hotelCache.isEmpty()) {
-            hotelCache = hotels.findAll();
-        }
-
-        Hotel nearest = null;
-        double bestDistance = Double.MAX_VALUE;
-
-        for (Hotel hotel : hotelCache) {
-            Double lat = parseCoordinate(hotel.getLatitude());
-            Double lon = parseCoordinate(hotel.getLongitude());
-            if (lat == null || lon == null) {
-                continue;
-            }
-
-            double distance = distanceSquared(latitude, longitude, lat, lon);
-            if (distance < bestDistance) {
-                bestDistance = distance;
-                nearest = hotel;
-            }
-        }
-
-        return nearest;
-    }
-
-    private Double parseCoordinate(String value) {
-        if (value == null || value.isBlank()) {
-            return null;
-        }
-        try {
-            return Double.parseDouble(value.trim());
-        } catch (NumberFormatException ex) {
-            return null;
+        for (String serviceName : servicesForSchedules) {
+            createScheduleForService(serviceName, baseDate.plusDays(1), LocalTime.of(9, 0), 7);
         }
     }
 
-    private double distanceSquared(double lat1, double lon1, Double lat2, Double lon2) {
-        if (lat2 == null || lon2 == null) {
-            return Double.MAX_VALUE;
+    private void createScheduleForService(String serviceName, LocalDate startDate, LocalTime time, int days) {
+        List<ServiceOffering> services = serviceRepository.findAll().stream()
+                .filter(s -> serviceName.equalsIgnoreCase(s.getName()))
+                .toList();
+
+        for (ServiceOffering service : services) {
+            ServiceSchedule schedule = new ServiceSchedule();
+            schedule.setService(service);
+            schedule.setDaysOfWeek(Set.of(ServiceSchedule.DayWeek.DAILY));
+            schedule.setStartTime(time);
+            schedule.setEndTime(time.plusMinutes(service.getDurationMinutes()));
+            schedule.setActive(true);
+
+            scheduleService.seedSchedules(schedule, days);
         }
-        double dLat = lat1 - lat2;
-        double dLon = lon1 - lon2;
-        return dLat * dLat + dLon * dLon;
     }
 
-    // --- Helpers para la Opción B ---
+    // Métodos auxiliares originales
+    private RoomType ensureType(Map<String, RoomType> existing,
+            String name, String desc, BigDecimal price, Integer cap, String image) {
+        RoomType found = existing.get(name.toLowerCase(Locale.ROOT));
+        if (found != null)
+            return found;
+
+        RoomType rt = new RoomType();
+        rt.setName(name);
+        rt.setDescription(desc);
+        rt.setBasePrice(price);
+        rt.setCapacity(cap);
+        rt.setImage(image);
+
+        rt = roomTypeRepository.save(rt);
+        existing.put(name.toLowerCase(Locale.ROOT), rt);
+        return rt;
+    }
+
+    private String themeNameFor(int hotelId, int floor) {
+        return switch (hotelId) {
+            case 1 -> switch (floor) {
+                case 1 -> "Balcones Coloniales";
+                case 2 -> "Brisa Marina";
+                case 3 -> "Palacio Virreinal";
+                case 4 -> "Casa de Familias";
+                default -> "Terraza Tropical";
+            };
+            case 2 -> switch (floor) {
+                case 1 -> "Finca Cafetera";
+                case 2 -> "Valle del Cocora";
+                case 3 -> "Balcón Montañero";
+                case 4 -> "Casa Paisa";
+                default -> "Guadual Eco";
+            };
+            case 3 -> switch (floor) {
+                case 1 -> "Mar de Siete Colores";
+                case 2 -> "Johnny Cay";
+                case 3 -> "Cayo Acuario";
+                case 4 -> "Casa Raizal";
+                default -> "Brisa Caribe";
+            };
+            case 4 -> switch (floor) {
+                case 1 -> "Tayrona Ancestral";
+                case 2 -> "Sierra Nevada";
+                case 3 -> "Ciudad Perdida";
+                case 4 -> "Kogui Sagrado";
+                default -> "Eco Tayrona";
+            };
+            case 5 -> switch (floor) {
+                case 1 -> "Plaza Mayor";
+                case 2 -> "Casa Colonial";
+                case 3 -> "Observatorio Muisca";
+                case 4 -> "Hogar Boyacense";
+                default -> "Viñedos Andinos";
+            };
+            default -> "Tema Regional";
+        };
+    }
+
     private Amenity mustAmenity(Map<String, Amenity> map, String name) {
         Amenity a = map.get(name);
         if (a == null) {
             AmenityType type = determineAmenityType(name);
-            // Imagen real de Unsplash o similar para cada amenity
-            String image = switch (name) {
-                case "Restaurante" ->
-                    "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80";
-                case "Bar" ->
-                    "https://images.unsplash.com/photo-1514361892635-cebbd6b7a2c4?auto=format&fit=crop&w=400&q=80";
-                case "Wifi gratis" ->
-                    "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80";
-                case "Parqueadero gratis" ->
-                    "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80";
-                case "Traslado aeropuerto" ->
-                    "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&fit=crop&w=400&q=80";
-                case "Gimnasio" ->
-                    "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80";
-                case "Spa/Sauna" ->
-                    "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80";
-                case "Piscina al aire libre" ->
-                    "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80";
-                case "Aseo diario" ->
-                    "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80";
-                case "CCTV en zonas comunes" ->
-                    "https://images.unsplash.com/photo-1465101178521-c1a4c8a0a8c7?auto=format&fit=crop&w=400&q=80";
-                case "Terraza" ->
-                    "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80";
-                case "Salón de eventos" ->
-                    "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80";
-                case "Desayuno incluido" ->
-                    "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80";
-                case "Jardín" ->
-                    "https://images.unsplash.com/photo-1465101178521-c1a4c8a0a8c7?auto=format&fit=crop&w=400&q=80";
-                case "Jacuzzi" ->
-                    "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80";
-                case "Frente a la playa" ->
-                    "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80";
-                case "Alojamiento libre de humo" ->
-                    "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80";
-                case "Se admiten mascotas" ->
-                    "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80";
-                case "Se habla español" ->
-                    "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&fit=crop&w=400&q=80";
-                case "Se habla inglés" ->
-                    "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80";
-                // Amenities de habitación
-                case "TV" ->
-                    "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80";
-                case "Aire acondicionado" ->
-                    "https://images.unsplash.com/photo-1465101178521-c1a4c8a0a8c7?auto=format&fit=crop&w=400&q=80";
-                case "Minibar" ->
-                    "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80";
-                case "Caja fuerte" ->
-                    "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&fit=crop&w=400&q=80";
-                case "Secador de pelo" ->
-                    "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80";
-                case "Cafetera" ->
-                    "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80";
-                case "Plancha" ->
-                    "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80";
-                case "Balcon" ->
-                    "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80";
-                case "Cocineta" ->
-                    "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80";
-                case "Ropa de cama premium" ->
-                    "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80";
-                default -> type == AmenityType.HOTEL
-                        ? "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80"
-                        : "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80";
-            };
+            String image = getAmenityImage(name);
             a = amenities.save(new Amenity(null, name, image, type));
             map.put(name, a);
         }
         return a;
     }
 
-    // Determina el tipo de amenity basado en su nombre
     private AmenityType determineAmenityType(String name) {
-        // Lista de amenities típicas de habitación
         List<String> roomAmenities = List.of(
                 "TV", "Aire acondicionado", "Minibar",
                 "Caja fuerte", "Secador de pelo", "Cafetera", "Plancha",
                 "Balcon", "Cocineta", "Ropa de cama premium");
-
         return roomAmenities.contains(name) ? AmenityType.ROOM : AmenityType.HOTEL;
+    }
+
+    private String getAmenityImage(String name) {
+        return switch (name) {
+            case "Restaurante" ->
+                "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80";
+            case "Bar" ->
+                "https://images.unsplash.com/photo-1514361892635-cebbd6b7a2c4?auto=format&fit=crop&w=400&q=80";
+            case "Wifi gratis" ->
+                "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80";
+            case "Parqueadero gratis" ->
+                "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80";
+            case "Traslado aeropuerto" ->
+                "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&fit=crop&w=400&q=80";
+            case "Gimnasio" ->
+                "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80";
+            case "Spa/Sauna" ->
+                "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80";
+            case "Piscina al aire libre" ->
+                "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80";
+            case "Aseo diario" ->
+                "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80";
+            case "CCTV en zonas comunes" ->
+                "https://images.unsplash.com/photo-1465101178521-c1a4c8a0a8c7?auto=format&fit=crop&w=400&q=80";
+            case "Terraza" ->
+                "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80";
+            case "Salón de eventos" ->
+                "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80";
+            case "Desayuno incluido" ->
+                "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80";
+            case "Jardín" ->
+                "https://images.unsplash.com/photo-1465101178521-c1a4c8a0a8c7?auto=format&fit=crop&w=400&q=80";
+            case "Jacuzzi" ->
+                "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80";
+            case "Frente a la playa" ->
+                "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80";
+            case "Alojamiento libre de humo" ->
+                "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80";
+            case "Se admiten mascotas" ->
+                "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80";
+            case "Se habla español" ->
+                "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&fit=crop&w=400&q=80";
+            case "Se habla inglés" ->
+                "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80";
+            case "TV" -> "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80";
+            case "Aire acondicionado" ->
+                "https://images.unsplash.com/photo-1465101178521-c1a4c8a0a8c7?auto=format&fit=crop&w=400&q=80";
+            case "Minibar" ->
+                "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80";
+            case "Caja fuerte" ->
+                "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&fit=crop&w=400&q=80";
+            case "Secador de pelo" ->
+                "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80";
+            case "Cafetera" ->
+                "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80";
+            case "Plancha" ->
+                "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80";
+            case "Balcon" ->
+                "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80";
+            case "Cocineta" ->
+                "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80";
+            case "Ropa de cama premium" ->
+                "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80";
+            default -> "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80";
+        };
     }
 
     private Set<Amenity> amenSet(Map<String, Amenity> map, String... names) {
@@ -1179,108 +1248,11 @@ public class DatabaseInit implements CommandLineRunner {
     }
 
     private String pickIcon(int i) {
-        // rota entre 3 íconos disponibles
         int mod = i % 3;
         return switch (mod) {
             case 1 -> "/images/icons/icono1.png";
             case 2 -> "/images/icons/icono2.png";
             default -> "/images/icons/icono3.png";
         };
-    }
-
-    private static final class ImageUrls {
-        private static final String GASTRONOMIA_1 = "https://www.paulinacocina.net/wp-content/uploads/2024/01/arepas-de-huevo-Paulina-Cocina-Recetas-1722251878.jpg";
-        private static final String GASTRONOMIA_2 = "https://i.blogs.es/bb0cca/bandeja_paisa/1200_900.jpg";
-        private static final String GASTRONOMIA_3 = "https://www.semana.com/resizer/v2/GBBYJH5YMZC6PEINHE3HZZH4TY.jpg?auth=f21d7fbf15c15316b80dd213fb2c635e4445db8e08133172d69a4956d7f417db&smart=true&quality=75&width=1920&height=1080&fitfill=false";
-        private static final String TOURS_ARQUEOLOGICOS_1 = "https://paseovallenato.com/wp-content/uploads/nabusimake-y-espiritualidad-top.jpg";
-        private static final String TOURS_ARQUEOLOGICOS_2 = "https://www.semana.com/resizer/v2/ZRKLGUHQV5GSTLO2SQSLNE7VGI.jpeg?auth=ca2d608992531b9ea91c1cd67c8f03d457ab55a7fae3299013a2a4b23c9baa0e&smart=true&quality=75&width=1280&height=720";
-        private static final String TOURS_ARQUEOLOGICOS_3 = "https://portalenlace.com.co/wp-content/uploads/2024/04/nabusimake.jpeg";
-        private static final String RITUALES_1 = "https://blumont.org/wp-content/uploads/2020/02/Apagada-del-fuego_17_VPeretti-1024x683.jpg";
-        private static final String RITUALES_2 = "https://www.cric-colombia.org/portal/wp-content/uploads/2024/06/IMG-20240621-WA0120-scaled.jpg";
-        private static final String RITUALES_3 = "https://www.cric-colombia.org/portal/wp-content/uploads/2018/09/02.-Once-a%C3%B1os-practicando-y-vivenciando-el-ritual-mayor-del-pueblo-nasa-el-sakhelu-territorio-de-Jambal%C3%B3.jpg";
-        private static final String HOSPEDAJE_BOUTIQUE_1 = "https://www.estelarsantamar.com/media/uploads/cms_apps/imagenes/_URV1496_M_OK_2_1_1.jpg?q=pr:sharp/rs:fill/w:1920/h:800/f:jpg";
-        private static final String HOSPEDAJE_BOUTIQUE_2 = "https://www.planessantamarta.com.co/wp-content/uploads/2023/11/habitacion-doble-con-vista-al-mar-hotel-be-la-sierra2.jpg";
-        private static final String HOSPEDAJE_BOUTIQUE_3 = "https://be-la-sierra-santa-marta.santamarta-choice-hotels.com/data/Images/OriginalPhoto/12137/1213775/1213775257/image-santa-marta-magdalena-hotel-be-la-sierra-46.JPEG";
-        private static final String ECOTURISMO_1 = "https://elsolazsuites.com/wp-content/uploads/2022/06/ecoturismo-en-villa-de-leyva.jpg";
-        private static final String ECOTURISMO_2 = "https://tutourencartagena.com/wp-content/uploads/2017/01/buceo-en-cartagena-cartagena-colombia-tutourencartagena.jpg";
-        private static final String ECOTURISMO_3 = "https://radionacional-v3.s3.amazonaws.com/s3fs-public/styles/portadas_relaciona_4_3/public/node/article/field_image/San%20Andr%C3%A9s%20Colprensa.jpg?h=96a96008&itok=31WwVuLy";
-        private static final String CULTURA_1 = "https://www.infobae.com/resizer/v2/H4BSBL5F7JEH7ELIPDGLKO5OBQ.jpg?auth=da6890b5ced46d170fe76fcc186b721e5495c108b33bec0fff4cfd53e527e538&smart=true&width=1200&height=900&quality=85";
-        private static final String CULTURA_2 = "https://live.staticflickr.com/4136/4925539026_db69e6ec6e_b.jpg";
-        private static final String CULTURA_3 = "https://visitvalle.travel/wp-content/uploads/2024/08/festival-de-la-bandola-sevilla.webp";
-        private static final String CACAO_1 = "https://wakana.es/wp-content/uploads/2019/01/M-OF-W-YogaDSCF0152w.jpg";
-        private static final String CACAO_2 = "https://thehouseofaia.com/wp-content/uploads/2024/02/240111-cacao-img.webp";
-        private static final String CACAO_3 = "https://bodaespiritual.com/wp-content/uploads/2023/09/ceremonia-del-cacao-1200x646.png";
-        private static final String AVES_1 = "https://cdn.prod.website-files.com/64df6dd37ac6a0dbb9d03cb3/659bfb376102d36e421df403_6-resultado.jpeg";
-        private static final String AVES_2 = "https://blogs.eluniversal.com.co/sites/default/files/styles/interna/public/2022-09/colibri-portada-shutterstock_1176281404.jpg?itok=m9cp2BgQ";
-        private static final String AVES_3 = "https://www.rcnradio.com/_next/image?url=https%3A%2F%2Ffiles.rcnradio.com%2Fpublic%2Fstyles%2F16_9%2Fpublic%2F2024-05%2Fimg_0718_0.jpg%3FVersionId%3DkGlGqZsZOwJW_Cu84R1PGspi.rxCp6h6%26itok%3DBnhqtmHX&w=3840&q=75";
-        private static final String SENDERISMO_1 = "https://www.esariri.com/wp-content/uploads/2022/09/296122789_3527452994148567_1098327290177545856_n.jpg";
-        private static final String SENDERISMO_2 = "https://bogota.gov.co/sites/default/files/2022-08/la-aguadora.jpg";
-        private static final String SENDERISMO_3 = "https://colombiavisible.com/wp-content/uploads/2023/04/Senderismo-Bogota-1-1024x576.jpg";
-        private static final String SUITE_PRESIDENCIAL_1 = "https://www.sofitelbarucalablanca.com/wp-content/uploads/sites/19/2023/04/DUF_7068-v-ok-1170x780.jpg";
-        private static final String SUITE_PRESIDENCIAL_2 = "https://s3.amazonaws.com/static-webstudio-accorhotels-usa-1.wp-ha.fastbooking.com/wp-content/uploads/sites/19/2022/03/11175445/DUF_7063-v-ok-1170x780.jpg";
-        private static final String SUITE_PRESIDENCIAL_3 = "https://www.sofitelbarucalablanca.com/wp-content/uploads/sites/19/2023/04/DUF_7066-v-ok-1170x780.jpg";
-        private static final String CABANAS_1 = "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTgxMTg3OTI=/original/318d3435-c2ea-4b59-94e9-fba4f10b99cd.jpeg";
-        private static final String CABANAS_2 = "https://a0.muscache.com/im/pictures/miso/Hosting-25479833/original/80ae5655-034b-4573-8b87-9492772cc2c3.jpeg";
-        private static final String CABANAS_3 = "https://a0.muscache.com/im/pictures/hosting/Hosting-12347806/original/afebb259-a5ce-4057-a93c-b98e200e0678.jpeg";
-        private static final String CAFE_1 = "https://educafes.com/wp-content/uploads/2018/06/whatsapp-image-2018-06-25-at-4-59-55-pm3.jpeg";
-        private static final String CAFE_2 = "https://educafes.com/wp-content/uploads/2015/12/img_20151130_111827469.jpg";
-        private static final String CAFE_3 = "https://cafedecolombia.us/wp-content/uploads/2024/10/WhatsApp-Image-2024-10-14-at-6.19.32-PM-scaled.jpeg";
-        private static final String CHEF_1 = "https://revistamomentos.co/wp-content/uploads/2019/11/Plato-sostenible-1900x1266_c.jpeg";
-        private static final String CHEF_2 = "https://radionacional-v3.s3.amazonaws.com/s3fs-public/styles/portadas_relaciona_4_3/public/node/article/field_image/COLP_EXT_127797.jpg?h=f639aea9&itok=FrRSntMG";
-        private static final String CHEF_3 = "https://www.metropolitan-touring.com/wp-content/uploads/2024/04/Cande.webp";
-        private static final String DESAYUNO_1 = "https://i.ytimg.com/vi/r4FgfmO3zLg/maxresdefault.jpg";
-        private static final String DESAYUNO_2 = "https://saboresdecolombianj.com/wp-content/uploads/2025/04/HUEVOS-Y-AREPA-CON-QUESO.jpg";
-        private static final String DESAYUNO_3 = "https://live.staticflickr.com/6209/6147056621_15c60d28cf_b.jpg";
-        private static final String PISCINA = "https://www.patiodepilar.com/img/cms/Piscina%20Infinity/piscina-infinita-que-es.jpg";
-        private static final String SPA = "https://cf.bstatic.com/xdata/images/hotel/max1024x768/483180906.jpg?k=cb923aa311360020d113175cd13556cafbe65103f2c2ab90a5e7553fab302c03&o=&hp=1";
-        private static final String RESTAURANTE = "https://lirp.cdn-website.com/ba701a07/dms3rep/multi/opt/Hotel-Las-Americas-Cartagena-de-Indias-Colombia---Las-Americas-Hotels-Group---Gastronom-C3-ADa---Erre-de-Ram-C3-B3n-Freixa-6-640w.png";
-        private static final String BAR = "https://www.palladiohotelbuenosaires.com/wp-content/uploads/sites/7/2021/11/palladio_hotel_mgallery_restaurant_negresco_bar_slide_01-2200x1200.jpg";
-        private static final String ARTESANIAS = "https://media-cdn.tripadvisor.com/media/photo-s/10/c7/82/f1/getlstd-property-photo.jpg";
-        private static final String BIBLIOTECA = "https://media.admagazine.com/photos/6585f094b83aa25ed6cd5397/master/w_1600%2Cc_limit/Library%2520Hotel.jpg";
-        private static final String GIMNASIO = "https://image-tc.galaxy.tf/wijpeg-blu54hydt85v0io6vu4lmnjrr/gimnasio_standard.jpg?crop=112%2C0%2C1777%2C1333";
-        private static final String JARDIN = "https://z.cdrst.com/foto/hotel-sf/123119a8/granderesp/foto-hotel-12310efe.jpg";
-        private static final String SALON = "https://www.hotelestequendama.com.co/assets/cache/uploads/tequendama-hoteles/Hotel%20Tequendama%20Bogot%C3%A1/salas/salon-crystal-view/1920x1080/interior-sala-crystal-view-mesas-boda-tequendama-hoteles-santa-fe-bogota-colombia-1691572149.jpg";
-        private static final String TERRAZA = "https://media-cdn.tripadvisor.com/media/photo-s/06/74/87/fc/best-western-plus-93.jpg";
-        private static final String NEGOSCIOS = "https://img.pikbest.com/wp/202346/wood-room-modern-style-business-meeting-in-3d-rendering_9730531.jpg!w700wp";
-        private static final String CONCIERGE = "https://www.ncakey.org/wp-content/uploads/2017/10/bell-2.jpg";
-        private static final String BANDEJA = "https://i.blogs.es/bb0cca/bandeja_paisa/1200_900.jpg";
-        private static final String SANCOCHO = "https://www.cheekyfoods.com.au/cdn/shop/articles/Untitled_design_87.jpg?v=1698649815";
-        private static final String AJIACO = "https://www.semana.com/resizer/v2/GBBYJH5YMZC6PEINHE3HZZH4TY.jpg?auth=f21d7fbf15c15316b80dd213fb2c635e4445db8e08133172d69a4956d7f417db&smart=true&quality=75&width=1920&height=1080&fitfill=false";
-        private static final String PESCADO = "https://us.123rf.com/450wm/echeverriurrealuis/echeverriurrealuis2311/echeverriurrealuis231100466/218354595-fried-horse-mackerel-fish-with-coconut-rice-patacon-and-vegetable-salad.jpg";
-        private static final String LECHONA = "https://media.istockphoto.com/id/1442283646/photo/lechona-with-rice-arepa-and-potato-on-a-white-plate-and-a-background-with-plants.jpg?s=612x612&w=0&k=20&c=3GsgmLQfsWEJcPjOld1n2Fhhb2kICye50IU557P7m4I=";
-        private static final String MONDONGO = "https://media.istockphoto.com/id/1205769953/photo/mondongo-typical-dish-of-the-center-of-colombia.jpg?s=612x612&w=0&k=20&c=BJL_ngH3nOc_LRkxFAdl8j2OCaAcpNGQ9w765AEmkZM=";
-        private static final String CAZUELA = "https://media.istockphoto.com/id/607991782/es/foto/paella-tradicional-espa%C3%B1ola-con-marisco-y-pollo.jpg?s=612x612&w=0&k=20&c=2q56wjPHIcSqje4SbsJdvA7Zy0I2Xy67XSdE6pQrmlo=";
-        private static final String TRUCHA = "https://thumbs.dreamstime.com/b/prendedero-de-la-trucha-cocinada-109983171.jpg";
-        private static final String TRELECHES = "https://easyways.cl/storage/20211229090337postre-tres-leches.jpg";
-        private static final String AREQUIPE = "https://easyways.cl/storage/20211229090337postre-tres-leches.jpg";
-        private static final String COCADAS = "https://www.shutterstock.com/image-photo/peruvian-cocadas-traditional-coconut-dessert-600nw-380640118.jpg";
-        private static final String CUAJADA = "https://static.bainet.es/clip/315db07b-3610-42cc-9c94-8abe9baef742_source-aspect-ratio_1600w_0.jpg";
-        private static final String TORTA = "https://api.photon.aremedia.net.au/wp-content/uploads/sites/4/2021/07/23/12909/HL1121E15-scaled.jpg?fit=2560%2C2134";
-        private static final String MANJAR = "https://elrinconcolombiano.com/wp-content/uploads/2023/04/Manjar-blanco-receta-colombiana.jpg";
-        private static final String NISPERO = "https://cloudfront-us-east-1.images.arcpublishing.com/infobae/ETKI3DOT3NFMBEKOML6FNT346M.jpg";
-        private static final String PAPAYUELA = "https://yucatan.travel/wp-content/uploads/2022/09/365-Sabores-en-Yucata%CC%81n-Dulce-de-papaya-con-queso-de-bola-3.jpg";
-        private static final String BEBIDACAFE = "https://st2.depositphotos.com/1773130/7605/i/450/depositphotos_76054953-stock-photo-iced-coffee-in-a-tall.jpg";
-        private static final String AGUAPANELA = "https://media.istockphoto.com/id/1181234339/es/foto/aguapanela-casera-fresca-agua-de-panela-o-aguadulce-una-popular-bebida-dulce-latinoamericana.jpg?s=612x612&w=0&k=20&c=wv78sAHw4zohimed6F0xdQrE7VIGtL6whjbpagllnek=";
-        private static final String COROZO = "https://imagenes.eltiempo.com/files/image_1200_535/uploads/2024/02/20/65d4e89c2c395.jpeg";
-        private static final String CHICHA = "https://cdn.colombia.com/gastronomia/2011/08/03/chicha-1604.gif";
-        private static final String LULADA = "https://www.elespectador.com/resizer/VQS-41ig6YKYg4qcH5zr5B1XXBw=/arc-anglerfish-arc2-prod-elespectador/public/GTELHVJGBZARLL3GLVUEGRCMJY.JPG";
-        private static final String CHOCOLATE = "https://sabor.eluniverso.com/wp-content/uploads/2023/12/shutterstock_1665115558-1024x683.jpg";
-        private static final String COCO = "https://jappi.com.co/wp-content/uploads/2023/03/Jappi-Final.webp";
-        private static final String AGUARDIENTE = "https://desquite.com/en/wp-content/uploads/2025/03/Desquite-Tradicion-Artisanal-Authentic-Colombian-Aguardiente-m.webp";
-        private static final String AMURALLADA = "https://viajerofacil.com/wp-content/uploads/2019/07/Webp.net-resizeimage-11-min.jpg";
-        private static final String ISLAS = "https://www.cartagenaexplorer.com/wp-content/uploads/2020/07/Depositphotos_156273740_xl-2015-scaled.jpg";
-        private static final String PALENQUE = "https://turismo.encolombia.com/wp-content/uploads/2019/09/Cartagena-de-Indias.jpg";
-        private static final String FINCA = "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/07/19/08/27/finca-el-ocaso-salento.jpg?w=900&h=-1&s=1";
-        private static final String COCORA = "https://content-viajes.nationalgeographic.com.es/medio/2020/04/03/y-por-fin-el-valle_a092a848_1257x835.jpg";
-        private static final String PUEBLO = "https://www.infobae.com/new-resizer/GTDQWXVcyONBZkezz8NbuyrMMa4=/arc-anglerfish-arc2-prod-infobae/public/3WMFVPC5OFBF3LI652Z6V4LS2Q.jpg";
-        private static final String CUEVA = "https://www.regiocantabrorum.es/img/publicaciones/441/cueva_los_tornillos_index.jpg";
-        private static final String RAIZAL = "https://regionesnaturalescolombia.com/wp-content/uploads/2023/03/Traje-tipico-de-la-region-insular.png";
-        private static final String ACUARIO = "https://www.arserver.info/img/excursions/40/acuario-rio-de-janeiro-aquario-16.jpg";
-        private static final String TAYRONA = "https://ciudadperdidacolombia.com/wp-content/uploads/2023/12/todo-sobre-los-tairona.jpg";
-        private static final String TEYUNA = "https://content-viajes.nationalgeographic.com.es/medio/2019/09/16/istock-501625632_0eac7a9a_1200x630.jpg";
-        private static final String AVES = "https://media.istockphoto.com/id/153187546/es/foto/p%C3%A1jaro-watcher-silueta.jpg?s=612x612&w=0&k=20&c=Z7bdiVI9amwRG9NA8OEiNaM93F2CmTFQLzBkwfxUCFM=";
-        private static final String FOSILES = "https://humanidades.com/wp-content/uploads/2018/09/fosiles-e1579375905679.jpg";
-        private static final String OBSERVATORIO = "https://pbs.twimg.com/media/DUa0PLFUQAAlYJl.jpg";
-        private static final String VINO = "https://raizdeguzman.com/wp-content/uploads/2019/05/vinedos-raiz.png";
     }
 }

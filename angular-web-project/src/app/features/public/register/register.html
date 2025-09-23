@@ -1,1 +1,103 @@
-<p>register works!</p>
+<app-blinds-bg
+  [colors]="['#f2f3ed', '#e0d4be', '#bcc399', '#778E69']"
+  [angleDeg]="-22"
+  [blindCount]="18"
+  [blindMinWidth]="64"
+  [noise]="0.1"
+  [mirror]="true"
+  [stripeStrength]="0.2"
+></app-blinds-bg>
+
+<div class="auth-wrap">
+  <div class="card">
+    <div class="logo-row">
+      <img [src]="img('/images/logito.png')" alt="Logo" class="logo" />
+    </div>
+
+    <!-- Toast local -->
+    <div *ngIf="flash()" class="toast" [class.toast--error]="flash()?.type === 'error'">
+      {{ flash()?.text }}
+    </div>
+
+    <h3 class="title">Registro</h3>
+    <p class="subtitle">Crea tu cuenta para continuar</p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <div
+        class="field"
+        [class.invalid]="f.full_name.invalid && (f.full_name.touched || f.full_name.dirty)"
+      >
+        <input class="form-control" placeholder="Nombre completo" formControlName="full_name" />
+        <div class="hint" *ngIf="f.full_name.errors && (f.full_name.touched || f.full_name.dirty)">
+          <span>El nombre es obligatorio.</span>
+        </div>
+      </div>
+
+      <div class="field" [class.invalid]="f.email.invalid && (f.email.touched || f.email.dirty)">
+        <input placeholder="Email" type="email" formControlName="email" autocomplete="email" />
+        <div class="hint" *ngIf="f.email.errors && (f.email.touched || f.email.dirty)">
+          <span *ngIf="f.email.errors['required']">El email es obligatorio.</span>
+          <span *ngIf="f.email.errors['email']">Formato de email inválido.</span>
+        </div>
+      </div>
+
+      <div class="field" [class.invalid]="f.phone.invalid && (f.phone.touched || f.phone.dirty)">
+        <input placeholder="Teléfono" formControlName="phone" />
+        <div class="hint" *ngIf="f.phone.errors && (f.phone.touched || f.phone.dirty)">
+          <span *ngIf="f.phone.errors['required']">El teléfono es obligatorio.</span>
+          <span *ngIf="f.phone.errors['minlength']">Debe tener al menos 10 caracteres.</span>
+        </div>
+      </div>
+
+      <div
+        class="field"
+        [class.invalid]="f.national_id.invalid && (f.national_id.touched || f.national_id.dirty)"
+      >
+        <input placeholder="Cédula / Documento" formControlName="national_id" />
+        <div
+          class="hint"
+          *ngIf="f.national_id.errors && (f.national_id.touched || f.national_id.dirty)"
+        >
+          <span *ngIf="f.national_id.errors['required']">El documento es obligatorio.</span>
+          <span *ngIf="f.national_id.errors['minlength']">Debe tener al menos 10 caracteres.</span>
+        </div>
+      </div>
+
+      <div
+        class="field"
+        [class.invalid]="f.password.invalid && (f.password.touched || f.password.dirty)"
+      >
+        <input
+          placeholder="Contraseña"
+          type="password"
+          formControlName="password"
+          autocomplete="new-password"
+        />
+        <div class="pw-meter" aria-hidden="true">
+          <div
+            class="pw-bar"
+            [style.width.%]="pwPct"
+            [class.good]="pwScore >= 3"
+            [class.ok]="pwScore == 2"
+            [class.bad]="pwScore <= 1"
+          ></div>
+        </div>
+        <div class="pw-label">{{ pwLabel }}</div>
+        <div class="hint" *ngIf="f.password.errors && (f.password.touched || f.password.dirty)">
+          <span *ngIf="f.password.errors['required']">La contraseña es obligatoria.</span>
+          <span *ngIf="f.password.errors['minlength']">Mínimo 6 caracteres.</span>
+        </div>
+      </div>
+
+      <button class="btn" [disabled]="form.invalid || loading()">
+        <span *ngIf="!loading()">Crear cuenta</span>
+        <span *ngIf="loading()" class="spinner"></span>
+      </button>
+    </form>
+
+    <p class="muted">
+      ¿Ya tienes cuenta?
+      <a routerLink="/login">Inicia sesión</a>
+    </p>
+  </div>
+</div>
