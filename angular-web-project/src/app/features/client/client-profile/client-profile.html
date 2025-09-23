@@ -1,0 +1,76 @@
+<h4>Mi perfil</h4>
+
+<div class="card card-body mt-3">
+  <form #f="ngForm" (ngSubmit)="save(f)">
+    <div class="row g-3">
+      <div class="col-md-4 text-center">
+        <div class="mb-2">Foto de perfil</div>
+        <div class="avatar-wrapper">
+          <img
+            [src]="img(draft.selected_pet)"
+            (error)="imgBroken = true"
+            (load)="imgBroken = false"
+            alt="Avatar"
+            class="avatar-preview"
+          />
+          <div *ngIf="imgBroken" class="text-danger small mt-1">No se pudo cargar la imagen</div>
+        </div>
+        <input
+          class="form-control mt-2"
+          name="selected_pet"
+          [(ngModel)]="draft.selected_pet"
+          placeholder="/images/icons/icono.png o https://..."
+        />
+      </div>
+
+      <div class="col-md-8">
+        <div class="row g-2">
+          <div class="col-md-6">
+            <label class="form-label">Nombre completo</label>
+            <input class="form-control" name="full_name" [(ngModel)]="draft.full_name" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Teléfono</label>
+            <input class="form-control" name="phone" [(ngModel)]="draft.phone" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Documento</label>
+            <input class="form-control" name="national_id" [(ngModel)]="draft.national_id" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Nueva contraseña</label>
+            <input
+              class="form-control"
+              type="password"
+              name="password"
+              [(ngModel)]="draft.password"
+            />
+            <div class="form-text">Mínimo 6 caracteres</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Confirmar contraseña</label>
+            <input
+              class="form-control"
+              type="password"
+              name="password2"
+              [(ngModel)]="draft.password2"
+            />
+            <div
+              class="text-danger small"
+              *ngIf="editTouched && !passwordsMatch(draft.password, draft.password2)"
+            >
+              No coincide
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-3 d-flex gap-2 justify-content-end">
+      <button class="btn btn-primary" type="submit">Guardar cambios</button>
+      <button type="button" class="btn btn-danger" (click)="deleteAccount()">
+        Eliminar cuenta
+      </button>
+    </div>
+  </form>
+</div>

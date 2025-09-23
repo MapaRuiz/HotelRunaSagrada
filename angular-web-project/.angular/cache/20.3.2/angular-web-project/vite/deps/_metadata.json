@@ -1,4 +1,5 @@
 {
+
   "hash": "bfa3504d",
   "configHash": "226cae46",
   "lockfileHash": "4667144a",
@@ -8,12 +9,30 @@
       "src": "../../../../../../node_modules/@angular/common/fesm2022/common.mjs",
       "file": "@angular_common.js",
       "fileHash": "6e862897",
+
+  "hash": "31475eab",
+  "configHash": "3b354e7e",
+  "lockfileHash": "7f55c056",
+  "browserHash": "c95a1e9c",
+  "optimized": {
+    "@angular/cdk/drag-drop": {
+      "src": "../../../../../../node_modules/@angular/cdk/fesm2022/drag-drop.mjs",
+      "file": "@angular_cdk_drag-drop.js",
+      "fileHash": "32a0af72",
+      "needsInterop": false
+    },
+    "@angular/common": {
+      "src": "../../../../../../node_modules/@angular/common/fesm2022/common.mjs",
+      "file": "@angular_common.js",
+      "fileHash": "a22a282b",
+
       "needsInterop": false
     },
     "@angular/common/http": {
       "src": "../../../../../../node_modules/@angular/common/fesm2022/http.mjs",
       "file": "@angular_common_http.js",
       "fileHash": "3bee13f7",
+
       "needsInterop": false
     },
     "@angular/core": {
@@ -32,12 +51,14 @@
       "src": "../../../../../../node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs",
       "file": "@angular_platform-browser.js",
       "fileHash": "3fb3d27e",
+
       "needsInterop": false
     },
     "@angular/router": {
       "src": "../../../../../../node_modules/@angular/router/fesm2022/router.mjs",
       "file": "@angular_router.js",
       "fileHash": "6f3c56e6",
+
       "needsInterop": false
     },
     "ag-grid-angular": {
@@ -56,7 +77,16 @@
       "src": "../../../../../../node_modules/gsap/index.js",
       "file": "gsap.js",
       "fileHash": "48b38219",
+
+      "fileHash": "413d2a41",
+
       "needsInterop": false
+    },
+    "bootstrap/js/dist/toast": {
+      "src": "../../../../../../node_modules/bootstrap/js/dist/toast.js",
+      "file": "bootstrap_js_dist_toast.js",
+      "fileHash": "29955d45",
+      "needsInterop": true
     },
     "ng-apexcharts": {
       "src": "../../../../../../node_modules/ng-apexcharts/fesm2022/ng-apexcharts.mjs",

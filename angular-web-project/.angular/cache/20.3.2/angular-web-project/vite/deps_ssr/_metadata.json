@@ -8,12 +8,29 @@
       "src": "../../../../../../node_modules/@angular/common/fesm2022/common.mjs",
       "file": "@angular_common.js",
       "fileHash": "fece559d",
+  "hash": "04407a3a",
+  "configHash": "add396a3",
+  "lockfileHash": "7f55c056",
+  "browserHash": "60c9fb07",
+  "optimized": {
+    "@angular/cdk/drag-drop": {
+      "src": "../../../../../../node_modules/@angular/cdk/fesm2022/drag-drop.mjs",
+      "file": "@angular_cdk_drag-drop.js",
+      "fileHash": "f1e03130",
+      "needsInterop": false
+    },
+    "@angular/common": {
+      "src": "../../../../../../node_modules/@angular/common/fesm2022/common.mjs",
+      "file": "@angular_common.js",
+      "fileHash": "58dccc69",
+
       "needsInterop": false
     },
     "@angular/common/http": {
       "src": "../../../../../../node_modules/@angular/common/fesm2022/http.mjs",
       "file": "@angular_common_http.js",
       "fileHash": "c6d9cd23",
+
       "needsInterop": false
     },
     "@angular/core": {
@@ -32,17 +49,20 @@
       "src": "../../../../../../node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs",
       "file": "@angular_platform-browser.js",
       "fileHash": "995f1da5",
+
       "needsInterop": false
     },
     "@angular/platform-server/init": {
       "src": "../../../../../../node_modules/@angular/platform-server/fesm2022/init.mjs",
       "file": "@angular_platform-server_init.js",
+
       "fileHash": "ccd22396",
       "needsInterop": false
     },
     "@angular/router": {
       "src": "../../../../../../node_modules/@angular/router/fesm2022/router.mjs",
       "file": "@angular_router.js",
+
       "fileHash": "6c6279e4",
       "needsInterop": false
     },
@@ -73,7 +93,9 @@
     "express": {
       "src": "../../../../../../node_modules/express/index.js",
       "file": "express.js",
+
       "fileHash": "e5e905ef",
+
       "needsInterop": true
     },
     "gsap": {
@@ -86,6 +108,7 @@
       "src": "../../../../../../node_modules/ng-apexcharts/fesm2022/ng-apexcharts.mjs",
       "file": "ng-apexcharts.js",
       "fileHash": "6002d516",
+
       "needsInterop": false
     },
     "rxjs": {
@@ -116,6 +139,8 @@
     },
     "chunk-FZ2VB62N": {
       "file": "chunk-FZ2VB62N.js"
+    "chunk-M6ISZB4V": {
+      "file": "chunk-M6ISZB4V.js"
     },
     "chunk-CAUVSML3": {
       "file": "chunk-CAUVSML3.js"

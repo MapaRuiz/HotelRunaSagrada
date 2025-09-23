@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { OperatorProfile } from './operatorprofile';
+import { ClientDashboard } from './client-dashboard';
 
-describe('OperatorProfile', () => {
-  let component: OperatorProfile;
-  let fixture: ComponentFixture<OperatorProfile>;
+describe('ClientDashboard', () => {
+  let component: ClientDashboard;
+  let fixture: ComponentFixture<ClientDashboard>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [OperatorProfile]
+      imports: [ClientDashboard]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(OperatorProfile);
+    fixture = TestBed.createComponent(ClientDashboard);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -5,19 +5,45 @@ export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./features/public/login/login').then(m => m.Login) },
   { path: 'register', loadComponent: () => import('./features/public/register/register').then(m => m.Register) },
 
-  // client
-  { path: 'client/profile', loadComponent: () => import('./features/client/clientprofile/clientprofile').then(m => m.ClientProfile) },
+  // CLIENT - shell con children
+  {
+    path: 'client',
+    loadComponent: () => import('./features/client/client-shell/client-shell')
+      .then(m => m.ClientShellComponent),
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        loadComponent: () => import('./features/client/client-dashboard/client-dashboard')
+          .then(m => m.ClientDashboardComponent)
+      },
+      {
+        path: 'profile',
+        loadComponent: () => import('./features/client/client-profile/client-profile')
+          .then(m => m.ClientProfileComponent)
+      },
+    ]
+  },
 
-  // operator
-  { path: 'operator/profile', loadComponent: () => import('./features/operator/operatorprofile/operatorprofile').then(m => m.OperatorProfile) },
-
+  // OPERATOR
+  {
+    path: 'operator',
+    loadComponent: () => import('./features/operator/operator-shell/operator-shell')
+      .then(m => m.OperatorShellComponent),
+    children: [
+      { path: '', pathMatch: 'full', loadComponent: () => import('./features/operator/operator-dashboard/operator-dashboard').then(m => m.OperatorDashboardComponent) },
+      { path: 'profile', loadComponent: () => import('./features/operator/operator-profile/operator-profile').then(m => m.OperatorProfileComponent) },
+    ]
+  },
   // ADMIN - shell con children
   {
     path: 'admin',
     loadComponent: () => import('./features/admin/shell/admin-shell/admin-shell')
       .then(m => m.AdminShellComponent),
     children: [
-      { path: '', pathMatch: 'full',
+      {
+        path: '',
+        pathMatch: 'full',
         loadComponent: () => import('./features/admin/dashboard/admin-dashboard/admin-dashboard')
           .then(m => m.AdminDashboardComponent)
       },
