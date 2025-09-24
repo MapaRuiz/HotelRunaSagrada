@@ -66,6 +66,7 @@ export class ServicesTableTest {
   
 
   gridOptions: GridOptions<ServiceOffering> = {
+    getRowId: params => params.data.id?.toString(),
     onGridReady: params => { 
       this.gridApi = params.api
       params.api.sizeColumnsToFit();
@@ -223,16 +224,14 @@ export class ServicesTableTest {
 
     this.serviceOfferingService.update(this.editing.id, request).subscribe({
       next: updated => {
-        const updatedRow: ServiceOffering = {
-          ...this.editing!,
-          ...updated,
+        Object.assign(this.editing!, updated, {
           image_urls: updated.image_urls ? [...updated.image_urls] : [],
           hotel: this.hotelsList.find(h => h.hotel_id === updated.hotel_id)
-        };
+        });
 
-        this.gridApi?.applyTransaction({ update: [updatedRow] });
-        this.editing = undefined;
+        this.gridApi?.refreshCells({ force: true });
         this.loading = false;
+        this.editing = undefined;
       },
       error: () => { this.loading = false; }
     });

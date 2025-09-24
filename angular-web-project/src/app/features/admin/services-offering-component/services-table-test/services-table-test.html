@@ -4,17 +4,17 @@
   [value]="search"
   (input)="onSearch($any($event.target).value)"
 />
-
-<div class="services-grid-wrap">
-  <ag-grid-angular
-    *ngIf="isBrowser && !editing"
-    class="ag-theme-alpine"
-    [gridOptions]="gridOptions"
-    [rowData]="rowData"
-    style="width: 100%; height: 100%"
-  >
-  </ag-grid-angular>
-</div>
+<ng-container *ngIf="isBrowser && !editing">
+  <div class="services-grid-wrap">
+    <ag-grid-angular
+      class="ag-theme-alpine"
+      [gridOptions]="gridOptions"
+      [rowData]="rowData"
+      style="width: 100%; height: 100%"
+    >
+    </ag-grid-angular>
+  </div>
+</ng-container>
 
 <!-- Edit Form -->
 <app-services-form
