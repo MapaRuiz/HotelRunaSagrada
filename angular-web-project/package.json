@@ -53,6 +53,7 @@
     "@angular/compiler-cli": "^20.3.0",
     "@types/bootstrap": "^5.2.10",
     "@types/express": "^5.0.1",
+    "@types/gsap": "^1.20.2",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^20.17.19",
     "@types/three": "^0.180.0",
