@@ -1,79 +1,134 @@
 {
+<<<<<<< HEAD
   "hash": "072773ee",
   "configHash": "00431a37",
   "lockfileHash": "193b0648",
   "browserHash": "44c8708c",
+=======
+  "hash": "32a186ee",
+  "configHash": "5837e1f9",
+  "lockfileHash": "854de204",
+  "browserHash": "177b2825",
+>>>>>>> 71aa24b91d9742694e9ac5a04b7e98ff4dc0b43b
   "optimized": {
     "@angular/common": {
       "src": "../../../../../../node_modules/@angular/common/fesm2022/common.mjs",
       "file": "@angular_common.js",
+<<<<<<< HEAD
       "fileHash": "5ec3e458",
+=======
+      "fileHash": "bd4315d7",
+>>>>>>> 71aa24b91d9742694e9ac5a04b7e98ff4dc0b43b
       "needsInterop": false
     },
     "@angular/common/http": {
       "src": "../../../../../../node_modules/@angular/common/fesm2022/http.mjs",
       "file": "@angular_common_http.js",
+<<<<<<< HEAD
       "fileHash": "e79cf8cf",
+=======
+      "fileHash": "5f570cf4",
+>>>>>>> 71aa24b91d9742694e9ac5a04b7e98ff4dc0b43b
       "needsInterop": false
     },
     "@angular/core": {
       "src": "../../../../../../node_modules/@angular/core/fesm2022/core.mjs",
       "file": "@angular_core.js",
+<<<<<<< HEAD
       "fileHash": "927aaff5",
+=======
+      "fileHash": "27fc5c4b",
+>>>>>>> 71aa24b91d9742694e9ac5a04b7e98ff4dc0b43b
       "needsInterop": false
     },
     "@angular/forms": {
       "src": "../../../../../../node_modules/@angular/forms/fesm2022/forms.mjs",
       "file": "@angular_forms.js",
+<<<<<<< HEAD
       "fileHash": "064da849",
+=======
+      "fileHash": "ccca6145",
+>>>>>>> 71aa24b91d9742694e9ac5a04b7e98ff4dc0b43b
       "needsInterop": false
     },
     "@angular/platform-browser": {
       "src": "../../../../../../node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs",
       "file": "@angular_platform-browser.js",
+<<<<<<< HEAD
       "fileHash": "3c1f8643",
+=======
+      "fileHash": "53756c78",
+>>>>>>> 71aa24b91d9742694e9ac5a04b7e98ff4dc0b43b
       "needsInterop": false
     },
     "@angular/router": {
       "src": "../../../../../../node_modules/@angular/router/fesm2022/router.mjs",
       "file": "@angular_router.js",
+<<<<<<< HEAD
       "fileHash": "764763c7",
+=======
+      "fileHash": "a1b9c0f4",
+>>>>>>> 71aa24b91d9742694e9ac5a04b7e98ff4dc0b43b
       "needsInterop": false
     },
     "ag-grid-angular": {
       "src": "../../../../../../node_modules/ag-grid-angular/fesm2022/ag-grid-angular.mjs",
       "file": "ag-grid-angular.js",
+<<<<<<< HEAD
       "fileHash": "faa72445",
+=======
+      "fileHash": "4a71a7b9",
+>>>>>>> 71aa24b91d9742694e9ac5a04b7e98ff4dc0b43b
       "needsInterop": false
     },
     "bootstrap/js/dist/toast": {
       "src": "../../../../../../node_modules/bootstrap/js/dist/toast.js",
       "file": "bootstrap_js_dist_toast.js",
+<<<<<<< HEAD
       "fileHash": "473a01c2",
+=======
+      "fileHash": "610bb7c1",
+>>>>>>> 71aa24b91d9742694e9ac5a04b7e98ff4dc0b43b
       "needsInterop": true
     },
     "gsap": {
       "src": "../../../../../../node_modules/gsap/index.js",
       "file": "gsap.js",
+<<<<<<< HEAD
       "fileHash": "0beae365",
+=======
+      "fileHash": "d9cbaff9",
+>>>>>>> 71aa24b91d9742694e9ac5a04b7e98ff4dc0b43b
       "needsInterop": false
     },
     "ng-apexcharts": {
       "src": "../../../../../../node_modules/ng-apexcharts/fesm2022/ng-apexcharts.mjs",
       "file": "ng-apexcharts.js",
+<<<<<<< HEAD
       "fileHash": "e108c4b3",
+=======
+      "fileHash": "956347eb",
+>>>>>>> 71aa24b91d9742694e9ac5a04b7e98ff4dc0b43b
       "needsInterop": false
     },
     "rxjs": {
       "src": "../../../../../../node_modules/rxjs/dist/esm5/index.js",
       "file": "rxjs.js",
+<<<<<<< HEAD
       "fileHash": "adc44149",
+=======
+      "fileHash": "6ac0c910",
+>>>>>>> 71aa24b91d9742694e9ac5a04b7e98ff4dc0b43b
       "needsInterop": false
     },
     "zone.js": {
       "src": "../../../../../../node_modules/zone.js/fesm2015/zone.js",
       "file": "zone__js.js",
+<<<<<<< HEAD
       "fileHash": "ef54de70",
+=======
+      "fileHash": "0080fd10",
+>>>>>>> 71aa24b91d9742694e9ac5a04b7e98ff4dc0b43b
       "needsInterop": true
     },
     "ag-grid-community": {
@@ -87,6 +142,7 @@
     "apexcharts.esm-ZEHFLCH6": {
       "file": "apexcharts__esm-ZEHFLCH6.js"
     },
+<<<<<<< HEAD
     "chunk-KDHX6ELO": {
       "file": "chunk-KDHX6ELO.js"
     },
@@ -95,9 +151,16 @@
     },
     "chunk-AQPODC3U": {
       "file": "chunk-AQPODC3U.js"
+=======
+    "chunk-IXIKY3FN": {
+      "file": "chunk-IXIKY3FN.js"
+>>>>>>> 71aa24b91d9742694e9ac5a04b7e98ff4dc0b43b
     },
     "chunk-XTEYJ74I": {
       "file": "chunk-XTEYJ74I.js"
+    },
+    "chunk-AQPODC3U": {
+      "file": "chunk-AQPODC3U.js"
     },
     "chunk-ZJ25XCV3": {
       "file": "chunk-ZJ25XCV3.js"
