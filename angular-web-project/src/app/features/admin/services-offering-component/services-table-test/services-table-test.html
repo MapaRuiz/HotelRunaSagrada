@@ -5,14 +5,16 @@
   (input)="onSearch($any($event.target).value)"
 />
 
-<ag-grid-angular
-  *ngIf="isBrowser && !editing"
-  class="ag-theme-alpine"
-  [gridOptions]="gridOptions"
-  [rowData]="rowData"
-  style="width: 100%; height: 500px"
->
-</ag-grid-angular>
+<div class="services-grid-wrap">
+  <ag-grid-angular
+    *ngIf="isBrowser && !editing"
+    class="ag-theme-alpine"
+    [gridOptions]="gridOptions"
+    [rowData]="rowData"
+    style="width: 100%; height: 100%"
+  >
+  </ag-grid-angular>
+</div>
 
 <!-- Edit Form -->
 <app-services-form

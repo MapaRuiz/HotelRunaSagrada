@@ -1,0 +1,14 @@
+.services-grid-wrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 300px;
+  height: 60vh; /* o lo que necesites */
+  max-height: 80vh;
+}
+
+@media (max-width: 768px) {
+  .services-grid-wrapper {
+    height: auto;
+  }
+}

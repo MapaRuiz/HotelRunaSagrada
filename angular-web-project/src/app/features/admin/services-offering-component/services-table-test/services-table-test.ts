@@ -63,27 +63,37 @@ export class ServicesTableTest {
     });
   }
 
+  
+
   gridOptions: GridOptions<ServiceOffering> = {
-    onGridReady: params => this.gridApi = params.api,
+    onGridReady: params => { 
+      this.gridApi = params.api
+      params.api.sizeColumnsToFit();
+    },
     columnDefs: [
       { 
         headerName:'ID',
-        field:'id'},
+        field:'id',
+        maxWidth: 100
+      },
       { 
         headerName:'Nombre',
         field:'name'
       },
       { 
         headerName:'Categoria',
-        field:'category'
+        field:'category',
+        maxWidth: 150
       },
       {
         headerName:'Precio base',
-        field:'base_price'
+        field:'base_price',
+        maxWidth: 150
       },
       {
-        headerName:'Cupo maximo',
-        field:'duration_minutes'
+        headerName:'Cupo',
+        field:'duration_minutes',
+        maxWidth: 100
       },
       {
         headerName:'Hotel',
@@ -91,6 +101,7 @@ export class ServicesTableTest {
       },
       {
         headerName: 'Actions',
+        minWidth: 205,
         cellRenderer: ActionButtonsComponent<ServiceOffering>,
         cellRendererParams: {
           onEdit: (row: ServiceOffering) => this.beginEdit(row),
