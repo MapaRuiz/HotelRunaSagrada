@@ -3,7 +3,7 @@
   flex-direction: column;
   width: 100%;
   min-height: 300px;
-  height: 60vh; /* o lo que necesites */
+  height: 100%;
   max-height: 80vh;
 }
 

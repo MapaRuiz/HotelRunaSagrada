@@ -7,13 +7,14 @@ import { HotelsService } from '../../../../services/hotels';
 import { Hotel } from '../../../../model/hotel';
 import { FormsModule } from '@angular/forms';
 import { ServicesFormComponent } from '../services-form/services-form';
-import { ColDef, GridOptions, GridApi, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
+import { ColDef, GridOptions, GridApi, ModuleRegistry, AllCommunityModule, PaginationModule } from 'ag-grid-community';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ActionButtonsParams } from '../../action-buttons-cell/action-buttons-param';
 import { ActionButtonsComponent } from '../../action-buttons-cell/action-buttons-cell';
 import { Component, Inject, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { ServicesDetail } from "../services-detail/services-detail";
+import { AG_GRID_LOCALE } from '../../ag-grid-locale';
 @Component({
   selector: 'app-services-table-test',
   standalone: true,
@@ -68,6 +69,7 @@ export class ServicesTableTest {
   
 
   gridOptions: GridOptions<ServiceOffering> = {
+    localeText: AG_GRID_LOCALE,
     rowSelection: 'single',
     getRowId: params => params.data.id?.toString(),
     onGridReady: params => { 
@@ -96,6 +98,13 @@ export class ServicesTableTest {
       {
         headerName:'Precio base',
         field:'base_price',
+        valueFormatter: params => {
+          return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
+          maximumFractionDigits: 2
+      }).format(params.value);
+      },
         maxWidth: 150
       },
       {

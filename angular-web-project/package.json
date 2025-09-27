@@ -23,6 +23,7 @@
   },
   "private": true,
   "dependencies": {
+    "@ag-grid-community/locale": "^34.2.0",
     "@angular/cdk": "^20.2.4",
     "@angular/common": "^20.3.0",
     "@angular/compiler": "^20.3.0",
