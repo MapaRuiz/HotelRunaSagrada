@@ -1,10 +1,10 @@
-<input
-  type="search"
-  placeholder="Buscar servicios…"
-  [value]="search"
-  (input)="onSearch($any($event.target).value)"
-/>
 <ng-container *ngIf="isBrowser && !editing && !selected">
+  <input
+    type="search"
+    placeholder="Buscar servicios…"
+    [value]="search"
+    (input)="onSearch($any($event.target).value)"
+  />
   <div class="services-grid-wrap">
     <ag-grid-angular
       class="ag-theme-alpine"
