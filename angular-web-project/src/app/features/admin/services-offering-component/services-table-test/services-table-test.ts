@@ -16,7 +16,20 @@ import { isPlatformBrowser } from '@angular/common';
 import { ServicesDetail } from "../services-detail/services-detail";
 import { AG_GRID_LOCALE } from '../../ag-grid-locale';
 import { MultiSelectFilterComponent } from '../../filters/multi-select-filter/multi-select-filter';
-import { title } from 'process';
+
+import type { ITextFilterParams, INumberFilterParams } from 'ag-grid-community';
+
+const TEXT_FILTER_CONFIG: ITextFilterParams = {
+  filterOptions: ['contains', 'equals', 'notContains', 'startsWith'],
+  maxNumConditions: 1
+};
+
+const NUMBER_FILTER_CONFIG: INumberFilterParams = {
+  filterOptions: ['equals', 'greaterThan', 'lessThan', 'inRange'],
+  maxNumConditions: 1
+};
+
+
 
 
 @Component({
@@ -96,6 +109,7 @@ export class ServicesTableTest {
       { 
         headerName:'Nombre',
         filter: 'agTextColumnFilter',
+        filterParams: TEXT_FILTER_CONFIG,
         field:'name'
       },
       { 
@@ -112,6 +126,7 @@ export class ServicesTableTest {
         headerName:'Precio base',
         field:'base_price',
         filter: 'agNumberColumnFilter',
+        filterParams: NUMBER_FILTER_CONFIG,
         valueFormatter: params => {
           return new Intl.NumberFormat('en-US', {
           style: 'currency',
@@ -125,6 +140,7 @@ export class ServicesTableTest {
         headerName:'Cupo',
         field:'duration_minutes',
         filter: 'agNumberColumnFilter',
+        filterParams: NUMBER_FILTER_CONFIG,
         maxWidth: 100
       },
       {
