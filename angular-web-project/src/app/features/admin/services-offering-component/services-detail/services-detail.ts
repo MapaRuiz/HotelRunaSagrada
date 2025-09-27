@@ -1,12 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { ServiceOffering } from '../../../../model/service-offering';
-import { ServicesFormComponent } from '../services-form/services-form';
 
 @Component({
   selector: 'app-services-detail',
   standalone: true,
-  imports: [CommonModule, ServicesFormComponent],
+  imports: [CommonModule],
   templateUrl: './services-detail.html',
   styleUrls: ['./services-detail.css', '../services-form/services-form.css'],
 })
