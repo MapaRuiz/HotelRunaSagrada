@@ -11,7 +11,7 @@ import { ColDef, GridOptions, GridApi, ModuleRegistry, AllCommunityModule, Pagin
 import { AgGridAngular } from 'ag-grid-angular';
 import { ActionButtonsParams } from '../../action-buttons-cell/action-buttons-param';
 import { ActionButtonsComponent } from '../../action-buttons-cell/action-buttons-cell';
-import { Component, Inject, inject, PLATFORM_ID } from '@angular/core';
+import { Component, ElementRef, Inject, inject, PLATFORM_ID, ViewChild } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { ServicesDetail } from "../services-detail/services-detail";
 import { AG_GRID_LOCALE } from '../../ag-grid-locale';
@@ -51,6 +51,8 @@ export class ServicesTableTest {
   createLoading = false;
   selected?: ServiceOffering;
 
+  @ViewChild('createDetails') private createDetails?: ElementRef<HTMLDetailsElement>;
+
   constructor(
     private serviceOfferingService: ServiceOfferingService,
     private hotelsService: HotelsService,
@@ -86,7 +88,11 @@ export class ServicesTableTest {
     });
   }
 
-  
+  onCreateToggle(event: Event): void {
+    const details = event.target as HTMLDetailsElement;
+    this.showCreate = details.open;
+  }
+
 
   gridOptions: GridOptions<ServiceOffering> = {
     localeText: AG_GRID_LOCALE,
@@ -165,17 +171,19 @@ export class ServicesTableTest {
     ]
   }
 
-  toggleCreate(): void {
-    this.showCreate = !this.showCreate;
-    if (this.showCreate) {
-      this.createDraft = this.buildEmptyDraft();
-    }
-  }
-
   cancelCreate(): void {
     this.showCreate = false;
     this.createDraft = this.buildEmptyDraft();
     this.createLoading = false;
+    this.closeCreatePanel();
+  }
+
+  private closeCreatePanel(): void {
+    const details = this.createDetails?.nativeElement;
+    if (!details) return;
+
+    details.open = false;          
+    details.removeAttribute('open'); 
   }
 
   saveCreate(payload: Partial<ServiceOffering>): void {
@@ -196,12 +204,10 @@ export class ServicesTableTest {
 
     this.serviceOfferingService.create(request).subscribe({
       next: created => {
-        const withHotel: ServiceOffering = {
-          ...created,
-          hotel: this.hotelsList.find(h => h.hotel_id === created.hotel_id)
-        } as ServiceOffering;
+        const withHotel: ServiceOffering = this.fillNewService(created);
         this.serviceOfferingList = [withHotel, ...this.serviceOfferingList];
         this.cancelCreate();
+        this.gridApi?.applyTransaction({ add: [withHotel], addIndex: 0 });
       },
       error: () => {
         this.createLoading = false;
@@ -223,6 +229,14 @@ export class ServicesTableTest {
       longitude: undefined,
       hotel_id: undefined
     };
+  }
+
+  private fillNewService(service: ServiceOffering): ServiceOffering {
+    return {
+      ...service,
+      image_urls: service.image_urls ? [...service.image_urls]: [],
+      hotel: this.hotelsList.find(h => h.hotel_id === service.hotel_id)
+    }
   }
 
   deleteServiceOffering(serviceOffering: ServiceOffering): void {

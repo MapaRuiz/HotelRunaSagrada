@@ -1,10 +1,25 @@
 <ng-container *ngIf="isBrowser && !editing && !selected">
-  <input
-    type="search"
-    placeholder="Buscar servicios…"
-    [value]="search"
-    (input)="onSearch($any($event.target).value)"
-  />
+  <details #createDetails (toggle)="onCreateToggle($event)">
+    <summary>Crear servicio</summary>
+
+    <app-services-form
+      *ngIf="showCreate"
+      [draft]="createDraft"
+      [hotels]="hotelOptions"
+      [loading]="createLoading"
+      (cancel)="cancelCreate()"
+      (save)="saveCreate($event)"
+    ></app-services-form>
+  </details>
+
+  <div class="mt-3 mb-2">
+    <input
+      type="search"
+      placeholder="Buscar servicios…"
+      [value]="search"
+      (input)="onSearch($any($event.target).value)"
+    />
+  </div>
   <div class="services-grid-wrap">
     <ag-grid-angular
       class="ag-theme-alpine"
