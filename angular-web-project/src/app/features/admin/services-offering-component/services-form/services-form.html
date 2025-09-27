@@ -11,7 +11,7 @@
       <label class="form-label">Hotel</label>
       <select class="form-select" [(ngModel)]="draft.hotel_id" name="hotel" required>
         <option [ngValue]="undefined">Selecciona hotel…</option>
-        <option *ngFor="let h of hotels" [ngValue]="h.id">{{ h.name }}</option>
+        <option *ngFor="let h of hotels" [ngValue]="h.id">{{ h.name | slice : 12 }}</option>
       </select>
     </div>
 

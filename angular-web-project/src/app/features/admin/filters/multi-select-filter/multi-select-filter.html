@@ -1,0 +1,25 @@
+<div class="multi-filter">
+  <header class="multi-filter__header">
+    <h3>{{ title }}</h3>
+    <button type="button" class="link" (click)="onClear()">Limpiar</button>
+  </header>
+
+  <div class="multi-filter__search" *ngIf="options.length > 3">
+    <input type="search" placeholder="Buscar…" [(ngModel)]="search" (ngModelChange)="onSearch()" />
+  </div>
+
+  <div class="multi-filter__options">
+    <label *ngFor="let option of filteredOptions" class="multi-filter__option">
+      <input
+        type="checkbox"
+        [checked]="selected.has(option)"
+        (change)="onSelectionChange(option, $any($event.target).checked)"
+      />
+      <span>{{ option }}</span>
+    </label>
+  </div>
+
+  <footer class="multi-filter__footer">
+    <button type="button" class="primary" (click)="onApply()">Aplicar</button>
+  </footer>
+</div>

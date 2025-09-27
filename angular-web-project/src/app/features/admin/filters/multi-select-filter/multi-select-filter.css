@@ -1,0 +1,64 @@
+.multi-filter {
+  display: flex;
+  flex-direction: column;
+  min-width: 220px;
+  max-width: 280px;
+  max-height: 320px;
+  padding: 0.75rem;
+  box-sizing: border-box;
+  gap: 0.75rem;
+}
+
+.multi-filter__header,
+.multi-filter__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.multi-filter__search input {
+  width: 100%;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.multi-filter__options {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.multi-filter__option {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+  gap: 0.45rem;
+}
+
+.multi-filter__option input {
+  margin: 0;
+}
+
+button.link {
+  background: none;
+  border: none;
+  color: var(--ag-accent-color, #0078d4);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+button.primary {
+  padding: 0.45rem 0.85rem;
+  border-radius: 4px;
+  border: none;
+  background-color: var(--ag-accent-color, #0078d4);
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.85rem;
+}

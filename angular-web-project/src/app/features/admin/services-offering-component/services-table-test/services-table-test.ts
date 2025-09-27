@@ -15,6 +15,10 @@ import { Component, Inject, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { ServicesDetail } from "../services-detail/services-detail";
 import { AG_GRID_LOCALE } from '../../ag-grid-locale';
+import { MultiSelectFilterComponent } from '../../filters/multi-select-filter/multi-select-filter';
+import { title } from 'process';
+
+
 @Component({
   selector: 'app-services-table-test',
   standalone: true,
@@ -37,10 +41,13 @@ export class ServicesTableTest {
   constructor(
     private serviceOfferingService: ServiceOfferingService,
     private hotelsService: HotelsService,
+    // Injection token describing the current runtime plataform
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
+    // Should only run when the component is executed in the browser
     this.isBrowser = isPlatformBrowser(this.platformId);
     if (this.isBrowser) {
+      // Tells ag-grid to use all the modules
       ModuleRegistry.registerModules([AllCommunityModule]);
     }
   }
@@ -88,16 +95,23 @@ export class ServicesTableTest {
       },
       { 
         headerName:'Nombre',
+        filter: 'agTextColumnFilter',
         field:'name'
       },
       { 
         headerName:'Categoria',
+        filter: MultiSelectFilterComponent,
+        filterParams: {
+          valueGetter: (row: ServiceOffering) => row.category,
+          title: 'Categorias'
+        },
         field:'category',
         maxWidth: 150
       },
       {
         headerName:'Precio base',
         field:'base_price',
+        filter: 'agNumberColumnFilter',
         valueFormatter: params => {
           return new Intl.NumberFormat('en-US', {
           style: 'currency',
@@ -110,14 +124,21 @@ export class ServicesTableTest {
       {
         headerName:'Cupo',
         field:'duration_minutes',
+        filter: 'agNumberColumnFilter',
         maxWidth: 100
       },
       {
         headerName:'Hotel',
-        field:'hotel.name'
+        filter: MultiSelectFilterComponent,
+        filterParams: {
+          valueGetter: (row: ServiceOffering) => row.hotel?.name.slice(12),
+          title: 'Hoteles'
+        },
+        valueGetter: params => params.data?.hotel?.name.slice(12)
       },
       {
         headerName: 'Actions',
+        filter: false,
         minWidth: 205,
         cellRenderer: ActionButtonsComponent<ServiceOffering>,
         cellRendererParams: {

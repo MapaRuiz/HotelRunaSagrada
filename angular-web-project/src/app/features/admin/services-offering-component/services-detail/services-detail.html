@@ -16,7 +16,7 @@
       <div class="col-md-6">
         <label class="form-label">Hotel</label>
         <div class="form-control-plaintext">
-          {{ current.hotel?.name || 'ID ' + current.hotel_id || fallbackText }}
+          {{ current.hotel?.name?.slice(12) || 'ID ' + current.hotel_id || fallbackText }}
         </div>
       </div>
 
