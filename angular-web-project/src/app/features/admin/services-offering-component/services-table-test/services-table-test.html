@@ -4,7 +4,7 @@
   [value]="search"
   (input)="onSearch($any($event.target).value)"
 />
-<ng-container *ngIf="isBrowser && !editing">
+<ng-container *ngIf="isBrowser && !editing && !selected">
   <div class="services-grid-wrap">
     <ag-grid-angular
       class="ag-theme-alpine"
@@ -16,7 +16,13 @@
   </div>
 </ng-container>
 
-<!-- Edit Form -->
+<!-- Detail Form -->
+<app-services-detail
+  *ngIf="selected && !editing"
+  [service]="selected"
+  (editRequested)="onDetailEdit($event)"
+></app-services-detail>
+
 <app-services-form
   *ngIf="editing"
   [draft]="draft"
@@ -24,5 +30,4 @@
   [loading]="loading"
   (cancel)="cancelEdit()"
   (save)="saveEdit($event)"
->
-</app-services-form>
+></app-services-form>

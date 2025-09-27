@@ -13,10 +13,11 @@ import { ActionButtonsParams } from '../../action-buttons-cell/action-buttons-pa
 import { ActionButtonsComponent } from '../../action-buttons-cell/action-buttons-cell';
 import { Component, Inject, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { ServicesDetail } from "../services-detail/services-detail";
 @Component({
   selector: 'app-services-table-test',
   standalone: true,
-  imports: [CommonModule, FormsModule, AgGridAngular, ServicesFormComponent],
+  imports: [CommonModule, FormsModule, AgGridAngular, ServicesFormComponent, ServicesDetail],
   templateUrl: './services-table-test.html',
   styleUrls: ['./services-table-test.css']
 })
@@ -30,6 +31,7 @@ export class ServicesTableTest {
   createDraft: Partial<ServiceOffering> = this.buildEmptyDraft();
   private gridApi?: GridApi<ServiceOffering>;
   createLoading = false;
+  selected?: ServiceOffering;
 
   constructor(
     private serviceOfferingService: ServiceOfferingService,
@@ -66,10 +68,15 @@ export class ServicesTableTest {
   
 
   gridOptions: GridOptions<ServiceOffering> = {
+    rowSelection: 'single',
     getRowId: params => params.data.id?.toString(),
     onGridReady: params => { 
       this.gridApi = params.api
       params.api.sizeColumnsToFit();
+    },
+    onSelectionChanged: params => {
+      const [row] = params.api.getSelectedRows();
+      this.selected = row ?? undefined;
     },
     columnDefs: [
       { 
@@ -243,5 +250,9 @@ export class ServicesTableTest {
   onSearch(term: string): void {
     this.search = term;
     this.gridApi?.setGridOption('quickFilterText', term || undefined);
+  }
+
+  onDetailEdit(service: ServiceOffering): void {
+  this.beginEdit(service);
   }
 }
