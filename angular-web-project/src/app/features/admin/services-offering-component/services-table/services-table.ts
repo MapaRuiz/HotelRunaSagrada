@@ -6,7 +6,7 @@ import { ServiceOfferingService } from '../../../../services/service-offering-se
 import { HotelsService } from '../../../../services/hotels';
 import { Hotel } from '../../../../model/hotel';
 import { FormsModule } from '@angular/forms';
-import { ServicesFormComponent } from '../services-form/services-form';
+import { ServicesFormComponent, type ServicesFormPayload } from '../services-form/services-form';
 import { ColDef, GridOptions, GridApi, ModuleRegistry, AllCommunityModule, PaginationModule } from 'ag-grid-community';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ActionButtonsParams } from '../../action-buttons-cell/action-buttons-param';
@@ -30,9 +30,6 @@ const NUMBER_FILTER_CONFIG: INumberFilterParams = {
   filterOptions: ['equals', 'greaterThan', 'lessThan', 'inRange'],
   maxNumConditions: 1
 };
-
-
-
 
 @Component({
   selector: 'app-services-table',
@@ -198,8 +195,9 @@ export class ServicesTable {
     details.removeAttribute('open'); 
   }
 
-  saveCreate(payload: Partial<ServiceOffering>): void {
+  saveCreate(service: ServicesFormPayload): void {
     this.createLoading = true;
+    const payload = service.draft;
     const request = {
       name: payload.name ?? '',
       category: payload.category ?? '',
@@ -270,12 +268,29 @@ export class ServicesTable {
 
   beginEdit(service: ServiceOffering): void {
     this.editing = service;
-    this.draft = {
-      ...service,
-      hotel_id: service.hotel_id,
-      image_urls: service.image_urls ? [...service.image_urls] : []
-    };
+    this.loading = true;
+
+    this.serviceOfferingService.getDetail(service.id).subscribe({
+      next: detail => {
+        this.draft = {
+          ...detail.service,
+          hotel_id: detail.service.hotel_id,
+          image_urls: detail.service.image_urls ? [...detail.service.image_urls] : [],
+          schedules: detail.schedules
+        };
+        this.loading = false;
+      },
+      error: () => {
+        this.draft = {
+          ...service,
+          hotel_id: service.hotel_id,
+          image_urls: service.image_urls ? [...service.image_urls] : []
+        };
+        this.loading = false;
+      }
+    });
   }
+
 
   cancelEdit(): void {
     this.editing = undefined;
@@ -283,22 +298,24 @@ export class ServicesTable {
     this.loading = false;
   }
 
-  saveEdit(payload: Partial<ServiceOffering>): void {
+  saveEdit(payload: ServicesFormPayload): void {
+    console.log('[ServicesTable] saveEdit received:', payload);
     if (!this.editing) { return; }
     this.loading = true;
 
+    const draft = payload.draft;
     const request = {
-      name: payload.name ?? '',
-      category: payload.category ?? '',
-      subcategory: payload.subcategory ?? '',
-      description: payload.description ?? '',
-      base_price: Number(payload.base_price ?? 0),
-      duration_minutes: Number(payload.duration_minutes ?? 0),
-      image_urls: payload.image_urls ?? [],
-      max_participants: Number(payload.max_participants ?? 0),
-      latitude: Number(payload.latitude ?? 0),
-      longitude: Number(payload.longitude ?? 0),
-      hotel_id: Number(payload.hotel_id ?? this.editing.hotel_id)
+      name: draft.name ?? '',
+      category: draft.category ?? '',
+      subcategory: draft.subcategory ?? '',
+      description: draft.description ?? '',
+      base_price: Number(draft.base_price ?? 0),
+      duration_minutes: Number(draft.duration_minutes ?? 0),
+      image_urls: draft.image_urls ?? [],
+      max_participants: Number(draft.max_participants ?? 0),
+      latitude: Number(draft.latitude ?? 0),
+      longitude: Number(draft.longitude ?? 0),
+      hotel_id: Number(draft.hotel_id ?? this.editing.hotel_id)
     };
 
     this.serviceOfferingService.update(this.editing.id, request).subscribe({
@@ -309,10 +326,24 @@ export class ServicesTable {
         });
 
         this.gridApi?.refreshCells({ force: true });
+        this.deleteSchedules(payload.deleteIds);
+
         this.loading = false;
         this.editing = undefined;
       },
       error: () => { this.loading = false; }
+    });
+  }
+
+  private deleteSchedules(ids: number[]): void {
+    console.log('Deleting schedules', ids);
+    if (!ids.length) return;
+
+    ids.forEach(id => {
+      this.serviceOfferingService.deleteSchedule(id).subscribe({
+        next: () => console.log('Schedule deleted', id),
+        error: err => console.error('Failed to delete schedule', id, err)
+      });
     });
   }
 
@@ -355,24 +386,5 @@ export class ServicesTable {
 
     this.selected = details;
     this.detailLoading = false;
-  }
-
-
-  private normalizeSchedules(source: any[]): ServiceSchedule[] {
-    return source.map(item => {
-      const days = item.days_of_week ?? item.daysOfWeek ?? [];
-      const start = item.start_time ?? item.startTime ?? '';
-      const end = item.end_time ?? item.endTime ?? '';
-      const active = (item.active ?? item.is_active ?? item.isActive) ?? false;
-
-      return {
-        id: Number(item.id ?? 0),
-        days_of_week: Array.isArray(days) ? days : [],
-        start_time: String(start),
-        end_time: String(end),
-        active: Boolean(active),
-        service_offering: item.service_offering ?? item.service
-      } as ServiceSchedule;
-    });
   }
 }

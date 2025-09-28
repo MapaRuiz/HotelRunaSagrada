@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.security.Provider.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
@@ -267,9 +268,11 @@ public class DatabaseInit implements CommandLineRunner {
                 s.setHotel(hotel);
                 serviceRepository.save(s);
             });
+
+            createSampleSchedules(specificServices);
         }
 
-        createSampleSchedules();
+        createSampleSchedules(commonServices);
     }
 
     private List<ServiceOffering> createCommonServices() {
@@ -299,7 +302,8 @@ public class DatabaseInit implements CommandLineRunner {
         ajiacoSantafereño.setDescription("Sopa de tres papas con pollo, mazorca, alcaparras y crema de leche");
         ajiacoSantafereño.setBasePrice(32000);
         ajiacoSantafereño.setDurationMinutes(60);
-        ajiacoSantafereño.setImageUrls(List.of("https://www.semana.com/resizer/v2/GBBYJH5YMZC6PEINHE3HZZH4TY.jpg?auth=f21d7fbf15c15316b80dd213fb2c635e4445db8e08133172d69a4956d7f417db&smart=true&quality=75&width=1920&height=1080&fitfill=false"));
+        ajiacoSantafereño.setImageUrls(List.of(
+                "https://www.semana.com/resizer/v2/GBBYJH5YMZC6PEINHE3HZZH4TY.jpg?auth=f21d7fbf15c15316b80dd213fb2c635e4445db8e08133172d69a4956d7f417db&smart=true&quality=75&width=1920&height=1080&fitfill=false"));
         ajiacoSantafereño.setMaxParticipants(10);
         ajiacoSantafereño.setLatitude(4.7109);
         ajiacoSantafereño.setLongitude(-74.0721);
@@ -312,7 +316,8 @@ public class DatabaseInit implements CommandLineRunner {
         sancochoCosteño.setDescription("Sancocho de pescado con yuca, ñame, plátano verde y cilantro cimarrón");
         sancochoCosteño.setBasePrice(35000);
         sancochoCosteño.setDurationMinutes(60);
-        sancochoCosteño.setImageUrls(List.of("https://www.cheekyfoods.com.au/cdn/shop/articles/Untitled_design_87.jpg?v=1698649815"));
+        sancochoCosteño.setImageUrls(
+                List.of("https://www.cheekyfoods.com.au/cdn/shop/articles/Untitled_design_87.jpg?v=1698649815"));
         sancochoCosteño.setMaxParticipants(10);
         sancochoCosteño.setLatitude(10.3910);
         sancochoCosteño.setLongitude(-75.4794);
@@ -325,7 +330,8 @@ public class DatabaseInit implements CommandLineRunner {
         lechonaTolimense.setDescription("Cerdo relleno con arroz, arvejas y especias, asado en horno de barro");
         lechonaTolimense.setBasePrice(42000);
         lechonaTolimense.setDurationMinutes(60);
-        lechonaTolimense.setImageUrls(List.of("https://media.istockphoto.com/id/1442283646/photo/lechona-with-rice-arepa-and-potato-on-a-white-plate-and-a-background-with-plants.jpg"));
+        lechonaTolimense.setImageUrls(List.of(
+                "https://media.istockphoto.com/id/1442283646/photo/lechona-with-rice-arepa-and-potato-on-a-white-plate-and-a-background-with-plants.jpg"));
         lechonaTolimense.setMaxParticipants(10);
         lechonaTolimense.setLatitude(4.4389);
         lechonaTolimense.setLongitude(-75.2322);
@@ -335,10 +341,12 @@ public class DatabaseInit implements CommandLineRunner {
         tamalesBogotanos.setName("Tamales Bogotanos");
         tamalesBogotanos.setCategory("Gastronomía");
         tamalesBogotanos.setSubcategory("Cundinamarca");
-        tamalesBogotanos.setDescription("Masa de maíz rellena de pollo, cerdo y verduras, envuelta en hojas de plátano");
+        tamalesBogotanos
+                .setDescription("Masa de maíz rellena de pollo, cerdo y verduras, envuelta en hojas de plátano");
         tamalesBogotanos.setBasePrice(28000);
         tamalesBogotanos.setDurationMinutes(60);
-        tamalesBogotanos.setImageUrls(List.of("https://www.eltiempo.com/files/image_1200_600/uploads/2023/11/23/655f995f17c49.jpeg"));
+        tamalesBogotanos.setImageUrls(
+                List.of("https://www.eltiempo.com/files/image_1200_600/uploads/2023/11/23/655f995f17c49.jpeg"));
         tamalesBogotanos.setMaxParticipants(10);
         tamalesBogotanos.setLatitude(4.7110);
         tamalesBogotanos.setLongitude(-74.0721);
@@ -351,7 +359,8 @@ public class DatabaseInit implements CommandLineRunner {
         cazuelaDeMariscos.setDescription("Cazuela con camarones, langostinos, pescado y moluscos en leche de coco");
         cazuelaDeMariscos.setBasePrice(48000);
         cazuelaDeMariscos.setDurationMinutes(60);
-        cazuelaDeMariscos.setImageUrls(List.of("https://media.istockphoto.com/id/607991782/es/foto/paella-tradicional-espa%C3%B1ola-con-marisco-y-pollo.jpg"));
+        cazuelaDeMariscos.setImageUrls(List.of(
+                "https://media.istockphoto.com/id/607991782/es/foto/paella-tradicional-espa%C3%B1ola-con-marisco-y-pollo.jpg"));
         cazuelaDeMariscos.setMaxParticipants(10);
         cazuelaDeMariscos.setLatitude(10.3910);
         cazuelaDeMariscos.setLongitude(-75.4794);
@@ -404,7 +413,8 @@ public class DatabaseInit implements CommandLineRunner {
         arequipeConBrevas.setDescription("Brevas con dulce de leche, especialidad antioqueña");
         arequipeConBrevas.setBasePrice(12000);
         arequipeConBrevas.setDurationMinutes(30);
-        arequipeConBrevas.setImageUrls(List.of("https://elrinconcolombiano.com/wp-content/uploads/2023/04/Manjar-blanco-receta-colombiana.jpg"));
+        arequipeConBrevas.setImageUrls(List
+                .of("https://elrinconcolombiano.com/wp-content/uploads/2023/04/Manjar-blanco-receta-colombiana.jpg"));
         arequipeConBrevas.setMaxParticipants(10);
         arequipeConBrevas.setLatitude(6.2442);
         arequipeConBrevas.setLongitude(-75.5736);
@@ -417,7 +427,8 @@ public class DatabaseInit implements CommandLineRunner {
         cocadasIsleñas.setDescription("Dulces de coco de la tradición isleña de San Andrés");
         cocadasIsleñas.setBasePrice(8000);
         cocadasIsleñas.setDurationMinutes(20);
-        cocadasIsleñas.setImageUrls(List.of("https://www.shutterstock.com/image-photo/peruvian-cocadas-traditional-coconut-dessert-600nw-380640118.jpg"));
+        cocadasIsleñas.setImageUrls(List.of(
+                "https://www.shutterstock.com/image-photo/peruvian-cocadas-traditional-coconut-dessert-600nw-380640118.jpg"));
         cocadasIsleñas.setMaxParticipants(10);
         cocadasIsleñas.setLatitude(12.542499);
         cocadasIsleñas.setLongitude(-81.718369);
@@ -443,7 +454,8 @@ public class DatabaseInit implements CommandLineRunner {
         natillaColombiana.setDescription("Natilla cremosa con canela y pasas, postre tradicional navideño");
         natillaColombiana.setBasePrice(10000);
         natillaColombiana.setDurationMinutes(30);
-        natillaColombiana.setImageUrls(List.of("https://www.elespectador.com/resizer/VQS-41ig6YKYg4qcH5zr5B1XXBw=/arc-anglerfish-arc2-prod-elespectador/public/GTELHVJGBZARLL3GLVUEGRCMJY.JPG"));
+        natillaColombiana.setImageUrls(List.of(
+                "https://www.elespectador.com/resizer/VQS-41ig6YKYg4qcH5zr5B1XXBw=/arc-anglerfish-arc2-prod-elespectador/public/GTELHVJGBZARLL3GLVUEGRCMJY.JPG"));
         natillaColombiana.setMaxParticipants(10);
         natillaColombiana.setLatitude(4.7109);
         natillaColombiana.setLongitude(-74.0721);
@@ -456,7 +468,8 @@ public class DatabaseInit implements CommandLineRunner {
         cuajadaConMelao.setDescription("Queso fresco boyacense con miel de caña y almojábana");
         cuajadaConMelao.setBasePrice(9000);
         cuajadaConMelao.setDurationMinutes(20);
-        cuajadaConMelao.setImageUrls(List.of("https://static.bainet.es/clip/315db07b-3610-42cc-9c94-8abe9baef742_source-aspect-ratio_1600w_0.jpg"));
+        cuajadaConMelao.setImageUrls(List.of(
+                "https://static.bainet.es/clip/315db07b-3610-42cc-9c94-8abe9baef742_source-aspect-ratio_1600w_0.jpg"));
         cuajadaConMelao.setMaxParticipants(10);
         cuajadaConMelao.setLatitude(5.6333);
         cuajadaConMelao.setLongitude(-73.5333);
@@ -469,7 +482,8 @@ public class DatabaseInit implements CommandLineRunner {
         bocadilloConQueso.setDescription("Dulce de guayaba con queso fresco, combinación tradicional santandereana");
         bocadilloConQueso.setBasePrice(7000);
         bocadilloConQueso.setDurationMinutes(15);
-        bocadilloConQueso.setImageUrls(List.of("https://api.photon.aremedia.net.au/wp-content/uploads/sites/4/2021/07/23/12909/HL1121E15-scaled.jpg"));
+        bocadilloConQueso.setImageUrls(List.of(
+                "https://api.photon.aremedia.net.au/wp-content/uploads/sites/4/2021/07/23/12909/HL1121E15-scaled.jpg"));
         bocadilloConQueso.setMaxParticipants(10);
         bocadilloConQueso.setLatitude(7.1193);
         bocadilloConQueso.setLongitude(-73.1227);
@@ -482,7 +496,8 @@ public class DatabaseInit implements CommandLineRunner {
         empanadasVallecaucanas.setDescription("Empanadas de masa de maíz rellenas de papa y carne, fritas en aceite");
         empanadasVallecaucanas.setBasePrice(15000);
         empanadasVallecaucanas.setDurationMinutes(30);
-        empanadasVallecaucanas.setImageUrls(List.of("https://imagenes.eltiempo.com/files/image_1200_535/uploads/2024/02/20/65d4e89c2c395.jpeg"));
+        empanadasVallecaucanas.setImageUrls(
+                List.of("https://imagenes.eltiempo.com/files/image_1200_535/uploads/2024/02/20/65d4e89c2c395.jpeg"));
         empanadasVallecaucanas.setMaxParticipants(10);
         empanadasVallecaucanas.setLatitude(3.4516);
         empanadasVallecaucanas.setLongitude(-76.5319);
@@ -496,7 +511,8 @@ public class DatabaseInit implements CommandLineRunner {
         cafeDeOrigenEspecial.setDescription("Café de origen único de fincas locales");
         cafeDeOrigenEspecial.setBasePrice(8000);
         cafeDeOrigenEspecial.setDurationMinutes(15);
-        cafeDeOrigenEspecial.setImageUrls(List.of("https://st2.depositphotos.com/1773130/7605/i/450/depositphotos_76054953-stock-photo-iced-coffee-in-a-tall.jpg"));
+        cafeDeOrigenEspecial.setImageUrls(List.of(
+                "https://st2.depositphotos.com/1773130/7605/i/450/depositphotos_76054953-stock-photo-iced-coffee-in-a-tall.jpg"));
         cafeDeOrigenEspecial.setMaxParticipants(10);
         cafeDeOrigenEspecial.setLatitude(5.070275);
         cafeDeOrigenEspecial.setLongitude(-75.513817);
@@ -509,7 +525,8 @@ public class DatabaseInit implements CommandLineRunner {
         aguaDePanelaConLimon.setDescription("Agua de panela con limón, refresco tradicional");
         aguaDePanelaConLimon.setBasePrice(5000);
         aguaDePanelaConLimon.setDurationMinutes(10);
-        aguaDePanelaConLimon.setImageUrls(List.of("https://media.istockphoto.com/id/1181234339/es/foto/aguapanela-casera-fresca-agua-de-panela-o-aguadulce-una-popular-bebida-dulce-latinoamericana.jpg"));
+        aguaDePanelaConLimon.setImageUrls(List.of(
+                "https://media.istockphoto.com/id/1181234339/es/foto/aguapanela-casera-fresca-agua-de-panela-o-aguadulce-una-popular-bebida-dulce-latinoamericana.jpg"));
         aguaDePanelaConLimon.setMaxParticipants(10);
         aguaDePanelaConLimon.setLatitude(4.7109);
         aguaDePanelaConLimon.setLongitude(-74.0721);
@@ -522,7 +539,8 @@ public class DatabaseInit implements CommandLineRunner {
         luladaCalena.setDescription("Bebida refrescante de lulo con hielo, limón y azúcar");
         luladaCalena.setBasePrice(7000);
         luladaCalena.setDurationMinutes(10);
-        luladaCalena.setImageUrls(List.of("https://www.elespectador.com/resizer/VQS-41ig6YKYg4qcH5zr5B1XXBw=/arc-anglerfish-arc2-prod-elespectador/public/GTELHVJGBZARLL3GLVUEGRCMJY.JPG"));
+        luladaCalena.setImageUrls(List.of(
+                "https://www.elespectador.com/resizer/VQS-41ig6YKYg4qcH5zr5B1XXBw=/arc-anglerfish-arc2-prod-elespectador/public/GTELHVJGBZARLL3GLVUEGRCMJY.JPG"));
         luladaCalena.setMaxParticipants(10);
         luladaCalena.setLatitude(3.4516);
         luladaCalena.setLongitude(-76.5319);
@@ -535,7 +553,8 @@ public class DatabaseInit implements CommandLineRunner {
         chocolateSantafereño.setDescription("Chocolate caliente con queso, tradición bogotana");
         chocolateSantafereño.setBasePrice(9000);
         chocolateSantafereño.setDurationMinutes(20);
-        chocolateSantafereño.setImageUrls(List.of("https://sabor.eluniverso.com/wp-content/uploads/2023/12/shutterstock_1665115558-1024x683.jpg"));
+        chocolateSantafereño.setImageUrls(List
+                .of("https://sabor.eluniverso.com/wp-content/uploads/2023/12/shutterstock_1665115558-1024x683.jpg"));
         chocolateSantafereño.setMaxParticipants(10);
         chocolateSantafereño.setLatitude(4.7109);
         chocolateSantafereño.setLongitude(-74.0721);
@@ -548,7 +567,8 @@ public class DatabaseInit implements CommandLineRunner {
         jugoDeCorozo.setDescription("Jugo de fruta de palma corozo, especialidad caribeña");
         jugoDeCorozo.setBasePrice(7000);
         jugoDeCorozo.setDurationMinutes(10);
-        jugoDeCorozo.setImageUrls(List.of("https://imagenes.eltiempo.com/files/image_1200_535/uploads/2024/02/20/65d4e89c2c395.jpeg"));
+        jugoDeCorozo.setImageUrls(
+                List.of("https://imagenes.eltiempo.com/files/image_1200_535/uploads/2024/02/20/65d4e89c2c395.jpeg"));
         jugoDeCorozo.setMaxParticipants(10);
         jugoDeCorozo.setLatitude(10.3910);
         jugoDeCorozo.setLongitude(-75.4794);
@@ -587,14 +607,15 @@ public class DatabaseInit implements CommandLineRunner {
         cataDeAguardiente.setDescription("Degustación de aguardientes regionales con maridaje de aperitivos típicos");
         cataDeAguardiente.setBasePrice(25000);
         cataDeAguardiente.setDurationMinutes(45);
-        cataDeAguardiente.setImageUrls(List.of("https://desquite.com/en/wp-content/uploads/2025/03/Desquite-Tradicion-Artisanal-Authentic-Colombian-Aguardiente-m.webp"));
+        cataDeAguardiente.setImageUrls(List.of(
+                "https://desquite.com/en/wp-content/uploads/2025/03/Desquite-Tradicion-Artisanal-Authentic-Colombian-Aguardiente-m.webp"));
         cataDeAguardiente.setMaxParticipants(10);
         cataDeAguardiente.setLatitude(6.2442);
         cataDeAguardiente.setLongitude(-75.5736);
         services.add(cataDeAguardiente);
 
         // === TALLERES Y DANZAS CULTURALES (8) ===
-        
+
         ServiceOffering tallerDeCumbia = new ServiceOffering();
         tallerDeCumbia.setName("Taller de Cumbia");
         tallerDeCumbia.setCategory("Cultural");
@@ -602,7 +623,8 @@ public class DatabaseInit implements CommandLineRunner {
         tallerDeCumbia.setDescription("Aprende los pasos tradicionales de cumbia con vestuario y música en vivo");
         tallerDeCumbia.setBasePrice(35000);
         tallerDeCumbia.setDurationMinutes(90);
-        tallerDeCumbia.setImageUrls(List.of("https://www.infobae.com/resizer/v2/H4BSBL5F7JEH7ELIPDGLKO5OBQ.jpg?auth=da6890b5ced46d170fe76fcc186b721e5495c108b33bec0fff4cfd53e527e538&smart=true&width=1200&height=900&quality=85"));
+        tallerDeCumbia.setImageUrls(List.of(
+                "https://www.infobae.com/resizer/v2/H4BSBL5F7JEH7ELIPDGLKO5OBQ.jpg?auth=da6890b5ced46d170fe76fcc186b721e5495c108b33bec0fff4cfd53e527e538&smart=true&width=1200&height=900&quality=85"));
         tallerDeCumbia.setMaxParticipants(12);
         tallerDeCumbia.setLatitude(10.3910);
         tallerDeCumbia.setLongitude(-75.4794);
@@ -628,7 +650,8 @@ public class DatabaseInit implements CommandLineRunner {
         tallerDeBambuco.setDescription("Danza tradicional andina con pasos clásicos y vestuario típico");
         tallerDeBambuco.setBasePrice(30000);
         tallerDeBambuco.setDurationMinutes(90);
-        tallerDeBambuco.setImageUrls(List.of("https://visitvalle.travel/wp-content/uploads/2024/08/festival-de-la-bandola-sevilla.webp"));
+        tallerDeBambuco.setImageUrls(
+                List.of("https://visitvalle.travel/wp-content/uploads/2024/08/festival-de-la-bandola-sevilla.webp"));
         tallerDeBambuco.setMaxParticipants(12);
         tallerDeBambuco.setLatitude(4.7109);
         tallerDeBambuco.setLongitude(-74.0721);
@@ -641,7 +664,8 @@ public class DatabaseInit implements CommandLineRunner {
         tallerDeMapale.setDescription("Danza afrocolombiana con tambores y coreografía ancestral");
         tallerDeMapale.setBasePrice(40000);
         tallerDeMapale.setDurationMinutes(90);
-        tallerDeMapale.setImageUrls(List.of("https://regionesnaturalescolombia.com/wp-content/uploads/2023/03/Traje-tipico-de-la-region-insular.png"));
+        tallerDeMapale.setImageUrls(List.of(
+                "https://regionesnaturalescolombia.com/wp-content/uploads/2023/03/Traje-tipico-de-la-region-insular.png"));
         tallerDeMapale.setMaxParticipants(12);
         tallerDeMapale.setLatitude(10.3910);
         tallerDeMapale.setLongitude(-75.4794);
@@ -667,7 +691,8 @@ public class DatabaseInit implements CommandLineRunner {
         tallerDeCeramica.setDescription("Técnicas ancestrales de alfarería con arcillas locales y motivos indígenas");
         tallerDeCeramica.setBasePrice(55000);
         tallerDeCeramica.setDurationMinutes(180);
-        tallerDeCeramica.setImageUrls(List.of("https://media-cdn.tripadvisor.com/media/photo-s/10/c7/82/f1/getlstd-property-photo.jpg"));
+        tallerDeCeramica.setImageUrls(
+                List.of("https://media-cdn.tripadvisor.com/media/photo-s/10/c7/82/f1/getlstd-property-photo.jpg"));
         tallerDeCeramica.setMaxParticipants(8);
         tallerDeCeramica.setLatitude(4.7109);
         tallerDeCeramica.setLongitude(-74.0721);
@@ -680,7 +705,8 @@ public class DatabaseInit implements CommandLineRunner {
         tallerDeTextiles.setDescription("Tejido tradicional wayuu con técnicas milenarias y colores naturales");
         tallerDeTextiles.setBasePrice(65000);
         tallerDeTextiles.setDurationMinutes(240);
-        tallerDeTextiles.setImageUrls(List.of("https://educafes.com/wp-content/uploads/2018/06/whatsapp-image-2018-06-25-at-4-59-55-pm3.jpeg"));
+        tallerDeTextiles.setImageUrls(List
+                .of("https://educafes.com/wp-content/uploads/2018/06/whatsapp-image-2018-06-25-at-4-59-55-pm3.jpeg"));
         tallerDeTextiles.setMaxParticipants(6);
         tallerDeTextiles.setLatitude(11.5444);
         tallerDeTextiles.setLongitude(-72.9088);
@@ -693,7 +719,8 @@ public class DatabaseInit implements CommandLineRunner {
         tallerDeJoyeria.setDescription("Técnicas de orfebrería inspiradas en culturas Muisca, Tairona y Quimbaya");
         tallerDeJoyeria.setBasePrice(75000);
         tallerDeJoyeria.setDurationMinutes(180);
-        tallerDeJoyeria.setImageUrls(List.of("https://cafedecolombia.us/wp-content/uploads/2024/10/WhatsApp-Image-2024-10-14-at-6.19.32-PM-scaled.jpeg"));
+        tallerDeJoyeria.setImageUrls(List.of(
+                "https://cafedecolombia.us/wp-content/uploads/2024/10/WhatsApp-Image-2024-10-14-at-6.19.32-PM-scaled.jpeg"));
         tallerDeJoyeria.setMaxParticipants(6);
         tallerDeJoyeria.setLatitude(4.7109);
         tallerDeJoyeria.setLongitude(-74.0721);
@@ -711,10 +738,12 @@ public class DatabaseInit implements CommandLineRunner {
                 tourCiudadAmurallada.setName("Tour Ciudad Amurallada");
                 tourCiudadAmurallada.setCategory("Tours");
                 tourCiudadAmurallada.setSubcategory("Cultural");
-                tourCiudadAmurallada.setDescription("Recorrido histórico por Cartagena colonial con guía especializado");
+                tourCiudadAmurallada
+                        .setDescription("Recorrido histórico por Cartagena colonial con guía especializado");
                 tourCiudadAmurallada.setBasePrice(65000);
                 tourCiudadAmurallada.setDurationMinutes(180);
-                tourCiudadAmurallada.setImageUrls(List.of("https://viajerofacil.com/wp-content/uploads/2019/07/Webp.net-resizeimage-11-min.jpg"));
+                tourCiudadAmurallada.setImageUrls(
+                        List.of("https://viajerofacil.com/wp-content/uploads/2019/07/Webp.net-resizeimage-11-min.jpg"));
                 tourCiudadAmurallada.setMaxParticipants(15);
                 tourCiudadAmurallada.setLatitude(10.39972);
                 tourCiudadAmurallada.setLongitude(-75.51444);
@@ -727,7 +756,8 @@ public class DatabaseInit implements CommandLineRunner {
                 islasDelRosario.setDescription("Excursión en bote a islas coralinas con snorkel y tiempo de playa");
                 islasDelRosario.setBasePrice(120000);
                 islasDelRosario.setDurationMinutes(480);
-                islasDelRosario.setImageUrls(List.of("https://www.cartagenaexplorer.com/wp-content/uploads/2020/07/Depositphotos_156273740_xl-2015-scaled.jpg"));
+                islasDelRosario.setImageUrls(List.of(
+                        "https://www.cartagenaexplorer.com/wp-content/uploads/2020/07/Depositphotos_156273740_xl-2015-scaled.jpg"));
                 islasDelRosario.setMaxParticipants(15);
                 islasDelRosario.setLatitude(10.1667);
                 islasDelRosario.setLongitude(-75.7500);
@@ -737,10 +767,12 @@ public class DatabaseInit implements CommandLineRunner {
                 palenqueCultural.setName("Palenque Cultural");
                 palenqueCultural.setCategory("Tours");
                 palenqueCultural.setSubcategory("Cultural");
-                palenqueCultural.setDescription("Visita a San Basilio de Palenque, primer pueblo africano libre en América");
+                palenqueCultural
+                        .setDescription("Visita a San Basilio de Palenque, primer pueblo africano libre en América");
                 palenqueCultural.setBasePrice(85000);
                 palenqueCultural.setDurationMinutes(360);
-                palenqueCultural.setImageUrls(List.of("https://turismo.encolombia.com/wp-content/uploads/2019/09/Cartagena-de-Indias.jpg"));
+                palenqueCultural.setImageUrls(
+                        List.of("https://turismo.encolombia.com/wp-content/uploads/2019/09/Cartagena-de-Indias.jpg"));
                 palenqueCultural.setMaxParticipants(12);
                 palenqueCultural.setLatitude(10.2484);
                 palenqueCultural.setLongitude(-75.2070);
@@ -750,10 +782,12 @@ public class DatabaseInit implements CommandLineRunner {
                 ceremoniaDelCacaoSagrado.setName("Ceremonia del Cacao Sagrado");
                 ceremoniaDelCacaoSagrado.setCategory("Experiencia");
                 ceremoniaDelCacaoSagrado.setSubcategory("Ritual");
-                ceremoniaDelCacaoSagrado.setDescription("Ritual ancestral de conexión espiritual con el cacao como medicina sagrada");
+                ceremoniaDelCacaoSagrado
+                        .setDescription("Ritual ancestral de conexión espiritual con el cacao como medicina sagrada");
                 ceremoniaDelCacaoSagrado.setBasePrice(95000);
                 ceremoniaDelCacaoSagrado.setDurationMinutes(120);
-                ceremoniaDelCacaoSagrado.setImageUrls(List.of("https://wakana.es/wp-content/uploads/2019/01/M-OF-W-YogaDSCF0152w.jpg"));
+                ceremoniaDelCacaoSagrado
+                        .setImageUrls(List.of("https://wakana.es/wp-content/uploads/2019/01/M-OF-W-YogaDSCF0152w.jpg"));
                 ceremoniaDelCacaoSagrado.setMaxParticipants(8);
                 ceremoniaDelCacaoSagrado.setLatitude(10.39972);
                 ceremoniaDelCacaoSagrado.setLongitude(-75.51444);
@@ -763,10 +797,12 @@ public class DatabaseInit implements CommandLineRunner {
                 buceoArqueologico.setName("Buceo Arqueológico");
                 buceoArqueologico.setCategory("Tours");
                 buceoArqueologico.setSubcategory("Aventura");
-                buceoArqueologico.setDescription("Inmersiones en sitios arqueológicos submarinos con certificación PADI");
+                buceoArqueologico
+                        .setDescription("Inmersiones en sitios arqueológicos submarinos con certificación PADI");
                 buceoArqueologico.setBasePrice(180000);
                 buceoArqueologico.setDurationMinutes(240);
-                buceoArqueologico.setImageUrls(List.of("https://tutourencartagena.com/wp-content/uploads/2017/01/buceo-en-cartagena-cartagena-colombia-tutourencartagena.jpg"));
+                buceoArqueologico.setImageUrls(List.of(
+                        "https://tutourencartagena.com/wp-content/uploads/2017/01/buceo-en-cartagena-cartagena-colombia-tutourencartagena.jpg"));
                 buceoArqueologico.setMaxParticipants(8);
                 buceoArqueologico.setLatitude(10.39972);
                 buceoArqueologico.setLongitude(-75.51444);
@@ -778,10 +814,12 @@ public class DatabaseInit implements CommandLineRunner {
                 fincaCafeteraTradicional.setName("Finca Cafetera Tradicional");
                 fincaCafeteraTradicional.setCategory("Tours");
                 fincaCafeteraTradicional.setSubcategory("Cultural");
-                fincaCafeteraTradicional.setDescription("Experiencia en finca cafetera con cosecha, procesamiento y degustación");
+                fincaCafeteraTradicional
+                        .setDescription("Experiencia en finca cafetera con cosecha, procesamiento y degustación");
                 fincaCafeteraTradicional.setBasePrice(75000);
                 fincaCafeteraTradicional.setDurationMinutes(240);
-                fincaCafeteraTradicional.setImageUrls(List.of("https://dynamic-media-cdn.tripadvisor.com/media/photo-o/07/19/08/27/finca-el-ocaso-salento.jpg"));
+                fincaCafeteraTradicional.setImageUrls(List.of(
+                        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/07/19/08/27/finca-el-ocaso-salento.jpg"));
                 fincaCafeteraTradicional.setMaxParticipants(15);
                 fincaCafeteraTradicional.setLatitude(4.6370);
                 fincaCafeteraTradicional.setLongitude(-75.5710);
@@ -791,10 +829,12 @@ public class DatabaseInit implements CommandLineRunner {
                 valleDeCocoraPremium.setName("Valle de Cocora Premium");
                 valleDeCocoraPremium.setCategory("Tours");
                 valleDeCocoraPremium.setSubcategory("Naturaleza");
-                valleDeCocoraPremium.setDescription("Trekking privado por bosque de palmas de cera con biólogo especialista");
+                valleDeCocoraPremium
+                        .setDescription("Trekking privado por bosque de palmas de cera con biólogo especialista");
                 valleDeCocoraPremium.setBasePrice(110000);
                 valleDeCocoraPremium.setDurationMinutes(360);
-                valleDeCocoraPremium.setImageUrls(List.of("https://content-viajes.nationalgeographic.com.es/medio/2020/04/03/y-por-fin-el-valle_a092a848_1257x835.jpg"));
+                valleDeCocoraPremium.setImageUrls(List.of(
+                        "https://content-viajes.nationalgeographic.com.es/medio/2020/04/03/y-por-fin-el-valle_a092a848_1257x835.jpg"));
                 valleDeCocoraPremium.setMaxParticipants(12);
                 valleDeCocoraPremium.setLatitude(4.6333);
                 valleDeCocoraPremium.setLongitude(-75.4831);
@@ -804,10 +844,12 @@ public class DatabaseInit implements CommandLineRunner {
                 puebloPatrimonioSalamina.setName("Pueblo Patrimonio Salamina");
                 puebloPatrimonioSalamina.setCategory("Tours");
                 puebloPatrimonioSalamina.setSubcategory("Cultural");
-                puebloPatrimonioSalamina.setDescription("Tour por pueblo colonial con arquitectura tradicional y artesanías");
+                puebloPatrimonioSalamina
+                        .setDescription("Tour por pueblo colonial con arquitectura tradicional y artesanías");
                 puebloPatrimonioSalamina.setBasePrice(55000);
                 puebloPatrimonioSalamina.setDurationMinutes(240);
-                puebloPatrimonioSalamina.setImageUrls(List.of("https://www.infobae.com/new-resizer/GTDQWXVcyONBZkezz8NbuyrMMa4=/arc-anglerfish-arc2-prod-infobae/public/3WMFVPC5OFBF3LI652Z6V4LS2Q.jpg"));
+                puebloPatrimonioSalamina.setImageUrls(List.of(
+                        "https://www.infobae.com/new-resizer/GTDQWXVcyONBZkezz8NbuyrMMa4=/arc-anglerfish-arc2-prod-infobae/public/3WMFVPC5OFBF3LI652Z6V4LS2Q.jpg"));
                 puebloPatrimonioSalamina.setMaxParticipants(15);
                 puebloPatrimonioSalamina.setLatitude(5.4072);
                 puebloPatrimonioSalamina.setLongitude(-75.4881);
@@ -817,10 +859,12 @@ public class DatabaseInit implements CommandLineRunner {
                 cabalgataAndina.setName("Cabalgata Andina");
                 cabalgataAndina.setCategory("Tours");
                 cabalgataAndina.setSubcategory("Aventura");
-                cabalgataAndina.setDescription("Recorrido a caballo por senderos andinos con caballos criollos colombianos");
+                cabalgataAndina
+                        .setDescription("Recorrido a caballo por senderos andinos con caballos criollos colombianos");
                 cabalgataAndina.setBasePrice(100000);
                 cabalgataAndina.setDurationMinutes(240);
-                cabalgataAndina.setImageUrls(List.of("https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTgxMTg3OTI=/original/318d3435-c2ea-4b59-94e9-fba4f10b99cd.jpeg"));
+                cabalgataAndina.setImageUrls(List.of(
+                        "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTgxMTg3OTI=/original/318d3435-c2ea-4b59-94e9-fba4f10b99cd.jpeg"));
                 cabalgataAndina.setMaxParticipants(10);
                 cabalgataAndina.setLatitude(5.070275);
                 cabalgataAndina.setLongitude(-75.513817);
@@ -830,10 +874,12 @@ public class DatabaseInit implements CommandLineRunner {
                 cataDeVinosDeAltura.setName("Cata de Vinos de Altura");
                 cataDeVinosDeAltura.setCategory("Experiencia");
                 cataDeVinosDeAltura.setSubcategory("Gastronomía");
-                cataDeVinosDeAltura.setDescription("Degustación de vinos colombianos de alta montaña con sommelier experto");
+                cataDeVinosDeAltura
+                        .setDescription("Degustación de vinos colombianos de alta montaña con sommelier experto");
                 cataDeVinosDeAltura.setBasePrice(125000);
                 cataDeVinosDeAltura.setDurationMinutes(120);
-                cataDeVinosDeAltura.setImageUrls(List.of("https://raizdeguzman.com/wp-content/uploads/2019/05/vinedos-raiz.png"));
+                cataDeVinosDeAltura
+                        .setImageUrls(List.of("https://raizdeguzman.com/wp-content/uploads/2019/05/vinedos-raiz.png"));
                 cataDeVinosDeAltura.setMaxParticipants(12);
                 cataDeVinosDeAltura.setLatitude(5.070275);
                 cataDeVinosDeAltura.setLongitude(-75.513817);
@@ -845,10 +891,12 @@ public class DatabaseInit implements CommandLineRunner {
                 hoyoSopladorYCuevaMorgan.setName("Hoyo Soplador y Cueva Morgan");
                 hoyoSopladorYCuevaMorgan.setCategory("Tours");
                 hoyoSopladorYCuevaMorgan.setSubcategory("Naturaleza");
-                hoyoSopladorYCuevaMorgan.setDescription("Exploración de géiser natural y cueva de piratas en San Andrés");
+                hoyoSopladorYCuevaMorgan
+                        .setDescription("Exploración de géiser natural y cueva de piratas en San Andrés");
                 hoyoSopladorYCuevaMorgan.setBasePrice(45000);
                 hoyoSopladorYCuevaMorgan.setDurationMinutes(240);
-                hoyoSopladorYCuevaMorgan.setImageUrls(List.of("https://www.regiocantabrorum.es/img/publicaciones/441/cueva_los_tornillos_index.jpg"));
+                hoyoSopladorYCuevaMorgan.setImageUrls(
+                        List.of("https://www.regiocantabrorum.es/img/publicaciones/441/cueva_los_tornillos_index.jpg"));
                 hoyoSopladorYCuevaMorgan.setMaxParticipants(15);
                 hoyoSopladorYCuevaMorgan.setLatitude(12.5847);
                 hoyoSopladorYCuevaMorgan.setLongitude(-81.7005);
@@ -861,7 +909,8 @@ public class DatabaseInit implements CommandLineRunner {
                 culturaRaizal.setDescription("Inmersión en cultura raizal con música, danza y gastronomía auténtica");
                 culturaRaizal.setBasePrice(70000);
                 culturaRaizal.setDurationMinutes(240);
-                culturaRaizal.setImageUrls(List.of("https://regionesnaturalescolombia.com/wp-content/uploads/2023/03/Traje-tipico-de-la-region-insular.png"));
+                culturaRaizal.setImageUrls(List.of(
+                        "https://regionesnaturalescolombia.com/wp-content/uploads/2023/03/Traje-tipico-de-la-region-insular.png"));
                 culturaRaizal.setMaxParticipants(12);
                 culturaRaizal.setLatitude(12.542499);
                 culturaRaizal.setLongitude(-81.718369);
@@ -874,7 +923,8 @@ public class DatabaseInit implements CommandLineRunner {
                 acuarioYJohnnyCay.setDescription("Viaje en bote a acuario natural y playa prístina con snorkel");
                 acuarioYJohnnyCay.setBasePrice(95000);
                 acuarioYJohnnyCay.setDurationMinutes(360);
-                acuarioYJohnnyCay.setImageUrls(List.of("https://www.arserver.info/img/excursions/40/acuario-rio-de-janeiro-aquario-16.jpg"));
+                acuarioYJohnnyCay.setImageUrls(
+                        List.of("https://www.arserver.info/img/excursions/40/acuario-rio-de-janeiro-aquario-16.jpg"));
                 acuarioYJohnnyCay.setMaxParticipants(15);
                 acuarioYJohnnyCay.setLatitude(12.5333);
                 acuarioYJohnnyCay.setLongitude(-81.7167);
@@ -884,10 +934,12 @@ public class DatabaseInit implements CommandLineRunner {
                 safariDeAvesMarinas.setName("Safari de Aves Marinas");
                 safariDeAvesMarinas.setCategory("Tours");
                 safariDeAvesMarinas.setSubcategory("Naturaleza");
-                safariDeAvesMarinas.setDescription("Observación de aves marinas y endémicas del Caribe con ornitólogos");
+                safariDeAvesMarinas
+                        .setDescription("Observación de aves marinas y endémicas del Caribe con ornitólogos");
                 safariDeAvesMarinas.setBasePrice(80000);
                 safariDeAvesMarinas.setDurationMinutes(300);
-                safariDeAvesMarinas.setImageUrls(List.of("https://cdn.prod.website-files.com/64df6dd37ac6a0dbb9d03cb3/659bfb376102d36e421df403_6-resultado.jpeg"));
+                safariDeAvesMarinas.setImageUrls(List.of(
+                        "https://cdn.prod.website-files.com/64df6dd37ac6a0dbb9d03cb3/659bfb376102d36e421df403_6-resultado.jpeg"));
                 safariDeAvesMarinas.setMaxParticipants(12);
                 safariDeAvesMarinas.setLatitude(12.542499);
                 safariDeAvesMarinas.setLongitude(-81.718369);
@@ -897,10 +949,12 @@ public class DatabaseInit implements CommandLineRunner {
                 vueloEnParapente.setName("Vuelo en Parapente");
                 vueloEnParapente.setCategory("Tours");
                 vueloEnParapente.setSubcategory("Aventura");
-                vueloEnParapente.setDescription("Vuelo en parapente biplaza sobre el mar de siete colores con instructor certificado");
+                vueloEnParapente.setDescription(
+                        "Vuelo en parapente biplaza sobre el mar de siete colores con instructor certificado");
                 vueloEnParapente.setBasePrice(200000);
                 vueloEnParapente.setDurationMinutes(120);
-                vueloEnParapente.setImageUrls(List.of("https://www.esariri.com/wp-content/uploads/2022/09/296122789_3527452994148567_1098327290177545856_n.jpg"));
+                vueloEnParapente.setImageUrls(List.of(
+                        "https://www.esariri.com/wp-content/uploads/2022/09/296122789_3527452994148567_1098327290177545856_n.jpg"));
                 vueloEnParapente.setMaxParticipants(2);
                 vueloEnParapente.setLatitude(12.542499);
                 vueloEnParapente.setLongitude(-81.718369);
@@ -915,7 +969,8 @@ public class DatabaseInit implements CommandLineRunner {
                 tayronaAncestral.setDescription("Caminata a sitios arqueológicos indígenas Tayrona con guías nativos");
                 tayronaAncestral.setBasePrice(90000);
                 tayronaAncestral.setDurationMinutes(480);
-                tayronaAncestral.setImageUrls(List.of("https://ciudadperdidacolombia.com/wp-content/uploads/2023/12/todo-sobre-los-tairona.jpg"));
+                tayronaAncestral.setImageUrls(List
+                        .of("https://ciudadperdidacolombia.com/wp-content/uploads/2023/12/todo-sobre-los-tairona.jpg"));
                 tayronaAncestral.setMaxParticipants(12);
                 tayronaAncestral.setLatitude(11.3088);
                 tayronaAncestral.setLongitude(-73.9650);
@@ -925,10 +980,12 @@ public class DatabaseInit implements CommandLineRunner {
                 ciudadPerdidaTeyuna.setName("Ciudad Perdida Teyuna");
                 ciudadPerdidaTeyuna.setCategory("Tours");
                 ciudadPerdidaTeyuna.setSubcategory("Aventura");
-                ciudadPerdidaTeyuna.setDescription("Expedición de 4 días a la Ciudad Perdida con guías indígenas Kogui");
+                ciudadPerdidaTeyuna
+                        .setDescription("Expedición de 4 días a la Ciudad Perdida con guías indígenas Kogui");
                 ciudadPerdidaTeyuna.setBasePrice(450000);
                 ciudadPerdidaTeyuna.setDurationMinutes(5760);
-                ciudadPerdidaTeyuna.setImageUrls(List.of("https://content-viajes.nationalgeographic.com.es/medio/2019/09/16/istock-501625632_0eac7a9a_1200x630.jpg"));
+                ciudadPerdidaTeyuna.setImageUrls(List.of(
+                        "https://content-viajes.nationalgeographic.com.es/medio/2019/09/16/istock-501625632_0eac7a9a_1200x630.jpg"));
                 ciudadPerdidaTeyuna.setMaxParticipants(12);
                 ciudadPerdidaTeyuna.setLatitude(11.2442);
                 ciudadPerdidaTeyuna.setLongitude(-73.7256);
@@ -938,10 +995,12 @@ public class DatabaseInit implements CommandLineRunner {
                 avistamientoAvesSierraNevada.setName("Avistamiento Aves Sierra Nevada");
                 avistamientoAvesSierraNevada.setCategory("Tours");
                 avistamientoAvesSierraNevada.setSubcategory("Naturaleza");
-                avistamientoAvesSierraNevada.setDescription("Observación de aves en la cordillera costera más alta del mundo");
+                avistamientoAvesSierraNevada
+                        .setDescription("Observación de aves en la cordillera costera más alta del mundo");
                 avistamientoAvesSierraNevada.setBasePrice(75000);
                 avistamientoAvesSierraNevada.setDurationMinutes(300);
-                avistamientoAvesSierraNevada.setImageUrls(List.of("https://media.istockphoto.com/id/153187546/es/foto/p%C3%A1jaro-watcher-silueta.jpg"));
+                avistamientoAvesSierraNevada.setImageUrls(
+                        List.of("https://media.istockphoto.com/id/153187546/es/foto/p%C3%A1jaro-watcher-silueta.jpg"));
                 avistamientoAvesSierraNevada.setMaxParticipants(10);
                 avistamientoAvesSierraNevada.setLatitude(10.8400);
                 avistamientoAvesSierraNevada.setLongitude(-73.7200);
@@ -951,10 +1010,12 @@ public class DatabaseInit implements CommandLineRunner {
                 temazcalAncestral.setName("Temazcal Ancestral");
                 temazcalAncestral.setCategory("Experiencia");
                 temazcalAncestral.setSubcategory("Ritual");
-                temazcalAncestral.setDescription("Ceremonia de purificación en casa de sudor tradicional con plantas medicinales");
+                temazcalAncestral.setDescription(
+                        "Ceremonia de purificación en casa de sudor tradicional con plantas medicinales");
                 temazcalAncestral.setBasePrice(115000);
                 temazcalAncestral.setDurationMinutes(180);
-                temazcalAncestral.setImageUrls(List.of("https://blumont.org/wp-content/uploads/2020/02/Apagada-del-fuego_17_VPeretti-1024x683.jpg"));
+                temazcalAncestral.setImageUrls(List.of(
+                        "https://blumont.org/wp-content/uploads/2020/02/Apagada-del-fuego_17_VPeretti-1024x683.jpg"));
                 temazcalAncestral.setMaxParticipants(8);
                 temazcalAncestral.setLatitude(11.24079);
                 temazcalAncestral.setLongitude(-74.19904);
@@ -967,7 +1028,8 @@ public class DatabaseInit implements CommandLineRunner {
                 rappelEnCascadas.setDescription("Descenso en rappel por cascadas naturales con equipo profesional");
                 rappelEnCascadas.setBasePrice(160000);
                 rappelEnCascadas.setDurationMinutes(240);
-                rappelEnCascadas.setImageUrls(List.of("https://colombiavisible.com/wp-content/uploads/2023/04/Senderismo-Bogota-1-1024x576.jpg"));
+                rappelEnCascadas.setImageUrls(List
+                        .of("https://colombiavisible.com/wp-content/uploads/2023/04/Senderismo-Bogota-1-1024x576.jpg"));
                 rappelEnCascadas.setMaxParticipants(8);
                 rappelEnCascadas.setLatitude(11.24079);
                 rappelEnCascadas.setLongitude(-74.19904);
@@ -979,10 +1041,12 @@ public class DatabaseInit implements CommandLineRunner {
                 rutaDeLosFosiles.setName("Ruta de los Fósiles");
                 rutaDeLosFosiles.setCategory("Tours");
                 rutaDeLosFosiles.setSubcategory("Educativo");
-                rutaDeLosFosiles.setDescription("Tour paleontológico con descubrimientos de fósiles y museos especializados");
+                rutaDeLosFosiles
+                        .setDescription("Tour paleontológico con descubrimientos de fósiles y museos especializados");
                 rutaDeLosFosiles.setBasePrice(55000);
                 rutaDeLosFosiles.setDurationMinutes(240);
-                rutaDeLosFosiles.setImageUrls(List.of("https://humanidades.com/wp-content/uploads/2018/09/fosiles-e1579375905679.jpg"));
+                rutaDeLosFosiles.setImageUrls(
+                        List.of("https://humanidades.com/wp-content/uploads/2018/09/fosiles-e1579375905679.jpg"));
                 rutaDeLosFosiles.setMaxParticipants(15);
                 rutaDeLosFosiles.setLatitude(5.6333);
                 rutaDeLosFosiles.setLongitude(-73.5333);
@@ -992,7 +1056,8 @@ public class DatabaseInit implements CommandLineRunner {
                 observatorioAstronomicoMuisca.setName("Observatorio Astronómico Muisca");
                 observatorioAstronomicoMuisca.setCategory("Tours");
                 observatorioAstronomicoMuisca.setSubcategory("Cultural");
-                observatorioAstronomicoMuisca.setDescription("Observación estelar combinada con cosmogonía muisca en observatorio");
+                observatorioAstronomicoMuisca
+                        .setDescription("Observación estelar combinada con cosmogonía muisca en observatorio");
                 observatorioAstronomicoMuisca.setBasePrice(65000);
                 observatorioAstronomicoMuisca.setDurationMinutes(180);
                 observatorioAstronomicoMuisca.setImageUrls(List.of("https://pbs.twimg.com/media/DUa0PLFUQAAlYJl.jpg"));
@@ -1008,7 +1073,8 @@ public class DatabaseInit implements CommandLineRunner {
                 vinedosBoyacenses.setDescription("Tour de degustación de vinos en viñedos de alta altitud de Boyacá");
                 vinedosBoyacenses.setBasePrice(85000);
                 vinedosBoyacenses.setDurationMinutes(240);
-                vinedosBoyacenses.setImageUrls(List.of("https://raizdeguzman.com/wp-content/uploads/2019/05/vinedos-raiz.png"));
+                vinedosBoyacenses
+                        .setImageUrls(List.of("https://raizdeguzman.com/wp-content/uploads/2019/05/vinedos-raiz.png"));
                 vinedosBoyacenses.setMaxParticipants(12);
                 vinedosBoyacenses.setLatitude(5.7833);
                 vinedosBoyacenses.setLongitude(-73.0167);
@@ -1018,10 +1084,12 @@ public class DatabaseInit implements CommandLineRunner {
                 consultaConChaman.setName("Consulta con Chamán");
                 consultaConChaman.setCategory("Experiencia");
                 consultaConChaman.setSubcategory("Sanación");
-                consultaConChaman.setDescription("Sesión de sanación tradicional con chamán autorizado de comunidades locales");
+                consultaConChaman
+                        .setDescription("Sesión de sanación tradicional con chamán autorizado de comunidades locales");
                 consultaConChaman.setBasePrice(150000);
                 consultaConChaman.setDurationMinutes(90);
-                consultaConChaman.setImageUrls(List.of("https://www.cric-colombia.org/portal/wp-content/uploads/2024/06/IMG-20240621-WA0120-scaled.jpg"));
+                consultaConChaman.setImageUrls(List.of(
+                        "https://www.cric-colombia.org/portal/wp-content/uploads/2024/06/IMG-20240621-WA0120-scaled.jpg"));
                 consultaConChaman.setMaxParticipants(1);
                 consultaConChaman.setLatitude(5.6333);
                 consultaConChaman.setLongitude(-73.5333);
@@ -1034,7 +1102,8 @@ public class DatabaseInit implements CommandLineRunner {
                 retiroDeContemplacion.setDescription("Retiro de silencio y meditación en entornos naturales sagrados");
                 retiroDeContemplacion.setBasePrice(95000);
                 retiroDeContemplacion.setDurationMinutes(480);
-                retiroDeContemplacion.setImageUrls(List.of("https://elsolazsuites.com/wp-content/uploads/2022/06/ecoturismo-en-villa-de-leyva.jpg"));
+                retiroDeContemplacion.setImageUrls(List
+                        .of("https://elsolazsuites.com/wp-content/uploads/2022/06/ecoturismo-en-villa-de-leyva.jpg"));
                 retiroDeContemplacion.setMaxParticipants(8);
                 retiroDeContemplacion.setLatitude(5.6333);
                 retiroDeContemplacion.setLongitude(-73.5333);
@@ -1060,40 +1129,74 @@ public class DatabaseInit implements CommandLineRunner {
         return copy;
     }
 
-    private void createSampleSchedules() {
+    private void createSampleSchedules(List<ServiceOffering> services) {
         LocalDate baseDate = LocalDate.now();
-
-        // Crear schedules para algunos servicios destacados
-        List<String> servicesForSchedules = List.of(
-                "Ceremonia del Cacao Sagrado",
-                "Taller de Cumbia",
-                "Bandeja Paisa Auténtica",
-                "Tour Ciudad Amurallada",
-                "Finca Cafetera Tradicional",
-                "Acuario y Johnny Cay",
-                "Tayrona Ancestral",
-                "Observatorio Astronómico Muisca");
-
-        for (String serviceName : servicesForSchedules) {
-            createScheduleForService(serviceName, baseDate.plusDays(1), LocalTime.of(9, 0), 7);
+        for (ServiceOffering serviceName : services) {
+            createScheduleForService(serviceName, LocalTime.of(9, 0));
         }
     }
 
-    private void createScheduleForService(String serviceName, LocalDate startDate, LocalTime time, int days) {
+    private void createScheduleForService(ServiceOffering service, LocalTime time) {
+        String serviceName = service.getName();
         List<ServiceOffering> services = serviceRepository.findAll().stream()
                 .filter(s -> serviceName.equalsIgnoreCase(s.getName()))
                 .toList();
 
-        for (ServiceOffering service : services) {
-            ServiceSchedule schedule = new ServiceSchedule();
-            schedule.setService(service);
-            schedule.setDaysOfWeek(Set.of(ServiceSchedule.DayWeek.DAILY));
-            schedule.setStartTime(time);
-            schedule.setEndTime(time.plusMinutes(service.getDurationMinutes()));
-            schedule.setActive(true);
-
-            scheduleService.seedSchedules(schedule, days);
+        for (ServiceOffering serv : services) {
+            setScheduleByCategory(serv, time);
         }
+    }
+
+    private void setScheduleByCategory(ServiceOffering serv, LocalTime time) {
+        int duration = Math.max(30, serv.getDurationMinutes());
+
+        List<ServiceSchedule> schedules = switch (serv.getCategory()) {
+            case "Cultural" -> List.of(
+                    buildSchedule(serv, time, EnumSet.of(
+                            ServiceSchedule.DayWeek.MONDAY,
+                            ServiceSchedule.DayWeek.TUESDAY,
+                            ServiceSchedule.DayWeek.WEDNESDAY,
+                            ServiceSchedule.DayWeek.THURSDAY,
+                            ServiceSchedule.DayWeek.FRIDAY), duration),
+                    buildSchedule(serv, time.plusHours(2), EnumSet.of(
+                            ServiceSchedule.DayWeek.SATURDAY,
+                            ServiceSchedule.DayWeek.SUNDAY), duration));
+            case "Experiencia" -> List.of(
+                    buildSchedule(serv, time.plusHours(1), EnumSet.of(
+                            ServiceSchedule.DayWeek.THURSDAY,
+                            ServiceSchedule.DayWeek.FRIDAY), duration),
+                    buildSchedule(serv, time.plusHours(3), EnumSet.of(
+                            ServiceSchedule.DayWeek.SATURDAY), duration));
+            case "Gastronomía" -> List.of(
+                    buildSchedule(serv, time, EnumSet.of(ServiceSchedule.DayWeek.DAILY), duration),
+                    buildSchedule(serv, time.plusHours(6), EnumSet.of(ServiceSchedule.DayWeek.DAILY), duration));
+            case "Tours" -> List.of(
+                    buildSchedule(serv, time, EnumSet.of(
+                            ServiceSchedule.DayWeek.MONDAY,
+                            ServiceSchedule.DayWeek.WEDNESDAY,
+                            ServiceSchedule.DayWeek.FRIDAY), duration),
+                    buildSchedule(serv, time.plusHours(4), EnumSet.of(
+                            ServiceSchedule.DayWeek.TUESDAY,
+                            ServiceSchedule.DayWeek.THURSDAY,
+                            ServiceSchedule.DayWeek.SATURDAY), duration));
+            default -> List.of(
+                    buildSchedule(serv, time, EnumSet.of(ServiceSchedule.DayWeek.DAILY), duration));
+        };
+
+        schedules.forEach(scheduleService::save);
+    }
+
+    private ServiceSchedule buildSchedule(ServiceOffering service,
+            LocalTime start,
+            EnumSet<ServiceSchedule.DayWeek> days,
+            int durationMinutes) {
+        ServiceSchedule schedule = new ServiceSchedule();
+        schedule.setService(service);
+        schedule.setDaysOfWeek(EnumSet.copyOf(days));
+        schedule.setStartTime(start);
+        schedule.setEndTime(start.plusMinutes(durationMinutes));
+        schedule.setActive(true);
+        return schedule;
     }
 
     // Métodos auxiliares originales

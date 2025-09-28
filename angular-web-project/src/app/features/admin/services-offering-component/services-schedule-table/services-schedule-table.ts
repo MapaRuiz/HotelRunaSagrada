@@ -36,8 +36,20 @@ export class ServicesScheduleTable implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['schedules']) {
-      this.rowData = [...(this.schedules ?? [])];
-      this.refreshRowData();
+      const next = [...(this.schedules ?? [])];
+      if (this.gridApi) {
+        const nextIds = new Set(next.map(s => s.id));
+        const removed = this.rowData.filter(r => !nextIds.has(r.id));
+
+        this.rowData = next;
+        if (removed.length) {
+          this.gridApi.applyTransaction({ remove: removed });
+        } else {
+          this.gridApi.setGridOption('rowData', this.rowData);
+        }
+      } else {
+        this.rowData = next;
+      }
     }
     if (changes['showActions']) {
       this.updateColumnDefs();
@@ -51,6 +63,7 @@ export class ServicesScheduleTable implements OnChanges {
     columnDefs: this.buildColumnDefs(),
     onGridReady: params => {
       this.gridApi = params.api;
+      params.api.setGridOption('rowData', this.rowData);
       params.api.sizeColumnsToFit();
     }
   };

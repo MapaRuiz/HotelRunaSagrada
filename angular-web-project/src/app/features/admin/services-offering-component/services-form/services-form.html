@@ -233,6 +233,17 @@
       </div>
     </div>
 
+    <div class="col-12">
+      <label class="form-label">Horarios</label>
+      <app-services-schedule-table
+        [schedules]="draft.schedules || []"
+        [showActions]="true"
+        (editRequested)="editSchedule($event)"
+        (deleteRequested)="deleteSchedule($event)"
+      >
+      </app-services-schedule-table>
+    </div>
+
     <ng-template #noImages>
       <div class="text-muted fst-italic">No hay imágenes todavía.</div>
     </ng-template>

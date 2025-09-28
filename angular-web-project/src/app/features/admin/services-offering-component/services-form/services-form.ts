@@ -2,11 +2,18 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ServiceOffering } from '../../../../model/service-offering';
+import { ServicesScheduleTable } from "../services-schedule-table/services-schedule-table";
+import { ServiceSchedule } from '../../../../model/service-schedule';
+
+export interface ServicesFormPayload {
+  draft: Partial<ServiceOffering>;
+  deleteIds: number[];
+}
 
 @Component({
   selector: 'app-services-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ServicesScheduleTable],
   templateUrl: './services-form.html',
   styleUrls: ['./services-form.css']
 })
@@ -17,12 +24,15 @@ export class ServicesFormComponent {
   @Input() hotels: { id: number; name: string }[] = [];
   @Input() loading = false;
   @Output() cancel = new EventEmitter<void>();
-  @Output() save = new EventEmitter<Partial<ServiceOffering>>();
+  @Output() save = new EventEmitter<ServicesFormPayload>();
 
   newImageUrl = '';
   imageStatus: ('idle' | 'loaded' | 'error')[] = [];
   displayMode: 'carousel' | 'list' = 'carousel';
   activeSlide = 0;
+  pendingDeletes = new Set<number>();
+
+  constructor() {}
 
   get carouselId(): string {
     const id = this.draft.id ?? 'temp';
@@ -33,7 +43,16 @@ export class ServicesFormComponent {
     this.syncImageStatus();
   }
 
-  submit(): void { this.save.emit(this.draft); }
+  submit(): void {
+    const deleteIds = Array.from(this.pendingDeletes);
+    console.log('[ServicesForm] submit', { draft: this.draft, deleteIds });
+
+    this.pendingDeletes.clear();
+    this.save.emit({
+      draft: { ...this.draft },
+      deleteIds
+    });
+  }
 
   addImage(): void {
     const url = this.newImageUrl.trim();
@@ -75,6 +94,20 @@ export class ServicesFormComponent {
     const n = this.draft.image_urls?.length ?? 0;
     if (n === 0) return;
     this.activeSlide = (this.activeSlide + 1) % n;
+  }
+
+  deleteSchedule(schedule: ServiceSchedule): void {
+    const previous = this.draft.schedules ?? [];
+    this.draft = { 
+      ...this.draft, 
+      schedules: previous.filter(item => item.id !== schedule.id) 
+    };
+    this.pendingDeletes.add(schedule.id);
+    console.log(this.pendingDeletes);
+  }
+
+  editSchedule($event: ServiceSchedule) {
+
   }
 
   private syncImageStatus(): void {
