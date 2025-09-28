@@ -6,7 +6,6 @@ import com.runasagrada.hotelapi.repository.AmenityRepository;
 import com.runasagrada.hotelapi.repository.HotelRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
