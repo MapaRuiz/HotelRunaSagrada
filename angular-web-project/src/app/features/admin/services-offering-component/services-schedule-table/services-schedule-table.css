@@ -1,0 +1,18 @@
+.schedule-toolbar {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 1rem;
+}
+
+.schedule-toolbar input[type='search'] {
+  max-width: 280px;
+  width: 100%;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.schedule-grid {
+  width: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+}
