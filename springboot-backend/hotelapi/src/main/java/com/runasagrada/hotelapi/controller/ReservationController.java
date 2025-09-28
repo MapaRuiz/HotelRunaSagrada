@@ -1,0 +1,85 @@
+package com.runasagrada.hotelapi.controller;
+
+import com.runasagrada.hotelapi.model.Reservation;
+import com.runasagrada.hotelapi.service.ReservationService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/reservations")
+@CrossOrigin(origins = "http://localhost:4200")
+@RequiredArgsConstructor
+public class ReservationController {
+
+    private final ReservationService service;
+
+    @GetMapping
+    public List<Reservation> all(@RequestParam(required = false) Integer userId) {
+        if (userId != null)
+            return service.findByUser(userId);
+        return service.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Reservation> one(@PathVariable Integer id) {
+        return service.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // ---------- Helpers para leer el payload a pelo ----------
+    private Integer asInt(Object o) {
+        return (o == null) ? null : (o instanceof Number n ? n.intValue() : Integer.valueOf(o.toString()));
+    }
+
+    private Long asLong(Object o) {
+        return (o == null) ? null : (o instanceof Number n ? n.longValue() : Long.valueOf(o.toString()));
+    }
+
+    private LocalDate asDate(Object o) {
+        return (o == null) ? null : LocalDate.parse(o.toString());
+    }
+
+    private Reservation.Status asStatus(Object o) {
+        return (o == null) ? null : Reservation.Status.valueOf(o.toString());
+    }
+
+    @PostMapping
+    public ResponseEntity<Reservation> create(@RequestBody Map<String, Object> body) {
+        Integer userId = asInt(body.get("userId"));
+        Long hotelId = asLong(body.get("hotelId"));
+        Integer roomId = asInt(body.get("roomId"));
+        LocalDate checkIn = asDate(body.get("checkIn"));
+        LocalDate checkOut = asDate(body.get("checkOut"));
+        Reservation.Status status = asStatus(body.get("status")); // puede venir null
+
+        Reservation created = service.create(userId, hotelId, roomId, checkIn, checkOut, status);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Reservation> update(@PathVariable Integer id,
+            @RequestBody Map<String, Object> body) {
+        Integer userId = asInt(body.get("userId")); // opcional
+        Long hotelId = asLong(body.get("hotelId")); // opcional
+        Integer roomId = asInt(body.get("roomId")); // opcional
+        LocalDate checkIn = asDate(body.get("checkIn")); // opcional
+        LocalDate checkOut = asDate(body.get("checkOut")); // opcional
+        Reservation.Status status = asStatus(body.get("status")); // opcional
+
+        Reservation updated = service.update(id, userId, hotelId, roomId, checkIn, checkOut, status);
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+}
