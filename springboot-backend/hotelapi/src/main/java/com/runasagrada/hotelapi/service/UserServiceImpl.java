@@ -24,18 +24,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private RoleRepository roles;
     @Autowired
-    private JdbcTemplate jdbc;
-
-    private void resyncIdentity(String table, String idCol) {
-        try {
-            Integer max = jdbc.queryForObject(
-                    "SELECT COALESCE(MAX(" + idCol + "),0) FROM " + table, Integer.class);
-            int next = (max == null ? 0 : max) + 1;
-            jdbc.execute("ALTER TABLE " + table + " ALTER COLUMN " + idCol + " RESTART WITH " + next);
-        } catch (Exception ignored) {
-            // Si no es H2 u otra BD no soporta el ALTER, se ignora silenciosamente.
-        }
-    }
+    private ServiceHelper helper;
 
     @Override
     public User register(User u, String roleName) {
@@ -43,7 +32,7 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("email in use");
         Role r = roles.findByName(roleName == null ? "CLIENT" : roleName).orElseThrow();
         u.getRoles().add(r);
-        resyncIdentity("users", "user_id");
+        helper.resyncIdentity("users", "user_id");
         return users.save(u);
     }
 
@@ -84,7 +73,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void delete(Integer id) {
         users.deleteById(id);
-        resyncIdentity("users", "user_id");
+        helper.resyncIdentity("users", "user_id");
     }
 
     @Override

@@ -18,6 +18,9 @@ public class ServiceScheduleServiceImpl implements ServiceScheduleService {
     @Autowired
     private ServiceScheduleRepository serviceScheduleRepository;
 
+    @Autowired
+    private ServiceHelper helper;
+
     @Override
     public List<ServiceSchedule> findByService(ServiceOffering service) {
         return serviceScheduleRepository.findByService(service);
@@ -35,11 +38,13 @@ public class ServiceScheduleServiceImpl implements ServiceScheduleService {
 
     @Override
     public void save(ServiceSchedule serviceSchedule) {
+        helper.resyncIdentity("service_schedules", "service_schedule_id");
         serviceScheduleRepository.save(serviceSchedule);
     }
 
     @Override
     public void delete(Long id) {
+        helper.resyncIdentity("service_schedules", "service_schedule_id");
         serviceScheduleRepository.deleteById(id);
     }
 

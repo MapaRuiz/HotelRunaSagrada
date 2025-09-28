@@ -156,7 +156,8 @@ export class ServicesTableTest {
           valueGetter: (row: ServiceOffering) => row.hotel?.name.slice(12),
           title: 'Hoteles'
         },
-        valueGetter: params => params.data?.hotel?.name.slice(12)
+        valueGetter: params => params.data?.hotel?.name.slice(12),
+        maxWidth: 150
       },
       {
         headerName: 'Actions',

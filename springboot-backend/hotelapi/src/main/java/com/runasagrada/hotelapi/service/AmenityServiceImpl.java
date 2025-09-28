@@ -22,19 +22,9 @@ public class AmenityServiceImpl implements AmenityService {
 
     @Autowired
     private HotelRepository hotels;
-    @Autowired
-    private JdbcTemplate jdbc;
 
-    private void resyncIdentity(String table, String idCol) {
-        try {
-            Integer max = jdbc.queryForObject(
-                    "SELECT COALESCE(MAX(" + idCol + "),0) FROM " + table, Integer.class);
-            int next = (max == null ? 0 : max) + 1;
-            jdbc.execute("ALTER TABLE " + table + " ALTER COLUMN " + idCol + " RESTART WITH " + next);
-        } catch (Exception ignored) {
-            // Si no es H2 u otra BD no soporta el ALTER, se ignora silenciosamente.
-        }
-    }
+    @Autowired
+    private ServiceHelper helper;
 
     @Override
     @Transactional(readOnly = true)
@@ -50,7 +40,7 @@ public class AmenityServiceImpl implements AmenityService {
             throw new IllegalArgumentException("Amenity type is required");
         if (amenities.existsByName(a.getName()))
             throw new IllegalArgumentException("Amenity already exists");
-        resyncIdentity("amenities", "amenity_id");
+        helper.resyncIdentity("amenities", "amenity_id");
         return amenities.save(a);
     }
 
@@ -76,6 +66,6 @@ public class AmenityServiceImpl implements AmenityService {
         }
         hotels.saveAll(withAmenity);
         amenities.delete(a);
-        resyncIdentity("amenities", "amenity_id");
+        helper.resyncIdentity("amenities", "amenity_id");
     }
 }
