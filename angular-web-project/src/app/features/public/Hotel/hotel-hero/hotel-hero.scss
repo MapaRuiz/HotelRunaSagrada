@@ -68,6 +68,14 @@
     display: block;
   }
 
+    .hero-section {
+      height: var(--scroll-height, 20svh);
+      /* el mismo valor que pasas por [style.--scroll-height] */
+      min-height: 120svh;
+      /* por si reduces scrollHeight */
+      position: relative;
+      display: block; }
+
   .hero-supports {
     position: fixed;
     top: 0;
@@ -93,7 +101,8 @@
     --x: 0;
     --scale: 1;
 
-    position: fixed;
+    position: sticky;
+    top: 0;
     inset: 0;
     width: 100vw;
     height: 100svh;
@@ -108,11 +117,6 @@
     gap: var(--gap);
     padding: max(12px, 1.2vmin);
     box-sizing: border-box;
-  }
-
-  .hero-spacer {
-    /* este div empuja el resto del contenido para que el scroll del hero tenga espacio */
-    height: var(--scroll-height);
   }
 
   .tile {

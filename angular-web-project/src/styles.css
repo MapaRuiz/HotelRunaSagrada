@@ -8,10 +8,25 @@
   --page-bg: #f2f3ed; /* de la paleta */
   --text-ink: #151513;
 
+  --font-title: 'Quantico', system-ui, sans-serif;
+  --font-body: 'Lato', system-ui, sans-serif;
 }
 body {
   background: var(--page-bg);
   color: var(--text-ink);
+}
+
+html,
+body {
+  font-family: var(--font-body);
+}
+h1,
+h2,
+h3,
+.display,
+.title {
+  font-family: var(--font-title);
+  letter-spacing: 0.2px;
 }
 
 .auth-card {

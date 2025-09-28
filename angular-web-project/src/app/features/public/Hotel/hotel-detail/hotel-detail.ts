@@ -2,52 +2,42 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 
-import { HotelHeroComponent } from '../hotel-hero/hotel-hero';
 import { HotelsService } from '../../../../services/hotels';
+import { Hotel } from '../../../../model/hotel';                // 👈 usa el modelo correcto
+import { HotelHeroComponent } from '../hotel-hero/hotel-hero';  // igual que antes
+import { HotelAmenitiesComponent } from '../hotel-amenities/hotel-amenities';
 import { environment } from '../../../../../environments/environment';
-
-export interface HotelModel {
-  hotel_id?: number;
-  name: string;
-  description?: string;
-  image?: string; // puede venir relativa (/images/...)
-}
 
 @Component({
   standalone: true,
   selector: 'app-hotel-detail',
-  imports: [CommonModule, HotelHeroComponent],
+  imports: [CommonModule, HotelHeroComponent, HotelAmenitiesComponent],
   templateUrl: './hotel-detail.html'
 })
 export class HotelDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
-  private hotelsSvc = inject(HotelsService);
+  private hotels = inject(HotelsService);
 
-  hotel: HotelModel | null = null;
+  hotel: Hotel | null = null;        // 👈 ahora sí con check_in/out y amenities
   gallery: string[] = [];
   backendBase = (environment as any).backendBaseUrl
     || (environment.apiBaseUrl ? environment.apiBaseUrl.replace(/\/api\/?$/, '') : '');
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id') ?? 0);
-    this.hotelsSvc.get(id).subscribe((h: any) => {
-      this.hotel = {
-        hotel_id: h.hotel_id ?? h.hotelId,
-        name: h.name,
-        description: h.description,
-        image: h.image
-      };
-      this.gallery = this.buildGallery(this.hotel);
+    this.hotels.get(id).subscribe(h => {          // 👈 método real del service: get(id)
+      this.hotel = h;
+      this.gallery = this.buildGallery(h);
     });
   }
 
-  private first(h: HotelModel) {
+  private first(h: Hotel) {
     // primera imagen = del hotel (para el centro)
     return h.image ?? '/images/hotels/placeholder.jpg';
   }
 
   /** 8 imágenes por hotel (1 propia + 7 stock relevantes) */
-  private buildGallery(h: HotelModel): string[] {
+  private buildGallery(h: Hotel): string[] {
     switch (h.name) {
       case 'Runa Sagrada Cartagena':
         return [

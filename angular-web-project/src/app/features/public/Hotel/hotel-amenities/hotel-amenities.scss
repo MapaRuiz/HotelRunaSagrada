@@ -1,0 +1,207 @@
+@layer amenities-base {
+
+  /* ------------ container ------------ */
+  .container {
+    max-width: 1140px;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+
+  /* ------------ sección ------------ */
+  .bento-section {
+    --glow-intensity: 0;
+    /* sin glow */
+    padding-block: clamp(1.5rem, 2.5vw, 3rem);
+  }
+
+  /* ------------ header ------------ */
+  .bento-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 1rem 2rem;
+    margin-bottom: clamp(1rem, 2vw, 2rem);
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #0a6847;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      background: #e9f5ef;
+      margin-bottom: 0.5rem;
+      font-family: var(--font-body);
+    }
+
+    .title {
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: clamp(1.6rem, 3.2vw, 2.4rem);
+      margin: 0;
+      line-height: 1.1;
+    }
+
+    .desc {
+      margin: 0.5rem 0 0;
+      max-width: 62ch;
+      color: #4b5563;
+      font-size: clamp(0.95rem, 1.2vw, 1.05rem);
+    }
+
+    .meta {
+      display: flex;
+      gap: 0.5rem;
+      align-items: end;
+      flex-wrap: wrap;
+
+      .chip {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        background: #0a684710;
+        color: #0a6847;
+        border: 1px solid #0a684733;
+        padding: 0.5rem 0.75rem;
+        border-radius: 999px;
+
+        .k {
+          font-weight: 700;
+          font-family: var(--font-title);
+        }
+
+        .v {
+          font-variant-numeric: tabular-nums;
+        }
+      }
+    }
+  }
+
+  /* ------------ grid ------------ */
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+    grid-auto-flow: dense;
+    /* rellena huecos */
+
+    @media (min-width:700px) {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  /* Modo compacto (pocas tarjetas) → jamás deja una “perdida” */
+  .bento-grid.compact .card {
+    grid-column: auto !important;
+    grid-row: auto !important;
+    aspect-ratio: 4/3 !important;
+  }
+
+  /* ------------ card ------------ */
+    .card {
+      --bg: linear-gradient(135deg, #0b1020 0%, #151e30 100%);
+      position: relative;
+      min-height: 190px;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      background-image: var(--bg);
+      background-size: cover;
+      background-position: center;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  
+      /* sin glow morado */
+      &::after {
+        content: none;
+      }
+  
+      /* overlay para legibilidad */
+      .overlay {
+        background: linear-gradient(to top,
+            rgba(0, 0, 0, .35) 0%,
+            rgba(0, 0, 0, .15) 45%,
+            rgba(0, 0, 0, .06) 80%);
+      }
+  
+      /* QUITA la coloración/ sombra general en el body del card */
+      .card-body {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: auto;
+        inset: auto 0 0 auto;
+        padding: 0 !important;
+          margin: 0 !important;
+          border: 0 !important;
+        min-height: 0;
+        display: flex;
+        align-items: flex-end;
+        justify-content: flex-end;
+      }
+  
+      .card-title {
+        margin: 0 !important;
+        border: 0 !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-flex;
+        align-items: center;
+        gap: .2rem;
+        font-family: var(--font-title);
+        font-weight: 600;
+        letter-spacing: .2px;
+        font-size: clamp(.7rem, .4vw + .35rem, .85rem);
+        padding: 0;
+        background: rgba(238, 235, 235, 0.96);
+        color: #0f172a;
+        border-radius: 0;
+        box-shadow: none;
+        text-shadow: none;
+        max-width: 100%;
+      }
+  
+      &:hover {
+        transform: scale(1.03);
+        z-index: 2;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+        border-color: rgba(0, 0, 0, 0.18);
+      }
+    }
+
+  /* ------------ patrón bento “grande” SOLO cuando tú agregues .layout-xl ------------ */
+  /* Así evitamos que con pocas tarjetas quede una alejada del resto */
+  @media (min-width:1024px) {
+    .bento-grid.layout-xl .card:nth-child(3) {
+      grid-column: span 2;
+      grid-row: span 2;
+      aspect-ratio: 1;
+    }
+
+    .bento-grid.layout-xl .card:nth-child(4) {
+      grid-column: 1 / span 2;
+      grid-row: 2 / span 2;
+    }
+
+    .bento-grid.layout-xl .card:nth-child(6) {
+      grid-column: 4;
+      grid-row: 3;
+    }
+
+    /* si NO hay layout-xl, forzamos compacto para que no se “aparte” ninguna */
+    .bento-grid:not(.layout-xl) .card {
+      grid-column: auto !important;
+      grid-row: auto !important;
+      aspect-ratio: 4/3 !important;
+    }
+  }
+
+  /* ------------ reduce motion ------------ */
+  @media (prefers-reduced-motion: reduce) {
+    .card {
+      transition: none;
+    }
+  }
+}

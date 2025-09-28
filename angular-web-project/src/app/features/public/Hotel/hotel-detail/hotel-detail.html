@@ -1,4 +1,13 @@
+<!-- hotel-detail.html -->
 <ng-container *ngIf="hotel as h">
-  <app-hotel-hero [hotel]="h" [images]="gallery" [assetBase]="backendBase" scrollHeight="500svh">
+  <app-hotel-hero [hotel]="h" [images]="gallery" [assetBase]="backendBase" scrollHeight="700svh">
   </app-hotel-hero>
+
+  <app-hotel-amenities
+    class="mt-4"
+    [hotel]="h"
+    [amenities]="h.amenities || []"
+    [assetBase]="backendBase"
+  >
+  </app-hotel-amenities>
 </ng-container>
