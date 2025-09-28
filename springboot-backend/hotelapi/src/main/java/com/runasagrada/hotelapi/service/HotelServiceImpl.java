@@ -6,7 +6,6 @@ import com.runasagrada.hotelapi.repository.AmenityRepository;
 import com.runasagrada.hotelapi.repository.HotelRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,18 +22,7 @@ public class HotelServiceImpl implements HotelService {
     @Autowired
     private AmenityRepository amenities;
     @Autowired
-    private JdbcTemplate jdbc;
-
-    private void resyncIdentity(String table, String idCol) {
-        try {
-            Integer max = jdbc.queryForObject(
-                    "SELECT COALESCE(MAX(" + idCol + "),0) FROM " + table, Integer.class);
-            int next = (max == null ? 0 : max) + 1;
-            jdbc.execute("ALTER TABLE " + table + " ALTER COLUMN " + idCol + " RESTART WITH " + next);
-        } catch (Exception ignored) {
-            // Si no es H2 u otra BD no soporta el ALTER, se ignora silenciosamente.
-        }
-    }
+    private ServiceHelper helper;
 
     @Override
     @Transactional(readOnly = true)
@@ -55,7 +43,7 @@ public class HotelServiceImpl implements HotelService {
             h.setHotelId(null);
         if (amenityIds != null)
             h.setAmenities(resolve(amenityIds));
-        resyncIdentity("hotels", "hotel_id");
+        helper.resyncIdentity("hotels", "hotel_id");
         return hotels.save(h);
     }
 
@@ -93,7 +81,7 @@ public class HotelServiceImpl implements HotelService {
         Hotel db = get(id);
         db.getAmenities().clear();
         hotels.delete(db);
-        resyncIdentity("hotels", "hotel_id");
+        helper.resyncIdentity("hotels", "hotel_id");
     }
 
     private void validate(Hotel h) {

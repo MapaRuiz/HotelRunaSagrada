@@ -22,6 +22,9 @@ public class ServiceOfferingServiceImpl implements ServiceOfferingService {
     @Autowired
     private HotelRepository hotelRepository;
 
+    @Autowired
+    private ServiceHelper helper;
+
     @Override
     public Optional<ServiceOffering> searchById(Long id) {
         return serviceOfferingRepository.findById(id);
@@ -37,11 +40,13 @@ public class ServiceOfferingServiceImpl implements ServiceOfferingService {
         Hotel hotel = hotelRepository.findById(hotelId)
                 .orElseThrow(() -> new EntityNotFoundException("Hotel not found"));
         serviceOffering.setHotel(hotel);
+        helper.resyncIdentity("service_offerings", "service_offering_id");
         serviceOfferingRepository.save(serviceOffering);
     }
 
     @Override
     public void delete(Long id) {
+        helper.resyncIdentity("service_offerings", "service_offering_id");
         serviceOfferingRepository.deleteById(id);
     }
 

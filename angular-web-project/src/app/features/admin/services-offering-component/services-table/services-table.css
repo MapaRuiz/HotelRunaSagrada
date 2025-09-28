@@ -1,90 +1,14 @@
-.table-col-id {
-  white-space: nowrap;
-  min-width: 4rem;
+.services-grid-wrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 300px;
+  height: 100%;
+  max-height: 80vh;
 }
 
-.table-col-name {
-  min-width: 10rem;
-}
-
-.table-col-actions {
-  white-space: nowrap;
-}
-
-.table-col-category,
-.table-col-subcategory {
-  min-width: 7rem;
-}
-
-.table-col-description {
-  min-width: 14rem;
-  word-break: break-word;
-}
-
-.table-col-price {
-  min-width: 7rem;
-}
-
-.table-col-duration,
-.table-col-capacity {
-  min-width: 6rem;
-}
-
-.table-col-coords {
-  min-width: 8rem;
-  white-space: nowrap;
-}
-
-.table-col-actions {
-  min-width: 8rem;
-}
-
-.responsive-table th,
-.responsive-table td {
-  font-size: 0.85rem;
-  vertical-align: middle;
-}
-
-@media (max-width: 991.98px) {
-  .responsive-table th,
-  .responsive-table td {
-    font-size: 0.78rem;
-  }
-}
-
-@media (max-width: 575.98px) {
-  .responsive-table th,
-  .responsive-table td {
-    font-size: 0.72rem;
-  }
-}
-
-@media (min-width: 992px) {
-  .table-col-description {
-    min-width: 18rem;
-  }
-
-  .table-col-name {
-    min-width: 12rem;
-  }
-
-  .responsive-table th,
-  .responsive-table td {
-    font-size: 0.9rem;
-  }
-}
-
-@media (min-width: 1200px) {
-  .table-responsive-md.table-responsive-lg {
-    padding-right: 0.5rem;
-  }
-
-  .table-col-description {
-    min-width: 22rem;
-  }
-
-  .responsive-table th,
-  .responsive-table td {
-    font-size: 0.95rem;
+@media (max-width: 768px) {
+  .services-grid-wrapper {
+    height: auto;
   }
 }

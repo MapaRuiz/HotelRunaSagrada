@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { ServiceOffering } from '../../../../model/service-offering';
+import { ServicesScheduleTable } from "../services-schedule-table/services-schedule-table";
 
 @Component({
   selector: 'app-services-detail',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ServicesScheduleTable],
   templateUrl: './services-detail.html',
   styleUrls: ['./services-detail.css', '../services-form/services-form.css'],
 })
