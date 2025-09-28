@@ -1,0 +1,237 @@
+@layer amenities-base {
+
+  /* ------------ container ------------ */
+  .container {
+    max-width: 1140px;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+
+  /* ------------ sección ------------ */
+  .amenities-section {
+    padding-block: clamp(2rem, 4vw, 4rem);
+  }
+
+  /* ------------ header ------------ */
+  .amenities-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 2rem 3rem;
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #0a6847;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      background: #e9f5ef;
+      margin-bottom: 1rem;
+      font-family: var(--font-body);
+    }
+
+    .title {
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      margin: 0;
+      line-height: 1.1;
+    }
+
+    .desc {
+      margin: 1rem 0 0;
+      max-width: 60ch;
+      color: #4b5563;
+      font-size: clamp(1.2rem, 2vw, 1.4rem);
+      line-height: 1.5;
+    }
+
+    .meta {
+      display: flex;
+      gap: 1rem;
+      align-items: end;
+      flex-wrap: wrap;
+
+      .chip {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        background: #0a684710;
+        color: #0a6847;
+        border: 1px solid #0a684733;
+        padding: 1rem 1.5rem;
+        border-radius: 999px;
+        font-size: 1.1rem;
+
+        .k {
+          font-weight: 700;
+          font-family: var(--font-title);
+        }
+
+        .v {
+          font-variant-numeric: tabular-nums;
+        }
+      }
+    }
+  }
+
+  /* ------------ grid estilo responsive ------------ */
+  .amenities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (min-width: 1024px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (min-width: 1200px) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  /* ------------ card ------------ */
+  .amenity-card {
+    position: relative;
+    height: 200px;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+
+    /* imagen pura */
+    &.image-only {
+      background-size: cover;
+      background-position: center;
+    }
+
+    /* texto sobre fondo blanco */
+    &.white-text {
+      background: #fff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+
+      .card-content {
+        padding: 1.5rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+
+        .card-title {
+          color: #1f2937;
+          font-size: clamp(1rem, 1.5vw, 1.2rem);
+          font-weight: 600;
+          margin: 0;
+          line-height: 1.2;
+        }
+      }
+    }
+
+    /* texto sobre hojas */
+    &.leafy-text {
+      background-size: cover;
+      background-position: center;
+
+      .card-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(34, 77, 52, 0.30);
+      }
+
+      .card-content {
+        position: relative;
+        z-index: 2;
+        padding: 1.5rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+
+        .card-title {
+          color: #fff;
+          font-size: clamp(1rem, 1.5vw, 1.2rem);
+          font-weight: 600;
+          margin: 0;
+          text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+          line-height: 1.2;
+        }
+      }
+    }
+
+    /* relleno de hojas sin texto */
+    &.leafy-filler {
+      background-size: cover;
+      background-position: center;
+
+      .card-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(34, 77, 52, 0.40);
+      }
+    }
+
+    &:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  /* ------------ responsive header ------------ */
+  @media (max-width: 767px) {
+    .amenities-header {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      text-align: center;
+
+      .meta {
+        justify-content: center;
+      }
+    }
+  }
+
+  /* ============== AJUSTES FINALES ============== */
+
+  /* 1) Texto de las cards MÁS CHICO en todas las variantes */
+  .amenity-card .card-content {
+    padding: .65rem .7rem;
+  }
+
+  .amenity-card .card-title {
+    font-family: var(--font-title);
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.08;
+    letter-spacing: .15px;
+    font-size: clamp(.62rem, .35vw + .44rem, .86rem);
+    /* 👈 más pequeño */
+    overflow-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+  }
+
+  /* 2) Forzar BLANCO en texto de hojas (por encima de resets/h3 globales) */
+  .amenity-card.leafy-text .card-content .card-title {
+    color: #fff !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, .55);
+  }
+
+  /* 3) Oscurecer un poco más la superposición en hojas claras */
+  .amenity-card.leafy-text .card-overlay {
+    background: rgba(34, 77, 52, 0.38);
+  }
+
+  /* 4) Texto oscuro explícito en fondo blanco (robusto contra overrides) */
+  .amenity-card.white-text .card-content .card-title {
+    color: #111827 !important;
+    /* gray-900 */
+  }
+}

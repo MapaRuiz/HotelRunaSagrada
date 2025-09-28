@@ -1,0 +1,41 @@
+<section class="amenities-section container">
+  <div class="amenities-header">
+    <div class="left">
+      <span class="eyebrow">AMENIDADES</span>
+      <h2 class="title">{{ hotel.name }}</h2>
+      <p class="desc">{{ hotel.description }}</p>
+    </div>
+
+    <div class="right meta">
+      <div class="chip">
+        <span class="k">Check-in</span>
+        <span class="v">{{ hotel.check_in_after || '15:00' }}</span>
+      </div>
+      <div class="chip">
+        <span class="k">Check-out</span>
+        <span class="v">{{ hotel.check_out_before || '12:00' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="amenities-grid">
+    <div
+      class="amenity-card"
+      *ngFor="let c of cards; let i = index"
+      [ngClass]="{
+        'image-only': c.type === 'image-only',
+        'white-text': c.type === 'white-text',
+        'leafy-text': c.type === 'leafy-text',
+        'leafy-filler': c.type === 'leafy-filler'
+      }"
+      [style.background-image]="c.type !== 'white-text' ? c.bg : null"
+      [style.background-color]="c.type === 'white-text' ? 'white' : null"
+    >
+      <div class="card-overlay" *ngIf="c.type === 'leafy-text' || c.type === 'leafy-filler'"></div>
+
+      <div class="card-content" *ngIf="c.title">
+        <h3 class="card-title">{{ c.title }}</h3>
+      </div>
+    </div>
+  </div>
+</section>

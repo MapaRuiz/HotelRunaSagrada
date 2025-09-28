@@ -32,6 +32,10 @@ public class DatabaseInit implements CommandLineRunner {
     private final RoomTypeRepository roomTypeRepository;
     private final RoomRepository roomRepository;
 
+    // Repositorios para reservas y bloqueos
+    private final ReservationRepository reservationRepo;
+    private final RoomLockRepository roomLockRepo;
+
     @Override
     public void run(String... args) {
         // Datos originales: roles, usuarios y hoteles
@@ -41,13 +45,16 @@ public class DatabaseInit implements CommandLineRunner {
         List<Hotel> hotelList = hotels.findAll();
         seedRoomTypesAndRooms(hotelList);
         seedServicesForAllHotels(hotelList);
+        seedReservations(hotelList);
     }
 
     private void seedBasicData() {
         // --- Roles base ---
         Role adminRole = roleRepo.findByName("ADMIN").orElseGet(() -> roleRepo.save(new Role(null, "ADMIN")));
-        Role operatorRole = roleRepo.findByName("OPERATOR").orElseGet(() -> roleRepo.save(new Role(null, "OPERATOR")));
-        Role clientRole = roleRepo.findByName("CLIENT").orElseGet(() -> roleRepo.save(new Role(null, "CLIENT")));
+        Role operatorRole = roleRepo.findByName("OPERATOR")
+                .orElseGet(() -> roleRepo.save(new Role(null, "OPERATOR")));
+        Role clientRole = roleRepo.findByName("CLIENT")
+                .orElseGet(() -> roleRepo.save(new Role(null, "CLIENT")));
 
         // --- 1 Admin ---
         userRepo.findByEmail("admin@hotel.com").orElseGet(() -> {
@@ -101,7 +108,8 @@ public class DatabaseInit implements CommandLineRunner {
 
             // Crear amenities de ROOM explícitamente
             List<String> roomAmenities = List.of(
-                    "TV", "Aire acondicionado", "Minibar", "Caja fuerte", "Secador de pelo", "Cafetera", "Plancha",
+                    "TV", "Aire acondicionado", "Minibar", "Caja fuerte", "Secador de pelo",
+                    "Cafetera", "Plancha",
                     "Balcon", "Cocineta", "Ropa de cama premium");
             for (String r : roomAmenities) {
                 mustAmenity(A, r);
@@ -117,8 +125,9 @@ public class DatabaseInit implements CommandLineRunner {
             cartagena.setCheckOutBefore("12:00");
             cartagena.setImage("/images/hotels/cartagena.jpg");
             cartagena.setAmenities(amenSet(A,
-                    "Restaurante", "Bar", "Wifi gratis", "Parqueadero gratis", "Traslado aeropuerto", "Gimnasio",
-                    "Spa/Sauna", "Piscina al aire libre", "Aseo diario", "CCTV en zonas comunes",
+                    "Restaurante", "Bar", "Wifi gratis", "Parqueadero gratis",
+                    "Traslado aeropuerto", "Gimnasio",
+                    "Spa/Sauna", "Piscina al aire libre", "Aseo diario", "CCTV",
                     "Terraza", "Salón de eventos"));
 
             Hotel eje = new Hotel();
@@ -132,7 +141,8 @@ public class DatabaseInit implements CommandLineRunner {
             eje.setImage("/images/hotels/ejecafe.webp");
             eje.setAmenities(amenSet(A,
                     "Restaurante", "Desayuno incluido", "Wifi gratis", "Traslado aeropuerto",
-                    "Gimnasio", "Salón de eventos", "Jardín"));
+                    "Gimnasio", "Salón de eventos", "Jardín", "Alojamiento libre de humo",
+                    "Paqueadero gratis"));
 
             Hotel sanandres = new Hotel();
             sanandres.setName("Runa Sagrada San Andrés");
@@ -144,7 +154,8 @@ public class DatabaseInit implements CommandLineRunner {
             sanandres.setCheckOutBefore("12:00");
             sanandres.setImage("/images/hotels/sanandres.webp");
             sanandres.setAmenities(amenSet(A,
-                    "Desayuno incluido", "Wifi gratis", "Parqueadero gratis", "Piscina al aire libre",
+                    "Desayuno incluido", "Wifi gratis", "Parqueadero gratis",
+                    "Piscina al aire libre",
                     "Jacuzzi", "Frente a la playa", "Spa/Sauna", "Aseo diario"));
 
             Hotel santamarta = new Hotel();
@@ -158,7 +169,7 @@ public class DatabaseInit implements CommandLineRunner {
             santamarta.setImage("/images/hotels/santamarta.jpg");
             santamarta.setAmenities(amenSet(A,
                     "Restaurante", "Bar", "Wifi gratis", "Traslado aeropuerto", "Terraza", "Jardín",
-                    "Alojamiento libre de humo"));
+                    "Alojamiento libre de humo", "Spa/Sauna", "Desayuno incluido"));
 
             Hotel leyva = new Hotel();
             leyva.setName("Runa Sagrada Villa de Leyva");
@@ -171,7 +182,8 @@ public class DatabaseInit implements CommandLineRunner {
             leyva.setImage("/images/hotels/villaleiva.jpg");
             leyva.setAmenities(amenSet(A,
                     "Restaurante", "Wifi gratis", "Parqueadero gratis", "Salón de eventos",
-                    "Se admiten mascotas", "Se habla español", "Se habla inglés"));
+                    "Se admiten mascotas", "Se habla español", "Se habla inglés", "Bar",
+                    "Traslado aeropuerto"));
 
             hotels.saveAll(List.of(cartagena, eje, sanandres, santamarta, leyva));
         }
@@ -228,10 +240,12 @@ public class DatabaseInit implements CommandLineRunner {
                             default -> Room.ReservationStatus.AVAILABLE;
                         };
                         r.setResStatus(res);
-                        r.setCleStatus((i % 2 == 0) ? Room.CleaningStatus.DIRTY : Room.CleaningStatus.CLEAN);
+                        r.setCleStatus((i % 2 == 0) ? Room.CleaningStatus.DIRTY
+                                : Room.CleaningStatus.CLEAN);
                         r.setThemeName(themeNameFor(hotelOrdinal, floor));
                         r.getImages().add(
-                                "https://picsum.photos/seed/room" + hotelOrdinal + "-" + floor + "-" + i + "/800/600");
+                                "https://picsum.photos/seed/room" + hotelOrdinal + "-"
+                                        + floor + "-" + i + "/800/600");
 
                         roomRepository.save(r);
                     }
@@ -356,7 +370,8 @@ public class DatabaseInit implements CommandLineRunner {
         cazuelaDeMariscos.setName("Cazuela de Mariscos");
         cazuelaDeMariscos.setCategory("Gastronomía");
         cazuelaDeMariscos.setSubcategory("Costa Caribe");
-        cazuelaDeMariscos.setDescription("Cazuela con camarones, langostinos, pescado y moluscos en leche de coco");
+        cazuelaDeMariscos.setDescription(
+                "Cazuela con camarones, langostinos, pescado y moluscos en leche de coco");
         cazuelaDeMariscos.setBasePrice(48000);
         cazuelaDeMariscos.setDurationMinutes(60);
         cazuelaDeMariscos.setImageUrls(List.of(
@@ -370,7 +385,8 @@ public class DatabaseInit implements CommandLineRunner {
         moteDeQueso.setName("Mote de Queso Costeño");
         moteDeQueso.setCategory("Gastronomía");
         moteDeQueso.setSubcategory("Costa Caribe");
-        moteDeQueso.setDescription("Sopa espesa de ñame con queso costeño en cubos y un sofrito de cebolla y ajo");
+        moteDeQueso.setDescription(
+                "Sopa espesa de ñame con queso costeño en cubos y un sofrito de cebolla y ajo");
         moteDeQueso.setBasePrice(30000);
         moteDeQueso.setDurationMinutes(60);
         moteDeQueso.setImageUrls(List.of("https://i.ytimg.com/vi/h5a-fB9s3fA/maxresdefault.jpg"));
@@ -383,7 +399,8 @@ public class DatabaseInit implements CommandLineRunner {
         changuaBogotana.setName("Changua Bogotana");
         changuaBogotana.setCategory("Gastronomía");
         changuaBogotana.setSubcategory("Cundinamarca");
-        changuaBogotana.setDescription("Sopa de leche con huevos, cebolla larga y cilantro, servida con pan tostado");
+        changuaBogotana.setDescription(
+                "Sopa de leche con huevos, cebolla larga y cilantro, servida con pan tostado");
         changuaBogotana.setBasePrice(18000);
         changuaBogotana.setDurationMinutes(30);
         changuaBogotana.setImageUrls(List.of("https://i.ytimg.com/vi/r4FgfmO3zLg/maxresdefault.jpg"));
@@ -400,7 +417,8 @@ public class DatabaseInit implements CommandLineRunner {
         tresLechesCosteño.setDescription("Torta de tres leches con frutas tropicales");
         tresLechesCosteño.setBasePrice(15000);
         tresLechesCosteño.setDurationMinutes(30);
-        tresLechesCosteño.setImageUrls(List.of("https://easyways.cl/storage/20211229090337postre-tres-leches.jpg"));
+        tresLechesCosteño.setImageUrls(
+                List.of("https://easyways.cl/storage/20211229090337postre-tres-leches.jpg"));
         tresLechesCosteño.setMaxParticipants(10);
         tresLechesCosteño.setLatitude(10.3910);
         tresLechesCosteño.setLongitude(-75.4794);
@@ -414,6 +432,7 @@ public class DatabaseInit implements CommandLineRunner {
         arequipeConBrevas.setBasePrice(12000);
         arequipeConBrevas.setDurationMinutes(30);
         arequipeConBrevas.setImageUrls(List
+
                 .of("https://elrinconcolombiano.com/wp-content/uploads/2023/04/Manjar-blanco-receta-colombiana.jpg"));
         arequipeConBrevas.setMaxParticipants(10);
         arequipeConBrevas.setLatitude(6.2442);
@@ -438,7 +457,8 @@ public class DatabaseInit implements CommandLineRunner {
         buñuelosDeYuca.setName("Buñuelos de Yuca");
         buñuelosDeYuca.setCategory("Gastronomía");
         buñuelosDeYuca.setSubcategory("Postre");
-        buñuelosDeYuca.setDescription("Buñuelos esponjosos de yuca con queso, tradicionales de temporada navideña");
+        buñuelosDeYuca.setDescription(
+                "Buñuelos esponjosos de yuca con queso, tradicionales de temporada navideña");
         buñuelosDeYuca.setBasePrice(12000);
         buñuelosDeYuca.setDurationMinutes(30);
         buñuelosDeYuca.setImageUrls(List.of("https://cdn.colombia.com/gastronomia/2011/08/03/chicha-1604.gif"));
@@ -479,7 +499,8 @@ public class DatabaseInit implements CommandLineRunner {
         bocadilloConQueso.setName("Bocadillo con Queso");
         bocadilloConQueso.setCategory("Gastronomía");
         bocadilloConQueso.setSubcategory("Postre");
-        bocadilloConQueso.setDescription("Dulce de guayaba con queso fresco, combinación tradicional santandereana");
+        bocadilloConQueso.setDescription(
+                "Dulce de guayaba con queso fresco, combinación tradicional santandereana");
         bocadilloConQueso.setBasePrice(7000);
         bocadilloConQueso.setDurationMinutes(15);
         bocadilloConQueso.setImageUrls(List.of(
@@ -493,7 +514,8 @@ public class DatabaseInit implements CommandLineRunner {
         empanadasVallecaucanas.setName("Empanadas Vallecaucanas");
         empanadasVallecaucanas.setCategory("Gastronomía");
         empanadasVallecaucanas.setSubcategory("Aperitivo");
-        empanadasVallecaucanas.setDescription("Empanadas de masa de maíz rellenas de papa y carne, fritas en aceite");
+        empanadasVallecaucanas
+                .setDescription("Empanadas de masa de maíz rellenas de papa y carne, fritas en aceite");
         empanadasVallecaucanas.setBasePrice(15000);
         empanadasVallecaucanas.setDurationMinutes(30);
         empanadasVallecaucanas.setImageUrls(
@@ -594,7 +616,8 @@ public class DatabaseInit implements CommandLineRunner {
         cocoLocoIsleno.setDescription("Cóctel de coco con ron local");
         cocoLocoIsleno.setBasePrice(15000);
         cocoLocoIsleno.setDurationMinutes(15);
-        cocoLocoIsleno.setImageUrls(List.of("https://jappi.com.co/wp-content/uploads/2023/03/Jappi-Final.webp"));
+        cocoLocoIsleno.setImageUrls(
+                List.of("https://jappi.com.co/wp-content/uploads/2023/03/Jappi-Final.webp"));
         cocoLocoIsleno.setMaxParticipants(10);
         cocoLocoIsleno.setLatitude(12.542499);
         cocoLocoIsleno.setLongitude(-81.718369);
@@ -604,7 +627,8 @@ public class DatabaseInit implements CommandLineRunner {
         cataDeAguardiente.setName("Cata de Aguardiente");
         cataDeAguardiente.setCategory("Gastronomía");
         cataDeAguardiente.setSubcategory("Bebida");
-        cataDeAguardiente.setDescription("Degustación de aguardientes regionales con maridaje de aperitivos típicos");
+        cataDeAguardiente.setDescription(
+                "Degustación de aguardientes regionales con maridaje de aperitivos típicos");
         cataDeAguardiente.setBasePrice(25000);
         cataDeAguardiente.setDurationMinutes(45);
         cataDeAguardiente.setImageUrls(List.of(
@@ -620,7 +644,8 @@ public class DatabaseInit implements CommandLineRunner {
         tallerDeCumbia.setName("Taller de Cumbia");
         tallerDeCumbia.setCategory("Cultural");
         tallerDeCumbia.setSubcategory("Danza");
-        tallerDeCumbia.setDescription("Aprende los pasos tradicionales de cumbia con vestuario y música en vivo");
+        tallerDeCumbia.setDescription(
+                "Aprende los pasos tradicionales de cumbia con vestuario y música en vivo");
         tallerDeCumbia.setBasePrice(35000);
         tallerDeCumbia.setDurationMinutes(90);
         tallerDeCumbia.setImageUrls(List.of(
@@ -637,7 +662,8 @@ public class DatabaseInit implements CommandLineRunner {
         tallerDeVallenato.setDescription("Taller de acordeón, caja y guacharaca con maestros vallenatos");
         tallerDeVallenato.setBasePrice(45000);
         tallerDeVallenato.setDurationMinutes(120);
-        tallerDeVallenato.setImageUrls(List.of("https://live.staticflickr.com/4136/4925539026_db69e6ec6e_b.jpg"));
+        tallerDeVallenato.setImageUrls(
+                List.of("https://live.staticflickr.com/4136/4925539026_db69e6ec6e_b.jpg"));
         tallerDeVallenato.setMaxParticipants(10);
         tallerDeVallenato.setLatitude(10.4597);
         tallerDeVallenato.setLongitude(-73.2532);
@@ -688,7 +714,8 @@ public class DatabaseInit implements CommandLineRunner {
         tallerDeCeramica.setName("Taller de Cerámica Precolombina");
         tallerDeCeramica.setCategory("Cultural");
         tallerDeCeramica.setSubcategory("Artesanía");
-        tallerDeCeramica.setDescription("Técnicas ancestrales de alfarería con arcillas locales y motivos indígenas");
+        tallerDeCeramica.setDescription(
+                "Técnicas ancestrales de alfarería con arcillas locales y motivos indígenas");
         tallerDeCeramica.setBasePrice(55000);
         tallerDeCeramica.setDurationMinutes(180);
         tallerDeCeramica.setImageUrls(
@@ -716,7 +743,8 @@ public class DatabaseInit implements CommandLineRunner {
         tallerDeJoyeria.setName("Taller de Joyería Precolombina");
         tallerDeJoyeria.setCategory("Cultural");
         tallerDeJoyeria.setSubcategory("Artesanía");
-        tallerDeJoyeria.setDescription("Técnicas de orfebrería inspiradas en culturas Muisca, Tairona y Quimbaya");
+        tallerDeJoyeria.setDescription(
+                "Técnicas de orfebrería inspiradas en culturas Muisca, Tairona y Quimbaya");
         tallerDeJoyeria.setBasePrice(75000);
         tallerDeJoyeria.setDurationMinutes(180);
         tallerDeJoyeria.setImageUrls(List.of(
@@ -753,7 +781,8 @@ public class DatabaseInit implements CommandLineRunner {
                 islasDelRosario.setName("Islas del Rosario");
                 islasDelRosario.setCategory("Tours");
                 islasDelRosario.setSubcategory("Naturaleza");
-                islasDelRosario.setDescription("Excursión en bote a islas coralinas con snorkel y tiempo de playa");
+                islasDelRosario.setDescription(
+                        "Excursión en bote a islas coralinas con snorkel y tiempo de playa");
                 islasDelRosario.setBasePrice(120000);
                 islasDelRosario.setDurationMinutes(480);
                 islasDelRosario.setImageUrls(List.of(
@@ -787,7 +816,8 @@ public class DatabaseInit implements CommandLineRunner {
                 ceremoniaDelCacaoSagrado.setBasePrice(95000);
                 ceremoniaDelCacaoSagrado.setDurationMinutes(120);
                 ceremoniaDelCacaoSagrado
-                        .setImageUrls(List.of("https://wakana.es/wp-content/uploads/2019/01/M-OF-W-YogaDSCF0152w.jpg"));
+                        .setImageUrls(List.of(
+                                "https://wakana.es/wp-content/uploads/2019/01/M-OF-W-YogaDSCF0152w.jpg"));
                 ceremoniaDelCacaoSagrado.setMaxParticipants(8);
                 ceremoniaDelCacaoSagrado.setLatitude(10.39972);
                 ceremoniaDelCacaoSagrado.setLongitude(-75.51444);
@@ -879,7 +909,8 @@ public class DatabaseInit implements CommandLineRunner {
                 cataDeVinosDeAltura.setBasePrice(125000);
                 cataDeVinosDeAltura.setDurationMinutes(120);
                 cataDeVinosDeAltura
-                        .setImageUrls(List.of("https://raizdeguzman.com/wp-content/uploads/2019/05/vinedos-raiz.png"));
+                        .setImageUrls(List.of(
+                                "https://raizdeguzman.com/wp-content/uploads/2019/05/vinedos-raiz.png"));
                 cataDeVinosDeAltura.setMaxParticipants(12);
                 cataDeVinosDeAltura.setLatitude(5.070275);
                 cataDeVinosDeAltura.setLongitude(-75.513817);
@@ -906,7 +937,8 @@ public class DatabaseInit implements CommandLineRunner {
                 culturaRaizal.setName("Cultura Raizal");
                 culturaRaizal.setCategory("Tours");
                 culturaRaizal.setSubcategory("Cultural");
-                culturaRaizal.setDescription("Inmersión en cultura raizal con música, danza y gastronomía auténtica");
+                culturaRaizal.setDescription(
+                        "Inmersión en cultura raizal con música, danza y gastronomía auténtica");
                 culturaRaizal.setBasePrice(70000);
                 culturaRaizal.setDurationMinutes(240);
                 culturaRaizal.setImageUrls(List.of(
@@ -920,7 +952,8 @@ public class DatabaseInit implements CommandLineRunner {
                 acuarioYJohnnyCay.setName("Acuario y Johnny Cay");
                 acuarioYJohnnyCay.setCategory("Tours");
                 acuarioYJohnnyCay.setSubcategory("Naturaleza");
-                acuarioYJohnnyCay.setDescription("Viaje en bote a acuario natural y playa prístina con snorkel");
+                acuarioYJohnnyCay.setDescription(
+                        "Viaje en bote a acuario natural y playa prístina con snorkel");
                 acuarioYJohnnyCay.setBasePrice(95000);
                 acuarioYJohnnyCay.setDurationMinutes(360);
                 acuarioYJohnnyCay.setImageUrls(
@@ -966,7 +999,8 @@ public class DatabaseInit implements CommandLineRunner {
                 tayronaAncestral.setName("Tayrona Ancestral");
                 tayronaAncestral.setCategory("Tours");
                 tayronaAncestral.setSubcategory("Cultural");
-                tayronaAncestral.setDescription("Caminata a sitios arqueológicos indígenas Tayrona con guías nativos");
+                tayronaAncestral.setDescription(
+                        "Caminata a sitios arqueológicos indígenas Tayrona con guías nativos");
                 tayronaAncestral.setBasePrice(90000);
                 tayronaAncestral.setDurationMinutes(480);
                 tayronaAncestral.setImageUrls(List
@@ -1025,7 +1059,8 @@ public class DatabaseInit implements CommandLineRunner {
                 rappelEnCascadas.setName("Rappel en Cascadas");
                 rappelEnCascadas.setCategory("Tours");
                 rappelEnCascadas.setSubcategory("Aventura");
-                rappelEnCascadas.setDescription("Descenso en rappel por cascadas naturales con equipo profesional");
+                rappelEnCascadas.setDescription(
+                        "Descenso en rappel por cascadas naturales con equipo profesional");
                 rappelEnCascadas.setBasePrice(160000);
                 rappelEnCascadas.setDurationMinutes(240);
                 rappelEnCascadas.setImageUrls(List
@@ -1060,7 +1095,8 @@ public class DatabaseInit implements CommandLineRunner {
                         .setDescription("Observación estelar combinada con cosmogonía muisca en observatorio");
                 observatorioAstronomicoMuisca.setBasePrice(65000);
                 observatorioAstronomicoMuisca.setDurationMinutes(180);
-                observatorioAstronomicoMuisca.setImageUrls(List.of("https://pbs.twimg.com/media/DUa0PLFUQAAlYJl.jpg"));
+                observatorioAstronomicoMuisca.setImageUrls(
+                        List.of("https://pbs.twimg.com/media/DUa0PLFUQAAlYJl.jpg"));
                 observatorioAstronomicoMuisca.setMaxParticipants(15);
                 observatorioAstronomicoMuisca.setLatitude(5.6333);
                 observatorioAstronomicoMuisca.setLongitude(-73.5333);
@@ -1070,11 +1106,13 @@ public class DatabaseInit implements CommandLineRunner {
                 vinedosBoyacenses.setName("Viñedos Boyacenses");
                 vinedosBoyacenses.setCategory("Tours");
                 vinedosBoyacenses.setSubcategory("Cultural");
-                vinedosBoyacenses.setDescription("Tour de degustación de vinos en viñedos de alta altitud de Boyacá");
+                vinedosBoyacenses.setDescription(
+                        "Tour de degustación de vinos en viñedos de alta altitud de Boyacá");
                 vinedosBoyacenses.setBasePrice(85000);
                 vinedosBoyacenses.setDurationMinutes(240);
                 vinedosBoyacenses
-                        .setImageUrls(List.of("https://raizdeguzman.com/wp-content/uploads/2019/05/vinedos-raiz.png"));
+                        .setImageUrls(List.of(
+                                "https://raizdeguzman.com/wp-content/uploads/2019/05/vinedos-raiz.png"));
                 vinedosBoyacenses.setMaxParticipants(12);
                 vinedosBoyacenses.setLatitude(5.7833);
                 vinedosBoyacenses.setLongitude(-73.0167);
@@ -1099,7 +1137,8 @@ public class DatabaseInit implements CommandLineRunner {
                 retiroDeContemplacion.setName("Retiro de Contemplación");
                 retiroDeContemplacion.setCategory("Experiencia");
                 retiroDeContemplacion.setSubcategory("Bienestar");
-                retiroDeContemplacion.setDescription("Retiro de silencio y meditación en entornos naturales sagrados");
+                retiroDeContemplacion.setDescription(
+                        "Retiro de silencio y meditación en entornos naturales sagrados");
                 retiroDeContemplacion.setBasePrice(95000);
                 retiroDeContemplacion.setDurationMinutes(480);
                 retiroDeContemplacion.setImageUrls(List
@@ -1281,65 +1320,67 @@ public class DatabaseInit implements CommandLineRunner {
     private String getAmenityImage(String name) {
         return switch (name) {
             case "Restaurante" ->
-                "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/1428412216/es/foto/un-chef-masculino-vertiendo-salsa-en-la-comida.jpg?s=612x612&w=0&k=20&c=Wze2YwgkFMQOTWoxdiRYsUpa1azCIOm8yRaUEEYOgOU=";
             case "Bar" ->
-                "https://images.unsplash.com/photo-1514361892635-cebbd6b7a2c4?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/1479800728/es/foto/grupo-de-amigos-bebiendo-y-brindando-por-un-vaso-de-cerveza-en-el-restaurante-cervecer%C3%ADa.jpg?s=612x612&w=0&k=20&c=DTSh43zs5IufLFoXHrt5-8crVg6N4CW6EszavEK02x4=";
             case "Wifi gratis" ->
-                "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/1166056171/es/vector/s%C3%ADmbolo-futurista-de-wifi-poligonal-bajo-aislado-en-el-fondo-azul-oscuro.jpg?s=612x612&w=0&k=20&c=-lpeAdQqK7-sjxjq_tn-abKEGqaUXZHeOJ4XiU5yMKQ=";
             case "Parqueadero gratis" ->
-                "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/1498925162/es/foto/cartel-azul-de-aparcamiento-montado-en-poste-en-el-aparcamiento-urbano-el-d%C3%ADa-de-verano.jpg?s=612x612&w=0&k=20&c=2uaHkrCPODThFSK1GAk8pBFOvR_Y9EFbhYTm1mIn3D0=";
             case "Traslado aeropuerto" ->
-                "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/1554995991/es/foto/conductor-de-transporte-al-aeropuerto-hispano.jpg?s=612x612&w=0&k=20&c=bCNccohEVKZy93RhGrc8jmCWX7zJHgi2ZVkV9Cii9Rs=";
             case "Gimnasio" ->
-                "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/1679800838/es/foto/primer-plano-de-los-pies-corredor-deportivo-corriendo-en-cinta-de-correr-en-el-gimnasio.jpg?s=612x612&w=0&k=20&c=7LGOBm4FBTIMdtjpXuPXT93kwvbt12EjnMYc3Hp6hnI=";
             case "Spa/Sauna" ->
-                "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/2189087345/es/foto/mujer-relajada-en-la-sauna-del-centro-de-bienestar.jpg?s=612x612&w=0&k=20&c=4GV8VKMLxeVGxPETeFgyz1D-eSUTU67DXQu8zRP71CA=";
             case "Piscina al aire libre" ->
-                "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/525409331/es/foto/padre-nadando-con-sus-dos-hijos-en-la-piscina.jpg?s=612x612&w=0&k=20&c=nh2T3VyKMyyqG_GkqOkto8GIZvOYyNjwPeOhyfJgDvQ=";
             case "Aseo diario" ->
-                "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80";
-            case "CCTV en zonas comunes" ->
-                "https://images.unsplash.com/photo-1465101178521-c1a4c8a0a8c7?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/1417833187/es/foto/limpiador-profesional-aspirando-una-alfombra.jpg?s=612x612&w=0&k=20&c=0_Gu2dqS0PMGHnPAhHsIMB4bFOshRakSwKwDxhIq7IE=";
+            case "CCTV" ->
+                "https://media.istockphoto.com/id/1695553956/es/foto/mujer-usando-la-c%C3%A1mara-de-vigilancia-en-su-casa.jpg?s=612x612&w=0&k=20&c=kIy1tDPPE3_88o49J5TziVlr7v72LD96q3pi0UAk0K4=";
             case "Terraza" ->
-                "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/1132794287/es/foto/patio-con-muebles-de-jard%C3%ADn-y-sombrilla.jpg?s=612x612&w=0&k=20&c=Mg9Y9fcI2QB8Ww3WjH9GWIZjXlhUj8S2F_0fFKz-Oao=";
             case "Salón de eventos" ->
-                "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/590034882/es/foto/mesa-de-restaurante-con-comida.jpg?s=612x612&w=0&k=20&c=BIQ8FBTlpj47c4OVA6AXkiM0bGXVZZ-EPKd7AuDYs0c=";
             case "Desayuno incluido" ->
-                "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/1630504080/es/foto/desayuno-en-la-cama.jpg?s=612x612&w=0&k=20&c=Zr4TpaIxsLBlZz9aOPP8u6glIFRLpqf7tXq-8zD96GE=";
             case "Jardín" ->
-                "https://images.unsplash.com/photo-1465101178521-c1a4c8a0a8c7?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/964395046/es/foto/plantaci%C3%B3n-de-flores-en-flores-jard%C3%ADn-patio-trasero-de-la-mujer.jpg?s=612x612&w=0&k=20&c=JoUDn_9ESQ-Z0N-EUYJBk_tK3_lodouEzkAPXHKS96M=";
             case "Jacuzzi" ->
-                "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/471177791/es/foto/mujer-en-el-spa.jpg?s=612x612&w=0&k=20&c=s3NsQRQRHFlvfXr5a2ub9EglzwBif1UxuPyo0e6573o=";
             case "Frente a la playa" ->
-                "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/590069010/es/foto/descalzos-en-la-playa-caminando-hacia-la-luz-del-sol.jpg?s=612x612&w=0&k=20&c=auZbBBOSGLYhXcd4rWGgNwrUWYXCPqrnSU2KobENMxE=";
             case "Alojamiento libre de humo" ->
-                "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/1441675063/es/foto/cartel-de-no-fumar-en-el-parque.jpg?s=612x612&w=0&k=20&c=Pq73fb3WPO_PlE5Ho0xpN6houGzujAh2NEHOg0jJBfY=";
             case "Se admiten mascotas" ->
-                "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/1516239450/es/foto/amor-retrato-y-familia-con-perro-en-refugio-de-animales-para-adopci%C3%B3n-en-perrera.jpg?s=612x612&w=0&k=20&c=krBe-Pt0NC27qzf6upVuryyBvslI_EUlL6XrjwAr3hw=";
             case "Se habla español" ->
-                "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/1084045650/es/foto/pregunta-hablas-espa%C3%B1ol-escrito-en-espa%C3%B1ol.jpg?s=612x612&w=0&k=20&c=58lS_KOKoM3fxJzfCPPlYTDkPRFMD56AlpBj2w9YKxk=";
             case "Se habla inglés" ->
-                "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80";
-            case "TV" -> "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/528632533/es/foto/ingl%C3%A9s-espa%C3%B1ol-habla.jpg?s=612x612&w=0&k=20&c=yjqZjA4lgAH7yQNTgsncQ2CTgFhsnnEQuhAczuLu_jQ=";
+            case "TV" ->
+                "https://media.istockphoto.com/id/1563409200/es/foto/hombre-viendo-la-televisi%C3%B3n-con-el-mando-a-distancia-en-la-mano.jpg?s=612x612&w=0&k=20&c=-cV_CW__WqmqQ7W1tmX0yycRNmD0skEUbEnfFdxettA=";
             case "Aire acondicionado" ->
-                "https://images.unsplash.com/photo-1465101178521-c1a4c8a0a8c7?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/1368514998/es/foto/ajuste-manual-de-la-temperatura-en-el-aire-acondicionado.jpg?s=612x612&w=0&k=20&c=d67UDnq3Kqo6dmNw3YwxAaWuhMxm_yBAXtWkcHVEBCI=";
             case "Minibar" ->
-                "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/1254741480/es/foto/mini-nevera.jpg?s=612x612&w=0&k=20&c=IF_88Ur4i35DLP3fD3adsE6QsG0OJBLd6fpo8fQTRgg=";
             case "Caja fuerte" ->
-                "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/1282606903/es/foto/b%C3%B3veda-bancaria-cerrada-en-el-armario-en-casa-o-en-la-habitaci%C3%B3n-del-hotel.jpg?s=612x612&w=0&k=20&c=XUkBd3JpznvQGaoeSRWN5eJBlzpwT5sC_GJg2m1kRKQ=";
             case "Secador de pelo" ->
-                "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/1281532877/es/foto/mujer-joven-en-una-peluquer%C3%ADa-peluquero-usando-secador-de-pelo.jpg?s=612x612&w=0&k=20&c=bIRlPa-MpI4Bir_pWGqoX2WSm4oqOk808egcUjepBbY=";
             case "Cafetera" ->
-                "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/1033432408/es/foto/filtro-de-caf%C3%A9.jpg?s=612x612&w=0&k=20&c=Nf7qPxgALfsqlrm1VLG-SyN9wH_Q-2locst_h7ekUc0=";
             case "Plancha" ->
-                "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/1368091437/es/foto/mujer-joven-planchando-de-cerca.jpg?s=612x612&w=0&k=20&c=UaZ_vCXJqSo2kuLDnpbAMHjMj2jGDBjvrmPebrYECiQ=";
             case "Balcon" ->
-                "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/1086723866/es/foto/coloridas-flores-creciendo-en-macetas-en-el-balc%C3%B3n.jpg?s=612x612&w=0&k=20&c=b0UW7hjtAo8VYbX1-Wg6pKRoPOchx3H2dVgQvfdnQuU=";
             case "Cocineta" ->
-                "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/1477430966/es/foto/mujer-preparando-mezcla-de-verduras-de-quinua-cocinada-en-una-sart%C3%A9n.jpg?s=612x612&w=0&k=20&c=Zo-7Tq2vhj2Pg-9NyTtX4YaIRW3EAQaB6BedsXMo-ww=";
             case "Ropa de cama premium" ->
-                "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80";
-            default -> "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80";
+                "https://media.istockphoto.com/id/1303630250/es/foto/toallas-de-ba%C3%B1o-blancas-limpias-en-el-dormitorio-perfectamente-limpio-comodidad-y-concepto.jpg?s=612x612&w=0&k=20&c=7A9zfaFNHdV9DdxS_0ZtjD_qcil5zeOJKeEJcPR4g2g=";
+            default ->
+                "https://media.istockphoto.com/id/1303630250/es/foto/toallas-de-ba%C3%B1o-blancas-limpias-en-el-dormitorio-perfectamente-limpio-comodidad-y-concepto.jpg?s=612x612&w=0&k=20&c=7A9zfaFNHdV9DdxS_0ZtjD_qcil5zeOJKeEJcPR4g2g=";
         };
     }
 
@@ -1348,6 +1389,49 @@ public class DatabaseInit implements CommandLineRunner {
         for (String n : names)
             set.add(mustAmenity(map, n));
         return set;
+    }
+
+    private void seedReservations(List<Hotel> hotelList) {
+        if (reservationRepo.count() > 0)
+            return; // no duplicar
+
+        List<User> clients = userRepo.findAll().stream()
+                .filter(u -> u.getRoles().stream().anyMatch(r -> r.getName().equals("CLIENT")))
+                .toList();
+
+        List<Room> rooms = roomRepository.findAll();
+
+        Random random = new Random();
+        LocalDate base = LocalDate.now();
+
+        // Crear 15 reservas de ejemplo
+        for (int i = 0; i < 15; i++) {
+            User user = clients.get(random.nextInt(clients.size()));
+            Room room = rooms.get(random.nextInt(rooms.size()));
+            Hotel hotel = room.getHotel();
+
+            // checkIn y checkOut aleatorios (2 a 4 noches)
+            LocalDate checkIn = base.plusDays(random.nextInt(10) + 1); // entre mañana y 10 días
+            LocalDate checkOut = checkIn.plusDays(random.nextInt(3) + 2);
+
+            Reservation res = new Reservation();
+            res.setUser(user);
+            res.setHotel(hotel);
+            res.setRoom(room);
+            res.setCheckIn(checkIn);
+            res.setCheckOut(checkOut);
+            res.setStatus(Reservation.Status.CONFIRMED);
+
+            Reservation saved = reservationRepo.save(res);
+
+            // Crear locks por cada día
+            LocalDate d = checkIn;
+            while (d.isBefore(checkOut)) {
+                RoomLock lock = new RoomLock(room.getRoomId(), d, saved);
+                roomLockRepo.save(lock);
+                d = d.plusDays(1);
+            }
+        }
     }
 
     private String pickIcon(int i) {

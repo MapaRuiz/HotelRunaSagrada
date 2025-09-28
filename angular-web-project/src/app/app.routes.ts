@@ -4,6 +4,7 @@ export const routes: Routes = [
   { path: '', loadComponent: () => import('./features/public/landing/landing').then(m => m.Landing) },
   { path: 'login', loadComponent: () => import('./features/public/login/login').then(m => m.Login) },
   { path: 'register', loadComponent: () => import('./features/public/register/register').then(m => m.Register) },
+  { path: 'hotel/:id', loadComponent: () => import('./features/public/Hotel/hotel-detail/hotel-detail').then(m => m.HotelDetailComponent) },
 
   // CLIENT - shell con children
   {
@@ -53,6 +54,7 @@ export const routes: Routes = [
       { path: 'services', loadComponent: () => import('./features/admin/services-offering-component/services-offering-component').then(m => m.ServicesOfferingComponent) },
       { path: 'room-types', loadComponent: () => import('./features/admin/room-type/room-type').then(m => m.RoomType) },
       { path: 'room', loadComponent: () => import('./features/admin/room/room').then(m => m.Room) },
+      { path: 'reservations', loadComponent: () => import('./features/admin/reservation/reservation').then(m => m.ReservationComponent) },
     ]
   },
 

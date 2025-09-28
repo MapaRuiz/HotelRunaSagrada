@@ -1,0 +1,101 @@
+<h3>Reservas</h3>
+
+<div *ngIf="loading">Cargando...</div>
+
+<button (click)="new()" class="btn btn-primary mb-2">Nueva Reserva</button>
+
+<table class="table table-striped" *ngIf="!loading && reservations.length">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Cliente</th>
+      <th>Hotel</th>
+      <th>Habitación</th>
+      <th>Check-in</th>
+      <th>Check-out</th>
+      <th>Status</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let r of reservations">
+      <td>{{ r.reservation_id }}</td>
+      <td>{{ r.user?.full_name || r.user_id }}</td>
+      <td>{{ r.hotel?.name || r.hotel_id }}</td>
+      <td>{{ r.room?.number || r.room_id }}</td>
+      <td>{{ r.check_in }}</td>
+      <td>{{ r.check_out }}</td>
+      <td>{{ r.status }}</td>
+      <td>
+        <button (click)="edit(r)" class="btn btn-sm btn-outline-primary">Editar</button>
+        <button (click)="remove(r)" class="btn btn-sm btn-outline-warning">Cancelar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<div *ngIf="showForm" class="card mt-3 p-3">
+  <h5>{{ editingId ? 'Editar Reserva' : 'Nueva Reserva' }}</h5>
+
+  <!-- Cliente -->
+  <div class="mb-2">
+    <label>Cliente</label>
+    <select [(ngModel)]="draft.user_id" class="form-control">
+      <option [ngValue]="undefined">Seleccione cliente</option>
+      <option *ngFor="let u of users" [ngValue]="u.user_id">
+        {{ u.full_name }} ({{ u.email }})
+      </option>
+    </select>
+  </div>
+
+  <!-- Hotel -->
+  <div class="mb-2">
+    <label>Hotel</label>
+    <select
+      [(ngModel)]="draft.hotel_id"
+      (ngModelChange)="onHotelChange($event)"
+      class="form-control"
+    >
+      <option [ngValue]="undefined">Seleccione hotel</option>
+      <option *ngFor="let h of hotels" [ngValue]="h.hotel_id">
+        {{ h.name }}
+      </option>
+    </select>
+  </div>
+
+  <!-- Habitación (filtrada por hotel) -->
+  <div class="mb-2">
+    <label>Habitación</label>
+    <select [(ngModel)]="draft.room_id" class="form-control" [disabled]="!draft.hotel_id">
+      <option [ngValue]="undefined" *ngIf="!draft.hotel_id">Seleccione un hotel primero</option>
+      <option [ngValue]="undefined" *ngIf="draft.hotel_id && !roomsForForm.length">
+        No hay habitaciones
+      </option>
+      <option *ngFor="let r of roomsForForm" [ngValue]="r.room_id">
+        {{ r.number }}
+      </option>
+    </select>
+  </div>
+
+  <div class="mb-2">
+    <label>Check-in</label>
+    <input [(ngModel)]="draft.check_in" class="form-control" type="date" />
+  </div>
+
+  <div class="mb-2">
+    <label>Check-out</label>
+    <input [(ngModel)]="draft.check_out" class="form-control" type="date" />
+  </div>
+
+  <!-- Solo 2 estados válidos -->
+  <div class="mb-2">
+    <label>Status</label>
+    <select [(ngModel)]="draft.status" class="form-control">
+      <option value="PENDING">Pendiente</option>
+      <option value="CONFIRMED">Confirmada</option>
+    </select>
+  </div>
+
+  <button (click)="save()" class="btn btn-success">Guardar</button>
+  <button (click)="cancelForm()" class="btn btn-secondary">Cerrar</button>
+</div>
