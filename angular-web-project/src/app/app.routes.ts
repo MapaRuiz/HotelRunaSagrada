@@ -4,6 +4,7 @@ export const routes: Routes = [
   { path: '', loadComponent: () => import('./features/public/landing/landing').then(m => m.Landing) },
   { path: 'login', loadComponent: () => import('./features/public/login/login').then(m => m.Login) },
   { path: 'register', loadComponent: () => import('./features/public/register/register').then(m => m.Register) },
+  { path: 'hotel/:id', loadComponent: () => import('./features/public/hotel-detail/hotel-detail').then(m => m.HotelDetailComponent) },
 
   // CLIENT - shell con children
   {

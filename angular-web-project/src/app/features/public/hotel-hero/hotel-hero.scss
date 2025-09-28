@@ -1,0 +1,272 @@
+@layer hero-base, hero-demo;
+
+/* ====== DEMO / variables ====== */
+@layer hero-demo {
+  :root {
+    --gap-base: 10px;
+    --size-base: 100px;
+  }
+
+  /* Scroll total del hero; viene por inline style desde el componente */
+  .hero-wrapper {
+    --scroll-height: 500svh;
+    --position: sticky;
+    --top: 0;
+  }
+
+  /* Propiedades CSS registradas (scroll-driven) */
+  @property --gap {
+    syntax: '<length>';
+    inherits: true;
+    initial-value: 0;
+  }
+  @property --scale {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 1;
+  }
+  @property --x {
+    syntax: '<percent>';
+    inherits: true;
+    initial-value: 0;
+  }
+  @property --y {
+    syntax: '<percent>';
+    inherits: true;
+    initial-value: 0;
+  }
+  @property --text-opacity {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 1;
+  }
+  @property --mouse-rotate {
+    syntax: '<angle>';
+    inherits: true;
+    initial-value: 0deg;
+  }
+  @property --mouse-w {
+    syntax: '<length>';
+    inherits: true;
+    initial-value: 600px;
+  }
+  @property --center-x {
+    syntax: '<length>';
+    inherits: true;
+    initial-value: -250px;
+  }
+  @property --center-y {
+    syntax: '<length>';
+    inherits: true;
+    initial-value: -250px;
+  }
+}
+
+/* ====== BASE / layout ====== */
+@layer hero-base {
+  :host {
+    display: block;
+  }
+
+  .hero-supports {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    color: #fff;
+    background: #d11;
+    margin: 0;
+    padding: 0.75rem 1rem;
+    text-align: center;
+    border-block-end: 1px solid rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+  }
+  @supports (animation-timeline: auto) {
+    .hero-supports {
+      display: none;
+    }
+  }
+
+  .hero-wrapper {
+    --gap: 1rem;
+    --x: 0;
+    --scale: 1;
+
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100svh;
+
+    display: grid;
+    grid-template-columns: 1fr 2fr var(--size-base) 2fr 1fr;
+    grid-template-rows: 1fr var(--size-base) 1fr;
+    grid-template-areas:
+      'one  two   two   three four'
+      'one  six   center three eight'
+      'five six   seven seven eight';
+    gap: var(--gap);
+    padding: max(12px, 1.2vmin);
+    box-sizing: border-box;
+  }
+
+  .hero-spacer {
+    /* este div empuja el resto del contenido para que el scroll del hero tenga espacio */
+    height: var(--scroll-height);
+  }
+
+  .tile {
+    background-image: var(--bg);
+    background-size: cover;
+    background-position: center;
+    border-radius: 16px;
+    overflow: hidden;
+
+    /* Animaciones scroll-driven (Chrome/Edge/Safari modernos) */
+    animation-name: animate-boxes, animate-lines;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: scroll();
+    animation-duration: 1ms; /* Firefox workaround */
+  }
+
+  /* Áreas */
+  .hero-wrapper > .tile:nth-child(1) {
+    grid-area: one;
+    --x: -500%;
+    --y: -200%;
+  }
+  .hero-wrapper > .tile:nth-child(2) {
+    grid-area: two;
+    --x: -75%;
+    --y: -200%;
+  }
+  .hero-wrapper > .tile:nth-child(3) {
+    grid-area: three;
+    --x: 200%;
+    --y: 0%;
+  }
+  .hero-wrapper > .tile:nth-child(4) {
+    grid-area: four;
+    --x: 500%;
+    --y: -200%;
+  }
+  .hero-wrapper > .tile:nth-child(5) {
+    grid-area: five;
+    --x: -500%;
+    --y: 100%;
+  }
+  .hero-wrapper > .tile:nth-child(6) {
+    grid-area: six;
+    --x: -200%;
+    --y: 0%;
+  }
+  .hero-wrapper > .tile:nth-child(7) {
+    grid-area: seven;
+    --x: 75%;
+    --y: 200%;
+  }
+  .hero-wrapper > .tile:nth-child(8) {
+    grid-area: eight;
+    --x: 500%;
+    --y: 200%;
+  }
+
+  /* Centro */
+  .hero-wrapper > .center {
+    grid-area: center;
+    color: white;
+    display: grid;
+    place-content: center;
+    width: var(--mouse-w, 600px);
+    aspect-ratio: 1;
+    translate: var(--center-x) var(--center-y);
+    background-size: cover;
+    background-position: center;
+    border-radius: 24px;
+    position: relative;
+
+    animation-name: animate-center;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: scroll();
+    animation-duration: 1ms;
+  }
+
+  .hero-wrapper > .center > hgroup {
+    font-weight: 300;
+    opacity: var(--text-opacity, 1);
+    display: var(--text-display, block);
+    text-align: center;
+    padding: 16px 18px;
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+  }
+  .hotel-title {
+    margin: 0;
+    font-size: clamp(1.4rem, 4vw, 2.4rem);
+  }
+  .hotel-desc {
+    margin: 0.35rem 0 0;
+    font-size: clamp(0.9rem, 2.2vw, 1.05rem);
+  }
+
+  .hero-wrapper > .center > .mouse {
+    position: absolute;
+    display: block;
+    bottom: 18px;
+    left: 50%;
+    translate: -50% 50%;
+    width: 44px;
+    height: 44px;
+    rotate: var(--mouse-rotate, 0deg);
+    opacity: 0.9;
+    filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.35));
+  }
+
+  /* Keyframes */
+  @keyframes animate-center {
+    25%,
+    65% {
+      --mouse-w: 300px;
+      --center-x: -100px;
+      --center-y: -100px;
+      --text-opacity: 0;
+    }
+    70% {
+      --text-display: none;
+    }
+    95% {
+      --mouse-rotate: 0deg;
+    }
+    100% {
+      --mouse-w: var(--size-base);
+      --center-x: 0;
+      --center-y: 0;
+      --text-display: none;
+      --mouse-rotate: 180deg;
+    }
+  }
+
+  @keyframes animate-boxes {
+    0%,
+    15% {
+      translate: var(--x) var(--y);
+    }
+    100% {
+      translate: 0 0;
+    }
+  }
+
+  /* Pequeños ajustes responsive */
+  @media (max-width: 768px) {
+    .hero-wrapper {
+      grid-template-columns: 1fr 1fr var(--size-base) 1fr 1fr;
+      gap: 8px;
+      padding: 8px;
+    }
+    .hero-wrapper > .center {
+      width: min(72vw, 420px);
+      border-radius: 20px;
+    }
+  }
+}
