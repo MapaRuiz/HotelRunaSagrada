@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 
 import { HotelHeroComponent } from '../hotel-hero/hotel-hero';
-import { HotelsService } from '../../../services/hotels';
-import { environment } from '../../../../environments/environment';
+import { HotelsService } from '../../../../services/hotels';
+import { environment } from '../../../../../environments/environment';
 
 export interface HotelModel {
   hotel_id?: number;
