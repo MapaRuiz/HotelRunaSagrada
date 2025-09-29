@@ -1,8 +1,6 @@
 <!--Create Service-->
 <form (ngSubmit)="submit()" #form="ngForm" class="card mt-4 services-form">
   <div class="card-body row g-3">
-    <h5 class="card-title col-12">Editar servicio</h5>
-
     <div class="col-md-6">
       <label class="form-label">Dias de la semana</label>
       <input class="form-control" [(ngModel)]="draft.days_of_week" name="days_of_week" required />
