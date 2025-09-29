@@ -1,24 +1,33 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ServiceOffering } from '../../../../model/service-offering';
 import { ServicesScheduleTable } from "../services-schedule-table/services-schedule-table";
 import { ServiceSchedule } from '../../../../model/service-schedule';
+import { ServiceScheduleForm } from "../service-schedule-form/service-schedule-form";
+import { ServiceScheduleRequest } from '../../../../services/service-offering-service';
 
 export interface ServicesFormPayload {
   draft: Partial<ServiceOffering>;
   deleteIds: number[];
+  newSchedules: ServiceScheduleRequest[];
 }
+
+interface PendingScheduleSave {
+  tempId: number;
+  request: ServiceScheduleRequest;
+}
+
 
 @Component({
   selector: 'app-services-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, ServicesScheduleTable],
+  imports: [CommonModule, FormsModule, ServicesScheduleTable, ServiceScheduleForm],
   templateUrl: './services-form.html',
   styleUrls: ['./services-form.css']
 })
 export class ServicesFormComponent {
-  categorias: string[] = ['Tours', 'Hotel', 'Comida'];
+  categorias: string[] = [ 'Cultural', 'Experiencias', 'Gastronomía', 'Tours'];
 
   @Input() draft: Partial<ServiceOffering> = {};
   @Input() hotels: { id: number; name: string }[] = [];
@@ -26,11 +35,18 @@ export class ServicesFormComponent {
   @Output() cancel = new EventEmitter<void>();
   @Output() save = new EventEmitter<ServicesFormPayload>();
 
+  @ViewChild('scheduleDetails') private scheduleDetails?: ElementRef<HTMLDetailsElement>;
+
   newImageUrl = '';
   imageStatus: ('idle' | 'loaded' | 'error')[] = [];
   displayMode: 'carousel' | 'list' = 'carousel';
   activeSlide = 0;
   pendingDeletes = new Set<number>();
+  showScheduleForm = false;
+  scheduleDraft: Partial<ServiceSchedule> | null = null;
+
+  private nextTempScheduleId = 0;
+  private pendingSchedules: PendingScheduleSave[] = [];
 
   constructor() {}
 
@@ -45,13 +61,15 @@ export class ServicesFormComponent {
 
   submit(): void {
     const deleteIds = Array.from(this.pendingDeletes);
-    console.log('[ServicesForm] submit', { draft: this.draft, deleteIds });
 
     this.pendingDeletes.clear();
     this.save.emit({
       draft: { ...this.draft },
-      deleteIds
+      deleteIds,
+      newSchedules: this.pendingSchedules.map(item => item.request)
     });
+
+    this.pendingSchedules = [];
   }
 
   addImage(): void {
@@ -98,12 +116,16 @@ export class ServicesFormComponent {
 
   deleteSchedule(schedule: ServiceSchedule): void {
     const previous = this.draft.schedules ?? [];
-    this.draft = { 
-      ...this.draft, 
-      schedules: previous.filter(item => item.id !== schedule.id) 
+    this.draft = {
+      ...this.draft,
+      schedules: previous.filter(item => item.id !== schedule.id)
     };
-    this.pendingDeletes.add(schedule.id);
-    console.log(this.pendingDeletes);
+
+    if (schedule.id > 0) {
+      this.pendingDeletes.add(schedule.id);
+    } else {
+      this.pendingSchedules = this.pendingSchedules.filter(item => item.tempId !== schedule.id);
+    }
   }
 
   editSchedule($event: ServiceSchedule) {
@@ -121,5 +143,75 @@ export class ServicesFormComponent {
     if (n === 0) { this.activeSlide = 0; return; }
     if (this.activeSlide >= n) this.activeSlide = n - 1;
     if (this.activeSlide < 0) this.activeSlide = 0;
+  }
+
+  // Schedule Creation
+  onScheduleToggle(event: Event): void {
+    const details = event.target as HTMLDetailsElement;
+    this.showScheduleForm = details.open;
+    if (details.open) {
+      this.scheduleDraft = this.buildEmptySchedule();
+    } else {
+      this.scheduleDraft = null;
+    }
+  }
+
+  cancelSchedule(): void {
+    this.scheduleDraft = null;
+    this.showScheduleForm = false;
+
+    const details = this.scheduleDetails?.nativeElement;
+    if (details) {
+      details.open = false;
+      details.removeAttribute('open');
+    }
+  }
+
+  saveSchedule(schedule: ServiceSchedule): void {
+    const request = this.toScheduleRequest(schedule);
+    const tempId = this.getNextTempScheduleId();
+
+    const model: ServiceSchedule = {
+      id: tempId,
+      days_of_week: [...request.days_of_week],
+      start_time: request.start_time,
+      end_time: request.end_time,
+      active: request.active
+    };
+
+    const previous = this.draft.schedules ?? [];
+    this.draft = {
+      ...this.draft,
+      schedules: [...previous, model]
+    };
+
+    this.pendingSchedules.push({ tempId, request });
+    this.cancelSchedule();
+  }
+
+  private buildEmptySchedule(): Partial<ServiceSchedule> {
+    return { days_of_week: [], start_time: '', end_time: '', active: true };
+  }
+
+  private toScheduleRequest(schedule: Partial<ServiceSchedule>): ServiceScheduleRequest {
+    const raw = Array.isArray(schedule.days_of_week)
+      ? schedule.days_of_week
+      : (schedule.days_of_week ?? '')
+          .toString()
+          .split(',')
+          .map(day => day.trim())
+          .filter(Boolean);
+
+    return {
+      days_of_week: raw,
+      start_time: schedule.start_time ?? '',
+      end_time: schedule.end_time ?? '',
+      active: schedule.active ?? true
+    };
+  }
+
+  private getNextTempScheduleId(): number {
+    this.nextTempScheduleId -= 1;
+    return this.nextTempScheduleId;
   }
 }

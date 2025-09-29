@@ -1,1 +1,57 @@
-<p>service-schedule-form works!</p>
+<!--Create Service-->
+<form (ngSubmit)="submit()" #form="ngForm" class="card mt-4 services-form">
+  <div class="card-body row g-3">
+    <h5 class="card-title col-12">Editar servicio</h5>
+
+    <div class="col-md-6">
+      <label class="form-label">Dias de la semana</label>
+      <input class="form-control" [(ngModel)]="draft.days_of_week" name="days_of_week" required />
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Activo</label>
+      <select class="form-select" [(ngModel)]="draft.active" name="active" required>
+        <option [ngValue]="undefined">Selecciona categoria…</option>
+        <option [ngValue]="true">Si</option>
+        <option [ngValue]="false">No</option>
+      </select>
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Disponibilidad</label>
+      <div class="row g-2">
+        <div class="col-6">
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="draft.start_time"
+            name="latitude"
+            required
+          />
+        </div>
+        <div class="col-6">
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="draft.end_time"
+            name="longitude"
+            required
+          />
+        </div>
+      </div>
+    </div>
+    <div class="col-12 text-end">
+      <button
+        type="button"
+        class="btn btn-secondary me-2"
+        (click)="cancel.emit()"
+        [disabled]="loading"
+      >
+        Cancelar
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="loading || form.invalid">
+        Guardar
+      </button>
+    </div>
+  </div>
+</form>

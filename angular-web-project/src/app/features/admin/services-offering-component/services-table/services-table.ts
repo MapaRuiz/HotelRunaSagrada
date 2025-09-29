@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { zip } from 'rxjs';
+import { forkJoin, of, switchMap, zip } from 'rxjs';
 
 import { ServiceOffering } from '../../../../model/service-offering';
 import { ServiceOfferingService } from '../../../../services/service-offering-service';
@@ -198,6 +198,8 @@ export class ServicesTable {
   saveCreate(service: ServicesFormPayload): void {
     this.createLoading = true;
     const payload = service.draft;
+    const scheduleRequests = service.newSchedules ?? [];
+    console.log('[ServicesTable] saveCreate received:', scheduleRequests);
     const request = {
       name: payload.name ?? '',
       category: payload.category ?? '',
@@ -214,16 +216,34 @@ export class ServicesTable {
 
     this.serviceOfferingService.create(request).subscribe({
       next: created => {
-        const withHotel: ServiceOffering = this.fillNewService(created);
-        this.serviceOfferingList = [withHotel, ...this.serviceOfferingList];
-        this.cancelCreate();
-        this.gridApi?.applyTransaction({ add: [withHotel], addIndex: 0 });
+        const afterSchedules = (schedules: ServiceSchedule[]) => {
+          const withHotel = this.fillNewService(created);
+          withHotel.schedules = schedules; // assign schedules
+          this.serviceOfferingList = [withHotel, ...this.serviceOfferingList];
+          this.cancelCreate(); // Close create panel
+          this.gridApi?.applyTransaction({ add: [withHotel], addIndex: 0 });
+        };
+
+        if (!scheduleRequests.length) {
+          afterSchedules([]);
+          return;
+        }
+        
+        // create bundle of schedules
+        forkJoin(
+          scheduleRequests.map(schedule =>
+            this.serviceOfferingService.createSchedule(created.id, schedule)
+          )
+        ).subscribe({
+          // assign schedules
+          next: schedules => afterSchedules(schedules),
+          error: () => (this.createLoading = false)
+        });
       },
-      error: () => {
-        this.createLoading = false;
-      }
+      error: () => (this.createLoading = false)
     });
   }
+
 
   private buildEmptyDraft(): Partial<ServiceOffering> {
     return {
@@ -299,10 +319,10 @@ export class ServicesTable {
   }
 
   saveEdit(payload: ServicesFormPayload): void {
-    console.log('[ServicesTable] saveEdit received:', payload);
-    if (!this.editing) { return; }
+    if (!this.editing) return;
     this.loading = true;
 
+    const scheduleRequests = payload.newSchedules ?? [];
     const draft = payload.draft;
     const request = {
       name: draft.name ?? '',
@@ -318,12 +338,32 @@ export class ServicesTable {
       hotel_id: Number(draft.hotel_id ?? this.editing.hotel_id)
     };
 
-    this.serviceOfferingService.update(this.editing.id, request).subscribe({
-      next: updated => {
+
+    this.serviceOfferingService.update(this.editing.id, request).pipe(
+      // assign to the service offering {updated img, updated hotel}      
+      switchMap(updated => {
         Object.assign(this.editing!, updated, {
           image_urls: updated.image_urls ? [...updated.image_urls] : [],
           hotel: this.hotelsList.find(h => h.hotel_id === updated.hotel_id)
         });
+
+        if (!scheduleRequests.length) {
+          return of([] as ServiceSchedule[]);
+        }
+
+        // Create bundle of schedules calling the service
+        return forkJoin(
+          scheduleRequests.map(schedule =>
+            this.serviceOfferingService.createSchedule(this.editing!.id, schedule)
+          )
+        );
+      })
+    ).subscribe({
+      // assign to the service the bundle of schedules
+      next: schedules => {
+        if (schedules.length) {
+          this.editing!.schedules = [...(this.editing!.schedules ?? []), ...schedules];
+        }
 
         this.gridApi?.refreshCells({ force: true });
         this.deleteSchedules(payload.deleteIds);
@@ -334,6 +374,7 @@ export class ServicesTable {
       error: () => { this.loading = false; }
     });
   }
+
 
   private deleteSchedules(ids: number[]): void {
     console.log('Deleting schedules', ids);
