@@ -35,6 +35,11 @@ public class DatabaseInit implements CommandLineRunner {
         private final ReservationRepository reservationRepo;
         private final RoomLockRepository roomLockRepo;
 
+        // Nuevos repositorios para Department, StaffMember y Task
+        private final DepartmentRepository departmentRepo;
+        private final StaffMemberRepository staffMemberRepo;
+        private final TaskRepository taskRepo;
+
         @Override
         public void run(String... args) {
                 // Datos originales: roles, usuarios y hoteles
@@ -45,6 +50,11 @@ public class DatabaseInit implements CommandLineRunner {
                 seedRoomTypesAndRooms(hotelList);
                 seedServicesForAllHotels(hotelList);
                 seedReservations(hotelList);
+
+                // Datos para Department, StaffMember y Task
+                seedDepartments(hotelList);
+                seedStaffMembers(hotelList);
+                seedTasks();
         }
 
         private void seedBasicData() {
@@ -1403,5 +1413,97 @@ public class DatabaseInit implements CommandLineRunner {
                         case 2 -> "/images/icons/icono2.png";
                         default -> "/images/icons/icono3.png";
                 };
+        }
+
+        private void seedDepartments(List<Hotel> hotelList) {
+                if (departmentRepo.count() > 0)
+                        return;
+
+                String[] departmentNames = {
+                                "Recepción", "Limpieza", "Mantenimiento", "Cocina",
+                                "Servicio al Cliente", "Seguridad", "Recursos Humanos"
+                };
+
+                for (Hotel hotel : hotelList) {
+                        for (String deptName : departmentNames) {
+                                Department dept = new Department();
+                                dept.setHotelId(hotel.getHotelId());
+                                dept.setName(deptName);
+                                departmentRepo.save(dept);
+                        }
+                }
+        }
+
+        private void seedStaffMembers(List<Hotel> hotelList) {
+                if (staffMemberRepo.count() > 0)
+                        return; // no duplicar
+
+                List<User> operators = userRepo.findAll().stream()
+                                .filter(u -> u.getRoles().stream().anyMatch(r -> r.getName().equals("OPERATOR")))
+                                .toList();
+
+                List<Department> departments = departmentRepo.findAll();
+                Random random = new Random();
+
+                String[] staffNames = {
+                                "María González", "Carlos López", "Ana Martínez", "Luis Rodríguez",
+                                "Carmen Fernández", "José García", "Laura Sánchez", "Miguel Torres",
+                                "Isabel Ruiz", "Francisco Moreno", "Elena Jiménez", "Antonio Álvarez"
+                };
+
+                int staffIndex = 0;
+                for (Hotel hotel : hotelList) {
+                        List<Department> hotelDepts = departments.stream()
+                                        .filter(d -> d.getHotelId().equals(hotel.getHotelId()))
+                                        .toList();
+
+                        // Crear 2-3 staff members por departamento
+                        for (Department dept : hotelDepts) {
+                                int staffCount = random.nextInt(2) + 2; // 2-3 staff members
+                                for (int i = 0; i < staffCount && staffIndex < staffNames.length; i++) {
+                                        User user = operators.get(random.nextInt(operators.size()));
+
+                                        StaffMember staff = new StaffMember();
+                                        staff.setUserId(user.getUserId());
+                                        staff.setHotelId(hotel.getHotelId());
+                                        staff.setDepartmentId(dept.getDepartmentId());
+                                        staff.setName(staffNames[staffIndex % staffNames.length]);
+
+                                        staffMemberRepo.save(staff);
+                                        staffIndex++;
+                                }
+                        }
+                }
+        }
+
+        private void seedTasks() {
+                if (taskRepo.count() > 0)
+                        return;
+
+                List<StaffMember> staffMembers = staffMemberRepo.findAll();
+                List<Room> rooms = roomRepository.findAll();
+                Random random = new Random();
+
+                Task.TaskType[] taskTypes = Task.TaskType.values();
+                Task.TaskStatus[] taskStatuses = Task.TaskStatus.values();
+
+                // Crear 20 tareas de ejemplo
+                for (int i = 0; i < 20 && i < staffMembers.size(); i++) {
+                        StaffMember staff = staffMembers.get(i % staffMembers.size());
+
+                        Task task = new Task();
+                        task.setStaffId(staff.getStaffId());
+
+                        // 50% de probabilidad de asignar una habitación
+                        if (random.nextBoolean()) {
+                                Room room = rooms.get(random.nextInt(rooms.size()));
+                                task.setRoomId(room.getRoomId());
+                        }
+
+                        task.setType(taskTypes[random.nextInt(taskTypes.length)]);
+                        task.setStatus(taskStatuses[random.nextInt(taskStatuses.length)]);
+
+                        taskRepo.save(task);
+                }
         }
 }
