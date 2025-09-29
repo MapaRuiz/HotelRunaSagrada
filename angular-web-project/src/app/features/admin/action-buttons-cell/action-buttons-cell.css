@@ -1,0 +1,39 @@
+.btn {
+  padding: 4px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  border: none;
+  cursor: pointer;
+  margin-left: 5px;
+  transition: background 0.2s ease;
+}
+
+.btn-edit {
+  background: var(--c-olive);
+  color: #fff;
+}
+.btn-edit:hover {
+  filter: brightness(0.9);
+}
+
+.btn-delete {
+  background: #c34f4f;
+  color: #fff;
+}
+.btn-delete:hover {
+  filter: brightness(0.9);
+}
+
+.btn-details {
+  background: var(--c-ivory);
+  color: var(--c-ink);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.btn-details:hover {
+  background: var(--c-sand);
+}
+
+button:hover {
+  filter: brightness(0.9);
+}

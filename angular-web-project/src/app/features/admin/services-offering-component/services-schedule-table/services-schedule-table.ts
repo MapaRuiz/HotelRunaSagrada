@@ -5,7 +5,7 @@ import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, GridApi, GridOptions, ModuleRegistry, AllCommunityModule, PaginationModule } from 'ag-grid-community';
 
 import { ServiceSchedule } from '../../../../model/service-schedule';
-import { AG_GRID_LOCALE } from '../../ag-grid-locale';
+import { AG_GRID_LOCALE, gridTheme as sharedGridTheme } from '../../sharedTable';
 import { ActionButtonsComponent } from '../../action-buttons-cell/action-buttons-cell';
 import { ActionButtonsParams } from '../../action-buttons-cell/action-buttons-param';
 
@@ -27,6 +27,7 @@ export class ServicesScheduleTable implements OnChanges {
   rowData: ServiceSchedule[] = [];
   private gridApi?: GridApi<ServiceSchedule>;
   private isBrowser = false;
+  readonly gridTheme: typeof sharedGridTheme = sharedGridTheme;
 
   constructor(@Inject(PLATFORM_ID) platformId: Object) {
     this.isBrowser = isPlatformBrowser(platformId);

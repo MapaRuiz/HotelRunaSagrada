@@ -43,6 +43,18 @@ h3,
 .btn-olive:hover {
   filter: brightness(0.95);
 }
+
+.btn-outline-olive {
+  color: var(--c-olive);
+  border-color: var(--c-olive);
+  background: transparent;
+}
+.btn-outline-olive:hover,
+.btn-outline-olive.active {
+  background: var(--c-olive);
+  border-color: var(--c-olive);
+  color: #fff;
+}
 .link-ink {
   color: var(--c-ink);
 }

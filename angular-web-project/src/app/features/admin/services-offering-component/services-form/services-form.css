@@ -1,6 +1,19 @@
 .services-form {
   max-width: 100%; /* adjust as needed */
   margin: 0 auto;
+  background: var(--c-ivory);
+  border: 1px solid rgba(21, 21, 19, 0.08);
+  color: var(--c-ink);
+}
+
+.services-form .card-title {
+  color: var(--c-olive);
+  font-family: var(--font-title);
+}
+
+.services-form .form-label {
+  color: var(--c-olive);
+  font-weight: 600;
 }
 
 .carousel-stage {
@@ -53,9 +66,9 @@
 }
 
 .carousel-overlay-light {
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  color: #212529;
+  background: rgba(242, 243, 237, 0.92);
+  border: 1px solid rgba(21, 21, 19, 0.08);
+  color: var(--c-ink);
 }
 
 .carousel-overlay-error {

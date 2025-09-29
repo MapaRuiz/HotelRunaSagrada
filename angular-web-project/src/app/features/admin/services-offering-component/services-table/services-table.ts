@@ -11,13 +11,13 @@ import { ColDef, GridOptions, GridApi, ModuleRegistry, AllCommunityModule, Pagin
 import { AgGridAngular } from 'ag-grid-angular';
 import { ActionButtonsParams } from '../../action-buttons-cell/action-buttons-param';
 import { ActionButtonsComponent } from '../../action-buttons-cell/action-buttons-cell';
-import { Component, ElementRef, Inject, inject, PLATFORM_ID, ViewChild } from '@angular/core';
+import { Component, ElementRef, Inject, inject, PLATFORM_ID, ViewChild, ViewEncapsulation } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { ServicesDetail } from "../services-detail/services-detail";
-import { AG_GRID_LOCALE } from '../../ag-grid-locale';
+import { AG_GRID_LOCALE } from '../../sharedTable';
 import { MultiSelectFilterComponent } from '../../filters/multi-select-filter/multi-select-filter';
 import type { ServiceSchedule } from '../../../../model/service-schedule';
-
+import { gridTheme as sharedGridTheme } from '../../sharedTable';
 import type { ITextFilterParams, INumberFilterParams } from 'ag-grid-community';
 import type { ServiceOfferingDetailResponse } from '../../../../services/service-offering-service';
 
@@ -36,7 +36,8 @@ const NUMBER_FILTER_CONFIG: INumberFilterParams = {
   standalone: true,
   imports: [CommonModule, FormsModule, AgGridAngular, ServicesFormComponent, ServicesDetail],
   templateUrl: './services-table.html',
-  styleUrls: ['./services-table.css']
+  styleUrls: ['./services-table.css'],
+  encapsulation: ViewEncapsulation.None
 })
 export class ServicesTable {
   isBrowser: boolean = false;
@@ -50,8 +51,10 @@ export class ServicesTable {
   createLoading = false;
   selected?: ServiceOffering;
   detailLoading = false;
+  readonly gridTheme: typeof sharedGridTheme = sharedGridTheme;
 
   @ViewChild('createDetails') private createDetails?: ElementRef<HTMLDetailsElement>;
+
 
   constructor(
     private serviceOfferingService: ServiceOfferingService,
@@ -93,7 +96,6 @@ export class ServicesTable {
     this.showCreate = details.open;
   }
 
-
   gridOptions: GridOptions<ServiceOffering> = {
     localeText: AG_GRID_LOCALE,
     rowSelection: 'single',
@@ -118,6 +120,7 @@ export class ServicesTable {
       { 
         headerName:'ID',
         field:'id',
+        minWidth: 50,
         maxWidth: 100
       },
       { 
@@ -137,7 +140,7 @@ export class ServicesTable {
         maxWidth: 150
       },
       {
-        headerName:'Precio base',
+        headerName:'Precio',
         field:'base_price',
         filter: 'agNumberColumnFilter',
         filterParams: NUMBER_FILTER_CONFIG,
@@ -148,7 +151,8 @@ export class ServicesTable {
           maximumFractionDigits: 2
       }).format(params.value);
       },
-        maxWidth: 150
+        maxWidth: 150,
+        minWidth: 70
       },
       {
         headerName:'Cupo',
@@ -170,7 +174,7 @@ export class ServicesTable {
       {
         headerName: 'Actions',
         filter: false,
-        minWidth: 205,
+        minWidth: 270,
         cellRenderer: ActionButtonsComponent<ServiceOffering>,
         cellRendererParams: {
           onEdit: (row: ServiceOffering) => this.beginEdit(row),

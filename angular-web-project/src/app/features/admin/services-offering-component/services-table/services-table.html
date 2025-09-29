@@ -22,7 +22,7 @@
   </div>
   <div class="services-grid-wrap">
     <ag-grid-angular
-      class="ag-theme-alpine"
+      [theme]="gridTheme"
       [gridOptions]="gridOptions"
       [rowData]="rowData"
       [pagination]="true"

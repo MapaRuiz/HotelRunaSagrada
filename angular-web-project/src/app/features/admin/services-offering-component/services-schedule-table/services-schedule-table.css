@@ -4,11 +4,18 @@
   margin-bottom: 1rem;
 }
 
-.schedule-toolbar input[type='search'] {
-  max-width: 280px;
+.schedule-toolbar .form-control {
+  max-width: 320px;
   width: 100%;
   padding: 0.45rem 0.75rem;
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(21, 21, 19, 0.12);
+  background: var(--c-ivory);
+  color: var(--c-ink);
+  border-radius: 12px;
+}
+
+.schedule-toolbar .form-control::placeholder {
+  color: rgba(21, 21, 19, 0.6);
 }
 
 .schedule-grid {

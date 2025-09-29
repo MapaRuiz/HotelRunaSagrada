@@ -4,12 +4,12 @@
 
     <div class="col-md-6">
       <label class="form-label">Nombre</label>
-      <input class="form-control" [(ngModel)]="draft.name" name="name" required />
+      <input class="form-control input-soft" [(ngModel)]="draft.name" name="name" required />
     </div>
 
     <div class="col-md-6">
       <label class="form-label">Hotel</label>
-      <select class="form-select" [(ngModel)]="draft.hotel_id" name="hotel" required>
+      <select class="form-select input-soft" [(ngModel)]="draft.hotel_id" name="hotel" required>
         <option [ngValue]="undefined">Selecciona hotel…</option>
         <option *ngFor="let h of hotels" [ngValue]="h.id">{{ h.name | slice : 12 }}</option>
       </select>
@@ -17,7 +17,7 @@
 
     <div class="col-md-6">
       <label class="form-label">Categoria</label>
-      <select class="form-select" [(ngModel)]="draft.category" name="category" required>
+      <select class="form-select input-soft" [(ngModel)]="draft.category" name="category" required>
         <option [ngValue]="undefined">Selecciona categoria…</option>
         <option *ngFor="let cat of categorias" [ngValue]="cat">{{ cat }}</option>
       </select>
@@ -25,19 +25,19 @@
 
     <div class="col-md-6">
       <label class="form-label">Subcategoria</label>
-      <input class="form-control" [(ngModel)]="draft.subcategory" name="subcategory" required />
+      <input class="form-control input-soft" [(ngModel)]="draft.subcategory" name="subcategory" required />
     </div>
 
     <div class="col-md-6">
       <label class="form-label">Descripcion</label>
-      <input class="form-control" [(ngModel)]="draft.description" name="description" required />
+      <input class="form-control input-soft" [(ngModel)]="draft.description" name="description" required />
     </div>
 
     <div class="col-md-4">
       <label class="form-label">Duracion</label>
       <input
         type="number"
-        class="form-control"
+        class="form-control input-soft"
         [(ngModel)]="draft.duration_minutes"
         name="duration_minutes"
         min="0"
@@ -49,7 +49,7 @@
       <label class="form-label">Cupo maximo</label>
       <input
         type="number"
-        class="form-control"
+        class="form-control input-soft"
         [(ngModel)]="draft.max_participants"
         name="max_participants"
         min="0"
@@ -61,7 +61,7 @@
       <label class="form-label">Precio base</label>
       <input
         type="number"
-        class="form-control"
+        class="form-control input-soft"
         [(ngModel)]="draft.base_price"
         name="base_price"
         min="0"
@@ -75,7 +75,7 @@
         <div class="col-6">
           <input
             type="text"
-            class="form-control"
+            class="form-control input-soft"
             [(ngModel)]="draft.latitude"
             name="latitude"
             required
@@ -84,7 +84,7 @@
         <div class="col-6">
           <input
             type="text"
-            class="form-control"
+            class="form-control input-soft"
             [(ngModel)]="draft.longitude"
             name="longitude"
             required
@@ -103,7 +103,7 @@
           <div class="btn-group btn-group-sm" role="group">
             <button
               type="button"
-              class="btn btn-outline-primary"
+              class="btn btn-outline-olive"
               [class.active]="displayMode === 'carousel'"
               (click)="setDisplayMode('carousel')"
             >
@@ -111,7 +111,7 @@
             </button>
             <button
               type="button"
-              class="btn btn-outline-primary"
+              class="btn btn-outline-olive"
               [class.active]="displayMode === 'list'"
               (click)="setDisplayMode('list')"
             >
@@ -123,12 +123,12 @@
         <div class="imagenes-input input-group mb-3">
           <input
             type="url"
-            class="form-control"
+            class="form-control input-soft"
             placeholder="https://ejemplo.com/imagen.jpg"
             [(ngModel)]="newImageUrl"
             name="newImageUrl"
           />
-          <button class="btn btn-outline-primary" type="button" (click)="addImage()">Añadir</button>
+          <button class="btn btn-olive" type="button" (click)="addImage()">Añadir</button>
         </div>
 
         <div *ngIf="draft.image_urls?.length; else noImages" class="imagenes-body">
@@ -275,13 +275,13 @@
     <div class="col-12 text-end">
       <button
         type="button"
-        class="btn btn-secondary me-2"
+        class="btn btn-outline-olive me-2"
         (click)="cancel.emit()"
         [disabled]="loading"
       >
         Cancelar
       </button>
-      <button type="submit" class="btn btn-primary" [disabled]="loading || form.invalid">
+      <button type="submit" class="btn btn-olive" [disabled]="loading || form.invalid">
         Guardar
       </button>
     </div>
