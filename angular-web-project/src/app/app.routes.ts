@@ -33,6 +33,9 @@ export const routes: Routes = [
       .then(m => m.OperatorShellComponent),
     children: [
       { path: '', pathMatch: 'full', loadComponent: () => import('./features/operator/operator-dashboard/operator-dashboard').then(m => m.OperatorDashboardComponent) },
+      { path: 'department', loadComponent: () => import('./features/operator/department/department').then(m => m.DepartmentComponent)},
+      { path: 'task', loadComponent: () => import('./features/operator/task/task').then(m => m.TaskComponent)},
+      { path: 'staff-member', loadComponent: () => import('./features/operator/staff-member/staff-member').then(m => m.StaffMemberComponent)},
       { path: 'profile', loadComponent: () => import('./features/operator/operator-profile/operator-profile').then(m => m.OperatorProfileComponent) },
     ]
   },
@@ -42,12 +45,7 @@ export const routes: Routes = [
     loadComponent: () => import('./features/admin/shell/admin-shell/admin-shell')
       .then(m => m.AdminShellComponent),
     children: [
-      {
-        path: '',
-        pathMatch: 'full',
-        loadComponent: () => import('./features/admin/dashboard/admin-dashboard/admin-dashboard')
-          .then(m => m.AdminDashboardComponent)
-      },
+      { path: '',pathMatch: 'full', loadComponent: () => import('./features/admin/dashboard/admin-dashboard/admin-dashboard').then(m => m.AdminDashboardComponent)},
       { path: 'users', loadComponent: () => import('./features/admin/users/users').then(m => m.Users) },
       { path: 'hotels', loadComponent: () => import('./features/admin/hotels/hotels').then(m => m.HotelsComponent) },
       { path: 'amenities', loadComponent: () => import('./features/admin/amenities/amenities').then(m => m.AmenitiesComponent) },
