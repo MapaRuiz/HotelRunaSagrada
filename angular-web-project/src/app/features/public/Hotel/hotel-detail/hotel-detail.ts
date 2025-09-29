@@ -12,7 +12,8 @@ import { environment } from '../../../../../environments/environment';
   standalone: true,
   selector: 'app-hotel-detail',
   imports: [CommonModule, HotelHeroComponent, HotelAmenitiesComponent],
-  templateUrl: './hotel-detail.html'
+  templateUrl: './hotel-detail.html',
+  styleUrls: ['./hotel-detail.css']
 })
 export class HotelDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
