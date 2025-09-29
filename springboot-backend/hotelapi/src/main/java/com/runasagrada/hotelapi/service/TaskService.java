@@ -26,8 +26,4 @@ public interface TaskService {
 	List<Task> findByType(TaskType type);
 
 	List<Task> findByStaffIdAndStatus(Long staffId, TaskStatus status);
-
-	List<Task> findByStaffIdOrderByCreatedAtDesc(Long staffId);
-
-	List<Task> findByStatusOrderByCreatedAtAsc(TaskStatus status);
 }

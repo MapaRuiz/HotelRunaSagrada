@@ -67,12 +67,6 @@ public class StaffMemberServiceImpl implements StaffMemberService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<StaffMember> findByUserId(Integer userId) {
-		return staffMembers.findByUserId(userId);
-	}
-
-	@Override
-	@Transactional(readOnly = true)
 	public List<StaffMember> findByHotelId(Long hotelId) {
 		return staffMembers.findByHotelId(hotelId);
 	}

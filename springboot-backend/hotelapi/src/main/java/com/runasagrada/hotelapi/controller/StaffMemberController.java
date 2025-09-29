@@ -28,11 +28,6 @@ public class StaffMemberController {
 		return service.findById(id);
 	}
 
-	@GetMapping("/staff-members/user/{userId}")
-	public List<StaffMember> getByUser(@PathVariable Integer userId) {
-		return service.findByUserId(userId);
-	}
-
 	@GetMapping("/staff-members/hotel/{hotelId}")
 	public List<StaffMember> getByHotel(@PathVariable Long hotelId) {
 		return service.findByHotelId(hotelId);

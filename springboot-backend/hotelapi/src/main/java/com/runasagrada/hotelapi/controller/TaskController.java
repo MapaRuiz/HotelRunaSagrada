@@ -20,52 +20,42 @@ public class TaskController {
 	@Autowired
 	private TaskService service;
 
-	@GetMapping("/tasks")
+	@GetMapping("/task")
 	public List<Task> list() {
 		return service.findAll();
 	}
 
-	@GetMapping("/tasks/{id}")
+	@GetMapping("/task/{id}")
 	public Task get(@PathVariable Long id) {
 		return service.findById(id);
 	}
 
-	@GetMapping("/tasks/staff/{staffId}")
+	@GetMapping("/task/staff/{staffId}")
 	public List<Task> getByStaff(@PathVariable Long staffId) {
 		return service.findByStaffId(staffId);
 	}
 
-	@GetMapping("/tasks/room/{roomId}")
+	@GetMapping("/task/room/{roomId}")
 	public List<Task> getByRoom(@PathVariable Integer roomId) {
 		return service.findByRoomId(roomId);
 	}
 
-	@GetMapping("/tasks/status/{status}")
+	@GetMapping("/task/status/{status}")
 	public List<Task> getByStatus(@PathVariable TaskStatus status) {
 		return service.findByStatus(status);
 	}
 
-	@GetMapping("/tasks/type/{type}")
+	@GetMapping("/task/type/{type}")
 	public List<Task> getByType(@PathVariable TaskType type) {
 		return service.findByType(type);
 	}
 
-	@GetMapping("/tasks/staff/{staffId}/status/{status}")
+	@GetMapping("/task/staff/{staffId}/status/{status}")
 	public List<Task> getByStaffAndStatus(@PathVariable Long staffId, @PathVariable TaskStatus status) {
 		return service.findByStaffIdAndStatus(staffId, status);
 	}
 
-	@GetMapping("/tasks/staff/{staffId}/recent")
-	public List<Task> getByStaffOrderByDate(@PathVariable Long staffId) {
-		return service.findByStaffIdOrderByCreatedAtDesc(staffId);
-	}
-
-	@GetMapping("/tasks/status/{status}/ordered")
-	public List<Task> getByStatusOrderByDate(@PathVariable TaskStatus status) {
-		return service.findByStatusOrderByCreatedAtAsc(status);
-	}
-
-	@PostMapping("/tasks")
+	@PostMapping("/task")
 	public ResponseEntity<Task> create(@RequestBody TaskRequest body) {
 		Task task = new Task();
 		task.setStaffId(body.getStaffId());
@@ -76,7 +66,7 @@ public class TaskController {
 		return ResponseEntity.ok(service.create(task));
 	}
 
-	@PutMapping("/tasks/{id}")
+	@PutMapping("/task/{id}")
 	public ResponseEntity<Task> update(@PathVariable Long id, @RequestBody TaskRequest body) {
 		Task partial = new Task();
 		partial.setStaffId(body.getStaffId());
@@ -87,14 +77,14 @@ public class TaskController {
 		return ResponseEntity.ok(service.update(id, partial));
 	}
 
-	@PutMapping("/tasks/{id}/status")
+	@PutMapping("/task/{id}/status")
 	public ResponseEntity<Task> updateStatus(@PathVariable Long id, @RequestBody TaskStatusRequest body) {
 		Task partial = new Task();
 		partial.setStatus(body.getStatus());
 		return ResponseEntity.ok(service.update(id, partial));
 	}
 
-	@DeleteMapping("/tasks/{id}")
+	@DeleteMapping("/task/{id}")
 	public ResponseEntity<Void> delete(@PathVariable Long id) {
 		service.delete(id);
 		return ResponseEntity.noContent().build();

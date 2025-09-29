@@ -15,8 +15,6 @@ public interface StaffMemberService {
 
 	void delete(Long id);
 
-	List<StaffMember> findByUserId(Integer userId);
-
 	List<StaffMember> findByHotelId(Long hotelId);
 
 	List<StaffMember> findByDepartmentId(Long departmentId);

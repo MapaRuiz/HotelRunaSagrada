@@ -107,18 +107,6 @@ public class TaskServiceImpl implements TaskService {
 		return tasks.findByStaffIdAndStatus(staffId, status);
 	}
 
-	@Override
-	@Transactional(readOnly = true)
-	public List<Task> findByStaffIdOrderByCreatedAtDesc(Long staffId) {
-		return tasks.findByStaffIdOrderByCreatedAtDesc(staffId);
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public List<Task> findByStatusOrderByCreatedAtAsc(TaskStatus status) {
-		return tasks.findByStatusOrderByCreatedAtAsc(status);
-	}
-
 	private void validate(Task task) {
 		if (task.getStaffId() == null)
 			throw new IllegalArgumentException("Staff ID is required");
