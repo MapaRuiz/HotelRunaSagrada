@@ -11,10 +11,16 @@ export interface ServicesFormPayload {
   draft: Partial<ServiceOffering>;
   deleteIds: number[];
   newSchedules: ServiceScheduleRequest[];
+  updatedSchedules: { id: number; request: ServiceScheduleRequest }[];
 }
 
 interface PendingScheduleSave {
   tempId: number;
+  request: ServiceScheduleRequest;
+}
+
+interface PendingScheduleUpdate {
+  id: number;
   request: ServiceScheduleRequest;
 }
 
@@ -44,9 +50,12 @@ export class ServicesFormComponent {
   pendingDeletes = new Set<number>();
   showScheduleForm = false;
   scheduleDraft: Partial<ServiceSchedule> | null = null;
+  editingSchedule: ServiceSchedule | null = null;
+  editingScheduleDraft: Partial<ServiceSchedule> | null = null;
 
   private nextTempScheduleId = 0;
   private pendingSchedules: PendingScheduleSave[] = [];
+  private pendingUpdates: PendingScheduleUpdate[] = [];
 
   constructor() {}
 
@@ -57,6 +66,13 @@ export class ServicesFormComponent {
 
   ngOnChanges(): void {
     this.syncImageStatus();
+
+    if (this.editingSchedule) {
+      const schedules = this.draft.schedules ?? [];
+      if (!schedules.some(item => item.id === this.editingSchedule?.id)) {
+        this.cancelScheduleEdit();
+      }
+    }
   }
 
   submit(): void {
@@ -66,10 +82,12 @@ export class ServicesFormComponent {
     this.save.emit({
       draft: { ...this.draft },
       deleteIds,
-      newSchedules: this.pendingSchedules.map(item => item.request)
+      newSchedules: this.pendingSchedules.map(item => item.request),
+      updatedSchedules: [...this.pendingUpdates]
     });
 
     this.pendingSchedules = [];
+    this.pendingUpdates = [];
   }
 
   addImage(): void {
@@ -128,8 +146,54 @@ export class ServicesFormComponent {
     }
   }
 
-  editSchedule($event: ServiceSchedule) {
+  editSchedule(schedule: ServiceSchedule): void {
+    this.cancelSchedule();
+    this.editingSchedule = schedule;
+    this.editingScheduleDraft = {
+      ...schedule,
+      days_of_week: [...(schedule.days_of_week ?? [])]
+    };
+  }
 
+  saveScheduleEdit(schedule: ServiceSchedule): void {
+    if (!this.editingSchedule) return;
+    const targetId = this.editingSchedule.id;
+    const request = this.toScheduleRequest(schedule);
+
+    if (targetId > 0) {
+      this.pendingUpdates = [
+        { id: targetId, request },
+        ...this.pendingUpdates.filter(item => item.id !== targetId)
+      ];
+    } else {
+      this.pendingSchedules = [
+        { tempId: targetId, request },
+        ...this.pendingSchedules.filter(item => item.tempId !== targetId)
+      ];
+    }
+
+    const previous = this.draft.schedules ?? [];
+    const sanitized: ServiceSchedule = {
+      ...this.editingSchedule,
+      ...schedule,
+      id: targetId,
+      days_of_week: [...request.days_of_week],
+      start_time: request.start_time,
+      end_time: request.end_time,
+      active: request.active
+    };
+    const remaining = previous.filter(item => item.id !== targetId);
+    this.draft = {
+      ...this.draft,
+      schedules: [sanitized, ...remaining]
+    };
+
+    this.cancelScheduleEdit();
+  }
+
+  cancelScheduleEdit(): void {
+    this.editingSchedule = null;
+    this.editingScheduleDraft = null;
   }
 
   private syncImageStatus(): void {

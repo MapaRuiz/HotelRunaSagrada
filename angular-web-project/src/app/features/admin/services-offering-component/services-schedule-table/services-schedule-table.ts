@@ -17,6 +17,7 @@ import { ActionButtonsParams } from '../../action-buttons-cell/action-buttons-pa
   styleUrls: ['./services-schedule-table.css']
 })
 export class ServicesScheduleTable implements OnChanges {
+
   @Input() schedules: ServiceSchedule[] = [];
   @Input() showActions = true;
   @Output() editRequested = new EventEmitter<ServiceSchedule>();
@@ -36,19 +37,9 @@ export class ServicesScheduleTable implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['schedules']) {
-      const next = [...(this.schedules ?? [])];
+      this.rowData = [...(this.schedules ?? [])];
       if (this.gridApi) {
-        const nextIds = new Set(next.map(s => s.id));
-        const removed = this.rowData.filter(r => !nextIds.has(r.id));
-
-        this.rowData = next;
-        if (removed.length) {
-          this.gridApi.applyTransaction({ remove: removed });
-        } else {
-          this.gridApi.setGridOption('rowData', this.rowData);
-        }
-      } else {
-        this.rowData = next;
+        this.gridApi.setGridOption('rowData', this.rowData);
       }
     }
     if (changes['showActions']) {
@@ -71,12 +62,6 @@ export class ServicesScheduleTable implements OnChanges {
   onSearch(term: string): void {
     this.search = term;
     this.gridApi?.setGridOption('quickFilterText', term || undefined);
-  }
-
-  private refreshRowData(): void {
-    if (this.gridApi) {
-      this.gridApi.setGridOption('rowData', this.rowData);
-    }
   }
 
   private updateColumnDefs(): void {
@@ -125,7 +110,6 @@ export class ServicesScheduleTable implements OnChanges {
     if (this.showActions) {
       columns.push({
         headerName: 'Acciones',
-        filter: false,
         minWidth: 200,
         cellRenderer: ActionButtonsComponent<ServiceSchedule>,
         cellRendererParams: {

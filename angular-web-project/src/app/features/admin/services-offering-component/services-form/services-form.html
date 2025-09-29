@@ -236,24 +236,36 @@
     <div class="col-12">
       <label class="form-label">Horarios</label>
 
-      <details #scheduleDetails class="mb-3" (toggle)="onScheduleToggle($event)">
-        <summary>Agregar horario</summary>
-
+      <ng-container *ngIf="editingSchedule; else scheduleManager">
         <app-service-schedule-form
-          *ngIf="showScheduleForm && scheduleDraft"
-          [draft]="scheduleDraft"
+          *ngIf="editingScheduleDraft"
+          [draft]="editingScheduleDraft"
           [loading]="loading"
-          (save)="saveSchedule($event)"
-          (cancel)="cancelSchedule()"
+          (save)="saveScheduleEdit($event)"
+          (cancel)="cancelScheduleEdit()"
         ></app-service-schedule-form>
-      </details>
+      </ng-container>
 
-      <app-services-schedule-table
-        [schedules]="draft.schedules || []"
-        [showActions]="true"
-        (editRequested)="editSchedule($event)"
-        (deleteRequested)="deleteSchedule($event)"
-      ></app-services-schedule-table>
+      <ng-template #scheduleManager>
+        <details #scheduleDetails class="mb-3" (toggle)="onScheduleToggle($event)">
+          <summary>Agregar horario</summary>
+
+          <app-service-schedule-form
+            *ngIf="showScheduleForm && scheduleDraft"
+            [draft]="scheduleDraft"
+            [loading]="loading"
+            (save)="saveSchedule($event)"
+            (cancel)="cancelSchedule()"
+          ></app-service-schedule-form>
+        </details>
+
+        <app-services-schedule-table
+          [schedules]="draft.schedules || []"
+          [showActions]="true"
+          (editRequested)="editSchedule($event)"
+          (deleteRequested)="deleteSchedule($event)"
+        ></app-services-schedule-table>
+      </ng-template>
     </div>
 
     <ng-template #noImages>

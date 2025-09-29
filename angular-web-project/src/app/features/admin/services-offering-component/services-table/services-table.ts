@@ -323,6 +323,7 @@ export class ServicesTable {
     this.loading = true;
 
     const scheduleRequests = payload.newSchedules ?? [];
+    const updateRequests = payload.updatedSchedules ?? [];
     const draft = payload.draft;
     const request = {
       name: draft.name ?? '',
@@ -338,31 +339,50 @@ export class ServicesTable {
       hotel_id: Number(draft.hotel_id ?? this.editing.hotel_id)
     };
 
+    const updateOps = updateRequests.map(update =>
+      this.serviceOfferingService.updateSchedule(update.id, update.request)
+    );
+    const createOps = scheduleRequests.map(schedule =>
+      this.serviceOfferingService.createSchedule(this.editing!.id, schedule)
+    );
+    const operations = [...updateOps, ...createOps];
 
     this.serviceOfferingService.update(this.editing.id, request).pipe(
-      // assign to the service offering {updated img, updated hotel}      
       switchMap(updated => {
         Object.assign(this.editing!, updated, {
           image_urls: updated.image_urls ? [...updated.image_urls] : [],
           hotel: this.hotelsList.find(h => h.hotel_id === updated.hotel_id)
         });
 
-        if (!scheduleRequests.length) {
+        if (!operations.length) {
           return of([] as ServiceSchedule[]);
         }
 
-        // Create bundle of schedules calling the service
-        return forkJoin(
-          scheduleRequests.map(schedule =>
-            this.serviceOfferingService.createSchedule(this.editing!.id, schedule)
-          )
-        );
+        return forkJoin(operations);
       })
     ).subscribe({
-      // assign to the service the bundle of schedules
       next: schedules => {
-        if (schedules.length) {
-          this.editing!.schedules = [...(this.editing!.schedules ?? []), ...schedules];
+        if (this.editing) {
+          const updatedSlice = schedules.slice(0, updateOps.length);
+          const createdSlice = schedules.slice(updateOps.length);
+
+          const updatedIds = new Set(updatedSlice.map(item => item.id));
+          const existing = this.editing.schedules ?? [];
+          const mergedExisting = existing.map(item => {
+            const replacement = updatedSlice.find(schedule => schedule.id === item.id);
+            return replacement ?? item;
+          });
+
+          let merged: ServiceSchedule[] = [
+            ...updatedSlice,
+            ...mergedExisting.filter(item => !updatedIds.has(item.id))
+          ];
+
+          if (createdSlice.length) {
+            merged = [...merged, ...createdSlice];
+          }
+
+          this.editing.schedules = merged;
         }
 
         this.gridApi?.refreshCells({ force: true });
