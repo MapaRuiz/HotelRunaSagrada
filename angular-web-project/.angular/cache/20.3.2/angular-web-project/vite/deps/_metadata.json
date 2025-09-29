@@ -1,91 +1,91 @@
 {
-  "hash": "03e3425e",
-  "configHash": "fa8cf657",
-  "lockfileHash": "751237a2",
-  "browserHash": "1521a269",
+  "hash": "6d63ed28",
+  "configHash": "5c98d4e3",
+  "lockfileHash": "84a25bde",
+  "browserHash": "1cdad735",
   "optimized": {
     "@ag-grid-community/locale": {
       "src": "../../../../../../node_modules/@ag-grid-community/locale/dist/package/main.esm.mjs",
       "file": "@ag-grid-community_locale.js",
-      "fileHash": "b2c4a6ee",
+      "fileHash": "566b32db",
       "needsInterop": false
     },
     "@angular/common": {
       "src": "../../../../../../node_modules/@angular/common/fesm2022/common.mjs",
       "file": "@angular_common.js",
-      "fileHash": "f5afbd40",
+      "fileHash": "9489d4f2",
       "needsInterop": false
     },
     "@angular/common/http": {
       "src": "../../../../../../node_modules/@angular/common/fesm2022/http.mjs",
       "file": "@angular_common_http.js",
-      "fileHash": "fc093bca",
+      "fileHash": "d0775948",
       "needsInterop": false
     },
     "@angular/core": {
       "src": "../../../../../../node_modules/@angular/core/fesm2022/core.mjs",
       "file": "@angular_core.js",
-      "fileHash": "59d43bde",
+      "fileHash": "c7d8a959",
       "needsInterop": false
     },
     "@angular/forms": {
       "src": "../../../../../../node_modules/@angular/forms/fesm2022/forms.mjs",
       "file": "@angular_forms.js",
-      "fileHash": "7a19ad14",
+      "fileHash": "423dad1b",
       "needsInterop": false
     },
     "@angular/platform-browser": {
       "src": "../../../../../../node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs",
       "file": "@angular_platform-browser.js",
-      "fileHash": "542e4b6c",
+      "fileHash": "aa186c50",
       "needsInterop": false
     },
     "@angular/router": {
       "src": "../../../../../../node_modules/@angular/router/fesm2022/router.mjs",
       "file": "@angular_router.js",
-      "fileHash": "315e0d9c",
+      "fileHash": "50569ce3",
       "needsInterop": false
     },
     "ag-grid-angular": {
       "src": "../../../../../../node_modules/ag-grid-angular/fesm2022/ag-grid-angular.mjs",
       "file": "ag-grid-angular.js",
-      "fileHash": "4d4cb277",
+      "fileHash": "2aefa06a",
       "needsInterop": false
     },
     "ag-grid-community": {
       "src": "../../../../../../node_modules/ag-grid-community/dist/package/main.esm.mjs",
       "file": "ag-grid-community.js",
-      "fileHash": "6445040c",
+      "fileHash": "81426045",
       "needsInterop": false
     },
     "bootstrap/js/dist/toast": {
       "src": "../../../../../../node_modules/bootstrap/js/dist/toast.js",
       "file": "bootstrap_js_dist_toast.js",
-      "fileHash": "aee0f6e3",
+      "fileHash": "b80099e3",
       "needsInterop": true
     },
     "gsap": {
       "src": "../../../../../../node_modules/gsap/index.js",
       "file": "gsap.js",
-      "fileHash": "494271b3",
+      "fileHash": "51daa1c1",
       "needsInterop": false
     },
     "ng-apexcharts": {
       "src": "../../../../../../node_modules/ng-apexcharts/fesm2022/ng-apexcharts.mjs",
       "file": "ng-apexcharts.js",
-      "fileHash": "bebb016e",
+      "fileHash": "d635d659",
       "needsInterop": false
     },
     "rxjs": {
       "src": "../../../../../../node_modules/rxjs/dist/esm5/index.js",
       "file": "rxjs.js",
-      "fileHash": "822a5d80",
+      "fileHash": "b111e6ec",
       "needsInterop": false
     },
     "zone.js": {
       "src": "../../../../../../node_modules/zone.js/fesm2015/zone.js",
       "file": "zone__js.js",
-      "fileHash": "0c52e815",
+      "fileHash": "7e3a68aa",
       "needsInterop": true
     }
   },
@@ -99,14 +99,14 @@
     "chunk-AQPODC3U": {
       "file": "chunk-AQPODC3U.js"
     },
+    "chunk-KDHX6ELO": {
+      "file": "chunk-KDHX6ELO.js"
+    },
     "chunk-XTEYJ74I": {
       "file": "chunk-XTEYJ74I.js"
     },
     "chunk-ZJ25XCV3": {
       "file": "chunk-ZJ25XCV3.js"
-    },
-    "chunk-KDHX6ELO": {
-      "file": "chunk-KDHX6ELO.js"
     },
     "chunk-ZVRIRQNZ": {
       "file": "chunk-ZVRIRQNZ.js"

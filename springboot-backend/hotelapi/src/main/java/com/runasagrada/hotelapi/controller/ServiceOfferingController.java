@@ -237,6 +237,18 @@ public class ServiceOfferingController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/servoffering/schedule/{id}")
+    public ResponseEntity<Void> deleteSchedule(@PathVariable("id") Long identifier) {
+        return serviceScheduleService.findById(identifier)
+                .map(this::buildDeleteResponseSchedule)
+                .orElseGet(() -> ResponseEntity.notFound().<Void>build());
+    }
+
+    private ResponseEntity<Void> buildDeleteResponseSchedule(ServiceSchedule existing) {
+        serviceScheduleService.delete(existing.getId());
+        return ResponseEntity.noContent().build();
+    }
+
     private List<ServiceOffering> filter(List<ServiceOffering> source, Predicate<ServiceOffering> predicate) {
         return source.stream().filter(predicate).collect(Collectors.toList());
     }

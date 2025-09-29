@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { ServiceOffering } from '../../../../model/service-offering';
 import { ServicesScheduleTable } from "../services-schedule-table/services-schedule-table";
+import { ServiceSchedule } from '../../../../model/service-schedule';
 
 @Component({
   selector: 'app-services-detail',

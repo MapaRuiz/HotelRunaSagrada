@@ -55,6 +55,10 @@ export class ServiceOfferingService {
   deleteById(id: number) {
     return this.http.delete<void>(`${this.resource}/delete/${id}`);
   }
+
+  deleteSchedule(id: number) {
+    return this.http.delete<void>(`${this.resource}/schedule/${id}`);
+  }
 }
 
 export interface ServiceOfferingRequest {

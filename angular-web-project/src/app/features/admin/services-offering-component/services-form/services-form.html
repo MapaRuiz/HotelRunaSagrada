@@ -233,6 +233,41 @@
       </div>
     </div>
 
+    <div class="col-12">
+      <label class="form-label">Horarios</label>
+
+      <ng-container *ngIf="editingSchedule; else scheduleManager">
+        <app-service-schedule-form
+          *ngIf="editingScheduleDraft"
+          [draft]="editingScheduleDraft"
+          [loading]="loading"
+          (save)="saveScheduleEdit($event)"
+          (cancel)="cancelScheduleEdit()"
+        ></app-service-schedule-form>
+      </ng-container>
+
+      <ng-template #scheduleManager>
+        <details #scheduleDetails class="mb-3" (toggle)="onScheduleToggle($event)">
+          <summary>Agregar horario</summary>
+
+          <app-service-schedule-form
+            *ngIf="showScheduleForm && scheduleDraft"
+            [draft]="scheduleDraft"
+            [loading]="loading"
+            (save)="saveSchedule($event)"
+            (cancel)="cancelSchedule()"
+          ></app-service-schedule-form>
+        </details>
+
+        <app-services-schedule-table
+          [schedules]="draft.schedules || []"
+          [showActions]="true"
+          (editRequested)="editSchedule($event)"
+          (deleteRequested)="deleteSchedule($event)"
+        ></app-services-schedule-table>
+      </ng-template>
+    </div>
+
     <ng-template #noImages>
       <div class="text-muted fst-italic">No hay imágenes todavía.</div>
     </ng-template>

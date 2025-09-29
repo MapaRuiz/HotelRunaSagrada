@@ -281,9 +281,11 @@ public class DatabaseInit implements CommandLineRunner {
                                 s.setHotel(hotel);
                                 serviceRepository.save(s);
                         });
+
+                        createSampleSchedules(specificServices);
                 }
 
-                createSampleSchedules();
+                createSampleSchedules(commonServices);
         }
 
         private List<ServiceOffering> createCommonServices() {
@@ -429,6 +431,7 @@ public class DatabaseInit implements CommandLineRunner {
                 arequipeConBrevas.setBasePrice(12000);
                 arequipeConBrevas.setDurationMinutes(30);
                 arequipeConBrevas.setImageUrls(List
+
                                 .of("https://elrinconcolombiano.com/wp-content/uploads/2023/04/Manjar-blanco-receta-colombiana.jpg"));
                 arequipeConBrevas.setMaxParticipants(10);
                 arequipeConBrevas.setLatitude(6.2442);
@@ -1164,40 +1167,74 @@ public class DatabaseInit implements CommandLineRunner {
                 return copy;
         }
 
-        private void createSampleSchedules() {
-                LocalDate baseDate = LocalDate.now();
-
-                // Crear schedules para algunos servicios destacados
-                List<String> servicesForSchedules = List.of(
-                                "Ceremonia del Cacao Sagrado",
-                                "Taller de Cumbia",
-                                "Bandeja Paisa Auténtica",
-                                "Tour Ciudad Amurallada",
-                                "Finca Cafetera Tradicional",
-                                "Acuario y Johnny Cay",
-                                "Tayrona Ancestral",
-                                "Observatorio Astronómico Muisca");
-
-                for (String serviceName : servicesForSchedules) {
-                        createScheduleForService(serviceName, baseDate.plusDays(1), LocalTime.of(9, 0), 7);
+        private void createSampleSchedules(List<ServiceOffering> services) {
+                for (ServiceOffering serviceName : services) {
+                        createScheduleForService(serviceName, LocalTime.of(9, 0));
                 }
         }
 
-        private void createScheduleForService(String serviceName, LocalDate startDate, LocalTime time, int days) {
+        private void createScheduleForService(ServiceOffering service, LocalTime time) {
+                String serviceName = service.getName();
                 List<ServiceOffering> services = serviceRepository.findAll().stream()
                                 .filter(s -> serviceName.equalsIgnoreCase(s.getName()))
                                 .toList();
 
-                for (ServiceOffering service : services) {
-                        ServiceSchedule schedule = new ServiceSchedule();
-                        schedule.setService(service);
-                        schedule.setDaysOfWeek(Set.of(ServiceSchedule.DayWeek.DAILY));
-                        schedule.setStartTime(time);
-                        schedule.setEndTime(time.plusMinutes(service.getDurationMinutes()));
-                        schedule.setActive(true);
-
-                        scheduleService.seedSchedules(schedule, days);
+                for (ServiceOffering serv : services) {
+                        setScheduleByCategory(serv, time);
                 }
+        }
+
+        private void setScheduleByCategory(ServiceOffering serv, LocalTime time) {
+                int duration = Math.max(30, serv.getDurationMinutes());
+
+                List<ServiceSchedule> schedules = switch (serv.getCategory()) {
+                        case "Cultural" -> List.of(
+                                        buildSchedule(serv, time, EnumSet.of(
+                                                        ServiceSchedule.DayWeek.MONDAY,
+                                                        ServiceSchedule.DayWeek.TUESDAY,
+                                                        ServiceSchedule.DayWeek.WEDNESDAY,
+                                                        ServiceSchedule.DayWeek.THURSDAY,
+                                                        ServiceSchedule.DayWeek.FRIDAY), duration),
+                                        buildSchedule(serv, time.plusHours(2), EnumSet.of(
+                                                        ServiceSchedule.DayWeek.SATURDAY,
+                                                        ServiceSchedule.DayWeek.SUNDAY), duration));
+                        case "Experiencia" -> List.of(
+                                        buildSchedule(serv, time.plusHours(1), EnumSet.of(
+                                                        ServiceSchedule.DayWeek.THURSDAY,
+                                                        ServiceSchedule.DayWeek.FRIDAY), duration),
+                                        buildSchedule(serv, time.plusHours(3), EnumSet.of(
+                                                        ServiceSchedule.DayWeek.SATURDAY), duration));
+                        case "Gastronomía" -> List.of(
+                                        buildSchedule(serv, time, EnumSet.of(ServiceSchedule.DayWeek.DAILY), duration),
+                                        buildSchedule(serv, time.plusHours(6),
+                                                        EnumSet.of(ServiceSchedule.DayWeek.DAILY), duration));
+                        case "Tours" -> List.of(
+                                        buildSchedule(serv, time, EnumSet.of(
+                                                        ServiceSchedule.DayWeek.MONDAY,
+                                                        ServiceSchedule.DayWeek.WEDNESDAY,
+                                                        ServiceSchedule.DayWeek.FRIDAY), duration),
+                                        buildSchedule(serv, time.plusHours(4), EnumSet.of(
+                                                        ServiceSchedule.DayWeek.TUESDAY,
+                                                        ServiceSchedule.DayWeek.THURSDAY,
+                                                        ServiceSchedule.DayWeek.SATURDAY), duration));
+                        default -> List.of(
+                                        buildSchedule(serv, time, EnumSet.of(ServiceSchedule.DayWeek.DAILY), duration));
+                };
+
+                schedules.forEach(scheduleService::save);
+        }
+
+        private ServiceSchedule buildSchedule(ServiceOffering service,
+                        LocalTime start,
+                        EnumSet<ServiceSchedule.DayWeek> days,
+                        int durationMinutes) {
+                ServiceSchedule schedule = new ServiceSchedule();
+                schedule.setService(service);
+                schedule.setDaysOfWeek(EnumSet.copyOf(days));
+                schedule.setStartTime(start);
+                schedule.setEndTime(start.plusMinutes(durationMinutes));
+                schedule.setActive(true);
+                return schedule;
         }
 
         // Métodos auxiliares originales
