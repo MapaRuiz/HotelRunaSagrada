@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
+import { DepartmentTable } from './department-table/department-table';
 
 @Component({
   selector: 'app-department',
-  imports: [],
+  imports: [DepartmentTable],
   templateUrl: './department.html',
   styleUrl: './department.css'
 })

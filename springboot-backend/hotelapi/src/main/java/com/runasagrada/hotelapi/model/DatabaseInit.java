@@ -52,6 +52,8 @@ public class DatabaseInit implements CommandLineRunner {
                 seedReservations(hotelList);
 
                 // Datos para Department, StaffMember y Task
+                // Los StaffMember son users con rol OPERATOR asociados a hoteles y
+                // departamentos
                 seedDepartments(hotelList);
                 seedStaffMembers(hotelList);
                 seedTasks();
@@ -78,15 +80,15 @@ public class DatabaseInit implements CommandLineRunner {
                         return userRepo.save(u);
                 });
 
-                // --- 5 Operadores ---
-                IntStream.rangeClosed(1, 5).forEach(i -> {
+                // --- 15 Operadores ---
+                IntStream.rangeClosed(1, 15).forEach(i -> {
                         String email = "op" + i + "@hotel.com";
                         userRepo.findByEmail(email).orElseGet(() -> {
                                 User u = new User();
                                 u.setEmail(email);
                                 u.setPassword("op123");
                                 u.setFullName("Operador Hotel " + i);
-                                u.setPhone("301000000" + i);
+                                u.setPhone("301000000" + String.format("%02d", i));
                                 u.setNationalId("OP-" + String.format("%03d", i));
                                 u.setSelectedPet(pickIcon(i));
                                 u.setRoles(Set.of(operatorRole));
@@ -1438,39 +1440,45 @@ public class DatabaseInit implements CommandLineRunner {
                 if (staffMemberRepo.count() > 0)
                         return; // no duplicar
 
+                // Obtener todos los users con rol OPERATOR
                 List<User> operators = userRepo.findAll().stream()
                                 .filter(u -> u.getRoles().stream().anyMatch(r -> r.getName().equals("OPERATOR")))
                                 .toList();
 
-                List<Department> departments = departmentRepo.findAll();
+                if (operators.isEmpty()) {
+                        return;
+                }
+
+                List<Department> allDepartments = departmentRepo.findAll();
                 Random random = new Random();
 
-                String[] staffNames = {
-                                "María González", "Carlos López", "Ana Martínez", "Luis Rodríguez",
-                                "Carmen Fernández", "José García", "Laura Sánchez", "Miguel Torres",
-                                "Isabel Ruiz", "Francisco Moreno", "Elena Jiménez", "Antonio Álvarez"
-                };
+                // Índice para distribuir operadores de manera equitativa
+                int operatorIndex = 0;
 
-                int staffIndex = 0;
                 for (Hotel hotel : hotelList) {
-                        List<Department> hotelDepts = departments.stream()
+                        List<Department> hotelDepts = allDepartments.stream()
                                         .filter(d -> d.getHotelId().equals(hotel.getHotelId()))
                                         .toList();
 
-                        // Crear 2-3 staff members por departamento
+                        // Asignar 1-2 staff members por departamento de cada hotel
                         for (Department dept : hotelDepts) {
-                                int staffCount = random.nextInt(2) + 2; // 2-3 staff members
-                                for (int i = 0; i < staffCount && staffIndex < staffNames.length; i++) {
-                                        User user = operators.get(random.nextInt(operators.size()));
+                                int staffCount = random.nextInt(2) + 1; // 1-2 staff members por departamento
 
-                                        StaffMember staff = new StaffMember();
-                                        staff.setUserId(user.getUserId());
-                                        staff.setHotelId(hotel.getHotelId());
-                                        staff.setDepartmentId(dept.getDepartmentId());
-                                        staff.setName(staffNames[staffIndex % staffNames.length]);
+                                for (int i = 0; i < staffCount && operatorIndex < operators.size(); i++) {
+                                        User user = operators.get(operatorIndex % operators.size());
 
-                                        staffMemberRepo.save(staff);
-                                        staffIndex++;
+                                        // Verificar que este user no esté ya asignado como staff member en este hotel
+                                        if (!staffMemberRepo.existsByUserIdAndHotelId(user.getUserId(),
+                                                        hotel.getHotelId())) {
+                                                StaffMember staff = new StaffMember();
+                                                staff.setUserId(user.getUserId());
+                                                staff.setHotelId(hotel.getHotelId());
+                                                staff.setDepartmentId(dept.getDepartmentId());
+
+                                                staffMemberRepo.save(staff);
+                                        }
+
+                                        operatorIndex++;
                                 }
                         }
                 }

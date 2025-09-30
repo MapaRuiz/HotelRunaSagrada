@@ -51,8 +51,6 @@ public class StaffMemberServiceImpl implements StaffMemberService {
 			db.setHotelId(partial.getHotelId());
 		if (partial.getDepartmentId() != null)
 			db.setDepartmentId(partial.getDepartmentId());
-		if (partial.getName() != null && !partial.getName().isBlank())
-			db.setName(partial.getName());
 
 		validate(db);
 		return staffMembers.save(db);
@@ -78,8 +76,6 @@ public class StaffMemberServiceImpl implements StaffMemberService {
 	}
 
 	private void validate(StaffMember staffMember) {
-		if (staffMember.getName() == null || staffMember.getName().isBlank())
-			throw new IllegalArgumentException("StaffMember name is required");
 		if (staffMember.getUserId() == null)
 			throw new IllegalArgumentException("User ID is required");
 		if (staffMember.getHotelId() == null)

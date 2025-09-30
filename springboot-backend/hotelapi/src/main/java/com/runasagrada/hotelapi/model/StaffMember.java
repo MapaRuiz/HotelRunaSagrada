@@ -30,9 +30,6 @@ public class StaffMember {
 	@Column(name = "department_id", nullable = false)
 	private Long departmentId;
 
-	@Column(name = "name", length = 150, nullable = false)
-	private String name;
-
 	// Relaciones
 	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)

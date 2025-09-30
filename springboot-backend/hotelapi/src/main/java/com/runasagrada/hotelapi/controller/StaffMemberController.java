@@ -44,7 +44,6 @@ public class StaffMemberController {
 		staffMember.setUserId(body.getUserId());
 		staffMember.setHotelId(body.getHotelId());
 		staffMember.setDepartmentId(body.getDepartmentId());
-		staffMember.setName(body.getName());
 		return ResponseEntity.ok(service.create(staffMember));
 	}
 
@@ -54,7 +53,6 @@ public class StaffMemberController {
 		partial.setUserId(body.getUserId());
 		partial.setHotelId(body.getHotelId());
 		partial.setDepartmentId(body.getDepartmentId());
-		partial.setName(body.getName());
 		return ResponseEntity.ok(service.update(id, partial));
 	}
 
