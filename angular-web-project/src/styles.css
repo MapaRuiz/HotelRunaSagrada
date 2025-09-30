@@ -10,11 +10,29 @@
 
   --font-title: 'Quantico', system-ui, sans-serif;
   --font-body: 'Lato', system-ui, sans-serif;
+
+   /*landing*/
+
+  /* Colors */
+  --brand-color: #778e69;
+  --black: hsl(0, 0%, 0%);
+  --white: hsl(0, 0%, 100%);
+  /* Fonts */
+  --font-title: "Montserrat", sans-serif;
+  --font-text: "Lato", sans-serif;
+
 }
 body {
   background: var(--page-bg);
   color: var(--text-ink);
+  font-family: "Lato", sans-serif;
+    margin: 0;
+    padding: 0;
 }
+
+
+
+
 
 html,
 body {

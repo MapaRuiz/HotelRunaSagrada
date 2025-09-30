@@ -1,138 +1,105 @@
-/* =========================
-   Footer
-   ========================= */
+
+/* Footer General */
 .footer {
-  background: linear-gradient(135deg, #778E69, #BCC399, #778E69); /* Gradiente con verdes de la paleta */
-  color: #F2F3ED; /* Texto claro */
-  text-align: center;
-  padding: 3rem 2rem;
-  margin-top: 5rem;
-  font-family: 'Georgia', serif;
+  background-color: #778E69; /* Verde natural */
+  color: #F2F3ED; /* Blanco cálido */
+  padding: 70px 20px 40px;
   position: relative;
+  border-radius: 80px 80px 0 0;
+}
+/* Contenedor principal */
+.footer-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 50px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.footer::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: url("https://www.transparenttextures.com/patterns/cream-pixels.png");
-  opacity: 0.08;
-  z-index: 0;
+/* Secciones */
+.footer-section h3 {
+  color: #E0D4BE; /* Beige elegante */
+  margin-bottom: 18px;
+  font-size: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
 }
 
-.footer-content {
-  position: relative;
-  z-index: 1;
+.footer-section p,
+.footer-section a {
+  color: #F2F3ED; 
+  font-size: 15px;
+  line-height: 1.7;
+  transition: color 0.3s ease;
 }
 
-.footer h3 {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-  color: #F2F3ED;
-  font-weight: bold;
-  letter-spacing: 1px;
+.footer-section a:hover {
+  color: #BCC399; /* Verde suave al hover */
 }
 
-.footer p {
-  font-size: 1rem;
-  margin: 0.3rem 0;
-  color: #f7f3ee; /* Texto beige claro */
-}
-
-.footer-social {
-  margin: 1.5rem 0;
-}
-
-.footer-social a {
-  display: inline-block;
-  margin: 0 10px;
-  font-size: 1.4rem;
-  color: #F2F3ED;
-  background: rgba(224, 212, 190, 0.2); /* Fondo beige translúcido */
-  padding: 12px;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-}
-
-.footer-social a:hover {
-  background: #E0D4BE; /* Beige sólido */
-  color: #778E69; /* Verde medio */
-  transform: translateY(-4px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
-}
-
-.footer-bottom {
-  border-top: 1px solid rgba(224, 212, 190, 0.4); /* Línea beige translúcida */
-  margin-top: 2rem;
-  padding-top: 1rem;
-  font-size: 0.9rem;
-  color: #E0D4BE; /* Texto beige */
-}
-
-.footer-section {
-  background: #111;
-  color: #eee;
-  padding: 40px 0;
-  font-size: 14px;
-}
+/* Logo */
 
 .footer-logo {
-  width: 200px;
+  display: block; /* Bloque para apilar logo + nombre */
+  margin-bottom: 20px;
+  text-align: left; /* A la izquierda en desktop */
+}
+
+.footer-logo img {
+  width: 200px;     /* Tamaño grande */
+  max-width: 100%;  /* Que no rompa en pantallas pequeñas */
   height: auto;
   margin-bottom: 10px;
+  border-radius: 8px; /* opcional */
+  box-shadow: 0px 2px 6px rgba(0,0,0,0.2);
 }
 
-.footer-title {
-  font-size: 18px;
+.footer-logo h3 {
+  color: #E0D4BE;
+  font-size: 24px;
   font-weight: bold;
-  margin: 10px 0 5px;
-  color: #fff;
-}
-
-.footer-description {
-  font-size: 13px;
-  color: #ccc;
-}
-
-.footer-heading {
-  font-weight: 600;
-  margin-bottom: 15px;
-  color: #fff;
-}
-
-.footer-links {
-  list-style: none;
-  padding: 0;
+  font-family: "Georgia", serif;
   margin: 0;
 }
 
-.footer-links li {
-  margin-bottom: 8px;
+
+/* Iconos sociales */
+.footer-icons {
+  margin-top: 15px;
 }
 
-.footer-links a {
-  color: #aaa;
-  text-decoration: none;
-  transition: color 0.2s ease;
+.footer-icons a {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: rgba(242,243,237,0.1);
+  margin-right: 10px;
+  color: #F2F3ED;
+  transition: all 0.3s ease;
 }
 
-.footer-links a:hover {
-  color: #fff;
+.footer-icons a:hover {
+  background-color: #BCC399;
+  color: #151513;
+  transform: scale(1.1);
 }
 
-.footer-contact p {
-  margin: 5px 0;
-  color: #ccc;
+/* Copy */
+.footer-copy {
+  text-align: center;
+  border-top: 1px solid rgba(242, 243, 237, 0.2);
+  margin-top: 50px;
+  padding-top: 20px;
+  font-size: 14px;
+  color: #BCC399; 
 }
 
-.footer-bottom {
-  border-top: 1px solid #333;
-  margin-top: 20px;
-  padding-top: 15px;
-  font-size: 13px;
-  color: #999;
+.footer-copy .heart {
+  color: #E0D4BE; 
 }
 
-.footer-love .heart {
-  color: red;
-}
+
+

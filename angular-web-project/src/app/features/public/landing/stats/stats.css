@@ -1,0 +1,23 @@
+.stats {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 60px;
+  padding: 60px 20px;
+  background: #dee4cf;
+  text-align: center;
+  border-radius: 30px;
+}
+
+.stat h2 {
+  font-size: 3em;
+  color: #778e69; /* verde elegante */
+  margin: 0;
+}
+
+.stat p {
+  font-size: 1.1em;
+  color: #555;
+  margin: 0;
+}
