@@ -41,8 +41,10 @@ const NUMBER_FILTER_CONFIG: INumberFilterParams = {
 })
 export class ServicesTable {
   isBrowser: boolean = false;
+  // Fuente de datos
   serviceOfferingList: ServiceOffering[] = [];
   hotelsList: Hotel[] = [];
+  // Datos mostrados por la tabla
   rowData: ServiceOffering[] = [];
   hotelOptions: { id: number; name: string }[] = [];
   showCreate = false;
@@ -103,6 +105,9 @@ export class ServicesTable {
     onGridReady: params => { 
       this.gridApi = params.api
       params.api.sizeColumnsToFit();
+    },
+    onGridPreDestroyed: () => {
+      this.gridApi = undefined;
     },
     onSelectionChanged: params => {
       const [row] = params.api.getSelectedRows();
@@ -224,8 +229,15 @@ export class ServicesTable {
           const withHotel = this.fillNewService(created);
           withHotel.schedules = schedules; // assign schedules
           this.serviceOfferingList = [withHotel, ...this.serviceOfferingList];
+          this.rowData = [withHotel, ...this.rowData];
           this.cancelCreate(); // Close create panel
-          this.gridApi?.applyTransaction({ add: [withHotel], addIndex: 0 });
+          this.withGridApi(api => {
+            api.applyTransaction({ add: [withHotel], addIndex: 0 });
+            api.refreshCells({ force: true });
+            api.refreshClientSideRowModel('filter');
+            api.setGridOption('quickFilterText', this.search || undefined);
+          });
+
         };
 
         if (!scheduleRequests.length) {
@@ -278,10 +290,9 @@ export class ServicesTable {
     if (index >= 0) {
       this.serviceOfferingList.splice(index, 1);
     }
+    this.rowData = this.rowData.filter(item => item.id !== serviceOffering.id);
     this.serviceOfferingService.deleteById(serviceOffering.id).subscribe();
-    if (this.gridApi) {
-      this.gridApi.applyTransaction({ remove: [serviceOffering] });
-    }
+    this.withGridApi(api => api.applyTransaction({ remove: [serviceOffering] }));
   }
 
   // Service editing
@@ -366,12 +377,14 @@ export class ServicesTable {
       })
     ).subscribe({
       next: schedules => {
+        let updatedService: ServiceOffering | undefined;
         if (this.editing) {
+          const base = this.editing;
           const updatedSlice = schedules.slice(0, updateOps.length);
           const createdSlice = schedules.slice(updateOps.length);
 
           const updatedIds = new Set(updatedSlice.map(item => item.id));
-          const existing = this.editing.schedules ?? [];
+          const existing = base.schedules ?? [];
           const mergedExisting = existing.map(item => {
             const replacement = updatedSlice.find(schedule => schedule.id === item.id);
             return replacement ?? item;
@@ -386,12 +399,30 @@ export class ServicesTable {
             merged = [...merged, ...createdSlice];
           }
 
-          this.editing.schedules = merged;
+          updatedService = {
+            ...base,
+            schedules: merged
+          };
+          this.editing = updatedService;
+          this.serviceOfferingList = this.serviceOfferingList.map(item =>
+            item.id === updatedService!.id ? updatedService! : item
+          );
+          this.rowData = this.rowData.map(item =>
+            item.id === updatedService!.id ? updatedService! : item
+          );
         }
 
-        this.gridApi?.refreshCells({ force: true });
-        this.deleteSchedules(payload.deleteIds);
+        const current = updatedService ?? this.editing;
+        if (current) {
+          this.withGridApi(api => {
+            api.applyTransaction({ update: [current] });
+            api.refreshCells({ force: true });
+            api.refreshClientSideRowModel('everything');
+            api.setGridOption('quickFilterText', this.search || undefined);
+          });
+        }
 
+        this.deleteSchedules(payload.deleteIds);
         this.loading = false;
         this.editing = undefined;
       },
@@ -417,7 +448,7 @@ export class ServicesTable {
 
   onSearch(term: string): void {
     this.search = term;
-    this.gridApi?.setGridOption('quickFilterText', term || undefined);
+    this.withGridApi(api => api.setGridOption('quickFilterText', term || undefined));
   }
 
   onDetailEdit(service: ServiceOffering): void {
@@ -450,6 +481,17 @@ export class ServicesTable {
     };
 
     this.selected = details;
+    this.withGridApi(api => api.refreshCells({ force: true }));
     this.detailLoading = false;
+  }
+
+  private withGridApi(action: (api: GridApi<ServiceOffering>) => void): void {
+    const api = this.gridApi;
+    if (!api) return;
+    const maybeDestroyed = (api as GridApi<ServiceOffering> & { isDestroyed?: () => boolean }).isDestroyed;
+    if (typeof maybeDestroyed === 'function' && maybeDestroyed.call(api)) {
+      return;
+    }
+    action(api);
   }
 }

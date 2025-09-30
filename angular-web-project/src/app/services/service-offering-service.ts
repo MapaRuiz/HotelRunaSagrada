@@ -40,6 +40,7 @@ export class ServiceOfferingService {
     return this.http.get<ServiceOfferingDetailResponse>(`${this.resource}/available/${id}`);
   }
 
+
   getGastronomy(): Observable<Record<string, ServiceOffering[]>> {
     return this.http.get<Record<string, ServiceOffering[]>>(`${this.resource}/gastronomy`);
   }
@@ -59,6 +60,7 @@ export class ServiceOfferingService {
   deleteSchedule(id: number) {
     return this.http.delete<void>(`${this.resource}/schedule/${id}`);
   }
+
 }
 
 export interface ServiceOfferingRequest {
