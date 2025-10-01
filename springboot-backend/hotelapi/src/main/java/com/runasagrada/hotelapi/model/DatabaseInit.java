@@ -1490,28 +1490,80 @@ public class DatabaseInit implements CommandLineRunner {
 
                 List<StaffMember> staffMembers = staffMemberRepo.findAll();
                 List<Room> rooms = roomRepository.findAll();
-                Random random = new Random();
 
-                Task.TaskType[] taskTypes = Task.TaskType.values();
-                Task.TaskStatus[] taskStatuses = Task.TaskStatus.values();
-
-                // Crear 20 tareas de ejemplo
-                for (int i = 0; i < 20 && i < staffMembers.size(); i++) {
-                        StaffMember staff = staffMembers.get(i % staffMembers.size());
-
-                        Task task = new Task();
-                        task.setStaffId(staff.getStaffId());
-
-                        // 50% de probabilidad de asignar una habitación
-                        if (random.nextBoolean()) {
-                                Room room = rooms.get(random.nextInt(rooms.size()));
-                                task.setRoomId(room.getRoomId());
-                        }
-
-                        task.setType(taskTypes[random.nextInt(taskTypes.length)]);
-                        task.setStatus(taskStatuses[random.nextInt(taskStatuses.length)]);
-
-                        taskRepo.save(task);
+                if (staffMembers.isEmpty() || rooms.isEmpty()) {
+                        return;
                 }
+
+                // Crear exactamente 20 tareas específicas y variadas
+                createSpecificTasks(staffMembers, rooms);
+        }
+
+        private void createSpecificTasks(List<StaffMember> staffMembers, List<Room> rooms) {
+                // DELIVERY tasks - 7 tareas
+                createDeliveryTask(staffMembers.get(0 % staffMembers.size()), rooms.get(0 % rooms.size()),
+                                Task.TaskStatus.PENDING);
+                createDeliveryTask(staffMembers.get(1 % staffMembers.size()), rooms.get(1 % rooms.size()),
+                                Task.TaskStatus.PENDING);
+                createDeliveryTask(staffMembers.get(2 % staffMembers.size()), rooms.get(2 % rooms.size()),
+                                Task.TaskStatus.IN_PROGRESS);
+                createDeliveryTask(staffMembers.get(3 % staffMembers.size()), rooms.get(3 % rooms.size()),
+                                Task.TaskStatus.PENDING);
+                createDeliveryTask(staffMembers.get(4 % staffMembers.size()), rooms.get(4 % rooms.size()),
+                                Task.TaskStatus.DONE);
+                createDeliveryTask(staffMembers.get(5 % staffMembers.size()), rooms.get(5 % rooms.size()),
+                                Task.TaskStatus.PENDING);
+                createDeliveryTask(staffMembers.get(6 % staffMembers.size()), rooms.get(6 % rooms.size()),
+                                Task.TaskStatus.IN_PROGRESS);
+
+                // GUIDING tasks - 6 tareas
+                createGuidingTask(staffMembers.get(7 % staffMembers.size()), Task.TaskStatus.PENDING);
+                createGuidingTask(staffMembers.get(8 % staffMembers.size()), Task.TaskStatus.IN_PROGRESS);
+                createGuidingTask(staffMembers.get(9 % staffMembers.size()), Task.TaskStatus.PENDING);
+                createGuidingTask(staffMembers.get(10 % staffMembers.size()), Task.TaskStatus.DONE);
+                createGuidingTask(staffMembers.get(11 % staffMembers.size()), Task.TaskStatus.PENDING);
+                createGuidingTask(staffMembers.get(12 % staffMembers.size()), Task.TaskStatus.CANCELED);
+
+                // TO-DO tasks - 7 tareas
+                createToDoTask(staffMembers.get(13 % staffMembers.size()), rooms.get(7 % rooms.size()),
+                                Task.TaskStatus.PENDING);
+                createToDoTask(staffMembers.get(14 % staffMembers.size()), rooms.get(8 % rooms.size()),
+                                Task.TaskStatus.PENDING);
+                createToDoTask(staffMembers.get(0 % staffMembers.size()), rooms.get(9 % rooms.size()),
+                                Task.TaskStatus.IN_PROGRESS);
+                createToDoTask(staffMembers.get(1 % staffMembers.size()), rooms.get(10 % rooms.size()),
+                                Task.TaskStatus.PENDING);
+                createToDoTask(staffMembers.get(2 % staffMembers.size()), rooms.get(11 % rooms.size()),
+                                Task.TaskStatus.DONE);
+                createToDoTask(staffMembers.get(3 % staffMembers.size()), null, Task.TaskStatus.PENDING);
+                createToDoTask(staffMembers.get(4 % staffMembers.size()), null, Task.TaskStatus.IN_PROGRESS);
+        }
+
+        private void createDeliveryTask(StaffMember staff, Room room, Task.TaskStatus status) {
+                Task task = new Task();
+                task.setStaffId(staff.getStaffId());
+                task.setRoomId(room.getRoomId());
+                task.setType(Task.TaskType.DELIVERY);
+                task.setStatus(status);
+                taskRepo.save(task);
+        }
+
+        private void createGuidingTask(StaffMember staff, Task.TaskStatus status) {
+                Task task = new Task();
+                task.setStaffId(staff.getStaffId());
+                task.setType(Task.TaskType.GUIDING);
+                task.setStatus(status);
+                taskRepo.save(task);
+        }
+
+        private void createToDoTask(StaffMember staff, Room room, Task.TaskStatus status) {
+                Task task = new Task();
+                task.setStaffId(staff.getStaffId());
+                if (room != null) {
+                        task.setRoomId(room.getRoomId());
+                }
+                task.setType(Task.TaskType.TO_DO);
+                task.setStatus(status);
+                taskRepo.save(task);
         }
 }

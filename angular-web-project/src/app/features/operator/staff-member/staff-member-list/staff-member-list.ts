@@ -6,10 +6,11 @@ import { DepartmentService } from '../../../../services/department';
 import { StaffMember } from '../../../../model/staff-member';
 import { Department } from '../../../../model/department';
 import { RoleEntity } from '../../../../model/user';
+import { TaskList } from '../../task/task-list/task-list';
 
 @Component({
   selector: 'app-staff-member-list',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TaskList],
   templateUrl: './staff-member-list.html',
   styleUrl: './staff-member-list.css'
 })
@@ -24,6 +25,9 @@ export class StaffMemberList implements OnInit {
   staffMembers: StaffMember[] = [];
   loading = false;
   error: string | null = null;
+
+  showTasksView = false;
+  selectedStaffMember: StaffMember | null = null;
 
   ngOnInit() {
     if (this.departmentId) {
@@ -61,8 +65,13 @@ export class StaffMemberList implements OnInit {
   }
 
   viewTasks(staffMember: StaffMember) {
-    // TODO: Implementar lógica para ver tareas del staff member
-    console.log('Ver tareas para:', staffMember);
+    this.selectedStaffMember = staffMember;
+    this.showTasksView = true;
+  }
+
+  backToStaffList() {
+    this.showTasksView = false;
+    this.selectedStaffMember = null;
   }
 
   goBack() {

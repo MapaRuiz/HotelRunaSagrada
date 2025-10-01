@@ -1,0 +1,203 @@
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">
+      <i class="fas fa-tasks me-2"></i>
+      {{ staffId ? 'Tareas del Staff' : 'Todas las Tareas' }}
+    </h4>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger" role="alert">
+    <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
+  </div>
+
+  <div *ngIf="loading" class="text-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <div *ngIf="!loading" class="row g-3 mb-4">
+    <div class="col-md-4">
+      <label class="form-label">Filtrar por Estado</label>
+      <select class="form-select" [(ngModel)]="selectedStatus" (change)="onFilterChange()">
+        <option value="">Todos los estados</option>
+        <option *ngFor="let status of statusOptions" [value]="status">
+          {{ getStatusLabel(status) }}
+        </option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Filtrar por Tipo</label>
+      <select class="form-select" [(ngModel)]="selectedType" (change)="onFilterChange()">
+        <option value="">Todos los tipos</option>
+        <option *ngFor="let type of typeOptions" [value]="type">
+          {{ getTypeLabel(type) }}
+        </option>
+      </select>
+    </div>
+    <div class="col-md-4 d-flex align-items-end">
+      <div class="text-muted">
+        <i class="fas fa-info-circle me-1"></i>
+        Mostrando {{ filteredTasks.length }} de {{ tasks.length }} tareas
+      </div>
+    </div>
+  </div>
+
+  <!-- Tasks Table -->
+  <div *ngIf="!loading && filteredTasks.length > 0" class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-list me-2"></i>Lista de Tareas
+            <span class="badge bg-primary ms-2">{{ filteredTasks.length }}</span>
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped table-hover">
+              <thead class="table-dark">
+                <tr>
+                  <th>ID</th>
+                  <th>Tipo</th>
+                  <th>Estado</th>
+                  <th>Staff ID</th>
+                  <th>Habitación</th>
+                  <th>Servicio</th>
+                  <th>Creada</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let task of filteredTasks">
+                  <td>
+                    <strong>{{ task.task_id }}</strong>
+                  </td>
+                  <td>
+                    <span class="badge" [class]="getTypeBadgeClass(task.type)">
+                      {{ getTypeLabel(task.type) }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge" [class]="getStatusBadgeClass(task.status)">
+                      {{ getStatusLabel(task.status) }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge bg-light text-dark">{{ task.staff_id }}</span>
+                    <small *ngIf="task.staff?.user?.full_name" class="d-block text-muted">
+                      {{ task.staff?.user?.full_name }}
+                    </small>
+                  </td>
+                  <td>
+                    <span *ngIf="task.room?.number" class="badge bg-info text-dark">
+                      Hab. {{ task.room?.number }}
+                    </span>
+                  </td>
+                  <td>
+                    <span *ngIf="task.res_service_id" class="badge bg-warning text-dark">
+                      Serv. {{ task.res_service_id }}
+                    </span>
+                    <span *ngIf="!task.res_service_id" class="text-muted">-</span>
+                  </td>
+                  <td>
+                    <small>{{ formatDate(task.created_at) }}</small>
+                  </td>
+                  <td>
+                    <div class="d-flex gap-2">
+                      <button
+                        *ngIf="task.status === 'PENDING'"
+                        class="btn btn-outline-primary btn-sm"
+                        (click)="showConfirmation(task, 'IN_PROGRESS')"
+                        title="Marcar en progreso"
+                      >
+                        <i class="fas fa-play me-1"></i>Iniciar
+                      </button>
+                      <button
+                        *ngIf="task.status === 'IN_PROGRESS'"
+                        class="btn btn-outline-success btn-sm"
+                        (click)="showConfirmation(task, 'DONE')"
+                        title="Marcar como completada"
+                      >
+                        <i class="fas fa-check me-1"></i>Completar
+                      </button>
+                      <button
+                        *ngIf="task.status !== 'CANCELED' && task.status !== 'DONE'"
+                        class="btn btn-outline-danger btn-sm"
+                        (click)="showConfirmation(task, 'CANCELED')"
+                        title="Cancelar tarea"
+                      >
+                        <i class="fas fa-times me-1"></i>Cancelar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Data Message -->
+  <div
+    *ngIf="!loading && filteredTasks.length === 0 && tasks.length > 0"
+    class="alert alert-info text-center"
+  >
+    <i class="fas fa-filter me-2"></i>
+    No se encontraron tareas que coincidan con los filtros seleccionados.
+    <button
+      class="btn btn-sm btn-outline-info ms-2"
+      (click)="selectedStatus = ''; selectedType = ''; onFilterChange()"
+    >
+      Limpiar filtros
+    </button>
+  </div>
+
+  <div *ngIf="!loading && tasks.length === 0" class="alert alert-info text-center">
+    <i class="fas fa-info-circle me-2"></i>
+    {{
+      staffId
+        ? 'No se encontraron tareas para este miembro del staff.'
+        : 'No se encontraron tareas.'
+    }}
+  </div>
+</div>
+
+<!-- Modal de Confirmación -->
+<div
+  *ngIf="showConfirmModal"
+  class="modal fade show d-block"
+  style="background-color: rgba(0, 0, 0, 0.5)"
+  tabindex="-1"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-question-circle me-2"></i>Confirmar Acción</h5>
+      </div>
+      <div class="modal-body">
+        <p>{{ confirmMessage }}</p>
+        <div *ngIf="taskToUpdate" class="alert alert-light">
+          <strong>Tarea:</strong> {{ getTypeLabel(taskToUpdate.type) }} (ID:
+          {{ taskToUpdate.task_id }})
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancelConfirmation()">
+          <i class="fas fa-times me-1"></i>Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn"
+          [class]="getConfirmButtonClass()"
+          (click)="confirmAction()"
+        >
+          <i class="fas" [class]="getConfirmIconClass()"></i>
+          {{ confirmButtonText }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
