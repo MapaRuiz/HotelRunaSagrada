@@ -1,1 +1,79 @@
-<h4 class="mb-3">Miembros de Staff</h4>
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Staff del Departamento: {{ departmentName }}</h4>
+    <button class="btn btn-outline-secondary" (click)="goBack()">
+      <i class="fas fa-arrow-left me-2"></i>Volver
+    </button>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="alert alert-danger" role="alert">
+    {{ error }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Staff Members Table -->
+  <div *ngIf="!loading && staffMembers.length > 0" class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            Personal
+            <span class="badge bg-primary ms-2">{{ staffMembers.length }} miembros</span>
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped table-hover">
+              <thead class="table-dark">
+                <tr>
+                  <th>ID Staff</th>
+                  <th>Nombre Completo</th>
+                  <th>Email</th>
+                  <th>Teléfono</th>
+                  <th>Estado</th>
+                  <th>Tareas</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let staffMember of staffMembers">
+                  <td>{{ staffMember.staff_id }}</td>
+                  <td>
+                    <strong>{{ staffMember.user?.full_name || staffMember.name }}</strong>
+                  </td>
+                  <td>{{ staffMember.user?.email || 'N/A' }}</td>
+                  <td>{{ staffMember.user?.phone || 'N/A' }}</td>
+                  <td>
+                    <span
+                      class="badge"
+                      [class]="staffMember.user?.enabled ? 'bg-success' : 'bg-danger'"
+                    >
+                      {{ staffMember.user?.enabled ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-warning" (click)="viewTasks(staffMember)">
+                      <i class="fas fa-tasks me-1"></i>Ver Tareas
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Data Message -->
+  <div *ngIf="!loading && staffMembers.length === 0" class="alert alert-info text-center">
+    <i class="fas fa-info-circle me-2"></i>
+    No se encontraron miembros de staff para este departamento.
+  </div>
+</div>

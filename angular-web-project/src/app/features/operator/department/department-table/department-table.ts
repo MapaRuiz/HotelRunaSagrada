@@ -33,7 +33,7 @@ export class DepartmentTable implements OnInit {
 
   // Ver el staff
   showStaffView = false;
-  selectedDepartmentId: number | undefined;
+  selectedDepartment: Department | undefined;
 
   ngOnInit() {
     this.loadHotels();
@@ -77,6 +77,11 @@ export class DepartmentTable implements OnInit {
 
   trackById(index: number, item: Department) {
     return item.department_id;
+  }
+
+  getHotelName(hotelId: number): string {
+    const hotel = this.hotels.find(h => h.hotel_id === hotelId);
+    return hotel ? hotel.name : `Hotel #${hotelId}`;
   }
 
   new() {
@@ -144,7 +149,12 @@ export class DepartmentTable implements OnInit {
   }
 
   viewStaff(department: Department) {
-    this.selectedDepartmentId = department.department_id;
+    this.selectedDepartment = department;
     this.showStaffView = true;
+  }
+
+  backToDepartments() {
+    this.showStaffView = false;
+    this.selectedDepartment = undefined;
   }
 }

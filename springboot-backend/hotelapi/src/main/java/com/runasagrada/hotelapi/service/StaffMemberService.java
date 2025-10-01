@@ -18,4 +18,6 @@ public interface StaffMemberService {
 	List<StaffMember> findByHotelId(Long hotelId);
 
 	List<StaffMember> findByDepartmentId(Long departmentId);
+
+	List<StaffMember> findByDepartmentIdWithUser(Long departmentId);
 }

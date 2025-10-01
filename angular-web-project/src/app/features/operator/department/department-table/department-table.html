@@ -51,7 +51,7 @@
   <table class="table table-striped">
     <thead>
       <tr>
-        <th>#</th>
+        <th>ID</th>
         <th>Hotel</th>
         <th>Nombre</th>
         <th>Staff</th>
@@ -61,17 +61,12 @@
     <tbody>
       <tr *ngFor="let d of filteredDepartments; trackBy: trackById">
         <td>{{ d.department_id }}</td>
-        <td>{{ d.hotel?.name || d.hotel_id }}</td>
+        <td>{{ getHotelName(d.hotel_id) }}</td>
         <td>{{ d.name }}</td>
         <td>
-          <span class="badge bg-secondary">
-            {{ d.staff?.length || 0 }} miembro{{ (d.staff?.length || 0) !== 1 ? 's' : '' }}
-          </span>
+          <button class="btn btn-sm btn-outline-info" (click)="viewStaff(d)">Ver Staff</button>
         </td>
         <td class="text-end">
-          <button class="btn btn-sm btn-outline-secondary me-2" (click)="viewStaff(d)">
-            Ver Staff
-          </button>
           <button class="btn btn-sm btn-outline-primary me-2" (click)="edit(d)">Editar</button>
           <button class="btn btn-sm btn-outline-danger" (click)="remove(d)">Eliminar</button>
         </td>
@@ -84,6 +79,11 @@
   </div>
 </div>
 
-<div *ngIf="showStaffView">
-  <app-staff-member-list></app-staff-member-list>
+<div *ngIf="showStaffView && selectedDepartment">
+  <app-staff-member-list
+    [departmentId]="selectedDepartment.department_id"
+    [departmentName]="selectedDepartment.name"
+    (backToParent)="backToDepartments()"
+  >
+  </app-staff-member-list>
 </div>

@@ -1,6 +1,7 @@
 package com.runasagrada.hotelapi.controller;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.runasagrada.hotelapi.model.StaffMemberWithUserDto;
 import com.runasagrada.hotelapi.model.StaffMember;
 import com.runasagrada.hotelapi.service.StaffMemberService;
 import lombok.Data;
@@ -34,8 +35,17 @@ public class StaffMemberController {
 	}
 
 	@GetMapping("/staff-members/department/{departmentId}")
-	public List<StaffMember> getByDepartment(@PathVariable Long departmentId) {
-		return service.findByDepartmentId(departmentId);
+	public ResponseEntity<?> getByDepartment(
+			@PathVariable Long departmentId,
+			@RequestParam(value = "includeUser", defaultValue = "false") boolean includeUser) {
+		if (includeUser) {
+			List<StaffMember> staffMembers = service.findByDepartmentIdWithUser(departmentId);
+			List<StaffMemberWithUserDto> result = staffMembers.stream()
+					.map(StaffMemberWithUserDto::fromStaffMember)
+					.toList();
+			return ResponseEntity.ok(result);
+		}
+		return ResponseEntity.ok(service.findByDepartmentId(departmentId));
 	}
 
 	@PostMapping("/staff-members")

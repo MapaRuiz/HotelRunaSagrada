@@ -16,4 +16,8 @@ export class StaffMemberService {
   
   getByHotel(hotelId: number) { return this.http.get<StaffMember[]>(`${this.base}/staff-members/hotel/${hotelId}`); }
   getByDepartment(departmentId: number) { return this.http.get<StaffMember[]>(`${this.base}/staff-members/department/${departmentId}`); }
+  
+  getStaffWithUsersByDepartment(departmentId: number) { 
+    return this.http.get<StaffMember[]>(`${this.base}/staff-members/department/${departmentId}?includeUser=true`); 
+  }
 }

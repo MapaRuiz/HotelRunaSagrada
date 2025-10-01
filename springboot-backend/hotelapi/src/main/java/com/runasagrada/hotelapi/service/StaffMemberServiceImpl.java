@@ -75,6 +75,12 @@ public class StaffMemberServiceImpl implements StaffMemberService {
 		return staffMembers.findByDepartmentId(departmentId);
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public List<StaffMember> findByDepartmentIdWithUser(Long departmentId) {
+		return staffMembers.findByDepartmentIdWithUser(departmentId);
+	}
+
 	private void validate(StaffMember staffMember) {
 		if (staffMember.getUserId() == null)
 			throw new IllegalArgumentException("User ID is required");
