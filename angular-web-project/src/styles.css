@@ -1,3 +1,5 @@
+@import 'leaflet/dist/leaflet.css';
+
 :root {
   --c-sand: #e0d4be;
   --c-ivory: #f2f3ed;
@@ -11,28 +13,20 @@
   --font-title: 'Quantico', system-ui, sans-serif;
   --font-body: 'Lato', system-ui, sans-serif;
 
-   /*landing*/
+  /*landing*/
 
   /* Colors */
   --brand-color: #778e69;
   --black: hsl(0, 0%, 0%);
   --white: hsl(0, 0%, 100%);
-  /* Fonts */
-  --font-title: "Montserrat", sans-serif;
-  --font-text: "Lato", sans-serif;
-
 }
 body {
   background: var(--page-bg);
   color: var(--text-ink);
-  font-family: "Lato", sans-serif;
-    margin: 0;
-    padding: 0;
+  font-family: 'Lato', sans-serif;
+  margin: 0;
+  padding: 0;
 }
-
-
-
-
 
 html,
 body {
@@ -123,4 +117,39 @@ body {
   border-radius: 18px;
   box-shadow: 0 20px 60px rgba(21, 21, 19, 0.12);
   border: 1px solid rgba(21, 21, 19, 0.06);
+}
+
+/* --- Leaflet custom pin (global) --- */
+.map-pin {
+  position: relative;
+  width: 16px; /* debe coincidir con iconSize */
+  height: 16px;
+}
+
+.map-pin .pin {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: 50%;
+  background: var(--pin, #0a6847);
+  border: 2px solid #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+/* opcional: una “colita” */
+.map-pin .pin::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 2px;
+  height: 8px;
+  transform: translateX(-50%);
+  background: var(--pin, #0a6847);
+  border-radius: 2px;
+}
+
+/* asegúrate de que se vea sobre el mapa */
+.leaflet-marker-icon.map-pin {
+  z-index: 500 !important;
 }

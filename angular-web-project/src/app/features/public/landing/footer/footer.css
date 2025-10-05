@@ -1,8 +1,7 @@
-
 /* Footer General */
 .footer {
-  background-color: #778E69; /* Verde natural */
-  color: #F2F3ED; /* Blanco cálido */
+  background-color: #778e69; /* Verde natural */
+  color: #f2f3ed; /* Blanco cálido */
   padding: 70px 20px 40px;
   position: relative;
   border-radius: 80px 80px 0 0;
@@ -18,7 +17,7 @@
 
 /* Secciones */
 .footer-section h3 {
-  color: #E0D4BE; /* Beige elegante */
+  color: #e0d4be; /* Beige elegante */
   margin-bottom: 18px;
   font-size: 20px;
   text-transform: uppercase;
@@ -27,14 +26,14 @@
 
 .footer-section p,
 .footer-section a {
-  color: #F2F3ED; 
+  color: #f2f3ed;
   font-size: 15px;
   line-height: 1.7;
   transition: color 0.3s ease;
 }
 
 .footer-section a:hover {
-  color: #BCC399; /* Verde suave al hover */
+  color: #bcc399; /* Verde suave al hover */
 }
 
 /* Logo */
@@ -46,22 +45,21 @@
 }
 
 .footer-logo img {
-  width: 200px;     /* Tamaño grande */
-  max-width: 100%;  /* Que no rompa en pantallas pequeñas */
+  width: 200px; /* Tamaño grande */
+  max-width: 100%; /* Que no rompa en pantallas pequeñas */
   height: auto;
   margin-bottom: 10px;
   border-radius: 8px; /* opcional */
-  box-shadow: 0px 2px 6px rgba(0,0,0,0.2);
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .footer-logo h3 {
-  color: #E0D4BE;
+  color: #e0d4be;
   font-size: 24px;
   font-weight: bold;
-  font-family: "Georgia", serif;
+  font-family: 'Quantico', system-ui, sans-serif;
   margin: 0;
 }
-
 
 /* Iconos sociales */
 .footer-icons {
@@ -75,14 +73,14 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background-color: rgba(242,243,237,0.1);
+  background-color: rgba(242, 243, 237, 0.1);
   margin-right: 10px;
-  color: #F2F3ED;
+  color: #f2f3ed;
   transition: all 0.3s ease;
 }
 
 .footer-icons a:hover {
-  background-color: #BCC399;
+  background-color: #bcc399;
   color: #151513;
   transform: scale(1.1);
 }
@@ -94,12 +92,9 @@
   margin-top: 50px;
   padding-top: 20px;
   font-size: 14px;
-  color: #BCC399; 
+  color: #bcc399;
 }
 
 .footer-copy .heart {
-  color: #E0D4BE; 
+  color: #e0d4be;
 }
-
-
-

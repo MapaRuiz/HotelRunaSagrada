@@ -1,6 +1,5 @@
 package com.runasagrada.hotelapi.service;
 
-import com.runasagrada.hotelapi.model.Reservation;
 import com.runasagrada.hotelapi.model.Room;
 import com.runasagrada.hotelapi.model.RoomLock;
 

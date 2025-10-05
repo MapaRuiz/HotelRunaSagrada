@@ -6,12 +6,13 @@ import { HotelsService } from '../../../../services/hotels';
 import { Hotel } from '../../../../model/hotel';                // 👈 usa el modelo correcto
 import { HotelHeroComponent } from '../hotel-hero/hotel-hero';  // igual que antes
 import { HotelAmenitiesComponent } from '../hotel-amenities/hotel-amenities';
+import { HotelLocationComponent } from '../hotel-location/hotel-location';
 import { environment } from '../../../../../environments/environment';
 
 @Component({
   standalone: true,
   selector: 'app-hotel-detail',
-  imports: [CommonModule, HotelHeroComponent, HotelAmenitiesComponent],
+  imports: [CommonModule, HotelHeroComponent, HotelAmenitiesComponent, HotelLocationComponent],
   templateUrl: './hotel-detail.html',
   styleUrls: ['./hotel-detail.css']
 })
