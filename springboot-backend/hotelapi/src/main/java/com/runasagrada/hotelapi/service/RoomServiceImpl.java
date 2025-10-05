@@ -2,8 +2,10 @@ package com.runasagrada.hotelapi.service;
 
 import com.runasagrada.hotelapi.model.Hotel;
 import com.runasagrada.hotelapi.model.Room;
+import com.runasagrada.hotelapi.model.RoomLock;
 import com.runasagrada.hotelapi.model.RoomType;
 import com.runasagrada.hotelapi.repository.HotelRepository;
+import com.runasagrada.hotelapi.repository.RoomLockRepository;
 import com.runasagrada.hotelapi.repository.RoomRepository;
 import com.runasagrada.hotelapi.repository.RoomTypeRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -11,16 +13,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
+@RequiredArgsConstructor
 public class RoomServiceImpl implements RoomService {
 
     private final RoomRepository roomRepository;
     private final HotelRepository hotelRepository;
     private final RoomTypeRepository roomTypeRepository;
+    private final RoomLockRepository roomLockRepository;
 
     @Override
     public List<Room> findAll() {
@@ -40,6 +45,16 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public java.util.Optional<Room> findById(Integer id) {
         return roomRepository.findById(id);
+    }
+
+    @Override
+    public Optional<Room> findByNumber(String number) {
+        return roomRepository.findByNumber(number);
+    }
+
+    @Override
+    public Optional<RoomLock> findRoomLockByNumGreaterEqDate(Integer roomId, LocalDate lockDate) {
+        return roomLockRepository.findNextLocksForRoom(roomId, lockDate).stream().findFirst();
     }
 
     @Override

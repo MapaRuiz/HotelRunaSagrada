@@ -34,6 +34,7 @@ export const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', loadComponent: () => import('./features/operator/operator-dashboard/operator-dashboard').then(m => m.OperatorDashboardComponent) },
       { path: 'profile', loadComponent: () => import('./features/operator/operator-profile/operator-profile').then(m => m.OperatorProfileComponent) },
+      { path: 'reservation-service', loadComponent: () => import('./features/operator/operator-reservation-service/operator-reservation-service').then(m => m.ReservationServiceComponent)},
     ]
   },
   // ADMIN - shell con children

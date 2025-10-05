@@ -104,4 +104,11 @@ public class HotelServiceImpl implements HotelService {
             throw new NoSuchElementException("Amenities not found: " + missing);
         return new HashSet<>(found);
     }
+
+    @Override
+    public Map<Long, String> getHotelsIdName() {
+        List<Hotel> hotels = this.list();
+        return hotels.stream().map(h -> Map.entry(h.getHotelId(), h.getName()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
 }
