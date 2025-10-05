@@ -1,9 +1,11 @@
 import { Component, AfterViewInit, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-hoteles',
   standalone: true,
+  imports:[RouterModule],
   templateUrl: './hoteles.html',
   styleUrls: ['./hoteles.css']   
 })
