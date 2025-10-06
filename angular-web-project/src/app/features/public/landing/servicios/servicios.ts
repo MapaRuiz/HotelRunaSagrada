@@ -114,24 +114,8 @@ export class Servicios implements AfterViewInit {
 
   private setupScrollAnimation(): void {
     gsap.registerPlugin(ScrollTrigger);
-    const watermarkWrap = document.querySelector('#watermark-wrap');
-    const watermarkText = document.querySelector('#watermark-text');
+
     const wrap = document.querySelector('#wrap');
-
-    const tlWatermark = gsap.timeline({
-      scrollTrigger: {
-        trigger: watermarkWrap,
-        start: 'top top',
-        end: '+=600%',
-        scrub: true,
-        pin: true,
-        pinSpacing: false
-      },
-      defaults: { ease: 'none' }
-    });
-
-    tlWatermark.fromTo(watermarkText, { x: '20%' }, { x: '-60%' });
-
     this.st = ScrollTrigger.create({
       trigger: wrap,
       start: 'top top',

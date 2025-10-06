@@ -1,83 +1,4 @@
-/* RESET */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
 
-* {
-  padding: 0;
-  margin: 0;
-}
-
-html, body {
-  min-height: 100%;
-  height: auto;
-}
-
-body {
-  width: 100vw;
-  overflow-x: hidden;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  hyphens: auto;
-  -webkit-hyphenate-character: '-';
-  hyphenate-character: '-';
-}
-
-img, picture, video, canvas, svg {
-  display: block;
-  max-width: 100%;
-}
-
-input, button, textarea, select {
-  font: inherit;
-}
-
-button {
-  appearance: none;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-}
-
-p, h1, h2, h3, h4, h5, h6 {
-  overflow-wrap: break-word;
-}
-
-a {
-  color: inherit;
-}
-
-/* CONFIGURACIÓN DE FUENTES Y VARIABLES */
-:root {
-  --ff-primary: 'Clash Display', 'Open Sans', 'Fira Sans', 'Source Sans Pro', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
-  --fw-black: 900;
-}
-
-/* WATERMARK */
-.watermark-wrap {
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-}
-
-.watermark-wrap span {
-  display: inline-block;
-  font-size: 35vw;
-  font-family: var(--ff-primary);
-  font-weight: var(--fw-black);
-  line-height: 1;
-  text-transform: uppercase;
-  opacity: 0.05;
-  pointer-events: none;
-  color: rgb(179, 165, 165);
-}
 
 /* CANVAS Y WRAP DEL CARRUSEL */
 .carousel-wrap {
@@ -86,10 +7,19 @@ a {
   height: 100vh;
   background-color: #ffffff;
   overflow: hidden;
+  padding-top: 0;
+
+  position: relative;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100%;
+
 }
 
 canvas {
   width: 100%;
-  height: 100%;
+  height: 80%;
   display: block;
 }
