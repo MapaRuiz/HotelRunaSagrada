@@ -5,7 +5,7 @@ body.has-modal-open {
 
 /* ===== overlay/portal ===== */
 :root {
-    --z-modal: 2147483646;
+    --z-modal: 20;
     /* altísimo para ganar a cualquier stacking context */
 }
 

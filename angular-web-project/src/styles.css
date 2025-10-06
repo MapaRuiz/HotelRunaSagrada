@@ -2,6 +2,12 @@
 app-service-modal {
   isolation: isolate;
 }
+html,
+body {
+  overflow-x: clip;
+}
+
+/* usa hidden si tu navegador no soporta clip */
 
 :root {
   --c-sand: #e0d4be;

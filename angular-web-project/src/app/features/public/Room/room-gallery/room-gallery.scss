@@ -4,22 +4,27 @@
 
 /* ===== fondo con hojas (full-bleed) + glass ===== */
 .vacay {
-    --blur: 22px;
-    --glass: rgba(255, 255, 255, .12);
-    --glass-2: rgba(255, 255, 255, .08);
-    --bd: rgba(255, 255, 255, .22);
+    /* antes: width: 100vw; margin-left/right: calc(50% - 50vw); */
+    inline-size: 100dvw;
+    /* no cuenta la barra de scroll */
+    margin-inline: calc(50% - 50dvw);
+    overflow-x: clip;
+    /* evita el scroll horizontal del propio bloque */
 
-    /* full width (100vw) y ~80vh de alto */
-    width: 100vw;
-    margin-left: calc(50% - 50vw);
-    margin-right: calc(50% - 50vw);
+    /* lo demás igual */
     min-height: 78svh;
-
     padding: clamp(16px, 3vmin, 28px);
     display: grid;
     place-items: center;
-
     background: var(--plant-bg) center/cover fixed no-repeat;
+}
+
+/* fallback para navegadores sin dvw */
+@supports not (width: 100dvw) {
+    .vacay {
+        inline-size: 100vw;
+        margin-inline: calc(50% - 50vw);
+    }
 }
 
 .glass {
