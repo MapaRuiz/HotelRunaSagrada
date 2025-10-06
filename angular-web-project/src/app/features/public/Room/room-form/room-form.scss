@@ -1,0 +1,145 @@
+/* Alineado al estilo de room-detail.scss y con algunos refinamientos visuales */
+:host {
+    display: block;
+}
+
+/* Tarjeta */
+.reserve-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .07);
+}
+
+.card-title {
+    margin: 0 0 8px;
+    font-weight: 900;
+}
+
+/* Filas del formulario */
+.form-row {
+    display: grid;
+    gap: 6px;
+    margin: 10px 0;
+}
+
+.form-row label {
+    font-family: var(--font-body);
+    font-weight: 700;
+    color: #0f172a;
+}
+
+/* Controles */
+.form-row input,
+.form-row select {
+    padding: 11px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: var(--font-body);
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+    background: #fff;
+}
+
+.form-row input:focus,
+.form-row select:focus {
+    border-color: #0a6847;
+    box-shadow: 0 0 0 3px rgba(10, 104, 71, .15);
+}
+
+.form-row select:disabled {
+    opacity: .7;
+    cursor: not-allowed;
+    background: #f8fafc;
+}
+
+/* Mensajería contextual */
+.form-hint,
+.field-hint {
+    color: #6b7280;
+    font-size: .9rem;
+    font-family: var(--font-body);
+    margin: .25rem 0 0;
+    padding: 10px 10px;
+}
+
+.field-error {
+    color: #b91c1c;
+    font-weight: 700;
+    font-size: .9rem;
+}
+
+/* Errores de submit */
+.error {
+    color: #b91c1c;
+    font-weight: 700;
+    margin-top: .5rem;
+}
+
+/* Botón primario */
+.primary {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    padding: 11px 16px;
+    border-radius: 12px;
+    font-weight: 900;
+    background: #0a6847;
+    font-family: var(--font-title);
+    color: #fff;
+    border: 0;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(10, 104, 71, .25);
+    transition: transform .15s ease, filter .15s ease;
+}
+
+.primary:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+}
+
+.primary:disabled {
+    opacity: .7;
+    filter: none;
+    transform: none;
+    cursor: not-allowed;
+}
+
+/* Loading */
+.btn-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.spinner {
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    border: 2px solid #ffffff;
+    border-right-color: transparent;
+    animation: spin .7s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* CTA cuando no se muestra el form */
+.reserve-cta {
+    margin-top: 6px;
+    background: #f8fafc;
+    border: 1px dashed #e2e8f0;
+    border-radius: 14px;
+    padding: 12px;
+    color: #475569;
+}
+
+.reserve-cta em {
+    color: #0a6847;
+    font-weight: 700;
+    font-style: normal;
+}

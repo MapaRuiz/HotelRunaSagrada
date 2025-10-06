@@ -1,0 +1,43 @@
+<section class="vacay" [style.--plant-bg]="'url(' + plantBg + ')'">
+  <div class="glass">
+    <header class="head">
+      <span class="chip-like">Vívelo</span>
+      <h3 class="title">{{ title }}</h3>
+      <p class="sub" *ngIf="hotelName">
+        En <strong class="name">{{ hotelName }}</strong>
+      </p>
+    </header>
+
+    <div
+      class="gallery"
+      [class.gallery-display]="hover"
+      (mouseenter)="setHover(true)"
+      (mouseleave)="setHover(false)"
+    >
+      <div>
+        <div class="gallery__row" *ngFor="let row of rows; let ri = index">
+          <div
+            class="gallery__row__image"
+            *ngFor="let img of row; let ci = index"
+            [style.width.%]="100 / columns"
+          >
+            <div class="postcard" [ngStyle]="styleFor(ri, ci)">
+              <div class="postcard__front">
+                <div class="media">
+                  <img
+                    [src]="img"
+                    alt="{{ 'Foto ' + (ri * columns + ci + 1) }}"
+                    title="{{ 'Foto ' + (ri * columns + ci + 1) }}"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <small class="hint">Pasa el cursor para ordenar las fotos</small>
+  </div>
+</section>

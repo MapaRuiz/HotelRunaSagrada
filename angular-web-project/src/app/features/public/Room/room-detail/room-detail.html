@@ -1,40 +1,92 @@
 <section class="room-detail">
-  <div class="container">
-    <header class="hero">
+  <!-- ===== Hero 100vh con autoplay ===== -->
+  <div class="hero-full">
+    <!-- stage / fondos -->
+    <div class="hero-stage">
       <div
-        class="hero-media"
-        *ngIf="heroImg; else noimg"
-        [style.backgroundImage]="'url(' + heroImg + ')'"
+        class="hero-bg"
+        *ngFor="let url of slides; let i = index"
+        [class.active]="i === currentSlide"
+        [style.backgroundImage]="
+          'linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url(' + url + ')'
+        "
       ></div>
-      <ng-template #noimg><div class="hero-media hero-media--empty"></div></ng-template>
+    </div>
 
-      <div class="hero-copy">
-        <span class="eyebrow">Habitación</span>
-        <h1 class="title">
-          {{ typeName }} — <span class="theme">{{ themeName }}</span>
-        </h1>
-        <p class="desc" *ngIf="description">{{ description }}</p>
+    <!-- overlay -->
+    <div class="hero-overlay">
+      <span class="eyebrow">HABITACIÓN</span>
 
-        <div class="chips">
-          <span class="chip" *ngIf="basePrice"
-            >Desde {{ basePrice | currency : 'COP' : 'symbol' : '1.0-0' }}</span
-          >
-          <span class="chip" *ngIf="capacity">Capacidad {{ capacity }}</span>
-          <span class="chip">Disponibles hoy: {{ availableCount }}</span>
-          <span class="chip muted" *ngIf="bookedCount">Reservadas: {{ bookedCount }}</span>
-          <span class="chip muted" *ngIf="maintenanceCount"
-            >Mantenimiento: {{ maintenanceCount }}</span
-          >
-        </div>
+      <!-- TÍTULO con animación en tipo + tema SIEMPRE que cambia el slide -->
+      <h1 class="hero-title" [class.fill-animate]="titleAnim">
+        <span class="t">{{ typeName }}</span> — <span class="theme">{{ themeName }}</span>
+      </h1>
+
+      <p class="hero-loc">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path
+            d="M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"
+          />
+        </svg>
+        {{ hotelName || 'Hotel #' + hotelId }}
+      </p>
+
+      <button
+        class="hero-cta"
+        (click)="reserveSection?.scrollIntoView({ behavior: 'smooth', block: 'start' })"
+      >
+        Ver habitaciones
+      </button>
+
+      <!-- dots -->
+      <div class="hero-dots" *ngIf="slides.length > 1">
+        <button
+          *ngFor="let _ of slides; let i = index"
+          [class.active]="i === currentSlide"
+          (click)="goTo(i)"
+          aria-label="Ir al slide {{ i + 1 }}"
+        ></button>
       </div>
-    </header>
+    </div>
+  </div>
 
-    <!-- GRID principal: listado (izq) + formulario (der) -->
+  <!-- ===== Copys y chips ===== -->
+  <div class="container">
+    <p class="desc">{{ description }}</p>
+
+    <div class="chips">
+      <span class="chip" *ngIf="basePrice">
+        <span class="k">Desde</span>
+        <span class="v">{{ basePrice | currency : 'COP' : 'symbol' : '1.0-0' }}</span>
+      </span>
+      <span class="chip" *ngIf="capacity">
+        <span class="k">Capacidad</span>
+        <span class="v">{{ capacity }}</span>
+      </span>
+      <span class="chip">
+        <span class="k">Disponibles hoy</span>
+        <span class="v">{{ availableCount }}</span>
+      </span>
+      <span class="chip">
+        <span class="k">Reservadas</span>
+        <span class="v">{{ bookedCount }}</span>
+      </span>
+      <span class="chip">
+        <span class="k">Mantenimiento</span>
+        <span class="v">{{ maintenanceCount }}</span>
+      </span>
+    </div>
+
+    <!-- ===== Grid listado + aside ===== -->
     <div class="content-grid">
       <div class="main-col">
         <h3>Habitaciones de este tipo en el hotel</h3>
         <ul class="room-list">
-          <li class="room-card" *ngFor="let r of rooms; trackBy: trackByRoom">
+          <li
+            class="room-card reveal"
+            *ngFor="let r of rooms; trackBy: trackByRoom; let i = index"
+            [style.--i]="i"
+          >
             <div class="room-left">
               <strong>{{ r.number }}</strong>
               <span class="muted">Piso {{ r.floor }}</span>
@@ -63,106 +115,46 @@
         </ul>
       </div>
 
-      <aside class="aside-col">
-        <!-- Tarjeta de reserva -->
-        <section class="reserve-card" *ngIf="showForm" #reserveSection>
-          <h3>Reservar esta categoría</h3>
-
-          <form [formGroup]="reserveForm" (ngSubmit)="reserve()">
-            <div class="form-row">
-              <label>Habitación</label>
-              <select formControlName="roomId">
-                <option [ngValue]="null" disabled>Elige una habitación disponible</option>
-                <option
-                  *ngFor="let r of availableRoomsList; trackBy: trackByRoom"
-                  [value]="r.room_id"
-                >
-                  {{ r.number }} — Piso {{ r.floor }}
-                </option>
-              </select>
-            </div>
-
-            <div class="form-row">
-              <label>Check-in</label>
-              <input type="date" formControlName="checkIn" [min]="minCheckIn" />
-            </div>
-
-            <div class="form-row">
-              <label>Check-out <small>(exclusivo)</small></label>
-              <input type="date" formControlName="checkOut" [min]="minCheckOut" />
-            </div>
-
-            <p class="form-hint">
-              * El check-out es exclusivo. Si reservas del 10 al 12, ocupas 10 y 11; el 12 ya no.
-            </p>
-
-            <div *ngIf="submitError" class="error">{{ submitError }}</div>
-
-            <button class="primary" type="submit" [disabled]="isSubmitting || reserveForm.invalid">
-              {{ isSubmitting ? 'Reservando…' : 'Reservar' }}
-            </button>
-          </form>
-        </section>
-
-        <section class="reserve-cta" *ngIf="!showForm && availableCount > 0">
-          <p>Selecciona una habitación <em>Disponible</em> para continuar con tu reserva.</p>
-        </section>
+      <aside class="aside-col" #reserveSection>
+        <app-room-form (reservationCreated)="onReservationCreated($event)"></app-room-form>
       </aside>
     </div>
-  </div>
 
-  <!-- Modal de confirmación (siempre centrado, con wrapper) -->
-  <div class="rs-modal-backdrop" *ngIf="showModal">
-    <div class="rs-modal" role="dialog" aria-modal="true">
-      <div class="rs-modal__header">
-        <h3>¡Reserva creada!</h3>
-      </div>
+    <app-room-gallery
+      class="mt-6"
+      [hotelName]="hotelName"
+      [plantBg]="'https://images.pexels.com/photos/2215534/pexels-photo-2215534.jpeg'"
+      [images]="[
+        'https://images.pexels.com/photos/1231365/pexels-photo-1231365.jpeg',
+        'https://images.pexels.com/photos/39691/family-pier-man-woman-39691.jpeg',
+        'https://images.pexels.com/photos/3155726/pexels-photo-3155726.jpeg',
+        'https://images.pexels.com/photos/61129/pexels-photo-61129.jpeg',
+        'https://images.pexels.com/photos/18160731/pexels-photo-18160731.jpeg',
+        'https://images.pexels.com/photos/13767906/pexels-photo-13767906.jpeg'
+      ]"
+      [columns]="3"
+      [cardW]="300"
+      [cardH]="200"
+    >
+    </app-room-gallery>
 
-      <div class="rs-modal__body">
-        <p class="code">
-          Código: <strong>{{ reservationCode }}</strong>
-        </p>
+    <app-room-rv
+      [title]="'Recorrido virtual de la habitación'"
+      [src]="'https://my.matterport.com/show/?m=dTDqi6RDy29&play=1&guides=1&brand=0'"
+    >
+    </app-room-rv>
 
-        <ul class="resume">
-          <li><span>Hotel:</span> {{ hotelName || 'Hotel #' + hotelId }}</li>
-          <li>
-            <span>Habitación:</span>
-            {{ selectedRoom?.number }} — Piso {{ selectedRoom?.floor }}
-            <ng-container *ngIf="selectedRoom?.theme_name || selectedRoom?.themeName">
-              — {{ selectedRoom?.theme_name || selectedRoom?.themeName }}
-            </ng-container>
-          </li>
-          <li>
-            <span>Categoría:</span> {{ typeName }}
-            <ng-container *ngIf="capacity"> (Cap. {{ capacity }})</ng-container>
-          </li>
-
-          <!-- Cliente -->
-          <li *ngIf="clientName"><span>Cliente:</span> {{ clientName }}</li>
-          <li *ngIf="clientUsername"><span>Usuario:</span> {{ clientUsername }}</li>
-          <li *ngIf="clientEmail"><span>Email:</span> {{ clientEmail }}</li>
-          <li *ngIf="clientPhone"><span>Teléfono:</span> {{ clientPhone }}</li>
-          <li *ngIf="clientDocNumber">
-            <span>Documento:</span>
-            <ng-container *ngIf="clientDocType">{{ clientDocType }} — </ng-container>
-            {{ clientDocNumber }}
-          </li>
-          <li *ngIf="clientCountry"><span>País:</span> {{ clientCountry }}</li>
-          <li *ngIf="clientAddress"><span>Dirección:</span> {{ clientAddress }}</li>
-          <li *ngIf="clientRolesLabel"><span>Roles:</span> {{ clientRolesLabel }}</li>
-
-          <li><span>Check-in:</span> {{ reserveForm.value?.checkIn }}</li>
-          <li><span>Check-out:</span> {{ reserveForm.value?.checkOut }}</li>
-          <li><span>Noches:</span> {{ nights() }}</li>
-          <li *ngIf="estimatedTotal() as total">
-            <span>Estimado:</span> {{ total | currency : 'COP' : 'symbol' : '1.0-0' }}
-          </li>
-        </ul>
-      </div>
-
-      <div class="rs-modal__actions">
-        <button class="primary" (click)="closeModalGoHome()">Ir al inicio</button>
-      </div>
-    </div>
+    <!-- Modal -->
+    <app-room-modal
+      [open]="showModal"
+      [reservationId]="lastReservationId"
+      [reservationCode]="reservationCode"
+      [hotelId]="modalHotelId"
+      [typeId]="modalTypeId"
+      [roomId]="modalRoomId"
+      [checkIn]="modalCheckIn"
+      [checkOut]="modalCheckOut"
+      (closed)="closeModalGoHome()"
+    ></app-room-modal>
   </div>
 </section>
