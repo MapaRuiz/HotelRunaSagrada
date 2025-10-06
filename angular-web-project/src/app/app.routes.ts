@@ -5,6 +5,12 @@ export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./features/public/login/login').then(m => m.Login) },
   { path: 'register', loadComponent: () => import('./features/public/register/register').then(m => m.Register) },
   { path: 'hotel/:id', loadComponent: () => import('./features/public/Hotel/hotel-detail/hotel-detail').then(m => m.HotelDetailComponent) },
+  {
+    path: 'room-type/:typeId',
+    loadComponent: () =>
+      import('./features/public/Room/room-detail/room-detail')
+        .then(m => m.RoomDetailComponent),
+  },
 
   // CLIENT - shell con children
   {

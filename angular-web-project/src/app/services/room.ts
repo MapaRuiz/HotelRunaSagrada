@@ -70,4 +70,8 @@ export class RoomService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.resource}/${id}`);
   }
+
+  listByHotel(hotelId: number): Observable<Room[]> {
+    return this.http.get<Room[]>(`${this.resource}/hotel/${hotelId}`);
+  }
 }

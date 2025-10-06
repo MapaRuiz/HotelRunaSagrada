@@ -1,0 +1,37 @@
+<section class="room-detail">
+  <header class="hero">
+    <div
+      class="hero-media"
+      *ngIf="heroImg; else noimg"
+      [style.backgroundImage]="'url(' + heroImg + ')'"
+    ></div>
+    <ng-template #noimg>
+      <div class="hero-media hero-media--empty"></div>
+    </ng-template>
+
+    <div class="hero-copy">
+      <span class="eyebrow">Habitación</span>
+      <h1 class="title">
+        {{ typeName }} — <span class="theme">{{ themeName }}</span>
+      </h1>
+      <p class="desc" *ngIf="description">{{ description }}</p>
+
+      <div class="chips">
+        <span class="chip" *ngIf="basePrice">Desde ${{ basePrice | number : '1.0-0' }}</span>
+        <span class="chip" *ngIf="capacity">Capacidad {{ capacity }}</span>
+        <span class="chip">Disponibles hoy: {{ availableCount }}</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="content">
+    <h2 class="section-title">Habitaciones de este tipo en el hotel</h2>
+    <ul class="room-list">
+      <li class="room" *ngFor="let r of rooms">
+        <span class="n">{{ r.number }}</span>
+        <span class="meta">Piso {{ r.floor }}</span>
+        <span class="status" [class.ok]="r.res_status === 'AVAILABLE'">{{ r.res_status }}</span>
+      </li>
+    </ul>
+  </div>
+</section>

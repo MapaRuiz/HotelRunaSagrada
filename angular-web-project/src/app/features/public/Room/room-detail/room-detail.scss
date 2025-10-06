@@ -1,0 +1,122 @@
+.room-detail {
+  --bg: #f5f6f5;
+  --ink: #111827;
+  --muted: #6b7280;
+  --brand: #0a6847;
+  display: block;
+  min-height: 100svh;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(280px, 580px) 1fr;
+  gap: clamp(16px, 3vw, 28px);
+  align-items: center;
+  padding: clamp(16px, 4vw, 40px);
+}
+
+.hero-media {
+  aspect-ratio: 4/3;
+  border-radius: 20px;
+  background: #e5e7eb center/cover no-repeat;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.12);
+}
+.hero-media--empty {
+  background: #eef2f7;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brand);
+  background: #e9f5ef;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  margin-bottom: 0.8rem;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: clamp(1.8rem, 4.4vw, 3rem);
+  line-height: 1.08;
+}
+.title .theme {
+  font-weight: 400;
+  color: var(--brand);
+}
+
+.desc {
+  margin: 0.75rem 0 0;
+  color: var(--muted);
+  font-size: clamp(1rem, 2vw, 1.15rem);
+}
+
+.chips {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.chip {
+  border: 1px solid #0a684733;
+  background: #0a684710;
+  color: var(--brand);
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.content {
+  padding: 0 clamp(16px, 4vw, 40px) clamp(24px, 5vw, 60px);
+}
+.section-title {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-title);
+  font-size: clamp(1.25rem, 3vw, 1.6rem);
+}
+
+.room-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.room {
+  background: #fff;
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  align-items: center;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.06);
+}
+.room .n {
+  font-weight: 700;
+  font-family: var(--font-title);
+}
+.room .meta {
+  color: var(--muted);
+}
+.room .status {
+  font-weight: 700;
+  color: #92400e;
+}
+.room .status.ok {
+  color: #065f46;
+}
+
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+}

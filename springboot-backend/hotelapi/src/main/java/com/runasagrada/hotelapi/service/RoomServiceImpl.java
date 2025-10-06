@@ -123,4 +123,14 @@ public class RoomServiceImpl implements RoomService {
     public void delete(Integer id) {
         roomRepository.deleteById(id);
     }
+
+    @Override
+    public List<Room> listByHotel(Long hotelId) {
+        return roomRepository.findByHotelId(hotelId);
+    }
+
+    @Override
+    public List<Room> listByHotelAndType(Long hotelId, Long roomTypeId) {
+        return roomRepository.findByHotelIdAndTypeId(hotelId, roomTypeId);
+    }
 }

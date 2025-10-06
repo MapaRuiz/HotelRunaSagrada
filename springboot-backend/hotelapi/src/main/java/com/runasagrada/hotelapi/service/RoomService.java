@@ -25,4 +25,8 @@ public interface RoomService {
     Room update(Integer id, Room room, Long hotelId, Integer roomTypeId);
 
     void delete(Integer id);
+
+    List<Room> listByHotel(Long hotelId);
+
+    List<Room> listByHotelAndType(Long hotelId, Long roomTypeId);
 }

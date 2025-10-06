@@ -9,11 +9,14 @@ import { HotelAmenitiesComponent } from '../hotel-amenities/hotel-amenities';
 import { HotelLocationComponent } from '../hotel-location/hotel-location';
 import { environment } from '../../../../../environments/environment';
 import { HotelServicesComponent } from '../hotel-services/hotel-services';
+import { HotelRoomsComponent } from '../hotel-rooms/hotel-rooms';
+
+
 
 @Component({
   standalone: true,
   selector: 'app-hotel-detail',
-  imports: [CommonModule, HotelHeroComponent, HotelAmenitiesComponent, HotelLocationComponent, HotelServicesComponent],
+  imports: [CommonModule, HotelHeroComponent, HotelAmenitiesComponent, HotelLocationComponent, HotelServicesComponent, HotelRoomsComponent],
   templateUrl: './hotel-detail.html',
   styleUrls: ['./hotel-detail.css']
 })

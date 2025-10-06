@@ -1,6 +1,6 @@
 <!-- hotel-detail.html -->
 <ng-container *ngIf="hotel as h">
-  <app-hotel-hero [hotel]="h" [images]="gallery" [assetBase]="backendBase" scrollHeight="1000svh">
+  <app-hotel-hero [hotel]="h" [images]="gallery" [assetBase]="backendBase" scrollHeight="700svh">
   </app-hotel-hero>
 
   <div class="content-wrapper">
@@ -21,5 +21,7 @@
     </app-hotel-location>
 
     <app-hotel-services class="mt-4" [hotelId]="h.hotel_id"></app-hotel-services>
+
+    <app-hotel-rooms class="mt-4" [hotel]="h" [assetBase]="backendBase"> </app-hotel-rooms>
   </div>
 </ng-container>

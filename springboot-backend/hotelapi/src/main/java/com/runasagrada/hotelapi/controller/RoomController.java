@@ -97,6 +97,18 @@ public class RoomController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/rooms/hotel/{hotelId}")
+    public ResponseEntity<List<Room>> listByHotel(
+            @PathVariable Long hotelId,
+            @RequestParam(name = "roomTypeId", required = false) Long roomTypeId) {
+
+        List<Room> out = (roomTypeId == null)
+                ? service.listByHotel(hotelId)
+                : service.listByHotelAndType(hotelId, roomTypeId);
+
+        return ResponseEntity.ok(out);
+    }
+
     // Clase interna para request
     @Data
     public static class RoomRequest {

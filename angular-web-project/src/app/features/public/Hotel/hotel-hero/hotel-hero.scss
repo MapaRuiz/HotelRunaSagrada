@@ -62,7 +62,7 @@
   }
 
     .hero-section {
-      height: var(--scroll-height, 10svh);
+      height: var(200svh, 5svh);
       /* el mismo valor que pasas por [style.--scroll-height] */
       min-height: 120svh;
       /* por si reduces scrollHeight */
@@ -131,43 +131,43 @@
   /* Áreas */
   .hero-wrapper > .tile:nth-child(1) {
     grid-area: one;
-    --x: -500%;
-    --y: -200%;
+    --x: -400%;
+    --y: -100%;
   }
   .hero-wrapper > .tile:nth-child(2) {
     grid-area: two;
     --x: -75%;
-    --y: -200%;
+    --y: -100%;
   }
   .hero-wrapper > .tile:nth-child(3) {
     grid-area: three;
-    --x: 200%;
+    --x: 100%;
     --y: 0%;
   }
   .hero-wrapper > .tile:nth-child(4) {
     grid-area: four;
-    --x: 500%;
-    --y: -200%;
+    --x: 400%;
+    --y: -100%;
   }
   .hero-wrapper > .tile:nth-child(5) {
     grid-area: five;
-    --x: -500%;
+    --x: -400%;
     --y: 100%;
   }
   .hero-wrapper > .tile:nth-child(6) {
     grid-area: six;
-    --x: -200%;
+    --x: -100%;
     --y: 0%;
   }
   .hero-wrapper > .tile:nth-child(7) {
     grid-area: seven;
     --x: 75%;
-    --y: 200%;
+    --y: 100%;
   }
   .hero-wrapper > .tile:nth-child(8) {
     grid-area: eight;
-    --x: 500%;
-    --y: 200%;
+    --x: 400%;
+    --y: 100%;
   }
 
   /* Centro */

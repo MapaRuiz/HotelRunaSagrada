@@ -37,7 +37,7 @@ export class HotelAmenitiesComponent {
     return base ? `${base}/${rel}` : `/${rel}`;
   }
 
-  private leafyBg = 'url(https://images.pexels.com/photos/807598/pexels-photo-807598.jpeg)';
+  private leafyBg = 'url(https://images.pexels.com/photos/38012/pexels-photo-38012.jpeg)';
 
   get cards() {
     const uniq = new Map<number, Amenity>();
