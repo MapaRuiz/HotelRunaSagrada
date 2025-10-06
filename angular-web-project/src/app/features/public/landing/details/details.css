@@ -20,16 +20,6 @@
   color: #778e69;
 }
 
-.details .btn-det {
-  background: #adb6a4;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  color: rgb(255, 255, 255);
-  transition: background 0.3s;
-}
 
 .details p {
    color: #555;
