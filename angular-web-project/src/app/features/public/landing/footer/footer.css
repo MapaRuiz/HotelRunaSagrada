@@ -1,100 +1,79 @@
-/* Footer General */
+/* Footer */
 .footer {
-  background-color: #778e69; /* Verde natural */
-  color: #f2f3ed; /* Blanco cálido */
-  padding: 70px 20px 40px;
-  position: relative;
+  background-color: #0d330e;
+  color: #f2f3ed;
+  padding: 20px 20px 30px;
+  text-align: center;
   border-radius: 80px 80px 0 0;
 }
-/* Contenedor principal */
-.footer-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 50px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
 
-/* Secciones */
-.footer-section h3 {
-  color: #e0d4be; /* Beige elegante */
-  margin-bottom: 18px;
-  font-size: 20px;
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-}
-
-.footer-section p,
-.footer-section a {
-  color: #f2f3ed;
-  font-size: 15px;
-  line-height: 1.7;
-  transition: color 0.3s ease;
-}
-
-.footer-section a:hover {
-  color: #bcc399; /* Verde suave al hover */
+.footer-container.centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 25px;
 }
 
 /* Logo */
-
-.footer-logo {
-  display: block; /* Bloque para apilar logo + nombre */
-  margin-bottom: 20px;
-  text-align: left; /* A la izquierda en desktop */
-}
-
 .footer-logo img {
-  width: 200px; /* Tamaño grande */
-  max-width: 100%; /* Que no rompa en pantallas pequeñas */
+  width: 160px;
   height: auto;
   margin-bottom: 10px;
-  border-radius: 8px; /* opcional */
-  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  box-shadow: 0px 2px 6px rgba(0,0,0,0.2);
 }
 
 .footer-logo h3 {
+  font-size: 26px;
   color: #e0d4be;
-  font-size: 24px;
-  font-weight: bold;
+  margin: 5px 0;
   font-family: 'Quantico', system-ui, sans-serif;
+}
+
+.footer-lema {
+  font-size: 16px;
+  color: #f2f3ed;
+  font-style: italic;
   margin: 0;
 }
 
 /* Iconos sociales */
 .footer-icons {
-  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
 }
 
-.footer-icons a {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  width: 38px;
-  height: 38px;
+.social-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
   border-radius: 50%;
   background-color: rgba(242, 243, 237, 0.1);
-  margin-right: 10px;
   color: #f2f3ed;
+  font-size: 18px;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.footer-icons a:hover {
+.social-btn:hover {
   background-color: #bcc399;
   color: #151513;
   transform: scale(1.1);
 }
 
-/* Copy */
-.footer-copy {
-  text-align: center;
-  border-top: 1px solid rgba(242, 243, 237, 0.2);
-  margin-top: 50px;
-  padding-top: 20px;
-  font-size: 14px;
-  color: #bcc399;
+/* Contacto */
+.footer-contacto p {
+  font-size: 17px;
+  color: #e0d4be;
+  margin: 0;
 }
 
-.footer-copy .heart {
-  color: #e0d4be;
+/* Copy */
+.footer-copy {
+  margin-top: 30px;
+  border-top: 1px solid rgba(242, 243, 237, 0.2);
+  padding-top: 15px;
+  font-size: 14px;
+  color: #bcc399;
 }

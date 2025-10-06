@@ -1,5 +1,5 @@
 .parallax {
-  height: 100vh;
+  height: 120vh;
   background-attachment: fixed;
   background-size: cover;
   background-position: center;
@@ -69,7 +69,15 @@
   opacity: 0;
   will-change: transform, opacity;
   animation: carousel 15s linear infinite;
+  pointer-events: none;
 }
+
+
+
+.card-car.active {
+  pointer-events: all;
+}
+
 
 .card-car h1 {
   font-size: 5em;
