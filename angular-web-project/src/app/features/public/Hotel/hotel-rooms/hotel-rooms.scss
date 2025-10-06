@@ -187,3 +187,31 @@
     }
   }
 }
+
+/* Links del menú: negro y sin subrayado */
+.rooms-section {
+
+  .menu-item,
+  .menu-item:link,
+  .menu-item:visited {
+    color: #111;
+    /* negro/gris oscuro */
+    text-decoration: none;
+    /* sin subrayado */
+  }
+
+  /* El texto visible del link en negrita */
+  .menu-item .label {
+    color: currentColor;
+    /* hereda #111 del <a> */
+    font-weight: 700;
+    /* negrita */
+    text-decoration: none;
+  }
+
+  /* Accesibilidad: foco visible sin cambiar color */
+  .menu-item:focus-visible {
+    outline: 2px solid #0a6847;
+    outline-offset: 2px;
+  }
+}

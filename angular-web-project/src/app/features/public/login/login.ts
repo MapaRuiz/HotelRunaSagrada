@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth';
 import { roleNames } from '../../../utils/roles';
 import { BlindsBgComponent } from '../cppn-bg/cppn-bg'; // <-- importa tu bg
+import { ActivatedRoute } from '@angular/router';
 
 // ⚙️ Utiliza la misma lógica de baseURL que me pasaste
 import { environment } from '../../../../environments/environment';
@@ -20,6 +21,7 @@ export class Login {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   // Base del backend para imágenes (/images/...)
   private backendBase =
@@ -73,8 +75,24 @@ onSubmit(ev?: Event) {
     next: (res) => {
       this.loading.set(false);
       this.showFlash('success', 'Login successful');
+    
+      // Guarda un shape simple que nuestra función de detalle sabe leer
+      localStorage.setItem('user', JSON.stringify({
+        id:  res.user?.user_id,
+        name: res.user?.full_name,
+        roles: res.user?.roles ?? [],
+        token: res.access_token ?? null
+      }));
+    
+      // Si veníamos de /room-type/:id?hotelId=...
+      const ret = this.route.snapshot.queryParamMap.get('returnUrl');
+      if (ret) {
+        this.router.navigateByUrl(ret);
+        return;
+      }
+      // Si no hay returnUrl, ve al dashboard por rol
       this.router.navigate([this.dashboardBy(res.user?.roles)]);
-    },
+    },    
     error: (err) => {
       this.loading.set(false);
       const status = err?.status ?? 0;
@@ -86,5 +104,10 @@ onSubmit(ev?: Event) {
   });
 }
   
-  
+get returnUrl() {
+  return this.route.snapshot.queryParamMap.get('returnUrl') || this.router.url;
 }
+
+}
+
+
