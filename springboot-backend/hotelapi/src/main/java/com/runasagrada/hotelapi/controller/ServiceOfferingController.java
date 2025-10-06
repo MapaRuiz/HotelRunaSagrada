@@ -258,6 +258,17 @@ public class ServiceOfferingController {
         return startTime.plusMinutes(clamped);
     }
 
+    @GetMapping("/servoffering/hotels/{hotelId}/services")
+    public List<ServiceOffering> servicesByHotel(@PathVariable Long hotelId) {
+        return serviceOfferingService.findByHotel(hotelId);
+    }
+
+    /** Lista los horarios de un servicio */
+    @GetMapping("/servoffering/services/{serviceId}/schedules")
+    public List<ServiceSchedule> schedulesByService(@PathVariable Long serviceId) {
+        return serviceScheduleService.findByService(serviceId);
+    }
+
     @Data
     static class ScheduleRequest {
         @Schema(name = "days_of_week")

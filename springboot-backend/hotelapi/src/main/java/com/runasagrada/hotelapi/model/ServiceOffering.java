@@ -6,7 +6,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -52,6 +54,9 @@ public class ServiceOffering {
     @Schema(name = "duration_minutes")
     private int durationMinutes;
 
+    @ElementCollection
+    @CollectionTable(name = "service_offering_images", joinColumns = @JoinColumn(name = "service_offering_id"))
+    @Column(name = "image_url", nullable = false, length = 500)
     @Schema(name = "image_urls")
     private List<String> imageUrls;
 

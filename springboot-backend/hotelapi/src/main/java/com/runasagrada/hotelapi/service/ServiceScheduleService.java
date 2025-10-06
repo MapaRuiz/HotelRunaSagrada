@@ -20,4 +20,6 @@ public interface ServiceScheduleService {
     void delete(Long id);
 
     Optional<ServiceSchedule> findById(Long id);
+
+    List<ServiceSchedule> findByService(Long serviceId);
 }

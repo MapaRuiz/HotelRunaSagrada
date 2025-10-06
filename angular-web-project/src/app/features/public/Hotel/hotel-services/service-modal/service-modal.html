@@ -1,0 +1,64 @@
+<div class="svc-wrap" role="dialog" aria-modal="true" [attr.aria-labelledby]="'svcTitle'">
+  <!-- Backdrop -->
+  <div class="svc-backdrop" (click)="triggerClose()"></div>
+
+  <!-- Panel -->
+  <div
+    class="svc-modal"
+    tabindex="-1"
+    (click)="$event.stopPropagation()"
+    (keydown.escape)="triggerClose()"
+  >
+    <button class="svc-close" type="button" aria-label="Cerrar" (click)="triggerClose()">×</button>
+
+    <!-- Header -->
+    <header class="svc-header">
+      <h2 id="svcTitle" class="svc-title">{{ service.name }}</h2>
+      <p class="svc-subtle">
+        {{ service.category }}
+        <span *ngIf="service.subcategory"> · {{ service.subcategory }}</span>
+      </p>
+
+      <div class="svc-chips">
+        <span class="chip">Duración: {{ service.duration_minutes }} min</span>
+        <span class="chip">Máx. {{ service.max_participants }} participantes</span>
+        <span class="chip" *ngIf="service.base_price"
+          >Desde ${{ service.base_price | number : '1.0-0' }}</span
+        >
+      </div>
+    </header>
+
+    <!-- Body -->
+    <section class="svc-body">
+      <div class="svc-grid">
+        <figure class="svc-media" *ngIf="cover; else noimg">
+          <img [src]="cover!" [alt]="service.name" />
+        </figure>
+        <ng-template #noimg>
+          <figure class="svc-media placeholder">
+            <div class="ph"></div>
+          </figure>
+        </ng-template>
+
+        <div class="svc-info">
+          <p class="svc-desc">{{ service.description }}</p>
+
+          <h3 class="svc-block-title">Horarios</h3>
+
+          <ul class="schedule-list" *ngIf="schedulesView.length; else nosched">
+            <li *ngFor="let sc of schedulesView">
+              <span class="days">{{ sc._daysLabel }}</span>
+              <span class="time"
+                >{{ formatTime(sc.start_time) }} – {{ formatTime(sc.end_time) }}</span
+              >
+              <span class="dot" aria-hidden="true"></span>
+            </li>
+          </ul>
+          <ng-template #nosched>
+            <p class="svc-muted">Sin horarios configurados.</p>
+          </ng-template>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

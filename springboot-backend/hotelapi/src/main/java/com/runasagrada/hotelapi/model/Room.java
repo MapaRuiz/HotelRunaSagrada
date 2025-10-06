@@ -63,7 +63,7 @@ public class Room {
     // Galería de imágenes similar a Services
     @ElementCollection
     @CollectionTable(name = "room_images", joinColumns = @JoinColumn(name = "room_id"))
-    @Column(name = "image_url", nullable = false)
+    @Column(name = "image_url", nullable = false, length = 500)
     private List<String> images = new ArrayList<>();
 
     // Exponer ids planos al JSON (alineado con tu front)

@@ -53,4 +53,9 @@ public class ServiceScheduleServiceImpl implements ServiceScheduleService {
         return serviceScheduleRepository.findById(id);
     }
 
+    @Override
+    public List<ServiceSchedule> findByService(Long serviceId) {
+        return serviceScheduleRepository.findByService_Id(serviceId);
+    }
+
 }

@@ -61,6 +61,14 @@ export class ServiceOfferingService {
     return this.http.delete<void>(`${this.resource}/schedule/${id}`);
   }
 
+  listByHotel(hotelId: number) {
+    return this.http.get<ServiceOffering[]>(`${this.resource}/hotels/${hotelId}/services`);
+  }
+
+  getSchedules(serviceId: number) {
+    return this.http.get<ServiceSchedule[]>(`${this.resource}/services/${serviceId}/schedules`);
+  }
+
 }
 
 export interface ServiceOfferingRequest {

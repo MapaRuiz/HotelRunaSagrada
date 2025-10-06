@@ -17,4 +17,6 @@ public interface ServiceScheduleRepository extends JpaRepository<ServiceSchedule
     List<ServiceSchedule> findByDaysOfWeekContaining(DayWeek dayOfWeek);
 
     List<ServiceSchedule> findByStartTime(LocalTime startTime);
+
+    List<ServiceSchedule> findByService_Id(Long serviceId);
 }
