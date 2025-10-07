@@ -1,37 +1,39 @@
 /* Footer */
 .footer {
-  background-color: #0d330e;
+  background-image: url("https://i.pinimg.com/1200x/ce/ec/77/ceec77f479bd81a777be38eaecfa3c25.jpg");
   color: #f2f3ed;
-  padding: 20px 20px 30px;
+  padding: 10px 20px 15px;
   text-align: center;
-  border-radius: 80px 80px 0 0;
+  border-radius: 60px 60px 0 0;
+  background-repeat: no-repeat;
+  background-size: cover ;
 }
 
+/* Contenedor */
 .footer-container.centered {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 25px;
+  gap: 12px;
 }
 
 /* Logo */
 .footer-logo img {
-  width: 160px;
+  width: 120px;
   height: auto;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  box-shadow: 0px 2px 6px rgba(0,0,0,0.2);
+  margin-bottom: 4px;
+  border-radius: 8px;
+  box-shadow: 0px 1px 4px rgba(0,0,0,0.2);
 }
 
 .footer-logo h3 {
-  font-size: 26px;
+  font-size: 20px;
   color: #e0d4be;
-  margin: 5px 0;
-  font-family: 'Quantico', system-ui, sans-serif;
+  margin: 3px 0;
 }
 
 .footer-lema {
-  font-size: 16px;
+  font-size: 13px;
   color: #f2f3ed;
   font-style: italic;
   margin: 0;
@@ -41,17 +43,17 @@
 .footer-icons {
   display: flex;
   justify-content: center;
-  gap: 15px;
+  gap: 10px;
 }
 
 .social-btn {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border: none;
   border-radius: 50%;
   background-color: rgba(242, 243, 237, 0.1);
   color: #f2f3ed;
-  font-size: 18px;
+  font-size: 15px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -59,21 +61,22 @@
 .social-btn:hover {
   background-color: #bcc399;
   color: #151513;
-  transform: scale(1.1);
+  transform: scale(1.08);
 }
 
 /* Contacto */
 .footer-contacto p {
-  font-size: 17px;
+  font-size: 14px;
   color: #e0d4be;
   margin: 0;
 }
 
 /* Copy */
 .footer-copy {
-  margin-top: 30px;
-  border-top: 1px solid rgba(242, 243, 237, 0.2);
-  padding-top: 15px;
-  font-size: 14px;
-  color: #bcc399;
+  margin-top: 12px;
+  border-top: 1px solid rgba(242, 243, 237, 0.15);
+  padding-top: 8px;
+  font-size: 12px;
+  color: #eef0e5;
 }
+

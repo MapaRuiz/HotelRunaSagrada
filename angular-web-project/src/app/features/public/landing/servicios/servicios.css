@@ -1,25 +1,94 @@
-
-
-/* CANVAS Y WRAP DEL CARRUSEL */
+/* CONTENEDOR GENERAL DEL CARRUSEL */
 .carousel-wrap {
   position: relative;
   width: 100%;
   height: 100vh;
-  background-color: #ffffff;
+  background: linear-gradient(180deg, #ffffff 0%, #eaf3ea 100%);
   overflow: hidden;
-  padding-top: 0;
-
-  position: relative;
-  top: 0;
-  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
   padding: 0;
-  height: 100vh;
-  width: 100%;
-
+  margin: 0;
 }
 
+/* TÍTULO SOBRE EL CARRUSEL */
+.carousel-heading {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  margin-top: 40px;
+  animation: fadeInDown 1.2s ease-in-out;
+}
+
+.carousel-heading h2 {
+
+  font-weight: 700;
+  font-size: 2.4rem;
+  color: #0d330e;
+  letter-spacing: 2px;
+  margin: 0;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #0d330e, #4e7f4f);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* LÍNEA DECORATIVA BAJO EL TÍTULO */
+.heading-line {
+  width: 80px;
+  height: 3px;
+  background-color: #4e7f4f;
+  border-radius: 3px;
+  margin: 10px auto 20px;
+  animation: expandLine 1s ease forwards;
+}
+
+/* CANVAS */
 canvas {
   width: 100%;
-  height: 80%;
+  height: calc(100vh - 80px); /* ocupa casi todo, restando el alto del título */
   display: block;
+  margin-top: -150px; /* 🔥 sube el carrusel — ajusta este valor según necesites */
+  position: relative;
+  z-index: 1;
+}
+
+/* ANIMACIONES SUAVES */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes expandLine {
+  from {
+    width: 0;
+    opacity: 0;
+  }
+  to {
+    width: 80px;
+    opacity: 1;
+  }
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .carousel-heading h2 {
+    font-size: 1.8rem;
+  }
+
+  .heading-line {
+    width: 60px;
+  }
+
+  canvas {
+    height: 70%;
+  }
 }
