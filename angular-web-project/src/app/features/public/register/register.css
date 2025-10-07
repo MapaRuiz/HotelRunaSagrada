@@ -1,28 +1,228 @@
-/* Reutiliza estilos del login */
-@import url('../login/login.css');
+/* Fondo general */
+.auth-wrap {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-/* Ajustes específicos para el medidor de contraseña */
-.pw-meter {
-  height: 8px;
-  background: #eef2f6;
-  border-radius: 999px;
-  overflow: hidden;
-  margin-top: 8px;
+  /* Fondo natural tipo glass */
+  background:
+              url('https://i.pinimg.com/originals/66/ad/8a/66ad8a8b3cf59cee451e53ec45ad76c3.gif') no-repeat center center fixed;
+  background-size: cover;
+
+  backdrop-filter: blur(4px);
+  position: relative;
+  z-index: 1;
 }
+
+/* Tarjeta glass (ajustada para más contenido) */
+.card {
+  width: 430px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 38px 36px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  color: #fff;
+  text-align: center;
+  transition: all 0.4s ease;
+  animation: fadeIn 1.3s ease;
+}
+
+/* Animación sutil de entrada */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(35px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Logo */
+.logo-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.logo {
+  width: 120px;
+  height: auto;
+  border-radius: 50%;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.25));
+}
+
+/* Título y subtítulo */
+.title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+  letter-spacing: 0.5px;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 22px;
+}
+
+/* Campos */
+.field {
+  position: relative;
+  margin-bottom: 18px;
+}
+
+.field input {
+  width: 100%;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.field input::placeholder {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.field input:focus {
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.35);
+}
+
+/* Validaciones */
+.field.invalid input {
+  border: 1px solid #ff6b6b;
+  background: rgba(255, 0, 0, 0.1);
+}
+
+/* Indicador de fuerza de contraseña */
+.pw-meter {
+  width: 100%;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+
 .pw-bar {
   height: 100%;
   width: 0%;
-  transition: width 220ms ease;
-  background: linear-gradient(90deg, #e65050, #ef984a);
+  transition: width 0.3s ease;
 }
+
+.pw-bar.bad {
+  background: #ff4e4e;
+}
+
 .pw-bar.ok {
-  background: linear-gradient(90deg, #ef984a, #c2b56b);
+  background: #ffd23f;
 }
+
 .pw-bar.good {
-  background: linear-gradient(90deg, #c2b56b, #778e69);
+  background: #7dd87d;
 }
+
 .pw-label {
-  margin-top: 6px;
-  font-size: 0.82rem;
-  color: #6b7280;
+  text-align: left;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Botón */
+.btn {
+  width: 100%;
+  padding: 13px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 28px;
+  background: linear-gradient(135deg, #87ac41, #649842);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.594);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Spinner */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(0, 0, 0, 0.3);
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Toast (alerta superior) */
+.toast {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+  color: #fff;
+}
+
+.toast--error {
+  background: rgba(255, 0, 0, 0.3);
+}
+
+/* Enlace inferior */
+.muted {
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.muted a {
+  color: #fff;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.muted a:hover {
+  text-decoration: underline;
+}
+
+/* Scroll invisible dentro del card */
+.card::-webkit-scrollbar {
+  width: 6px;
+}
+.card::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+.card::-webkit-scrollbar-track {
+  background: transparent;
 }
