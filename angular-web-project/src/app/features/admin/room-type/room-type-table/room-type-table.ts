@@ -71,6 +71,7 @@ export class RoomTypesTableComponent implements OnInit {
     obs.subscribe({
       next: () => { 
         this.showForm = false; 
+        this.editingId = undefined;
         this.refresh(); 
         const toastElement = document.createElement('div');
         toastElement.className = 'toast';
@@ -110,5 +111,8 @@ export class RoomTypesTableComponent implements OnInit {
     });
   }
 
-  cancel() { this.showForm = false; }
+  cancel() { 
+    this.showForm = false; 
+    this.editingId = undefined;
+  }
 }
