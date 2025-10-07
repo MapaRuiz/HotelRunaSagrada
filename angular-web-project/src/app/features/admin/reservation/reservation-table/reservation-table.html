@@ -69,7 +69,10 @@
   <button (click)="cancelForm()" class="btn btn-secondary">Cerrar</button>
 </div>
 
-<table class="table table-striped" *ngIf="!loading && reservations.length && !showForm">
+<table
+  class="table table-striped"
+  *ngIf="!loading && reservations.length && (!showForm || !editingId)"
+>
   <thead>
     <tr>
       <th>ID</th>
