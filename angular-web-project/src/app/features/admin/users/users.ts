@@ -1,195 +1,34 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, Inject, PLATFORM_ID, ElementRef, ViewChild } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
+import { AgGridAngular } from 'ag-grid-angular';
+import { ColDef, GridApi, GridOptions, ModuleRegistry, AllCommunityModule, PaginationModule } from 'ag-grid-community';
 import { UsersService } from '../../../services/users';
 import { User, Role, RoleEntity } from '../../../model/user';
 import { environment } from '../../../../environments/environment';
+import { AG_GRID_LOCALE, gridTheme as sharedGridTheme } from '../sharedTable';
+import { ActionButtonsComponent } from '../action-buttons-cell/action-buttons-cell';
+import { ActionButtonsParams } from '../action-buttons-cell/action-buttons-param';
 
 @Component({
   standalone: true,
   selector: 'app-admin-users',
-  imports: [CommonModule, FormsModule],
-  template: `
-  <h4>Usuarios</h4>
-
-  <!-- Crear -->
-  <details class="mt-3" open>
-    <summary class="mb-2">Crear usuario</summary>
-    <div class="card card-body">
-      <form #f="ngForm" (ngSubmit)="create(f)">
-        <div class="row g-2">
-          <div class="col-md-4">
-            <label class="form-label">Email *</label>
-            <input class="form-control" name="email" [(ngModel)]="createForm.email" required
-                   [class.is-invalid]="createTouched && !isEmailValid(createForm.email)">
-            <div class="invalid-feedback">Ingresa un correo válido.</div>
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label">Contraseña *</label>
-            <input class="form-control" type="password" name="password" [(ngModel)]="createForm.password" required
-                   [class.is-invalid]="createTouched && !isPasswordOk(createForm.password)">
-            <div class="invalid-feedback">Mínimo 6 caracteres.</div>
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label">Confirmar contraseña *</label>
-            <input class="form-control" type="password" name="password2" [(ngModel)]="createForm.password2" required
-                   [class.is-invalid]="createTouched && !passwordsMatch(createForm.password, createForm.password2)">
-            <div class="invalid-feedback">Las contraseñas no coinciden.</div>
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label">Nombre completo</label>
-            <input class="form-control" name="full_name" [(ngModel)]="createForm.full_name">
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label">Teléfono</label>
-            <input class="form-control" name="phone" [(ngModel)]="createForm.phone">
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label">Documento</label>
-            <input class="form-control" name="national_id" [(ngModel)]="createForm.national_id">
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label">Rol</label>
-            <select class="form-select" name="role" [(ngModel)]="createForm.role">
-              <option *ngFor="let r of allRoles" [value]="r">{{r}}</option>
-            </select>
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label">Activo</label>
-            <div>
-              <input class="form-check-input" type="checkbox" id="enabledCreate" [(ngModel)]="createForm.enabled" name="enabled">
-              <label class="form-check-label ms-1" for="enabledCreate">Sí</label>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label">Imagen (ruta/URL)</label>
-            <input class="form-control" name="selected_pet" [(ngModel)]="createForm.selected_pet"
-                   placeholder="/images/icons/icono1.png o https://...">
-            <div class="mt-2" *ngIf="createForm.selected_pet as src">
-              <img [src]="img(src)" (error)="imgBrokenCreate=true" (load)="imgBrokenCreate=false"
-                   style="width:64px;height:64px;object-fit:cover;border-radius:50%;">
-              <div class="text-danger small mt-1" *ngIf="imgBrokenCreate">No se pudo cargar la imagen.</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-3 d-flex gap-2">
-          <button class="btn btn-primary"
-                  (click)="createTouched = true"
-                  [disabled]="!isEmailValid(createForm.email) || !isPasswordOk(createForm.password) || !passwordsMatch(createForm.password, createForm.password2)">
-            Crear
-          </button>
-          <button type="button" class="btn btn-secondary" (click)="resetCreate()">Limpiar</button>
-        </div>
-      </form>
-    </div>
-  </details>
-
-  <!-- Lista -->
-  <table class="table table-striped mt-4" *ngIf="users.length; else empty">
-    <thead>
-      <tr>
-        <th>ID</th><th>Usuario</th><th>Roles</th><th>Activo</th><th class="text-end">Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let u of users">
-        <ng-container *ngIf="editId !== u.user_id; else editRow">
-          <td>{{u.user_id}}</td>
-          <td>
-            <div class="d-flex align-items-center gap-2">
-              <img *ngIf="u.selected_pet" [src]="img(u.selected_pet)" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
-              <div>
-                <div class="fw-semibold">{{u.full_name || '—'}}</div>
-                <div class="text-muted small">{{u.email}}</div>
-              </div>
-            </div>
-          </td>
-          <td>
-            <span *ngFor="let r of roleNames(u.roles)" class="badge text-bg-secondary me-1">{{r}}</span>
-          </td>
-          <td>
-            <span class="badge" [class.text-bg-success]="u.enabled !== false" [class.text-bg-secondary]="u.enabled === false">
-              {{ u.enabled === false ? 'No' : 'Sí' }}
-            </span>
-          </td>
-          <td class="text-end">
-            <button class="btn btn-sm btn-outline-primary me-2" (click)="beginEdit(u)" [disabled]="isSelf(u)">Editar</button>
-            <button class="btn btn-sm btn-outline-danger" (click)="remove(u)" [disabled]="isSelf(u)">Eliminar</button>
-          </td>
-        </ng-container>
-
-        <ng-template #editRow>
-          <td>{{u.user_id}}</td>
-          <td>
-            <div class="row g-2">
-              <div class="col-md-6">
-                <input class="form-control form-control-sm mb-1" [(ngModel)]="draft.full_name" placeholder="Nombre completo">
-                <input class="form-control form-control-sm mb-1" [(ngModel)]="draft.email" placeholder="Email"
-                       [class.is-invalid]="editTouched && !isEmailValid(draft.email)">
-                <div class="invalid-feedback">Email inválido.</div>
-              </div>
-              <div class="col-md-6">
-                <input class="form-control form-control-sm mb-1" [(ngModel)]="draft.selected_pet" placeholder="/images/icons/icono1.png o https://...">
-                <div class="mt-1" *ngIf="draft.selected_pet as src">
-                  <img [src]="img(src)" (error)="imgBrokenEdit=true" (load)="imgBrokenEdit=false"
-                       style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
-                  <div class="text-danger small mt-1" *ngIf="imgBrokenEdit">No se pudo cargar la imagen.</div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <input class="form-control form-control-sm" [(ngModel)]="draft.password" type="password" placeholder="Nueva contraseña (opcional)">
-                <div class="form-text" *ngIf="draft.password">Mín. 6 caracteres.</div>
-              </div>
-              <div class="col-md-6" *ngIf="draft.password">
-                <input class="form-control form-control-sm" [(ngModel)]="draft.password2" type="password" placeholder="Confirmar contraseña">
-                <div class="text-danger small" *ngIf="editTouched && !passwordsMatch(draft.password, draft.password2)">No coincide</div>
-              </div>
-            </div>
-          </td>
-          <td>
-            <select class="form-select form-select-sm" [(ngModel)]="draft.role">
-              <option *ngFor="let r of allRoles" [value]="r">{{r}}</option>
-            </select>
-          </td>
-          <td>
-            <input type="checkbox" class="form-check-input" [(ngModel)]="draft.enabled" id="chk{{u.user_id}}">
-          </td>
-          <td class="text-end">
-            <button class="btn btn-sm btn-primary me-2"
-                    (click)="save(u)"
-                    (mousedown)="editTouched = true"
-                    [disabled]="!isEmailValid(draft.email) || (draft.password && (!isPasswordOk(draft.password) || !passwordsMatch(draft.password, draft.password2)))">
-              Guardar
-            </button>
-            <button class="btn btn-sm btn-secondary" (click)="cancel()">Cancelar</button>
-          </td>
-        </ng-template>
-      </tr>
-    </tbody>
-  </table>
-
-  <ng-template #empty>
-    <div class="alert alert-info mt-3">No hay usuarios.</div>
-  </ng-template>
-  `,
+  imports: [CommonModule, FormsModule, AgGridAngular],
+  styleUrls: ['./users.css'],
+  templateUrl: `./users.html`,
 })
 export class Users implements OnInit {
+  isBrowser: boolean = false;
   private api = inject(UsersService);
 
+  // Fuente de datos
   users: User[] = [];
+  // Datos mostrados por la tabla
+  rowData: User[] = [];
   meId: number | null = null;
 
-  // Crear
-  createForm: {
+  showCreate = false;
+  createDraft: {
     email: string;
     password: string;
     password2: string;
@@ -202,6 +41,7 @@ export class Users implements OnInit {
   } = { email: '', password: '', password2: '', role: 'CLIENT', enabled: true };
   createTouched = false;
   imgBrokenCreate = false;
+  createLoading = false;
 
   // Editar
   editId: number | null = null;
@@ -218,8 +58,118 @@ export class Users implements OnInit {
   } = this.emptyDraft();
   editTouched = false;
   imgBrokenEdit = false;
+  showEditModal = false;
 
   allRoles: Role[] = ['ADMIN','OPERATOR','CLIENT'];
+
+  // AG-Grid configuration
+  readonly gridTheme: typeof sharedGridTheme = sharedGridTheme;
+  private gridApi?: GridApi<User>;
+
+  @ViewChild('createDetails') private createDetails?: ElementRef<HTMLDetailsElement>;
+
+  constructor(
+    // Injection token describing the current runtime platform
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    // Should only run when the component is executed in the browser
+    this.isBrowser = isPlatformBrowser(this.platformId);
+    if (this.isBrowser) {
+      // Tells ag-grid to use all the modules
+      ModuleRegistry.registerModules([AllCommunityModule]);
+    }
+  }
+  
+  columnDefs: ColDef[] = [
+    {
+      headerName: 'ID',
+      field: 'user_id',
+      flex: 0.5,
+      minWidth: 70,
+      maxWidth: 100,
+      sortable: true,
+      filter: 'agNumberColumnFilter'
+    },
+    {
+      headerName: 'Usuario',
+      field: 'email',
+      flex: 3,
+      minWidth: 250,
+      sortable: true,
+      filter: 'agTextColumnFilter',
+      cellRenderer: (params: any) => {
+        const user = params.data as User;
+        const imgSrc = user.selected_pet ? this.img(user.selected_pet) : '';
+        const fullName = user.full_name || '—';
+        
+        return `
+          <div class="d-flex align-items-center gap-3 h-100">
+            ${imgSrc ? `<img src="${imgSrc}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid #f0f0f0;">` : ''}
+            <div class="d-flex flex-column justify-content-center">
+              <div class="fw-semibold">${fullName}</div>
+              <div class="text-muted small">${user.email}</div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      headerName: 'Roles',
+      field: 'roles',
+      flex: 1,
+      minWidth: 120,
+      sortable: true,
+      cellRenderer: (params: any) => {
+        const user = params.data as User;
+        const roles = this.roleNames(user.roles);
+        return `<div class="d-flex align-items-center h-100">${roles.map(role => `<span class="badge text-bg-secondary me-1">${role}</span>`).join('')}</div>`;
+      }
+    },
+    {
+      headerName: 'Activo',
+      field: 'enabled',
+      flex: 0.7,
+      minWidth: 80,
+      maxWidth: 120,
+      sortable: true,
+      filter: 'agSetColumnFilter',
+      cellRenderer: (params: any) => {
+        const user = params.data as User;
+        const isEnabled = user.enabled !== false;
+        const badgeClass = isEnabled ? 'text-bg-success' : 'text-bg-secondary';
+        const text = isEnabled ? 'Sí' : 'No';
+        return `<div class="d-flex align-items-center justify-content-center h-100"><span class="badge ${badgeClass}">${text}</span></div>`;
+      }
+    },
+    {
+      headerName: 'Acciones',
+      field: 'actions',
+      flex: 1.5,
+      minWidth: 220,
+      cellRenderer: ActionButtonsComponent,
+      cellRendererParams: {
+        onEdit: (user: User) => this.beginEdit(user),
+        onDelete: (user: User) => this.remove(user)
+      },
+      sortable: false,
+      filter: false
+    }
+  ];
+
+  gridOptions: GridOptions<User> = {
+    localeText: AG_GRID_LOCALE,
+    rowSelection: 'single',
+    rowHeight: 80,
+    getRowId: params => params.data.user_id?.toString(),
+    onGridReady: params => { 
+      this.gridApi = params.api
+      params.api.sizeColumnsToFit();
+    },
+    onGridPreDestroyed: () => {
+      this.gridApi = undefined;
+    },
+    columnDefs: this.columnDefs
+  };
 
   // Base del backend para imágenes (/images/...) – usa backendBaseUrl si existe; si no, deriva de apiBaseUrl
   private backendBase = (environment as any).backendBaseUrl
@@ -236,8 +186,11 @@ export class Users implements OnInit {
   }
 
   load() {
-    // conserva tu método actual
-    this.api.getAll().subscribe(d => this.users = d.sort((a,b)=>(a.user_id||0)-(b.user_id||0)));
+    this.api.getAll().subscribe(d => {
+      const sortedUsers = d.sort((a,b)=>(a.user_id||0)-(b.user_id||0));
+      this.users = sortedUsers;
+      this.rowData = sortedUsers;
+    });
   }
 
   // Helpers
@@ -254,52 +207,87 @@ export class Users implements OnInit {
 
   isSelf(u: User) { return this.meId && u.user_id === this.meId; }
 
-  // Validaciones suaves
+  // Validaciones
   isEmailValid(v?: string) { return !!v && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
   isPasswordOk(v?: string) { return !!v && v.length >= 6; }
   passwordsMatch(a?: string, b?: string) { return (a || '') === (b || ''); }
 
+  onCreateToggle(event: Event): void {
+    const details = event.target as HTMLDetailsElement;
+    this.showCreate = details.open;
+  }
+
   // Crear
   resetCreate() {
-    this.createForm = { email: '', password: '', password2: '', role: 'CLIENT', enabled: true };
+    this.createDraft = { email: '', password: '', password2: '', role: 'CLIENT', enabled: true };
     this.createTouched = false;
     this.imgBrokenCreate = false;
   }
 
+  private closeCreatePanel(): void {
+    const details = this.createDetails?.nativeElement;
+    if (!details) return;
+
+    details.open = false;          
+    details.removeAttribute('open'); 
+  }
+
+  cancelCreate(): void {
+    this.showCreate = false;
+    this.createDraft = { email: '', password: '', password2: '', role: 'CLIENT', enabled: true };
+    this.createLoading = false;
+    this.createTouched = false;
+    this.imgBrokenCreate = false;
+    this.closeCreatePanel();
+  }
+
   create(f: NgForm) {
     this.createTouched = true;
-    if (!this.isEmailValid(this.createForm.email) ||
-        !this.isPasswordOk(this.createForm.password) ||
-        !this.passwordsMatch(this.createForm.password, this.createForm.password2)) {
+    this.createLoading = true;
+    if (!this.isEmailValid(this.createDraft.email) ||
+        !this.isPasswordOk(this.createDraft.password) ||
+        !this.passwordsMatch(this.createDraft.password, this.createDraft.password2)) {
+      this.createLoading = false;
       return;
     }
 
     const body: any = {
-      email: this.createForm.email,
-      password: this.createForm.password,
-      full_name: this.createForm.full_name,
-      phone: this.createForm.phone,
-      national_id: this.createForm.national_id,
-      selected_pet: this.createForm.selected_pet,
-      enabled: this.createForm.enabled,
-      roles: [this.createForm.role] // nombres de rol, como ya usabas
+      email: this.createDraft.email,
+      password: this.createDraft.password,
+      full_name: this.createDraft.full_name,
+      phone: this.createDraft.phone,
+      national_id: this.createDraft.national_id,
+      selected_pet: this.createDraft.selected_pet,
+      enabled: this.createDraft.enabled,
+      roles: [this.createDraft.role] // nombres de rol, como ya usabas
     };
 
     this.api.create(body).subscribe({
       next: u => {
         this.users = [u, ...this.users];
-        this.resetCreate();
+        this.rowData = [u, ...this.rowData];
+        this.cancelCreate();
         f.resetForm();
+        this.withGridApi(api => {
+          api.applyTransaction({ add: [u], addIndex: 0 });
+          api.refreshCells({ force: true });
+        });
       },
-      error: err => alert(err?.error?.message || err.message || 'Error al crear usuario')
+      error: err => {
+        this.createLoading = false;
+        alert(err?.error?.message || err.message || 'Error al crear usuario');
+      }
     });
   }
 
   // Editar
   beginEdit(u: User) {
+    if (this.isSelf(u)) return; // No permitir editar a uno mismo
+    
     this.editId = u.user_id;
     this.editTouched = false;
     this.imgBrokenEdit = false;
+    this.showEditModal = true;
     this.draft = {
       email: u.email,
       full_name: u.full_name,
@@ -315,7 +303,16 @@ export class Users implements OnInit {
     this.editId = null;
     this.editTouched = false;
     this.imgBrokenEdit = false;
+    this.showEditModal = false;
     this.draft = this.emptyDraft();
+  }
+
+  saveFromModal() {
+    if (!this.editId) return;
+    const user = this.users.find(u => u.user_id === this.editId);
+    if (user) {
+      this.save(user);
+    }
   }
 
   save(u: User) {
@@ -339,17 +336,50 @@ export class Users implements OnInit {
     this.api.update(u.user_id, body).subscribe({
       next: upd => {
         this.users = this.users.map(x => x.user_id === upd.user_id ? upd : x);
+        this.rowData = this.rowData.map(x => x.user_id === upd.user_id ? upd : x);
         this.cancel();
+        this.withGridApi(api => {
+          api.applyTransaction({ update: [upd] });
+          api.refreshCells({ force: true });
+        });
       },
       error: err => alert(err?.error?.message || err.message || 'Error al actualizar usuario')
     });
   }
 
   remove(u: User) {
+    if (this.isSelf(u)) {
+      alert('No puedes eliminar tu propio usuario.');
+      return;
+    }
+    
     if (!confirm(`¿Eliminar a ${u.full_name || u.email}?`)) return;
+    
     this.api.delete(u.user_id).subscribe({
-      next: () => this.users = this.users.filter(x => x.user_id !== u.user_id),
+      next: () => {
+        this.users = this.users.filter(x => x.user_id !== u.user_id);
+        this.rowData = this.rowData.filter(x => x.user_id !== u.user_id);
+        this.withGridApi(api => api.applyTransaction({ remove: [u] }));
+      },
       error: err => alert(err?.error?.message || err.message || 'Error al eliminar usuario')
     });
+  }
+
+  // Search bar
+  search: string = '';
+
+  onSearch(term: string): void {
+    this.search = term;
+    this.withGridApi(api => api.setGridOption('quickFilterText', term || undefined));
+  }
+
+  private withGridApi(action: (api: GridApi<User>) => void): void {
+    const api = this.gridApi;
+    if (!api) return;
+    const maybeDestroyed = (api as GridApi<User> & { isDestroyed?: () => boolean }).isDestroyed;
+    if (typeof maybeDestroyed === 'function' && maybeDestroyed.call(api)) {
+      return;
+    }
+    action(api);
   }
 }

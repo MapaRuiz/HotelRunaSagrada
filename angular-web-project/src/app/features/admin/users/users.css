@@ -1,0 +1,190 @@
+/* Centrar verticalmente el contenido de todas las celdas */
+::ng-deep .ag-cell {
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Asegurar que el contenido de las celdas ocupe toda la altura */
+::ng-deep .ag-cell-wrapper {
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.modal {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal.show {
+  display: block !important;
+}
+
+.modal-backdrop.show {
+  opacity: 0.5;
+}
+
+/* Personalización adicional para match con el theme de AG-Grid */
+.modal-content {
+  background-color: var(--c-ivory);
+  border: 1px solid rgba(21, 21, 19, 0.08);
+  border-radius: 0.5rem;
+}
+
+.modal-header {
+  background-color: var(--c-olive);
+  color: #fff;
+  border-bottom: 1px solid rgba(21, 21, 19, 0.08);
+}
+
+.modal-header .btn-close {
+  filter: invert(1);
+}
+
+.modal-title {
+  font-family: var(--font-title);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.modal-body .form-label {
+  color: var(--c-olive);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.modal-body .form-control,
+.modal-body .form-select {
+  border: 1px solid rgba(21, 21, 19, 0.15);
+  background-color: #fff;
+  color: var(--c-ink);
+  border-radius: 0.375rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.modal-body .form-control:focus,
+.modal-body .form-select:focus {
+  border-color: var(--c-olive);
+  box-shadow: 0 0 0 0.2rem rgba(119, 142, 105, 0.25);
+}
+
+.modal-footer .btn-primary {
+  background-color: var(--c-olive);
+  border-color: var(--c-olive);
+  color: #fff;
+  font-weight: 600;
+}
+
+.modal-footer .btn-primary:hover {
+  background-color: rgba(119, 142, 105, 0.9);
+  border-color: rgba(119, 142, 105, 0.9);
+}
+
+.modal-footer .btn-secondary {
+  background-color: var(--c-sand);
+  border-color: var(--c-sand);
+  color: var(--c-ink);
+  font-weight: 600;
+}
+
+.modal-footer .btn-secondary:hover {
+  background-color: rgba(188, 195, 153, 0.8);
+  border-color: rgba(188, 195, 153, 0.8);
+}
+
+/* Estilos para el formulario de crear usuario (inspirado en services-form) */
+.user-create-form {
+  max-width: 100%;
+  margin: 0 auto;
+  background: var(--c-ivory);
+  border: 1px solid rgba(21, 21, 19, 0.08);
+  color: var(--c-ink);
+  border-radius: 0.5rem;
+}
+
+.user-create-form .card-title {
+  color: var(--c-olive);
+  font-family: var(--font-title);
+  font-weight: 600;
+}
+
+.user-create-form .form-label {
+  color: var(--c-olive);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.user-create-form .form-control,
+.user-create-form .form-select {
+  border: 1px solid rgba(21, 21, 19, 0.15);
+  background-color: #fff;
+  color: var(--c-ink);
+  border-radius: 0.375rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.user-create-form .form-control:focus,
+.user-create-form .form-select:focus {
+  border-color: var(--c-olive);
+  box-shadow: 0 0 0 0.2rem rgba(119, 142, 105, 0.25);
+}
+
+.user-create-form .btn-primary {
+  background-color: var(--c-olive);
+  border-color: var(--c-olive);
+  color: #fff;
+  font-weight: 600;
+}
+
+.user-create-form .btn-primary:hover {
+  background-color: rgba(119, 142, 105, 0.9);
+  border-color: rgba(119, 142, 105, 0.9);
+}
+
+.user-create-form .btn-secondary {
+  background-color: var(--c-sand);
+  border-color: var(--c-sand);
+  color: var(--c-ink);
+  font-weight: 600;
+}
+
+.user-create-form .btn-secondary:hover {
+  background-color: rgba(188, 195, 153, 0.8);
+  border-color: rgba(188, 195, 153, 0.8);
+}
+
+.user-create-form .form-check-input:checked {
+  background-color: var(--c-olive);
+  border-color: var(--c-olive);
+}
+
+.user-create-form .invalid-feedback {
+  color: #dc3545;
+  font-size: 0.875rem;
+}
+
+/* Grid wrapper siguiendo el patrón de servicios */
+.users-grid-wrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 300px;
+  height: 100%;
+  max-height: 80vh;
+}
+
+@media (max-width: 768px) {
+  .users-grid-wrap {
+    height: auto;
+  }
+}
+
+.ag-theme-quartz .ag-header {
+  font-family: cursive;
+}
+.ag-theme-quartz .ag-header-group-cell {
+  font-weight: normal;
+  font-size: 22px;
+}
+.ag-theme-quartz .ag-header-cell {
+  font-size: 18px;
+}
