@@ -24,7 +24,6 @@ type AmenityCard = {
   styleUrls: ['./hotel-amenities.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-// ...
 export class HotelAmenitiesComponent {
   @Input({ required: true }) hotel!: Pick<Hotel, 'name' | 'description' | 'check_in_after' | 'check_out_before'>;
   @Input() amenities: Amenity[] = [];
@@ -38,25 +37,76 @@ export class HotelAmenitiesComponent {
     return base ? `${base}/${rel}` : `/${rel}`;
   }
 
-  private leafy(i=0){
-    const keys = ['monstera dark leaves','tropical leaves dark','philodendron dark','jungle foliage dark'];
-    const q = keys[i % keys.length];
-    return `url(https://source.unsplash.com/1200x900/?${encodeURIComponent(q)})`;
-  }
+  private leafyBg = 'url(https://images.pexels.com/photos/38012/pexels-photo-38012.jpeg)';
 
-  // ✅ SOLO amenities reales (sin “extras”)
   get cards() {
     const uniq = new Map<number, Amenity>();
     for (const a of this.amenities || []) uniq.set(a.amenity_id, a);
+    const amenities = Array.from(uniq.values());
 
-    return Array.from(uniq.values()).map((a, i) => ({
-      id: a.amenity_id,
+    // Crear arrays separados sin duplicar amenities
+    const imageCards = amenities
+      .filter(a => !!a.image && a.image.trim() !== '')
+      .map(a => ({
+        id: a.amenity_id,
+        title: '',
+        bg: `url(${this.imgUrl(a.image)})`,
+        type: 'image-only'
+      }));
+
+    const textCards = amenities.map((a, i) => ({
+      id: a.amenity_id + 1000,
       title: a.name,
-      // usa imagen del back si existe; si no, hojas
-      bg: `url(${this.imgUrl(a.image)})`,
-    })).map((c, i) => ({
-      ...c,
-      bg: c.bg === 'url()' ? this.leafy(i) : c.bg
+      bg: i % 2 === 0 ? 'white' : this.leafyBg,
+      type: i % 2 === 0 ? 'white-text' : 'leafy-text'
     }));
+
+    // Combinar todos sin duplicar
+    const allCards = [...imageCards, ...textCards];
+    
+    // Patrón rotativo: blanco, imagen, imagen, hojas
+    const patterns = [
+      ['white-text', 'image-only', 'image-only', 'leafy-text'], // fila 1
+      ['image-only', 'image-only', 'leafy-text', 'white-text'], // fila 2  
+      ['leafy-text', 'white-text', 'image-only', 'image-only'], // fila 3
+      ['image-only', 'leafy-text', 'white-text', 'image-only']  // fila 4
+    ];
+    
+    const result = [];
+    let cardIndex = 0;
+
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 4; col++) {
+        const targetType = patterns[row][col];
+        
+        // Buscar card del tipo requerido que no hayamos usado
+        let foundCard = null;
+        for (let i = cardIndex; i < allCards.length; i++) {
+          if (allCards[i].type === targetType) {
+            foundCard = allCards.splice(i, 1)[0];
+            break;
+          }
+        }
+        
+        // Si no encontramos del tipo exacto, usar el siguiente disponible
+        if (!foundCard && allCards.length > 0) {
+          foundCard = allCards.shift();
+        }
+        
+        // Si no hay cards, crear filler
+        if (!foundCard) {
+          foundCard = {
+            id: Date.now() + Math.random(),
+            title: '',
+            bg: this.leafyBg,
+            type: 'leafy-filler'
+          };
+        }
+        
+        result.push(foundCard);
+      }
+    }
+
+    return result;
   }
 }

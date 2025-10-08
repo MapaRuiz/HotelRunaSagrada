@@ -40,6 +40,7 @@ export class ServiceOfferingService {
     return this.http.get<ServiceOfferingDetailResponse>(`${this.resource}/available/${id}`);
   }
 
+
   getGastronomy(): Observable<Record<string, ServiceOffering[]>> {
     return this.http.get<Record<string, ServiceOffering[]>>(`${this.resource}/gastronomy`);
   }
@@ -55,6 +56,19 @@ export class ServiceOfferingService {
   deleteById(id: number) {
     return this.http.delete<void>(`${this.resource}/delete/${id}`);
   }
+
+  deleteSchedule(id: number) {
+    return this.http.delete<void>(`${this.resource}/schedule/${id}`);
+  }
+
+  listByHotel(hotelId: number) {
+    return this.http.get<ServiceOffering[]>(`${this.resource}/hotels/${hotelId}/services`);
+  }
+
+  getSchedules(serviceId: number) {
+    return this.http.get<ServiceSchedule[]>(`${this.resource}/services/${serviceId}/schedules`);
+  }
+
 }
 
 export interface ServiceOfferingRequest {

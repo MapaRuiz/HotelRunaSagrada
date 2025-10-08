@@ -1,0 +1,12 @@
+:host {
+  --detail-page-bg: #f7f5f5; /* tu color */
+  display: block;
+  background: var(--detail-page-bg);
+  min-height: 100%;
+}
+
+/* si el hero traía background, lo dejamos transparente aquí también */
+:host app-hotel-hero,
+:host app-hotel-hero * {
+  background-color: transparent;
+}

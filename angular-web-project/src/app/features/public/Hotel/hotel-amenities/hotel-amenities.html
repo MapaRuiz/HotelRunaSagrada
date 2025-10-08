@@ -1,5 +1,5 @@
-<section class="bento-section container">
-  <div class="bento-header">
+<section class="amenities-section container">
+  <div class="amenities-header">
     <div class="left">
       <span class="eyebrow">AMENIDADES</span>
       <h2 class="title">{{ hotel.name }}</h2>
@@ -18,10 +18,22 @@
     </div>
   </div>
 
-  <div class="bento-grid" [class.layout-xl]="cards.length >= 6" [class.compact]="cards.length < 5">
-    <div class="card" *ngFor="let c of cards" [style.--bg]="c.bg">
-      <div class="overlay"></div>
-      <div class="card-body">
+  <div class="amenities-grid">
+    <div
+      class="amenity-card"
+      *ngFor="let c of cards; let i = index"
+      [ngClass]="{
+        'image-only': c.type === 'image-only',
+        'white-text': c.type === 'white-text',
+        'leafy-text': c.type === 'leafy-text',
+        'leafy-filler': c.type === 'leafy-filler'
+      }"
+      [style.background-image]="c.type !== 'white-text' ? c.bg : null"
+      [style.background-color]="c.type === 'white-text' ? 'white' : null"
+    >
+      <div class="card-overlay" *ngIf="c.type === 'leafy-text' || c.type === 'leafy-filler'"></div>
+
+      <div class="card-content" *ngIf="c.title">
         <h3 class="card-title">{{ c.title }}</h3>
       </div>
     </div>

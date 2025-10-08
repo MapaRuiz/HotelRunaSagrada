@@ -1,0 +1,42 @@
+<section class="services container">
+  <header class="services__head">
+    <div>
+      <span class="eyebrow">SERVICIOS</span>
+      <h2 class="title">Vive experiencias cercanas</h2>
+      <p class="desc">Explora actividades seleccionadas para este hotel.</p>
+    </div>
+  </header>
+
+  <ng-container *ngFor="let group of servicesByCat()">
+    <h3 class="cat-title">{{ group.category }}</h3>
+
+    <div class="cards">
+      <article
+        class="card"
+        *ngFor="let s of group.items"
+        (click)="open(s)"
+        appShuffleOnHover=".card__title"
+      >
+        <img class="card__img" [src]="cover(s)" alt="" loading="lazy" />
+        <div class="card__shade"></div>
+
+        <div class="card__content">
+          <h3 class="card__title">{{ s.name }}</h3>
+          <p class="card__meta">
+            {{ s.category }}
+            <ng-container *ngIf="s.subcategory">· {{ s.subcategory }}</ng-container>
+          </p>
+        </div>
+
+        <span class="card__arrow" aria-hidden="true">…</span>
+      </article>
+    </div>
+  </ng-container>
+
+  <app-service-modal
+    *ngIf="showModal() && selected"
+    [service]="selected!"
+    [schedules]="selectedSchedules()"
+    (closed)="close()"
+  ></app-service-modal>
+</section>

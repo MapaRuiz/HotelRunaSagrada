@@ -1,6 +1,7 @@
 <div class="schedule-toolbar">
   <input
     type="search"
+    class="form-control input-soft"
     placeholder="Buscar horarios…"
     [value]="search"
     (input)="onSearch($any($event.target).value)"
@@ -8,7 +9,8 @@
 </div>
 
 <ag-grid-angular
-  class="ag-theme-alpine schedule-grid"
+  class="schedule-grid"
+  [theme]="gridTheme"
   [gridOptions]="gridOptions"
   [rowData]="rowData"
   [pagination]="true"

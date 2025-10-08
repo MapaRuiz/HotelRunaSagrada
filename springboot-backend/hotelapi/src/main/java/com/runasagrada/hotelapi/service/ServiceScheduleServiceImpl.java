@@ -54,7 +54,8 @@ public class ServiceScheduleServiceImpl implements ServiceScheduleService {
     }
 
     @Override
-    public void seedSchedules(ServiceSchedule schedule, int days) {
-        serviceScheduleRepository.save(schedule);
+    public List<ServiceSchedule> findByService(Long serviceId) {
+        return serviceScheduleRepository.findByService_Id(serviceId);
     }
+
 }

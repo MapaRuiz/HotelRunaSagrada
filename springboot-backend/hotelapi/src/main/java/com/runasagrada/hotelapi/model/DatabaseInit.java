@@ -213,19 +213,24 @@ public class DatabaseInit implements CommandLineRunner {
 
                 RoomType rtStd = ensureType(typesByName, "Estándar Regional",
                                 "Habitaciones cómodas con decoración típica de cada región colombiana",
-                                new BigDecimal("120000"), 2, "https://picsum.photos/seed/rt_std/640/420");
+                                new BigDecimal("120000"), 2,
+                                "https://cdn.pixabay.com/photo/2016/07/08/23/36/beach-house-1505461_1280.jpg");
                 RoomType rtDel = ensureType(typesByName, "Deluxe Cultural",
                                 "Habitaciones amplias con elementos culturales auténticos de la región",
-                                new BigDecimal("180000"), 3, "https://picsum.photos/seed/rt_del/640/420");
+                                new BigDecimal("180000"), 3,
+                                "https://cdn.pixabay.com/photo/2021/12/18/06/00/room-6878004_1280.jpg");
                 RoomType rtSuite = ensureType(typesByName, "Suite Ancestral",
                                 "Suites de lujo con sala separada y diseño premium colombiano",
-                                new BigDecimal("280000"), 4, "https://picsum.photos/seed/rt_suite/640/420");
+                                new BigDecimal("280000"), 4,
+                                "https://cdn.pixabay.com/photo/2020/12/24/19/10/hotel-room-5858068_1280.jpg");
                 RoomType rtFam = ensureType(typesByName, "Familiar Colombiana",
                                 "Habitaciones familiares amplias con espacios conectados y temática local",
-                                new BigDecimal("220000"), 6, "https://picsum.photos/seed/rt_fam/640/420");
+                                new BigDecimal("220000"), 6,
+                                "https://cdn.pixabay.com/photo/2017/04/28/22/14/room-2269591_1280.jpg");
                 RoomType rtEco = ensureType(typesByName, "Eco Boutique",
                                 "Habitación eco-friendly con materiales locales y energía renovable",
-                                new BigDecimal("200000"), 3, "https://picsum.photos/seed/rt_eco/640/420");
+                                new BigDecimal("200000"), 3,
+                                "https://cdn.pixabay.com/photo/2018/02/24/17/17/window-3178666_1280.jpg");
 
                 Map<Integer, RoomType> typeByFloor = Map.of(
                                 1, rtStd, 2, rtDel, 3, rtSuite, 4, rtFam, 5, rtEco);
@@ -255,8 +260,7 @@ public class DatabaseInit implements CommandLineRunner {
                                                                 : Room.CleaningStatus.CLEAN);
                                                 r.setThemeName(themeNameFor(hotelOrdinal, floor));
                                                 r.getImages().add(
-                                                                "https://picsum.photos/seed/room" + hotelOrdinal + "-"
-                                                                                + floor + "-" + i + "/800/600");
+                                                                "https://th.bing.com/th/id/R.6671f22a47fc00ccb37249bf7b7b74ef?rik=8VkhVVuKxibaJw&riu=http%3a%2f%2f1.bp.blogspot.com%2f-AJRd8qwC4RI%2fUnPI66ClGyI%2fAAAAAAAAzsU%2f6mfwCIhN6eQ%2fs1600%2fcasi4.JPG&ehk=c3QsEPM2AY2mfDQpRSFgkONQEThdMuBTWwlcAdaW6yc%3d&risl=&pid=ImgRaw&r=0");
 
                                                 roomRepository.save(r);
                                         }
@@ -293,9 +297,11 @@ public class DatabaseInit implements CommandLineRunner {
                                 s.setHotel(hotel);
                                 serviceRepository.save(s);
                         });
+
+                        createSampleSchedules(specificServices);
                 }
 
-                createSampleSchedules();
+                createSampleSchedules(commonServices);
         }
 
         private List<ServiceOffering> createCommonServices() {
@@ -308,11 +314,12 @@ public class DatabaseInit implements CommandLineRunner {
                 bandejaPaisa.setName("Bandeja Paisa Auténtica");
                 bandejaPaisa.setCategory("Gastronomía");
                 bandejaPaisa.setSubcategory("Antioquia");
-                bandejaPaisa
-                                .setDescription("Bandeja paisa tradicional con frijoles, chicharrón, chorizo, morcilla, arepa y huevo");
+                bandejaPaisa.setDescription(
+                                "Bandeja paisa tradicional con frijoles, chicharrón, chorizo, morcilla, arepa y huevo");
                 bandejaPaisa.setBasePrice(38000);
                 bandejaPaisa.setDurationMinutes(60);
-                bandejaPaisa.setImageUrls(List.of("https://i.blogs.es/bb0cca/bandeja_paisa/1200_900.jpg"));
+                bandejaPaisa.setImageUrls(List.of(
+                                "https://th.bing.com/th/id/OIP.AnZh6QS4zdQ4kJugYnBTGgHaEA?w=292&h=180&c=7&r=0&o=7&cb=12&dpr=1.5&pid=1.7&rm=3"));
                 bandejaPaisa.setMaxParticipants(10);
                 bandejaPaisa.setLatitude(6.2442);
                 bandejaPaisa.setLongitude(-75.5736);
@@ -326,7 +333,7 @@ public class DatabaseInit implements CommandLineRunner {
                 ajiacoSantafereño.setBasePrice(32000);
                 ajiacoSantafereño.setDurationMinutes(60);
                 ajiacoSantafereño.setImageUrls(List.of(
-                                "https://www.semana.com/resizer/v2/GBBYJH5YMZC6PEINHE3HZZH4TY.jpg?auth=f21d7fbf15c15316b80dd213fb2c635e4445db8e08133172d69a4956d7f417db&smart=true&quality=75&width=1920&height=1080&fitfill=false"));
+                                "https://th.bing.com/th/id/OIP.NQl2s4Eq66Lsnm_NA6lKYgHaEw?w=285&h=183&c=7&r=0&o=7&cb=12&dpr=1.5&pid=1.7&rm=3"));
                 ajiacoSantafereño.setMaxParticipants(10);
                 ajiacoSantafereño.setLatitude(4.7109);
                 ajiacoSantafereño.setLongitude(-74.0721);
@@ -340,7 +347,7 @@ public class DatabaseInit implements CommandLineRunner {
                 sancochoCosteño.setBasePrice(35000);
                 sancochoCosteño.setDurationMinutes(60);
                 sancochoCosteño.setImageUrls(
-                                List.of("https://www.cheekyfoods.com.au/cdn/shop/articles/Untitled_design_87.jpg?v=1698649815"));
+                                List.of("https://th.bing.com/th/id/OIP.0Uh9tgTWLk9rFTrwAUQJqwHaE5?w=236&h=180&c=7&r=0&o=7&cb=12&dpr=1.5&pid=1.7&rm=3"));
                 sancochoCosteño.setMaxParticipants(10);
                 sancochoCosteño.setLatitude(10.3910);
                 sancochoCosteño.setLongitude(-75.4794);
@@ -354,7 +361,7 @@ public class DatabaseInit implements CommandLineRunner {
                 lechonaTolimense.setBasePrice(42000);
                 lechonaTolimense.setDurationMinutes(60);
                 lechonaTolimense.setImageUrls(List.of(
-                                "https://media.istockphoto.com/id/1442283646/photo/lechona-with-rice-arepa-and-potato-on-a-white-plate-and-a-background-with-plants.jpg"));
+                                "https://th.bing.com/th/id/OIP.VXPfgpyO8xYN9VbCh1rfPAHaFS?w=257&h=184&c=7&r=0&o=7&cb=12&dpr=1.5&pid=1.7&rm=3"));
                 lechonaTolimense.setMaxParticipants(10);
                 lechonaTolimense.setLatitude(4.4389);
                 lechonaTolimense.setLongitude(-75.2322);
@@ -364,12 +371,12 @@ public class DatabaseInit implements CommandLineRunner {
                 tamalesBogotanos.setName("Tamales Bogotanos");
                 tamalesBogotanos.setCategory("Gastronomía");
                 tamalesBogotanos.setSubcategory("Cundinamarca");
-                tamalesBogotanos
-                                .setDescription("Masa de maíz rellena de pollo, cerdo y verduras, envuelta en hojas de plátano");
+                tamalesBogotanos.setDescription(
+                                "Masa de maíz rellena de pollo, cerdo y verduras, envuelta en hojas de plátano");
                 tamalesBogotanos.setBasePrice(28000);
                 tamalesBogotanos.setDurationMinutes(60);
                 tamalesBogotanos.setImageUrls(
-                                List.of("https://www.eltiempo.com/files/image_1200_600/uploads/2023/11/23/655f995f17c49.jpeg"));
+                                List.of("https://th.bing.com/th/id/OIP.9PBQoDo6ksOa1xEuQfBN8AHaE8?w=295&h=197&c=7&r=0&o=7&cb=12&dpr=1.5&pid=1.7&rm=3"));
                 tamalesBogotanos.setMaxParticipants(10);
                 tamalesBogotanos.setLatitude(4.7110);
                 tamalesBogotanos.setLongitude(-74.0721);
@@ -384,7 +391,7 @@ public class DatabaseInit implements CommandLineRunner {
                 cazuelaDeMariscos.setBasePrice(48000);
                 cazuelaDeMariscos.setDurationMinutes(60);
                 cazuelaDeMariscos.setImageUrls(List.of(
-                                "https://media.istockphoto.com/id/607991782/es/foto/paella-tradicional-espa%C3%B1ola-con-marisco-y-pollo.jpg"));
+                                "https://th.bing.com/th/id/OIP.gv9EQdQBk1BtmuVkkM5bCwHaE8?w=238&h=180&c=7&r=0&o=7&cb=12&dpr=1.5&pid=1.7&rm=3"));
                 cazuelaDeMariscos.setMaxParticipants(10);
                 cazuelaDeMariscos.setLatitude(10.3910);
                 cazuelaDeMariscos.setLongitude(-75.4794);
@@ -398,7 +405,8 @@ public class DatabaseInit implements CommandLineRunner {
                                 "Sopa espesa de ñame con queso costeño en cubos y un sofrito de cebolla y ajo");
                 moteDeQueso.setBasePrice(30000);
                 moteDeQueso.setDurationMinutes(60);
-                moteDeQueso.setImageUrls(List.of("https://i.ytimg.com/vi/h5a-fB9s3fA/maxresdefault.jpg"));
+                moteDeQueso.setImageUrls(List.of(
+                                "https://www.bing.com/th/id/OIP.ho9_tplOyO3pciMGwqw2ewHaEK?w=247&h=211&c=8&rs=1&qlt=90&o=6&cb=12&dpr=1.5&pid=3.1&rm=2"));
                 moteDeQueso.setMaxParticipants(10);
                 moteDeQueso.setLatitude(10.3910);
                 moteDeQueso.setLongitude(-75.4794);
@@ -412,7 +420,8 @@ public class DatabaseInit implements CommandLineRunner {
                                 "Sopa de leche con huevos, cebolla larga y cilantro, servida con pan tostado");
                 changuaBogotana.setBasePrice(18000);
                 changuaBogotana.setDurationMinutes(30);
-                changuaBogotana.setImageUrls(List.of("https://i.ytimg.com/vi/r4FgfmO3zLg/maxresdefault.jpg"));
+                changuaBogotana.setImageUrls(List.of(
+                                "https://www.bing.com/th/id/OIP.8j0S2BNHgER7PtWr8N8QKgHaD4?w=245&h=211&c=8&rs=1&qlt=90&o=6&cb=12&dpr=1.5&pid=3.1&rm=2"));
                 changuaBogotana.setMaxParticipants(10);
                 changuaBogotana.setLatitude(4.7109);
                 changuaBogotana.setLongitude(-74.0721);
@@ -441,7 +450,8 @@ public class DatabaseInit implements CommandLineRunner {
                 arequipeConBrevas.setBasePrice(12000);
                 arequipeConBrevas.setDurationMinutes(30);
                 arequipeConBrevas.setImageUrls(List
-                                .of("https://elrinconcolombiano.com/wp-content/uploads/2023/04/Manjar-blanco-receta-colombiana.jpg"));
+
+                                .of("https://www.bing.com/th/id/OIP.cbm7jA1ldElG57nuepvIkAHaFX?w=243&h=211&c=8&rs=1&qlt=90&o=6&cb=12&dpr=1.5&pid=3.1&rm=2"));
                 arequipeConBrevas.setMaxParticipants(10);
                 arequipeConBrevas.setLatitude(6.2442);
                 arequipeConBrevas.setLongitude(-75.5736);
@@ -455,7 +465,7 @@ public class DatabaseInit implements CommandLineRunner {
                 cocadasIsleñas.setBasePrice(8000);
                 cocadasIsleñas.setDurationMinutes(20);
                 cocadasIsleñas.setImageUrls(List.of(
-                                "https://www.shutterstock.com/image-photo/peruvian-cocadas-traditional-coconut-dessert-600nw-380640118.jpg"));
+                                "https://www.bing.com/th/id/OIP.q5e4zFNUpNOE1ZZCdHgkIwHaE8?w=247&h=211&c=8&rs=1&qlt=90&o=6&cb=12&dpr=1.5&pid=3.1&rm=2"));
                 cocadasIsleñas.setMaxParticipants(10);
                 cocadasIsleñas.setLatitude(12.542499);
                 cocadasIsleñas.setLongitude(-81.718369);
@@ -469,7 +479,8 @@ public class DatabaseInit implements CommandLineRunner {
                                 "Buñuelos esponjosos de yuca con queso, tradicionales de temporada navideña");
                 buñuelosDeYuca.setBasePrice(12000);
                 buñuelosDeYuca.setDurationMinutes(30);
-                buñuelosDeYuca.setImageUrls(List.of("https://cdn.colombia.com/gastronomia/2011/08/03/chicha-1604.gif"));
+                buñuelosDeYuca.setImageUrls(List.of(
+                                "https://th.bing.com/th/id/R.a9df0aa2da8d64ac977dff3f216c7197?rik=vlqK5Om8wLSg9Q&pid=ImgRaw&r=0"));
                 buñuelosDeYuca.setMaxParticipants(10);
                 buñuelosDeYuca.setLatitude(4.7109);
                 buñuelosDeYuca.setLongitude(-74.0721);
@@ -483,7 +494,7 @@ public class DatabaseInit implements CommandLineRunner {
                 natillaColombiana.setBasePrice(10000);
                 natillaColombiana.setDurationMinutes(30);
                 natillaColombiana.setImageUrls(List.of(
-                                "https://www.elespectador.com/resizer/VQS-41ig6YKYg4qcH5zr5B1XXBw=/arc-anglerfish-arc2-prod-elespectador/public/GTELHVJGBZARLL3GLVUEGRCMJY.JPG"));
+                                "https://th.bing.com/th/id/R.d1e9d68f55a35586a4a72a50b16e3414?rik=eAzc5K8D%2bL41ew&pid=ImgRaw&r=0"));
                 natillaColombiana.setMaxParticipants(10);
                 natillaColombiana.setLatitude(4.7109);
                 natillaColombiana.setLongitude(-74.0721);
@@ -497,7 +508,7 @@ public class DatabaseInit implements CommandLineRunner {
                 cuajadaConMelao.setBasePrice(9000);
                 cuajadaConMelao.setDurationMinutes(20);
                 cuajadaConMelao.setImageUrls(List.of(
-                                "https://static.bainet.es/clip/315db07b-3610-42cc-9c94-8abe9baef742_source-aspect-ratio_1600w_0.jpg"));
+                                "https://th.bing.com/th/id/OIP.Mo8nZdbNazOxbHlkGr_mCAHaE8?w=294&h=197&c=7&r=0&o=7&cb=12&dpr=1.5&pid=1.7&rm=3"));
                 cuajadaConMelao.setMaxParticipants(10);
                 cuajadaConMelao.setLatitude(5.6333);
                 cuajadaConMelao.setLongitude(-73.5333);
@@ -512,7 +523,7 @@ public class DatabaseInit implements CommandLineRunner {
                 bocadilloConQueso.setBasePrice(7000);
                 bocadilloConQueso.setDurationMinutes(15);
                 bocadilloConQueso.setImageUrls(List.of(
-                                "https://api.photon.aremedia.net.au/wp-content/uploads/sites/4/2021/07/23/12909/HL1121E15-scaled.jpg"));
+                                "https://th.bing.com/th/id/OIP.BitMm62T-WO-D8ZXPe_vcAHaE8?w=255&h=180&c=7&r=0&o=7&cb=12&dpr=1.5&pid=1.7&rm=3"));
                 bocadilloConQueso.setMaxParticipants(10);
                 bocadilloConQueso.setLatitude(7.1193);
                 bocadilloConQueso.setLongitude(-73.1227);
@@ -527,7 +538,7 @@ public class DatabaseInit implements CommandLineRunner {
                 empanadasVallecaucanas.setBasePrice(15000);
                 empanadasVallecaucanas.setDurationMinutes(30);
                 empanadasVallecaucanas.setImageUrls(
-                                List.of("https://imagenes.eltiempo.com/files/image_1200_535/uploads/2024/02/20/65d4e89c2c395.jpeg"));
+                                List.of("https://th.bing.com/th/id/OIP.1y8cf1VGqqQrkKYj9zC-tAHaE8?w=266&h=180&c=7&r=0&o=7&cb=12&dpr=1.5&pid=1.7&rm=3"));
                 empanadasVallecaucanas.setMaxParticipants(10);
                 empanadasVallecaucanas.setLatitude(3.4516);
                 empanadasVallecaucanas.setLongitude(-76.5319);
@@ -542,7 +553,7 @@ public class DatabaseInit implements CommandLineRunner {
                 cafeDeOrigenEspecial.setBasePrice(8000);
                 cafeDeOrigenEspecial.setDurationMinutes(15);
                 cafeDeOrigenEspecial.setImageUrls(List.of(
-                                "https://st2.depositphotos.com/1773130/7605/i/450/depositphotos_76054953-stock-photo-iced-coffee-in-a-tall.jpg"));
+                                "https://th.bing.com/th/id/OIP.NAdeTQfhhVDKHJVHgqXrOQEsDh?w=222&h=180&c=7&r=0&o=7&cb=12&dpr=1.5&pid=1.7&rm=3"));
                 cafeDeOrigenEspecial.setMaxParticipants(10);
                 cafeDeOrigenEspecial.setLatitude(5.070275);
                 cafeDeOrigenEspecial.setLongitude(-75.513817);
@@ -556,7 +567,7 @@ public class DatabaseInit implements CommandLineRunner {
                 aguaDePanelaConLimon.setBasePrice(5000);
                 aguaDePanelaConLimon.setDurationMinutes(10);
                 aguaDePanelaConLimon.setImageUrls(List.of(
-                                "https://media.istockphoto.com/id/1181234339/es/foto/aguapanela-casera-fresca-agua-de-panela-o-aguadulce-una-popular-bebida-dulce-latinoamericana.jpg"));
+                                "https://th.bing.com/th/id/OIP.pGbnrrumTEM9vM8hnEzHoAHaE7?w=222&h=180&c=7&r=0&o=7&cb=12&dpr=1.5&pid=1.7&rm=3"));
                 aguaDePanelaConLimon.setMaxParticipants(10);
                 aguaDePanelaConLimon.setLatitude(4.7109);
                 aguaDePanelaConLimon.setLongitude(-74.0721);
@@ -570,7 +581,7 @@ public class DatabaseInit implements CommandLineRunner {
                 luladaCalena.setBasePrice(7000);
                 luladaCalena.setDurationMinutes(10);
                 luladaCalena.setImageUrls(List.of(
-                                "https://www.elespectador.com/resizer/VQS-41ig6YKYg4qcH5zr5B1XXBw=/arc-anglerfish-arc2-prod-elespectador/public/GTELHVJGBZARLL3GLVUEGRCMJY.JPG"));
+                                "https://th.bing.com/th/id/OIP.HQA5wDMq1W1ZA1inQFWX_gHaD9?w=302&h=180&c=7&r=0&o=7&cb=12&dpr=1.5&pid=1.7&rm=3"));
                 luladaCalena.setMaxParticipants(10);
                 luladaCalena.setLatitude(3.4516);
                 luladaCalena.setLongitude(-76.5319);
@@ -584,7 +595,7 @@ public class DatabaseInit implements CommandLineRunner {
                 chocolateSantafereño.setBasePrice(9000);
                 chocolateSantafereño.setDurationMinutes(20);
                 chocolateSantafereño.setImageUrls(List
-                                .of("https://sabor.eluniverso.com/wp-content/uploads/2023/12/shutterstock_1665115558-1024x683.jpg"));
+                                .of("https://th.bing.com/th/id/OIP.XDYpFg4VtS3vlRCwg-SWbAHaFE?w=288&h=196&c=7&r=0&o=7&cb=12&dpr=1.5&pid=1.7&rm=3"));
                 chocolateSantafereño.setMaxParticipants(10);
                 chocolateSantafereño.setLatitude(4.7109);
                 chocolateSantafereño.setLongitude(-74.0721);
@@ -598,7 +609,7 @@ public class DatabaseInit implements CommandLineRunner {
                 jugoDeCorozo.setBasePrice(7000);
                 jugoDeCorozo.setDurationMinutes(10);
                 jugoDeCorozo.setImageUrls(
-                                List.of("https://imagenes.eltiempo.com/files/image_1200_535/uploads/2024/02/20/65d4e89c2c395.jpeg"));
+                                List.of("https://th.bing.com/th/id/OIP.H_I1dL60ZkLLBRtmK1j1kgHaGI?w=225&h=186&c=7&r=0&o=7&cb=12&dpr=1.5&pid=1.7&rm=3"));
                 jugoDeCorozo.setMaxParticipants(10);
                 jugoDeCorozo.setLatitude(10.3910);
                 jugoDeCorozo.setLongitude(-75.4794);
@@ -611,7 +622,8 @@ public class DatabaseInit implements CommandLineRunner {
                 chichaDeMaiz.setDescription("Bebida tradicional de maíz de cultura indígena");
                 chichaDeMaiz.setBasePrice(6000);
                 chichaDeMaiz.setDurationMinutes(20);
-                chichaDeMaiz.setImageUrls(List.of("https://cdn.colombia.com/gastronomia/2011/08/03/chicha-1604.gif"));
+                chichaDeMaiz.setImageUrls(List.of(
+                                "https://th.bing.com/th/id/OIP.gIC0joRsW5PXovRxqzluJQHaFK?w=259&h=180&c=7&r=0&o=7&cb=12&dpr=1.5&pid=1.7&rm=3"));
                 chichaDeMaiz.setMaxParticipants(10);
                 chichaDeMaiz.setLatitude(4.7109);
                 chichaDeMaiz.setLongitude(-74.0721);
@@ -625,7 +637,7 @@ public class DatabaseInit implements CommandLineRunner {
                 cocoLocoIsleno.setBasePrice(15000);
                 cocoLocoIsleno.setDurationMinutes(15);
                 cocoLocoIsleno.setImageUrls(
-                                List.of("https://jappi.com.co/wp-content/uploads/2023/03/Jappi-Final.webp"));
+                                List.of("https://th.bing.com/th/id/OIP.WntsmZx73XvSrHwpKxDAhwHaEy?w=185&h=180&c=7&r=0&o=7&cb=12&dpr=1.5&pid=1.7&rm=3"));
                 cocoLocoIsleno.setMaxParticipants(10);
                 cocoLocoIsleno.setLatitude(12.542499);
                 cocoLocoIsleno.setLongitude(-81.718369);
@@ -640,7 +652,7 @@ public class DatabaseInit implements CommandLineRunner {
                 cataDeAguardiente.setBasePrice(25000);
                 cataDeAguardiente.setDurationMinutes(45);
                 cataDeAguardiente.setImageUrls(List.of(
-                                "https://desquite.com/en/wp-content/uploads/2025/03/Desquite-Tradicion-Artisanal-Authentic-Colombian-Aguardiente-m.webp"));
+                                "https://tse4.mm.bing.net/th/id/OIP.EW_AK3Y1TmvxtIWB5EGmsgHaDI?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"));
                 cataDeAguardiente.setMaxParticipants(10);
                 cataDeAguardiente.setLatitude(6.2442);
                 cataDeAguardiente.setLongitude(-75.5736);
@@ -657,7 +669,7 @@ public class DatabaseInit implements CommandLineRunner {
                 tallerDeCumbia.setBasePrice(35000);
                 tallerDeCumbia.setDurationMinutes(90);
                 tallerDeCumbia.setImageUrls(List.of(
-                                "https://www.infobae.com/resizer/v2/H4BSBL5F7JEH7ELIPDGLKO5OBQ.jpg?auth=da6890b5ced46d170fe76fcc186b721e5495c108b33bec0fff4cfd53e527e538&smart=true&width=1200&height=900&quality=85"));
+                                "https://tse4.mm.bing.net/th/id/OIP.NB_0k_FAa3gr5aQ727fDuwHaEK?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"));
                 tallerDeCumbia.setMaxParticipants(12);
                 tallerDeCumbia.setLatitude(10.3910);
                 tallerDeCumbia.setLongitude(-75.4794);
@@ -671,7 +683,7 @@ public class DatabaseInit implements CommandLineRunner {
                 tallerDeVallenato.setBasePrice(45000);
                 tallerDeVallenato.setDurationMinutes(120);
                 tallerDeVallenato.setImageUrls(
-                                List.of("https://live.staticflickr.com/4136/4925539026_db69e6ec6e_b.jpg"));
+                                List.of("https://4.bp.blogspot.com/-NB3KxCgsqyA/VZhhMY0ydpI/AAAAAAAAAB4/si9OpsPWOgk/s1600/Ni%25C3%25B1os-del-vallenato.jpg"));
                 tallerDeVallenato.setMaxParticipants(10);
                 tallerDeVallenato.setLatitude(10.4597);
                 tallerDeVallenato.setLongitude(-73.2532);
@@ -685,7 +697,7 @@ public class DatabaseInit implements CommandLineRunner {
                 tallerDeBambuco.setBasePrice(30000);
                 tallerDeBambuco.setDurationMinutes(90);
                 tallerDeBambuco.setImageUrls(
-                                List.of("https://visitvalle.travel/wp-content/uploads/2024/08/festival-de-la-bandola-sevilla.webp"));
+                                List.of("https://tse3.mm.bing.net/th/id/OIP.Kg5E_clR9pWZOFj5mVrI2wHaFj?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"));
                 tallerDeBambuco.setMaxParticipants(12);
                 tallerDeBambuco.setLatitude(4.7109);
                 tallerDeBambuco.setLongitude(-74.0721);
@@ -699,7 +711,7 @@ public class DatabaseInit implements CommandLineRunner {
                 tallerDeMapale.setBasePrice(40000);
                 tallerDeMapale.setDurationMinutes(90);
                 tallerDeMapale.setImageUrls(List.of(
-                                "https://regionesnaturalescolombia.com/wp-content/uploads/2023/03/Traje-tipico-de-la-region-insular.png"));
+                                "https://3.bp.blogspot.com/-ijecNVgIdso/T95qn_D3LFI/AAAAAAAAABU/Qi1O-LcnHnQ/s1600/Mapale.jpg"));
                 tallerDeMapale.setMaxParticipants(12);
                 tallerDeMapale.setLatitude(10.3910);
                 tallerDeMapale.setLongitude(-75.4794);
@@ -712,7 +724,8 @@ public class DatabaseInit implements CommandLineRunner {
                 tallerDeCurrulao.setDescription("Ritmo del Pacífico con marimba, cununos y guasá");
                 tallerDeCurrulao.setBasePrice(50000);
                 tallerDeCurrulao.setDurationMinutes(120);
-                tallerDeCurrulao.setImageUrls(List.of("https://pbs.twimg.com/media/DUa0PLFUQAAlYJl.jpg"));
+                tallerDeCurrulao.setImageUrls(List.of(
+                                "https://tse3.mm.bing.net/th/id/OIP.qfmkbBcyiWgRR49EA-fCHAHaE8?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"));
                 tallerDeCurrulao.setMaxParticipants(10);
                 tallerDeCurrulao.setLatitude(3.8890);
                 tallerDeCurrulao.setLongitude(-77.0316);
@@ -727,7 +740,7 @@ public class DatabaseInit implements CommandLineRunner {
                 tallerDeCeramica.setBasePrice(55000);
                 tallerDeCeramica.setDurationMinutes(180);
                 tallerDeCeramica.setImageUrls(
-                                List.of("https://media-cdn.tripadvisor.com/media/photo-s/10/c7/82/f1/getlstd-property-photo.jpg"));
+                                List.of("https://tse1.mm.bing.net/th/id/OIP.Y7NqKjRVIDdiqAu-D1H5ygHaE8?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"));
                 tallerDeCeramica.setMaxParticipants(8);
                 tallerDeCeramica.setLatitude(4.7109);
                 tallerDeCeramica.setLongitude(-74.0721);
@@ -741,7 +754,7 @@ public class DatabaseInit implements CommandLineRunner {
                 tallerDeTextiles.setBasePrice(65000);
                 tallerDeTextiles.setDurationMinutes(240);
                 tallerDeTextiles.setImageUrls(List
-                                .of("https://educafes.com/wp-content/uploads/2018/06/whatsapp-image-2018-06-25-at-4-59-55-pm3.jpeg"));
+                                .of("https://th.bing.com/th/id/R.22185a7622acdb1113817d4b5824bb0e?rik=QTuvG43LbqtNhg&riu=http%3a%2f%2fartesaniasdecolombia.com.co%2fDocumentos%2fContenido%2f40473_mes-madre-carmen-maria-gonzalez-artesanias-colombia-2021-g.jpg&ehk=HcRSAE3NSPQHz7NBM7Nu3aRr4kmaYx%2fcC3Kgk%2bLshNo%3d&risl=&pid=ImgRaw&r=0"));
                 tallerDeTextiles.setMaxParticipants(6);
                 tallerDeTextiles.setLatitude(11.5444);
                 tallerDeTextiles.setLongitude(-72.9088);
@@ -756,7 +769,7 @@ public class DatabaseInit implements CommandLineRunner {
                 tallerDeJoyeria.setBasePrice(75000);
                 tallerDeJoyeria.setDurationMinutes(180);
                 tallerDeJoyeria.setImageUrls(List.of(
-                                "https://cafedecolombia.us/wp-content/uploads/2024/10/WhatsApp-Image-2024-10-14-at-6.19.32-PM-scaled.jpeg"));
+                                "https://th.bing.com/th/id/R.43c5848f3eef5405987566c94d9c8301?rik=HWu62g4bKL91YQ&pid=ImgRaw&r=0"));
                 tallerDeJoyeria.setMaxParticipants(6);
                 tallerDeJoyeria.setLatitude(4.7109);
                 tallerDeJoyeria.setLongitude(-74.0721);
@@ -779,7 +792,7 @@ public class DatabaseInit implements CommandLineRunner {
                                 tourCiudadAmurallada.setBasePrice(65000);
                                 tourCiudadAmurallada.setDurationMinutes(180);
                                 tourCiudadAmurallada.setImageUrls(
-                                                List.of("https://viajerofacil.com/wp-content/uploads/2019/07/Webp.net-resizeimage-11-min.jpg"));
+                                                List.of("https://th.bing.com/th/id/R.351262a5a6fefbd1ceaddb024dc05b09?rik=87y9SFzDOd6rBw&pid=ImgRaw&r=0"));
                                 tourCiudadAmurallada.setMaxParticipants(15);
                                 tourCiudadAmurallada.setLatitude(10.39972);
                                 tourCiudadAmurallada.setLongitude(-75.51444);
@@ -794,7 +807,7 @@ public class DatabaseInit implements CommandLineRunner {
                                 islasDelRosario.setBasePrice(120000);
                                 islasDelRosario.setDurationMinutes(480);
                                 islasDelRosario.setImageUrls(List.of(
-                                                "https://www.cartagenaexplorer.com/wp-content/uploads/2020/07/Depositphotos_156273740_xl-2015-scaled.jpg"));
+                                                "https://tse2.mm.bing.net/th/id/OIP.eEdiCwcs03Cza6LRPOzpCwHaDw?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"));
                                 islasDelRosario.setMaxParticipants(15);
                                 islasDelRosario.setLatitude(10.1667);
                                 islasDelRosario.setLongitude(-75.7500);
@@ -809,7 +822,7 @@ public class DatabaseInit implements CommandLineRunner {
                                 palenqueCultural.setBasePrice(85000);
                                 palenqueCultural.setDurationMinutes(360);
                                 palenqueCultural.setImageUrls(
-                                                List.of("https://turismo.encolombia.com/wp-content/uploads/2019/09/Cartagena-de-Indias.jpg"));
+                                                List.of("https://tse1.mm.bing.net/th/id/OIP.QbC3O3Efl4F4yWe_pFSzcwHaEC?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"));
                                 palenqueCultural.setMaxParticipants(12);
                                 palenqueCultural.setLatitude(10.2484);
                                 palenqueCultural.setLongitude(-75.2070);
@@ -817,7 +830,7 @@ public class DatabaseInit implements CommandLineRunner {
 
                                 ServiceOffering ceremoniaDelCacaoSagrado = new ServiceOffering();
                                 ceremoniaDelCacaoSagrado.setName("Ceremonia del Cacao Sagrado");
-                                ceremoniaDelCacaoSagrado.setCategory("Experiencia");
+                                ceremoniaDelCacaoSagrado.setCategory("Tours");
                                 ceremoniaDelCacaoSagrado.setSubcategory("Ritual");
                                 ceremoniaDelCacaoSagrado
                                                 .setDescription("Ritual ancestral de conexión espiritual con el cacao como medicina sagrada");
@@ -825,7 +838,7 @@ public class DatabaseInit implements CommandLineRunner {
                                 ceremoniaDelCacaoSagrado.setDurationMinutes(120);
                                 ceremoniaDelCacaoSagrado
                                                 .setImageUrls(List.of(
-                                                                "https://wakana.es/wp-content/uploads/2019/01/M-OF-W-YogaDSCF0152w.jpg"));
+                                                                "https://th.bing.com/th/id/R.998044b4e386f97558f2b87bf543b140?rik=FC7OsVnar8MtoQ&pid=ImgRaw&r=0"));
                                 ceremoniaDelCacaoSagrado.setMaxParticipants(8);
                                 ceremoniaDelCacaoSagrado.setLatitude(10.39972);
                                 ceremoniaDelCacaoSagrado.setLongitude(-75.51444);
@@ -840,7 +853,7 @@ public class DatabaseInit implements CommandLineRunner {
                                 buceoArqueologico.setBasePrice(180000);
                                 buceoArqueologico.setDurationMinutes(240);
                                 buceoArqueologico.setImageUrls(List.of(
-                                                "https://tutourencartagena.com/wp-content/uploads/2017/01/buceo-en-cartagena-cartagena-colombia-tutourencartagena.jpg"));
+                                                "https://img.freepik.com/foto-gratis/buzo-explorando-ruinas-edificios-arqueologicos-submarinos_23-2150886858.jpg?t=st=1697268749~exp=1697269349~hmac=4aa0a3356ae6ce331d81ca9c168417a998603a472fd1c4d991d7e7d4ac41fee7"));
                                 buceoArqueologico.setMaxParticipants(8);
                                 buceoArqueologico.setLatitude(10.39972);
                                 buceoArqueologico.setLongitude(-75.51444);
@@ -857,7 +870,7 @@ public class DatabaseInit implements CommandLineRunner {
                                 fincaCafeteraTradicional.setBasePrice(75000);
                                 fincaCafeteraTradicional.setDurationMinutes(240);
                                 fincaCafeteraTradicional.setImageUrls(List.of(
-                                                "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/07/19/08/27/finca-el-ocaso-salento.jpg"));
+                                                "https://tse3.mm.bing.net/th/id/OIP.7u-FivIq4BMtTmB6ZNW8mQHaFP?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"));
                                 fincaCafeteraTradicional.setMaxParticipants(15);
                                 fincaCafeteraTradicional.setLatitude(4.6370);
                                 fincaCafeteraTradicional.setLongitude(-75.5710);
@@ -872,7 +885,7 @@ public class DatabaseInit implements CommandLineRunner {
                                 valleDeCocoraPremium.setBasePrice(110000);
                                 valleDeCocoraPremium.setDurationMinutes(360);
                                 valleDeCocoraPremium.setImageUrls(List.of(
-                                                "https://content-viajes.nationalgeographic.com.es/medio/2020/04/03/y-por-fin-el-valle_a092a848_1257x835.jpg"));
+                                                "https://mlqfmr3rpryd.i.optimole.com/cb:Kpwn.a32d/w:auto/h:auto/q:100/ig:avif/https://cartagena-tours.co/wp-content/uploads/2022/12/Capture-decran-2022-12-09-a-15.37.52.png"));
                                 valleDeCocoraPremium.setMaxParticipants(12);
                                 valleDeCocoraPremium.setLatitude(4.6333);
                                 valleDeCocoraPremium.setLongitude(-75.4831);
@@ -887,7 +900,7 @@ public class DatabaseInit implements CommandLineRunner {
                                 puebloPatrimonioSalamina.setBasePrice(55000);
                                 puebloPatrimonioSalamina.setDurationMinutes(240);
                                 puebloPatrimonioSalamina.setImageUrls(List.of(
-                                                "https://www.infobae.com/new-resizer/GTDQWXVcyONBZkezz8NbuyrMMa4=/arc-anglerfish-arc2-prod-infobae/public/3WMFVPC5OFBF3LI652Z6V4LS2Q.jpg"));
+                                                "https://tse3.mm.bing.net/th/id/OIP.C_oydjw3FRc7bW6aKin7cAHaEK?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"));
                                 puebloPatrimonioSalamina.setMaxParticipants(15);
                                 puebloPatrimonioSalamina.setLatitude(5.4072);
                                 puebloPatrimonioSalamina.setLongitude(-75.4881);
@@ -902,7 +915,7 @@ public class DatabaseInit implements CommandLineRunner {
                                 cabalgataAndina.setBasePrice(100000);
                                 cabalgataAndina.setDurationMinutes(240);
                                 cabalgataAndina.setImageUrls(List.of(
-                                                "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTgxMTg3OTI=/original/318d3435-c2ea-4b59-94e9-fba4f10b99cd.jpeg"));
+                                                "https://tse3.mm.bing.net/th/id/OIP.XtCrwGcKfP87xEczt9tWWwHaE8?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"));
                                 cabalgataAndina.setMaxParticipants(10);
                                 cabalgataAndina.setLatitude(5.070275);
                                 cabalgataAndina.setLongitude(-75.513817);
@@ -910,7 +923,7 @@ public class DatabaseInit implements CommandLineRunner {
 
                                 ServiceOffering cataDeVinosDeAltura = new ServiceOffering();
                                 cataDeVinosDeAltura.setName("Cata de Vinos de Altura");
-                                cataDeVinosDeAltura.setCategory("Experiencia");
+                                cataDeVinosDeAltura.setCategory("Tours");
                                 cataDeVinosDeAltura.setSubcategory("Gastronomía");
                                 cataDeVinosDeAltura
                                                 .setDescription("Degustación de vinos colombianos de alta montaña con sommelier experto");
@@ -918,7 +931,7 @@ public class DatabaseInit implements CommandLineRunner {
                                 cataDeVinosDeAltura.setDurationMinutes(120);
                                 cataDeVinosDeAltura
                                                 .setImageUrls(List.of(
-                                                                "https://raizdeguzman.com/wp-content/uploads/2019/05/vinedos-raiz.png"));
+                                                                "https://th.bing.com/th/id/OIP.-S7HmvKJEDM5k_7zoZMbVAHaEc?o=7&cb=12rm=3&rs=1&pid=ImgDetMain&o=7&rm=3"));
                                 cataDeVinosDeAltura.setMaxParticipants(12);
                                 cataDeVinosDeAltura.setLatitude(5.070275);
                                 cataDeVinosDeAltura.setLongitude(-75.513817);
@@ -935,7 +948,7 @@ public class DatabaseInit implements CommandLineRunner {
                                 hoyoSopladorYCuevaMorgan.setBasePrice(45000);
                                 hoyoSopladorYCuevaMorgan.setDurationMinutes(240);
                                 hoyoSopladorYCuevaMorgan.setImageUrls(
-                                                List.of("https://www.regiocantabrorum.es/img/publicaciones/441/cueva_los_tornillos_index.jpg"));
+                                                List.of("https://tse2.mm.bing.net/th/id/OIP.Q3Ut00lpPTbkXkHfA4xr1AHaFj?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"));
                                 hoyoSopladorYCuevaMorgan.setMaxParticipants(15);
                                 hoyoSopladorYCuevaMorgan.setLatitude(12.5847);
                                 hoyoSopladorYCuevaMorgan.setLongitude(-81.7005);
@@ -950,7 +963,7 @@ public class DatabaseInit implements CommandLineRunner {
                                 culturaRaizal.setBasePrice(70000);
                                 culturaRaizal.setDurationMinutes(240);
                                 culturaRaizal.setImageUrls(List.of(
-                                                "https://regionesnaturalescolombia.com/wp-content/uploads/2023/03/Traje-tipico-de-la-region-insular.png"));
+                                                "https://tse4.mm.bing.net/th/id/OIP.1Jzhgqtl_5nENnOTKxsnzQHaFF?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"));
                                 culturaRaizal.setMaxParticipants(12);
                                 culturaRaizal.setLatitude(12.542499);
                                 culturaRaizal.setLongitude(-81.718369);
@@ -965,7 +978,7 @@ public class DatabaseInit implements CommandLineRunner {
                                 acuarioYJohnnyCay.setBasePrice(95000);
                                 acuarioYJohnnyCay.setDurationMinutes(360);
                                 acuarioYJohnnyCay.setImageUrls(
-                                                List.of("https://www.arserver.info/img/excursions/40/acuario-rio-de-janeiro-aquario-16.jpg"));
+                                                List.of("https://dynamic-media.tacdn.com/media/photo-o/2f/31/9b/4b/caption.jpg?w=1400&h=1000&s=1"));
                                 acuarioYJohnnyCay.setMaxParticipants(15);
                                 acuarioYJohnnyCay.setLatitude(12.5333);
                                 acuarioYJohnnyCay.setLongitude(-81.7167);
@@ -980,7 +993,7 @@ public class DatabaseInit implements CommandLineRunner {
                                 safariDeAvesMarinas.setBasePrice(80000);
                                 safariDeAvesMarinas.setDurationMinutes(300);
                                 safariDeAvesMarinas.setImageUrls(List.of(
-                                                "https://cdn.prod.website-files.com/64df6dd37ac6a0dbb9d03cb3/659bfb376102d36e421df403_6-resultado.jpeg"));
+                                                "https://vidamarina.net/wp-content/uploads/aves-marinas-vuelo-vasto.webp"));
                                 safariDeAvesMarinas.setMaxParticipants(12);
                                 safariDeAvesMarinas.setLatitude(12.542499);
                                 safariDeAvesMarinas.setLongitude(-81.718369);
@@ -995,7 +1008,7 @@ public class DatabaseInit implements CommandLineRunner {
                                 vueloEnParapente.setBasePrice(200000);
                                 vueloEnParapente.setDurationMinutes(120);
                                 vueloEnParapente.setImageUrls(List.of(
-                                                "https://www.esariri.com/wp-content/uploads/2022/09/296122789_3527452994148567_1098327290177545856_n.jpg"));
+                                                "https://parapenteencolombia.com/wp-content/uploads/2018/01/volar-en-parapente-medellin2-1.jpg"));
                                 vueloEnParapente.setMaxParticipants(2);
                                 vueloEnParapente.setLatitude(12.542499);
                                 vueloEnParapente.setLongitude(-81.718369);
@@ -1012,7 +1025,7 @@ public class DatabaseInit implements CommandLineRunner {
                                 tayronaAncestral.setBasePrice(90000);
                                 tayronaAncestral.setDurationMinutes(480);
                                 tayronaAncestral.setImageUrls(List
-                                                .of("https://ciudadperdidacolombia.com/wp-content/uploads/2023/12/todo-sobre-los-tairona.jpg"));
+                                                .of("https://tse3.mm.bing.net/th/id/OIP.MKV_ldp6VxSwg1wptMuOhQHaD5?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"));
                                 tayronaAncestral.setMaxParticipants(12);
                                 tayronaAncestral.setLatitude(11.3088);
                                 tayronaAncestral.setLongitude(-73.9650);
@@ -1027,7 +1040,7 @@ public class DatabaseInit implements CommandLineRunner {
                                 ciudadPerdidaTeyuna.setBasePrice(450000);
                                 ciudadPerdidaTeyuna.setDurationMinutes(5760);
                                 ciudadPerdidaTeyuna.setImageUrls(List.of(
-                                                "https://content-viajes.nationalgeographic.com.es/medio/2019/09/16/istock-501625632_0eac7a9a_1200x630.jpg"));
+                                                "https://tse2.mm.bing.net/th/id/OIP.w2Y39OR2kBqZRnD28uEhowHaE6?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"));
                                 ciudadPerdidaTeyuna.setMaxParticipants(12);
                                 ciudadPerdidaTeyuna.setLatitude(11.2442);
                                 ciudadPerdidaTeyuna.setLongitude(-73.7256);
@@ -1042,7 +1055,7 @@ public class DatabaseInit implements CommandLineRunner {
                                 avistamientoAvesSierraNevada.setBasePrice(75000);
                                 avistamientoAvesSierraNevada.setDurationMinutes(300);
                                 avistamientoAvesSierraNevada.setImageUrls(
-                                                List.of("https://media.istockphoto.com/id/153187546/es/foto/p%C3%A1jaro-watcher-silueta.jpg"));
+                                                List.of("https://tse1.mm.bing.net/th/id/OIP.xcPpaclkV33fOuzzuTVoEgHaHa?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"));
                                 avistamientoAvesSierraNevada.setMaxParticipants(10);
                                 avistamientoAvesSierraNevada.setLatitude(10.8400);
                                 avistamientoAvesSierraNevada.setLongitude(-73.7200);
@@ -1050,14 +1063,14 @@ public class DatabaseInit implements CommandLineRunner {
 
                                 ServiceOffering temazcalAncestral = new ServiceOffering();
                                 temazcalAncestral.setName("Temazcal Ancestral");
-                                temazcalAncestral.setCategory("Experiencia");
+                                temazcalAncestral.setCategory("Tours");
                                 temazcalAncestral.setSubcategory("Ritual");
                                 temazcalAncestral.setDescription(
                                                 "Ceremonia de purificación en casa de sudor tradicional con plantas medicinales");
                                 temazcalAncestral.setBasePrice(115000);
                                 temazcalAncestral.setDurationMinutes(180);
                                 temazcalAncestral.setImageUrls(List.of(
-                                                "https://blumont.org/wp-content/uploads/2020/02/Apagada-del-fuego_17_VPeretti-1024x683.jpg"));
+                                                "https://tse3.mm.bing.net/th/id/OIP.QYfd2kVDqsJ_-8-QVo3yvgHaEK?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"));
                                 temazcalAncestral.setMaxParticipants(8);
                                 temazcalAncestral.setLatitude(11.24079);
                                 temazcalAncestral.setLongitude(-74.19904);
@@ -1072,7 +1085,7 @@ public class DatabaseInit implements CommandLineRunner {
                                 rappelEnCascadas.setBasePrice(160000);
                                 rappelEnCascadas.setDurationMinutes(240);
                                 rappelEnCascadas.setImageUrls(List
-                                                .of("https://colombiavisible.com/wp-content/uploads/2023/04/Senderismo-Bogota-1-1024x576.jpg"));
+                                                .of("https://tse2.mm.bing.net/th/id/OIP.F48ROM88XpjeLo67rL-qJwHaFj?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"));
                                 rappelEnCascadas.setMaxParticipants(8);
                                 rappelEnCascadas.setLatitude(11.24079);
                                 rappelEnCascadas.setLongitude(-74.19904);
@@ -1089,7 +1102,7 @@ public class DatabaseInit implements CommandLineRunner {
                                 rutaDeLosFosiles.setBasePrice(55000);
                                 rutaDeLosFosiles.setDurationMinutes(240);
                                 rutaDeLosFosiles.setImageUrls(
-                                                List.of("https://humanidades.com/wp-content/uploads/2018/09/fosiles-e1579375905679.jpg"));
+                                                List.of("https://th.bing.com/th/id/R.afa8e29958e50c504e6fb3096ca977bb?rik=7ULqdR1pwEhBDQ&pid=ImgRaw&r=0"));
                                 rutaDeLosFosiles.setMaxParticipants(15);
                                 rutaDeLosFosiles.setLatitude(5.6333);
                                 rutaDeLosFosiles.setLongitude(-73.5333);
@@ -1104,7 +1117,7 @@ public class DatabaseInit implements CommandLineRunner {
                                 observatorioAstronomicoMuisca.setBasePrice(65000);
                                 observatorioAstronomicoMuisca.setDurationMinutes(180);
                                 observatorioAstronomicoMuisca.setImageUrls(
-                                                List.of("https://pbs.twimg.com/media/DUa0PLFUQAAlYJl.jpg"));
+                                                List.of("https://th.bing.com/th/id/R.32acd1710c3c0f6e343dec661fcf9e79?rik=%2blwmqcHRzsoatg&pid=ImgRaw&r=0"));
                                 observatorioAstronomicoMuisca.setMaxParticipants(15);
                                 observatorioAstronomicoMuisca.setLatitude(5.6333);
                                 observatorioAstronomicoMuisca.setLongitude(-73.5333);
@@ -1120,7 +1133,7 @@ public class DatabaseInit implements CommandLineRunner {
                                 vinedosBoyacenses.setDurationMinutes(240);
                                 vinedosBoyacenses
                                                 .setImageUrls(List.of(
-                                                                "https://raizdeguzman.com/wp-content/uploads/2019/05/vinedos-raiz.png"));
+                                                                "https://tse2.mm.bing.net/th/id/OIP.Vgah6MmQQYE4OO9vmf7Q9AHaCu?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"));
                                 vinedosBoyacenses.setMaxParticipants(12);
                                 vinedosBoyacenses.setLatitude(5.7833);
                                 vinedosBoyacenses.setLongitude(-73.0167);
@@ -1128,14 +1141,14 @@ public class DatabaseInit implements CommandLineRunner {
 
                                 ServiceOffering consultaConChaman = new ServiceOffering();
                                 consultaConChaman.setName("Consulta con Chamán");
-                                consultaConChaman.setCategory("Experiencia");
+                                consultaConChaman.setCategory("Tours");
                                 consultaConChaman.setSubcategory("Sanación");
                                 consultaConChaman
                                                 .setDescription("Sesión de sanación tradicional con chamán autorizado de comunidades locales");
                                 consultaConChaman.setBasePrice(150000);
                                 consultaConChaman.setDurationMinutes(90);
                                 consultaConChaman.setImageUrls(List.of(
-                                                "https://www.cric-colombia.org/portal/wp-content/uploads/2024/06/IMG-20240621-WA0120-scaled.jpg"));
+                                                "https://th.bing.com/th/id/R.fe4ae4786929081ad6cfa2efbc4acda9?rik=%2bPSjMI%2blB1ooOQ&riu=http%3a%2f%2fwww.proimagenescolombia.com%2fphotos%2f57150_4118_imagen__.jpg&ehk=MKpJ6vG2500PfrJuUXxy7WFivdhlkA83NDgPowz5HHk%3d&risl=&pid=ImgRaw&r=0"));
                                 consultaConChaman.setMaxParticipants(1);
                                 consultaConChaman.setLatitude(5.6333);
                                 consultaConChaman.setLongitude(-73.5333);
@@ -1143,14 +1156,14 @@ public class DatabaseInit implements CommandLineRunner {
 
                                 ServiceOffering retiroDeContemplacion = new ServiceOffering();
                                 retiroDeContemplacion.setName("Retiro de Contemplación");
-                                retiroDeContemplacion.setCategory("Experiencia");
+                                retiroDeContemplacion.setCategory("Tours");
                                 retiroDeContemplacion.setSubcategory("Bienestar");
                                 retiroDeContemplacion.setDescription(
                                                 "Retiro de silencio y meditación en entornos naturales sagrados");
                                 retiroDeContemplacion.setBasePrice(95000);
                                 retiroDeContemplacion.setDurationMinutes(480);
                                 retiroDeContemplacion.setImageUrls(List
-                                                .of("https://elsolazsuites.com/wp-content/uploads/2022/06/ecoturismo-en-villa-de-leyva.jpg"));
+                                                .of("https://tse3.mm.bing.net/th/id/OIP.F3Mp_02IN8eCT-I5ByTULgHaE8?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"));
                                 retiroDeContemplacion.setMaxParticipants(8);
                                 retiroDeContemplacion.setLatitude(5.6333);
                                 retiroDeContemplacion.setLongitude(-73.5333);
@@ -1176,40 +1189,68 @@ public class DatabaseInit implements CommandLineRunner {
                 return copy;
         }
 
-        private void createSampleSchedules() {
-                LocalDate baseDate = LocalDate.now();
-
-                // Crear schedules para algunos servicios destacados
-                List<String> servicesForSchedules = List.of(
-                                "Ceremonia del Cacao Sagrado",
-                                "Taller de Cumbia",
-                                "Bandeja Paisa Auténtica",
-                                "Tour Ciudad Amurallada",
-                                "Finca Cafetera Tradicional",
-                                "Acuario y Johnny Cay",
-                                "Tayrona Ancestral",
-                                "Observatorio Astronómico Muisca");
-
-                for (String serviceName : servicesForSchedules) {
-                        createScheduleForService(serviceName, baseDate.plusDays(1), LocalTime.of(9, 0), 7);
+        private void createSampleSchedules(List<ServiceOffering> services) {
+                for (ServiceOffering serviceName : services) {
+                        createScheduleForService(serviceName, LocalTime.of(9, 0));
                 }
         }
 
-        private void createScheduleForService(String serviceName, LocalDate startDate, LocalTime time, int days) {
+        private void createScheduleForService(ServiceOffering service, LocalTime time) {
+                String serviceName = service.getName();
                 List<ServiceOffering> services = serviceRepository.findAll().stream()
                                 .filter(s -> serviceName.equalsIgnoreCase(s.getName()))
                                 .toList();
 
-                for (ServiceOffering service : services) {
-                        ServiceSchedule schedule = new ServiceSchedule();
-                        schedule.setService(service);
-                        schedule.setDaysOfWeek(Set.of(ServiceSchedule.DayWeek.DAILY));
-                        schedule.setStartTime(time);
-                        schedule.setEndTime(time.plusMinutes(service.getDurationMinutes()));
-                        schedule.setActive(true);
-
-                        scheduleService.seedSchedules(schedule, days);
+                for (ServiceOffering serv : services) {
+                        setScheduleByCategory(serv, time);
                 }
+        }
+
+        private void setScheduleByCategory(ServiceOffering serv, LocalTime time) {
+                int duration = Math.max(30, serv.getDurationMinutes());
+
+                List<ServiceSchedule> schedules = switch (serv.getCategory()) {
+                        case "Cultural" -> List.of(
+                                        buildSchedule(serv, time, EnumSet.of(
+                                                        ServiceSchedule.DayWeek.MONDAY,
+                                                        ServiceSchedule.DayWeek.TUESDAY,
+                                                        ServiceSchedule.DayWeek.WEDNESDAY,
+                                                        ServiceSchedule.DayWeek.THURSDAY,
+                                                        ServiceSchedule.DayWeek.FRIDAY), duration),
+                                        buildSchedule(serv, time.plusHours(2), EnumSet.of(
+                                                        ServiceSchedule.DayWeek.SATURDAY,
+                                                        ServiceSchedule.DayWeek.SUNDAY), duration));
+                        case "Gastronomía" -> List.of(
+                                        buildSchedule(serv, time, EnumSet.of(ServiceSchedule.DayWeek.DAILY), duration),
+                                        buildSchedule(serv, time.plusHours(6),
+                                                        EnumSet.of(ServiceSchedule.DayWeek.DAILY), duration));
+                        case "Tours" -> List.of(
+                                        buildSchedule(serv, time, EnumSet.of(
+                                                        ServiceSchedule.DayWeek.MONDAY,
+                                                        ServiceSchedule.DayWeek.WEDNESDAY,
+                                                        ServiceSchedule.DayWeek.FRIDAY), duration),
+                                        buildSchedule(serv, time.plusHours(4), EnumSet.of(
+                                                        ServiceSchedule.DayWeek.TUESDAY,
+                                                        ServiceSchedule.DayWeek.THURSDAY,
+                                                        ServiceSchedule.DayWeek.SATURDAY), duration));
+                        default -> List.of(
+                                        buildSchedule(serv, time, EnumSet.of(ServiceSchedule.DayWeek.DAILY), duration));
+                };
+
+                schedules.forEach(scheduleService::save);
+        }
+
+        private ServiceSchedule buildSchedule(ServiceOffering service,
+                        LocalTime start,
+                        EnumSet<ServiceSchedule.DayWeek> days,
+                        int durationMinutes) {
+                ServiceSchedule schedule = new ServiceSchedule();
+                schedule.setService(service);
+                schedule.setDaysOfWeek(EnumSet.copyOf(days));
+                schedule.setStartTime(start);
+                schedule.setEndTime(start.plusMinutes(durationMinutes));
+                schedule.setActive(true);
+                return schedule;
         }
 
         // Métodos auxiliares originales

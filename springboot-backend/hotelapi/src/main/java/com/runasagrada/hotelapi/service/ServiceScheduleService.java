@@ -17,9 +17,9 @@ public interface ServiceScheduleService {
 
     void save(ServiceSchedule serviceSchedule);
 
-    void seedSchedules(ServiceSchedule schedule, int days);
-
     void delete(Long id);
 
     Optional<ServiceSchedule> findById(Long id);
+
+    List<ServiceSchedule> findByService(Long serviceId);
 }

@@ -1,0 +1,123 @@
+
+.landing-section {
+    width: 100%;
+    height: 100vh;
+    background-image: url('https://i.pinimg.com/1200x/52/22/bc/5222bca711c1663c59d473410b91bfe4.jpg');
+    background-position: center;
+    background-attachment: fixed;
+    background-size: cover;
+    padding: 50px 0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    
+    border-radius: 0 0 80px 80px; 
+    overflow: hidden;   
+    
+    position: relative;  
+    z-index: 2;   
+           
+}
+
+.landing-title {
+    font-size: 50px;
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+.landing-subtitle {
+    font-size: 15px;
+    color: #ffffff;
+    margin-bottom: 20px;
+}
+
+.completo {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.landing-container {
+  margin: 30px;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.15); /* capa translúcida */
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #fff;
+}
+
+
+.landing-spect {
+color: white;
+margin: 30px;
+padding-right: 110px;
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+}
+
+.card {
+  position: relative;
+  background:#778e69;  
+  border-radius: 20px;
+  padding: 140px 80px 50px; 
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  overflow: visible; 
+  margin-right: 30px;
+}
+
+.plant-img {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  filter: drop-shadow(0 5px 10px rgba(0,0,0,0.4));
+}
+
+.btn {
+  background: white;
+  border: none;
+  padding: 10px 30px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 40px;
+}
+.btn:hover {
+  background: #2a4901; 
+  color: white;        
+}
+
+.landing-btn {
+    display: flex;
+    margin-top: 30px;
+    margin-left: 30px;
+}
+
+.btn-v{
+
+  background: transparent;              
+  border: 1.5px solid rgba(255, 255, 255, 0.6); 
+  color: white;                         
+  padding: 5px 20px;                     
+  border-radius: 50px;                  
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;            
+  margin-right: 10px;
+}
+
+.btn-v:hover {
+  background: rgba(255, 255, 255, 0.15); /* Fondo al pasar el mouse */
+  border-color:#778e69;                 /* Cambia a verde suave */
+  color: #192805;        
+}

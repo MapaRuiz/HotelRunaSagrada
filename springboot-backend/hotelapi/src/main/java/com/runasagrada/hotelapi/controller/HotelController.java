@@ -9,6 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+
+import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController
 @RequestMapping("/api")
@@ -26,6 +29,11 @@ public class HotelController {
     @GetMapping("/hotels/{id}")
     public Hotel get(@PathVariable Long id) {
         return service.get(id);
+    }
+
+    @GetMapping("/hotels/id-name")
+    public ResponseEntity<Map<Long, String>> getHotelsIdName() {
+        return ResponseEntity.ok(service.getHotelsIdName());
     }
 
     @PostMapping("/hotels")

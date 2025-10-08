@@ -1,0 +1,40 @@
+<!-- Click fuera cierra; click dentro no burbujea -->
+<div class="rs-modal-backdrop" *ngIf="open" (click)="close()">
+  <div class="rs-modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <div class="rs-modal__header">
+      <h3>¡Reserva creada!</h3>
+    </div>
+
+    <div class="rs-modal__body">
+      <p class="code">
+        Código: <strong>{{ reservationCode }}</strong>
+      </p>
+
+      <ul class="resume">
+        <li><span>Hotel:</span> {{ hotelName || 'Hotel #' + (hotelId || '—') }}</li>
+        <li>
+          <span>Habitación:</span>
+          {{ roomNumber || '—' }}
+          <ng-container *ngIf="roomFloor != null"> — Piso {{ roomFloor }}</ng-container>
+          <ng-container *ngIf="roomTheme"> — {{ roomTheme }}</ng-container>
+        </li>
+        <li>
+          <span>Categoría:</span>
+          {{ roomTypeName || '—' }}
+          <ng-container *ngIf="capacity != null"> (Cap. {{ capacity }})</ng-container>
+        </li>
+
+        <li><span>Check-in:</span> {{ checkIn }}</li>
+        <li><span>Check-out:</span> {{ checkOut }}</li>
+        <li><span>Noches:</span> {{ nights }}</li>
+        <li *ngIf="estimatedTotal != null">
+          <span>Estimado:</span> {{ estimatedTotal | currency : 'COP' : 'symbol' : '1.0-0' }}
+        </li>
+      </ul>
+    </div>
+
+    <div class="rs-modal__actions">
+      <button class="primary" (click)="close()">Ir al inicio</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,20 @@
+<section class="rv">
+  <header class="rv__head">
+    <h3>{{ title }}</h3>
+    <a class="rv__open" [href]="rawUrl" target="_blank" rel="noopener noreferrer">
+      Abrir en pestaña nueva
+    </a>
+  </header>
+
+  <div class="rv__frame">
+    <iframe
+      [src]="safeSrc"
+      title="{{ title }}"
+      loading="lazy"
+      allow="fullscreen; vr;"
+      allowfullscreen
+      referrerpolicy="no-referrer"
+    >
+    </iframe>
+  </div>
+</section>

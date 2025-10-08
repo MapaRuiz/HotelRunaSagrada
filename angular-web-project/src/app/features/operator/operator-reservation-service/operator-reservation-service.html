@@ -1,0 +1,17 @@
+<div class="container mt-4">
+  <h1 class="text-center">Agregar servicios a una Reserva</h1>
+
+  <form (ngSubmit)="search()" class="input-group mb-3">
+    <input
+      [(ngModel)]="roomNumber"
+      class="form-control"
+      placeholder="Ingrese el número de habitación"
+      name="roomNumber"
+    />
+    <button type="submit" class="btn btn-primary">Buscar</button>
+  </form>
+
+  <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+
+  <app-client-info *ngIf="reservation" [reservation]="reservation"></app-client-info>
+</div>

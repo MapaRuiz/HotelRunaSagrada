@@ -1,0 +1,100 @@
+/* Backdrop a pantalla completa */
+.rs-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.42);
+    display: grid;
+    place-items: center;
+    z-index: 2147483647;
+    /* arriba de todo */
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    /* opcional */
+}
+
+/* Caja del modal */
+.rs-modal {
+    width: min(92vw, 560px);
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+/* Header */
+.rs-modal__header {
+    padding: 16px;
+    background: #e9f5ef;
+    border-bottom: 1px solid #d1fae5;
+}
+
+.rs-modal__header h3 {
+    margin: 0;
+    color: #0a6847;
+    font-weight: 900;
+}
+
+.code{
+    font-family: var(--font-title);
+}
+
+/* Body */
+.rs-modal__body {
+    padding: 16px;
+}
+
+.rs-modal__body .code {
+    font-size: 1.05rem;
+    margin: 0 0 8px;
+}
+
+/* Lista resumen */
+.resume {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0;
+    display: grid;
+    gap: 6px;
+}
+
+.resume li {
+    display: flex;
+    gap: 8px;
+    font-family: var(--font-body);
+}
+
+.resume li span {
+    width: 110px;
+    color: #6b7280;
+    font-family: var(--font-body);
+}
+
+/* Actions */
+.rs-modal__actions {
+    padding: 16px;
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid #f1f5f9;
+}
+
+/* Botón primario consistente con el resto */
+.primary {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    padding: 11px 16px;
+    border-radius: 12px;
+    font-weight: 900;
+    font-family: var(--font-title);
+    background: #0a6847;
+    color: #fff;
+    border: 0;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(10, 104, 71, 0.25);
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.primary:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+}

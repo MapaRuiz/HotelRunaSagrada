@@ -13,4 +13,8 @@ public interface ServiceOfferingService {
     public void save(ServiceOffering serviceOffering, Long hotelId);
 
     public void delete(Long id);
+
+    List<ServiceOffering> findByHotel(Long hotelId);
+
+    Optional<ServiceOffering> findOne(Long id);
 }

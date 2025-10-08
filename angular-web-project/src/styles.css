@@ -1,3 +1,14 @@
+@import 'leaflet/dist/leaflet.css';
+app-service-modal {
+  isolation: isolate;
+}
+html,
+body {
+  overflow-x: clip;
+}
+
+/* usa hidden si tu navegador no soporta clip */
+
 :root {
   --c-sand: #e0d4be;
   --c-ivory: #f2f3ed;
@@ -10,15 +21,26 @@
 
   --font-title: 'Quantico', system-ui, sans-serif;
   --font-body: 'Lato', system-ui, sans-serif;
+
+  /*landing*/
+
+  /* Colors */
+  --brand-color: #778e69;
+  --black: hsl(0, 0%, 0%);
+  --white: hsl(0, 0%, 100%);
 }
 body {
   background: var(--page-bg);
   color: var(--text-ink);
+  font-family: 'Lato', sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
 html,
 body {
   font-family: var(--font-body);
+  overscroll-behavior-y: none;
 }
 h1,
 h2,
@@ -42,6 +64,18 @@ h3,
 }
 .btn-olive:hover {
   filter: brightness(0.95);
+}
+
+.btn-outline-olive {
+  color: var(--c-olive);
+  border-color: var(--c-olive);
+  background: transparent;
+}
+.btn-outline-olive:hover,
+.btn-outline-olive.active {
+  background: var(--c-olive);
+  border-color: var(--c-olive);
+  color: #fff;
 }
 .link-ink {
   color: var(--c-ink);
@@ -92,4 +126,39 @@ body {
   border-radius: 18px;
   box-shadow: 0 20px 60px rgba(21, 21, 19, 0.12);
   border: 1px solid rgba(21, 21, 19, 0.06);
+}
+
+/* --- Leaflet custom pin (global) --- */
+.map-pin {
+  position: relative;
+  width: 16px; /* debe coincidir con iconSize */
+  height: 16px;
+}
+
+.map-pin .pin {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: 50%;
+  background: var(--pin, #0a6847);
+  border: 2px solid #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+/* opcional: una “colita” */
+.map-pin .pin::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 2px;
+  height: 8px;
+  transform: translateX(-50%);
+  background: var(--pin, #0a6847);
+  border-radius: 2px;
+}
+
+/* asegúrate de que se vea sobre el mapa */
+.leaflet-marker-icon.map-pin {
+  z-index: 500 !important;
 }

@@ -1,0 +1,217 @@
+.rooms-section {
+  min-height: 70vh;
+  overflow-x: clip;
+  /* o hidden si tu target no soporta clip */
+}
+.rooms-section {
+  .container {
+    position: relative;
+  }
+
+  .eyebrow {
+    display: inline-block;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #0a6847;
+    padding: .5rem 1rem;
+    border-radius: 999px;
+    background: #e9f5ef;
+    margin-bottom: 1rem;
+    font-family: var(--font-body);
+  }
+
+  /* === título/desc pedidos (sin bold) === */
+  .title {
+    margin: 0;
+    font-family: var(--font-title);
+    font-weight: 400;
+    font-size: clamp(1.4rem, 4vw, 2.4rem);
+    letter-spacing: .2px;
+  }
+
+  .desc {
+    margin: .35rem 0 0;
+    font-size: clamp(1.5rem, 2vw, 1.5rem);
+    color: #4b5563;
+    font-weight: 400;
+  }
+
+  /* wrapper del menú + overlay */
+  .menu-stage {
+    position: relative;
+    margin-top: 1.25rem;
+  }
+
+  /* ===== Overlay PNG a la derecha, superpuesto ===== */
+  .overlay-img {
+    position: absolute;
+    z-index: 3;
+    /* por encima del listado visualmente */
+    pointer-events: none;
+    /* no bloquea clics del menú */
+    top: -10rem;
+    right: -20vw;
+    /* ligeramente por encima del menú */
+    width: min(110vw, 800px);
+    /* tamaño controlado y responsivo */
+    height: auto;
+    filter: drop-shadow(0 12px 28px rgba(0, 0, 0, .15));
+  }
+
+  /* ===== Flowing menu ===== */
+  .flowing-menu {
+    position: relative;
+    z-index: 1;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, .06);
+    overflow: hidden;
+  }
+
+  .menu-item {
+    position: relative;
+    display: block;
+    width: 100%;
+    background: #fff;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    padding: clamp(16px, 3.3vw, 28px) 20px;
+    font-family: var(--font-title);
+    isolation: isolate;
+    /* separar capas internas */
+  }
+    
+
+  .menu-item+.menu-item {
+    border-top: 1px solid rgba(0, 0, 0, .06);
+  }
+
+  .label {
+    display: block;
+    font-size: clamp(1.25rem, 2.6vw, 2.3rem);
+    line-height: 1.15;
+    transition: opacity .28s ease, transform .28s ease;
+  }
+
+  /* Capa del marquee: empieza escondida abajo */
+  .marquee {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    transform: translateY(105%);
+    transition: transform .5s cubic-bezier(.19, 1, .22, 1);
+    background: #fff;
+    /* para “reemplazar” el label debajo */
+    z-index: 1;
+  }
+
+  .menu-item:hover .marquee {
+    transform: translateY(0);
+  }
+
+  .inner {
+    display: inline-flex;
+    align-items: center;
+    gap: 2.25vw;
+    white-space: nowrap;
+    will-change: transform;
+  }
+
+  .repeat {
+    text-transform: none;
+    font-size: clamp(1.25rem, 2.6vw, 2.3rem);
+    color: #0a6847;
+  }
+
+  .pill {
+    display: inline-block;
+    width: clamp(120px, 16vw, 240px);
+    height: clamp(42px, 6vw, 74px);
+    border-radius: 999px;
+    background: #e6eef0 no-repeat center/cover;
+  }
+
+  /* al hacer hover: escondemos/atenuamos el label base */
+  .menu-item:hover .label {
+    opacity: .08;
+    transform: translateY(-2px);
+    filter: blur(.4px);
+  }
+
+  /* animación continua al hacer hover */
+  .menu-item:hover .inner {
+    animation: marquee-left 16s linear infinite;
+  }
+
+  @keyframes marquee-left {
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* estados */
+  .state {
+    padding: 16px 0 0;
+
+    &.muted {
+      color: #6b7280;
+    }
+
+    &.error {
+      color: #b91c1c;
+      font-weight: 600;
+    }
+  }
+
+  /* responsive: en móviles el PNG puede estorbar; lo reducimos o lo ocultamos */
+  @media (max-width: 820px) {
+    .overlay-img {
+      right: -40px;
+      top: -8px;
+      width: min(44vw, 320px);
+      opacity: .9;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .overlay-img {
+      display: none;
+    }
+  }
+}
+
+/* Links del menú: negro y sin subrayado */
+.rooms-section {
+
+  .menu-item,
+  .menu-item:link,
+  .menu-item:visited {
+    color: #111;
+    /* negro/gris oscuro */
+    text-decoration: none;
+    /* sin subrayado */
+  }
+
+  /* El texto visible del link en negrita */
+  .menu-item .label {
+    color: currentColor;
+    /* hereda #111 del <a> */
+    font-weight: 700;
+    /* negrita */
+    text-decoration: none;
+  }
+
+  /* Accesibilidad: foco visible sin cambiar color */
+  .menu-item:focus-visible {
+    outline: 2px solid #0a6847;
+    outline-offset: 2px;
+  }
+}

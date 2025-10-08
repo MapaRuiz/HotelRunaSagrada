@@ -1,0 +1,31 @@
+.stats {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 60px;
+  padding: 60px 20px;
+  background-image: url("https://i.pinimg.com/1200x/ce/ec/77/ceec77f479bd81a777be38eaecfa3c25.jpg");
+  text-align: center;
+  border-radius: 30px;
+}
+
+.stat h2 {
+  font-size: 3em;
+  color: #f2f3ed; /* verde elegante */
+  margin: 0;
+}
+
+.stat p {
+  font-size: 1.1em;
+  color: #ffffff;
+  margin: 0;
+}
+
+.parallax {
+
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+}
+

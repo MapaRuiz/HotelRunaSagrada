@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RoomType } from '../../../../model/room-type';
 import { RoomTypeService, RoomTypeRequest } from '../../../../services/room-type';
-import toast from 'bootstrap/js/dist/toast';
+
+type ToastCtor = new (element: string | Element, config?: any) => { show(): void };
 
 @Component({
   selector: 'app-room-types-table',
@@ -21,6 +22,8 @@ export class RoomTypesTableComponent implements OnInit {
   draft: RoomType = {
     name: '', capacity: 1, base_price: 0, description: '', image: ''
   };
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private toastCtor?: ToastCtor;
 
   constructor(private svc: RoomTypeService) {}
 
@@ -32,11 +35,7 @@ export class RoomTypesTableComponent implements OnInit {
       next: (rows) => { this.roomTypes = rows; this.loading = false; },
       error: () => { 
         this.loading = false;
-        const toastElement = document.createElement('div');
-        toastElement.className = 'toast';
-        toastElement.textContent = 'Error loading room types';
-        const toastInstance = new toast(toastElement);
-        toastInstance.show();
+        void this.showToast('Error loading room types');
       }
     });
   }
@@ -71,19 +70,12 @@ export class RoomTypesTableComponent implements OnInit {
     obs.subscribe({
       next: () => { 
         this.showForm = false; 
+        this.editingId = undefined;
         this.refresh(); 
-        const toastElement = document.createElement('div');
-        toastElement.className = 'toast';
-        toastElement.textContent = 'Saved';
-        const toastInstance = new toast(toastElement);
-        toastInstance.show();
+        void this.showToast('Saved');
       },
       error: (e) => {
-        const toastElement = document.createElement('div');
-        toastElement.className = 'toast';
-        toastElement.textContent = e?.error?.detail || 'Error saving';
-        const toastInstance = new toast(toastElement);
-        toastInstance.show();
+        void this.showToast(e?.error?.detail || 'Error saving');
       }
     });
   }
@@ -94,21 +86,41 @@ export class RoomTypesTableComponent implements OnInit {
     this.svc.delete(rt.room_type_id).subscribe({
       next: () => { 
         this.refresh(); 
-        const toastElement = document.createElement('div');
-        toastElement.className = 'toast';
-        toastElement.textContent = 'Deleted';
-        const toastInstance = new toast(toastElement);
-        toastInstance.show();
+        void this.showToast('Deleted');
       },
       error: (e) => {
-        const toastElement = document.createElement('div');
-        toastElement.className = 'toast';
-        toastElement.textContent = e?.error?.detail || 'Error deleting';
-        const toastInstance = new toast(toastElement);
-        toastInstance.show();
+        void this.showToast(e?.error?.detail || 'Error deleting');
       }
     });
   }
 
-  cancel() { this.showForm = false; }
+  cancel() { 
+    this.showForm = false; 
+    this.editingId = undefined;
+  }
+
+  private async showToast(message: string): Promise<void> {
+    if (!this.isBrowser) return;
+
+    if (!this.toastCtor) {
+      const module = await import('bootstrap/js/dist/toast');
+      this.toastCtor = module.default;
+    }
+
+    const Toast = this.toastCtor;
+    if (!Toast) return;
+
+    const toastElement = document.createElement('div');
+    toastElement.className = 'toast align-items-center text-bg-dark border-0 position-fixed top-0 end-0 m-3';
+    toastElement.textContent = message;
+    toastElement.setAttribute('role', 'alert');
+    toastElement.setAttribute('aria-live', 'assertive');
+    toastElement.setAttribute('aria-atomic', 'true');
+
+    document.body.appendChild(toastElement);
+    toastElement.addEventListener('hidden.bs.toast', () => toastElement.remove(), { once: true });
+
+    const toastInstance = new Toast(toastElement);
+    toastInstance.show();
+  }
 }

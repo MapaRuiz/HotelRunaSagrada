@@ -97,7 +97,12 @@
 
     <p class="muted">
       ¿Ya tienes cuenta?
-      <a routerLink="/login">Inicia sesión</a>
+      <a
+        [routerLink]="['/login']"
+        [queryParams]="{ returnUrl: returnUrl }"
+        queryParamsHandling="merge"
+        >Inicia sesión</a
+      >
     </p>
   </div>
 </div>

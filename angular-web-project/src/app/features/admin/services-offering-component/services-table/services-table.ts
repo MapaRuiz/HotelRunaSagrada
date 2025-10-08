@@ -1,23 +1,23 @@
 import { CommonModule } from '@angular/common';
-import { zip } from 'rxjs';
+import { forkJoin, of, switchMap, zip } from 'rxjs';
 
 import { ServiceOffering } from '../../../../model/service-offering';
 import { ServiceOfferingService } from '../../../../services/service-offering-service';
 import { HotelsService } from '../../../../services/hotels';
 import { Hotel } from '../../../../model/hotel';
 import { FormsModule } from '@angular/forms';
-import { ServicesFormComponent } from '../services-form/services-form';
+import { ServicesFormComponent, type ServicesFormPayload } from '../services-form/services-form';
 import { ColDef, GridOptions, GridApi, ModuleRegistry, AllCommunityModule, PaginationModule } from 'ag-grid-community';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ActionButtonsParams } from '../../action-buttons-cell/action-buttons-param';
 import { ActionButtonsComponent } from '../../action-buttons-cell/action-buttons-cell';
-import { Component, ElementRef, Inject, inject, PLATFORM_ID, ViewChild } from '@angular/core';
+import { Component, ElementRef, Inject, inject, PLATFORM_ID, ViewChild, ViewEncapsulation } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { ServicesDetail } from "../services-detail/services-detail";
-import { AG_GRID_LOCALE } from '../../ag-grid-locale';
+import { AG_GRID_LOCALE } from '../../sharedTable';
 import { MultiSelectFilterComponent } from '../../filters/multi-select-filter/multi-select-filter';
 import type { ServiceSchedule } from '../../../../model/service-schedule';
-
+import { gridTheme as sharedGridTheme } from '../../sharedTable';
 import type { ITextFilterParams, INumberFilterParams } from 'ag-grid-community';
 import type { ServiceOfferingDetailResponse } from '../../../../services/service-offering-service';
 
@@ -31,20 +31,20 @@ const NUMBER_FILTER_CONFIG: INumberFilterParams = {
   maxNumConditions: 1
 };
 
-
-
-
 @Component({
   selector: 'app-services-table',
   standalone: true,
   imports: [CommonModule, FormsModule, AgGridAngular, ServicesFormComponent, ServicesDetail],
   templateUrl: './services-table.html',
-  styleUrls: ['./services-table.css']
+  styleUrls: ['./services-table.css'],
+  encapsulation: ViewEncapsulation.None
 })
 export class ServicesTable {
   isBrowser: boolean = false;
+  // Fuente de datos
   serviceOfferingList: ServiceOffering[] = [];
   hotelsList: Hotel[] = [];
+  // Datos mostrados por la tabla
   rowData: ServiceOffering[] = [];
   hotelOptions: { id: number; name: string }[] = [];
   showCreate = false;
@@ -53,8 +53,10 @@ export class ServicesTable {
   createLoading = false;
   selected?: ServiceOffering;
   detailLoading = false;
+  readonly gridTheme: typeof sharedGridTheme = sharedGridTheme;
 
   @ViewChild('createDetails') private createDetails?: ElementRef<HTMLDetailsElement>;
+
 
   constructor(
     private serviceOfferingService: ServiceOfferingService,
@@ -96,7 +98,6 @@ export class ServicesTable {
     this.showCreate = details.open;
   }
 
-
   gridOptions: GridOptions<ServiceOffering> = {
     localeText: AG_GRID_LOCALE,
     rowSelection: 'single',
@@ -104,6 +105,9 @@ export class ServicesTable {
     onGridReady: params => { 
       this.gridApi = params.api
       params.api.sizeColumnsToFit();
+    },
+    onGridPreDestroyed: () => {
+      this.gridApi = undefined;
     },
     onSelectionChanged: params => {
       const [row] = params.api.getSelectedRows();
@@ -121,6 +125,7 @@ export class ServicesTable {
       { 
         headerName:'ID',
         field:'id',
+        minWidth: 50,
         maxWidth: 100
       },
       { 
@@ -140,7 +145,7 @@ export class ServicesTable {
         maxWidth: 150
       },
       {
-        headerName:'Precio base',
+        headerName:'Precio',
         field:'base_price',
         filter: 'agNumberColumnFilter',
         filterParams: NUMBER_FILTER_CONFIG,
@@ -151,7 +156,8 @@ export class ServicesTable {
           maximumFractionDigits: 2
       }).format(params.value);
       },
-        maxWidth: 150
+        maxWidth: 150,
+        minWidth: 70
       },
       {
         headerName:'Cupo',
@@ -173,7 +179,7 @@ export class ServicesTable {
       {
         headerName: 'Actions',
         filter: false,
-        minWidth: 205,
+        minWidth: 270,
         cellRenderer: ActionButtonsComponent<ServiceOffering>,
         cellRendererParams: {
           onEdit: (row: ServiceOffering) => this.beginEdit(row),
@@ -198,8 +204,11 @@ export class ServicesTable {
     details.removeAttribute('open'); 
   }
 
-  saveCreate(payload: Partial<ServiceOffering>): void {
+  saveCreate(service: ServicesFormPayload): void {
     this.createLoading = true;
+    const payload = service.draft;
+    const scheduleRequests = service.newSchedules ?? [];
+    console.log('[ServicesTable] saveCreate received:', scheduleRequests);
     const request = {
       name: payload.name ?? '',
       category: payload.category ?? '',
@@ -216,16 +225,41 @@ export class ServicesTable {
 
     this.serviceOfferingService.create(request).subscribe({
       next: created => {
-        const withHotel: ServiceOffering = this.fillNewService(created);
-        this.serviceOfferingList = [withHotel, ...this.serviceOfferingList];
-        this.cancelCreate();
-        this.gridApi?.applyTransaction({ add: [withHotel], addIndex: 0 });
+        const afterSchedules = (schedules: ServiceSchedule[]) => {
+          const withHotel = this.fillNewService(created);
+          withHotel.schedules = schedules; // assign schedules
+          this.serviceOfferingList = [withHotel, ...this.serviceOfferingList];
+          this.rowData = [withHotel, ...this.rowData];
+          this.cancelCreate(); // Close create panel
+          this.withGridApi(api => {
+            api.applyTransaction({ add: [withHotel], addIndex: 0 });
+            api.refreshCells({ force: true });
+            api.refreshClientSideRowModel('filter');
+            api.setGridOption('quickFilterText', this.search || undefined);
+          });
+
+        };
+
+        if (!scheduleRequests.length) {
+          afterSchedules([]);
+          return;
+        }
+        
+        // create bundle of schedules
+        forkJoin(
+          scheduleRequests.map(schedule =>
+            this.serviceOfferingService.createSchedule(created.id, schedule)
+          )
+        ).subscribe({
+          // assign schedules
+          next: schedules => afterSchedules(schedules),
+          error: () => (this.createLoading = false)
+        });
       },
-      error: () => {
-        this.createLoading = false;
-      }
+      error: () => (this.createLoading = false)
     });
   }
+
 
   private buildEmptyDraft(): Partial<ServiceOffering> {
     return {
@@ -256,10 +290,9 @@ export class ServicesTable {
     if (index >= 0) {
       this.serviceOfferingList.splice(index, 1);
     }
+    this.rowData = this.rowData.filter(item => item.id !== serviceOffering.id);
     this.serviceOfferingService.deleteById(serviceOffering.id).subscribe();
-    if (this.gridApi) {
-      this.gridApi.applyTransaction({ remove: [serviceOffering] });
-    }
+    this.withGridApi(api => api.applyTransaction({ remove: [serviceOffering] }));
   }
 
   // Service editing
@@ -270,12 +303,29 @@ export class ServicesTable {
 
   beginEdit(service: ServiceOffering): void {
     this.editing = service;
-    this.draft = {
-      ...service,
-      hotel_id: service.hotel_id,
-      image_urls: service.image_urls ? [...service.image_urls] : []
-    };
+    this.loading = true;
+
+    this.serviceOfferingService.getDetail(service.id).subscribe({
+      next: detail => {
+        this.draft = {
+          ...detail.service,
+          hotel_id: detail.service.hotel_id,
+          image_urls: detail.service.image_urls ? [...detail.service.image_urls] : [],
+          schedules: detail.schedules
+        };
+        this.loading = false;
+      },
+      error: () => {
+        this.draft = {
+          ...service,
+          hotel_id: service.hotel_id,
+          image_urls: service.image_urls ? [...service.image_urls] : []
+        };
+        this.loading = false;
+      }
+    });
   }
+
 
   cancelEdit(): void {
     this.editing = undefined;
@@ -283,36 +333,113 @@ export class ServicesTable {
     this.loading = false;
   }
 
-  saveEdit(payload: Partial<ServiceOffering>): void {
-    if (!this.editing) { return; }
+  saveEdit(payload: ServicesFormPayload): void {
+    if (!this.editing) return;
     this.loading = true;
 
+    const scheduleRequests = payload.newSchedules ?? [];
+    const updateRequests = payload.updatedSchedules ?? [];
+    const draft = payload.draft;
     const request = {
-      name: payload.name ?? '',
-      category: payload.category ?? '',
-      subcategory: payload.subcategory ?? '',
-      description: payload.description ?? '',
-      base_price: Number(payload.base_price ?? 0),
-      duration_minutes: Number(payload.duration_minutes ?? 0),
-      image_urls: payload.image_urls ?? [],
-      max_participants: Number(payload.max_participants ?? 0),
-      latitude: Number(payload.latitude ?? 0),
-      longitude: Number(payload.longitude ?? 0),
-      hotel_id: Number(payload.hotel_id ?? this.editing.hotel_id)
+      name: draft.name ?? '',
+      category: draft.category ?? '',
+      subcategory: draft.subcategory ?? '',
+      description: draft.description ?? '',
+      base_price: Number(draft.base_price ?? 0),
+      duration_minutes: Number(draft.duration_minutes ?? 0),
+      image_urls: draft.image_urls ?? [],
+      max_participants: Number(draft.max_participants ?? 0),
+      latitude: Number(draft.latitude ?? 0),
+      longitude: Number(draft.longitude ?? 0),
+      hotel_id: Number(draft.hotel_id ?? this.editing.hotel_id)
     };
 
-    this.serviceOfferingService.update(this.editing.id, request).subscribe({
-      next: updated => {
+    const updateOps = updateRequests.map(update =>
+      this.serviceOfferingService.updateSchedule(update.id, update.request)
+    );
+    const createOps = scheduleRequests.map(schedule =>
+      this.serviceOfferingService.createSchedule(this.editing!.id, schedule)
+    );
+    const operations = [...updateOps, ...createOps];
+
+    this.serviceOfferingService.update(this.editing.id, request).pipe(
+      switchMap(updated => {
         Object.assign(this.editing!, updated, {
           image_urls: updated.image_urls ? [...updated.image_urls] : [],
           hotel: this.hotelsList.find(h => h.hotel_id === updated.hotel_id)
         });
 
-        this.gridApi?.refreshCells({ force: true });
+        if (!operations.length) {
+          return of([] as ServiceSchedule[]);
+        }
+
+        return forkJoin(operations);
+      })
+    ).subscribe({
+      next: schedules => {
+        let updatedService: ServiceOffering | undefined;
+        if (this.editing) {
+          const base = this.editing;
+          const updatedSlice = schedules.slice(0, updateOps.length);
+          const createdSlice = schedules.slice(updateOps.length);
+
+          const updatedIds = new Set(updatedSlice.map(item => item.id));
+          const existing = base.schedules ?? [];
+          const mergedExisting = existing.map(item => {
+            const replacement = updatedSlice.find(schedule => schedule.id === item.id);
+            return replacement ?? item;
+          });
+
+          let merged: ServiceSchedule[] = [
+            ...updatedSlice,
+            ...mergedExisting.filter(item => !updatedIds.has(item.id))
+          ];
+
+          if (createdSlice.length) {
+            merged = [...merged, ...createdSlice];
+          }
+
+          updatedService = {
+            ...base,
+            schedules: merged
+          };
+          this.editing = updatedService;
+          this.serviceOfferingList = this.serviceOfferingList.map(item =>
+            item.id === updatedService!.id ? updatedService! : item
+          );
+          this.rowData = this.rowData.map(item =>
+            item.id === updatedService!.id ? updatedService! : item
+          );
+        }
+
+        const current = updatedService ?? this.editing;
+        if (current) {
+          this.withGridApi(api => {
+            api.applyTransaction({ update: [current] });
+            api.refreshCells({ force: true });
+            api.refreshClientSideRowModel('everything');
+            api.setGridOption('quickFilterText', this.search || undefined);
+          });
+        }
+
+        this.deleteSchedules(payload.deleteIds);
         this.loading = false;
         this.editing = undefined;
       },
       error: () => { this.loading = false; }
+    });
+  }
+
+
+  private deleteSchedules(ids: number[]): void {
+    console.log('Deleting schedules', ids);
+    if (!ids.length) return;
+
+    ids.forEach(id => {
+      this.serviceOfferingService.deleteSchedule(id).subscribe({
+        next: () => console.log('Schedule deleted', id),
+        error: err => console.error('Failed to delete schedule', id, err)
+      });
     });
   }
 
@@ -321,7 +448,7 @@ export class ServicesTable {
 
   onSearch(term: string): void {
     this.search = term;
-    this.gridApi?.setGridOption('quickFilterText', term || undefined);
+    this.withGridApi(api => api.setGridOption('quickFilterText', term || undefined));
   }
 
   onDetailEdit(service: ServiceOffering): void {
@@ -354,25 +481,17 @@ export class ServicesTable {
     };
 
     this.selected = details;
+    this.withGridApi(api => api.refreshCells({ force: true }));
     this.detailLoading = false;
   }
 
-
-  private normalizeSchedules(source: any[]): ServiceSchedule[] {
-    return source.map(item => {
-      const days = item.days_of_week ?? item.daysOfWeek ?? [];
-      const start = item.start_time ?? item.startTime ?? '';
-      const end = item.end_time ?? item.endTime ?? '';
-      const active = (item.active ?? item.is_active ?? item.isActive) ?? false;
-
-      return {
-        id: Number(item.id ?? 0),
-        days_of_week: Array.isArray(days) ? days : [],
-        start_time: String(start),
-        end_time: String(end),
-        active: Boolean(active),
-        service_offering: item.service_offering ?? item.service
-      } as ServiceSchedule;
-    });
+  private withGridApi(action: (api: GridApi<ServiceOffering>) => void): void {
+    const api = this.gridApi;
+    if (!api) return;
+    const maybeDestroyed = (api as GridApi<ServiceOffering> & { isDestroyed?: () => boolean }).isDestroyed;
+    if (typeof maybeDestroyed === 'function' && maybeDestroyed.call(api)) {
+      return;
+    }
+    action(api);
   }
 }

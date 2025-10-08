@@ -54,7 +54,12 @@
 
     <p class="muted">
       ¿No tienes cuenta?
-      <a routerLink="/register">Crear cuenta</a>
+      <a
+        [routerLink]="['/register']"
+        [queryParams]="{ returnUrl: returnUrl }"
+        queryParamsHandling="merge"
+        >Crear cuenta</a
+      >
     </p>
   </div>
 </div>

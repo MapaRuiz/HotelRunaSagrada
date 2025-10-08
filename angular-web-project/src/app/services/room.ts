@@ -3,6 +3,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Room } from '../model/room';
+import { User } from '../model/user';
+import { Reservation } from '../model/reservation';
 
 export interface RoomRequest {
   hotel_id: number;
@@ -13,6 +15,27 @@ export interface RoomRequest {
   cle_status?: Room['cle_status'];
   theme_name?: string;
   images?: string[];
+}
+
+export interface ReservationSummary {
+  reservation_id: number | null;
+  check_in: string | null;
+  check_out: string | null;
+  status: string | null;
+  room_id: number | null;
+  room_number: string | null;
+}
+
+export interface GuestSummary {
+  user_id: number | null;
+  full_name: string | null;
+  email: string | null;
+  phone: string | null;
+}
+
+export interface ReservationLookupPayload {
+  reservation: Reservation | null;
+  guest?: User | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -32,6 +55,10 @@ export class RoomService {
     return this.http.get<Room>(`${this.resource}/${id}`);
   }
 
+  getTodayReservation(number: string): Observable<ReservationLookupPayload> {
+    return this.http.get<ReservationLookupPayload>(`${this.resource}/number/${number}`);
+  }
+
   create(payload: RoomRequest): Observable<Room> {
     return this.http.post<Room>(this.resource, payload);
   }
@@ -42,5 +69,9 @@ export class RoomService {
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.resource}/${id}`);
+  }
+
+  listByHotel(hotelId: number): Observable<Room[]> {
+    return this.http.get<Room[]>(`${this.resource}/hotel/${hotelId}`);
   }
 }

@@ -5,6 +5,12 @@ export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./features/public/login/login').then(m => m.Login) },
   { path: 'register', loadComponent: () => import('./features/public/register/register').then(m => m.Register) },
   { path: 'hotel/:id', loadComponent: () => import('./features/public/Hotel/hotel-detail/hotel-detail').then(m => m.HotelDetailComponent) },
+  {
+    path: 'room-type/:typeId',
+    loadComponent: () =>
+      import('./features/public/Room/room-detail/room-detail')
+        .then(m => m.RoomDetailComponent),
+  },
 
   // CLIENT - shell con children
   {
@@ -37,6 +43,7 @@ export const routes: Routes = [
       { path: 'task', loadComponent: () => import('./features/operator/task/task').then(m => m.TaskComponent)},
       { path: 'staff-member', loadComponent: () => import('./features/operator/staff-member/staff-member').then(m => m.StaffMemberComponent)},
       { path: 'profile', loadComponent: () => import('./features/operator/operator-profile/operator-profile').then(m => m.OperatorProfileComponent) },
+      { path: 'reservation-service', loadComponent: () => import('./features/operator/operator-reservation-service/operator-reservation-service').then(m => m.ReservationServiceComponent)},
     ]
   },
   // ADMIN - shell con children

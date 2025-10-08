@@ -50,4 +50,14 @@ public class ServiceOfferingServiceImpl implements ServiceOfferingService {
         serviceOfferingRepository.deleteById(id);
     }
 
+    @Override
+    public List<ServiceOffering> findByHotel(Long hotelId) {
+        return serviceOfferingRepository.findByHotel_HotelId(hotelId); // o findByHotel_HotelId(...)
+    }
+
+    @Override
+    public Optional<ServiceOffering> findOne(Long id) {
+        return serviceOfferingRepository.findById(id);
+    }
+
 }

@@ -1,0 +1,37 @@
+.details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 50px;
+  margin-left: 100px;
+  margin-right: 100px;
+  margin-bottom: 50px;
+  height: 50dvh;
+}
+
+.details img {
+  width: 350px;
+  height: auto;
+  
+}
+
+.details h1 {
+
+  color: #050c00;
+}
+
+
+.details p {
+   color: #555;
+}
+
+.details .btn-det:hover{
+  background-color: #778e69;
+}
+
+.textos{
+  padding: 30px;
+  margin-left: 100px;
+  background-color: #f2f3ed;
+  border-radius: 20px;
+}

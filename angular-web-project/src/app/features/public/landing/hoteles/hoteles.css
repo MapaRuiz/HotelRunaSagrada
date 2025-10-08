@@ -1,0 +1,367 @@
+.parallax {
+  height: 120vh;
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+}
+
+.parallax1 {
+  background-color: white;
+  position: relative;
+  z-index: 1;
+  margin-top: -80px;
+  border-radius: 0 0 80px 80px;
+  overflow: hidden;
+  padding-bottom: 200px;
+}
+
+.parallax1 .navbar {
+  margin-top: 185px;
+  margin-bottom: 0px;
+}
+
+.parallax1 .navbar-links li a {
+  text-decoration: none;
+  color: rgb(255, 255, 255);
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.parallax1 .navbar-links li a:hover {
+  color: #adb6a4;
+  text-decoration: underline;
+}
+
+.hoteles {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  height: 200vh;
+  margin-top: -300px;
+  background-size: cover;
+  background-color: rgba(0, 0, 0, 0.125);
+  background-blend-mode: darken;
+  transition: background-image 1s ease-in-out;
+  padding-top: 200px;
+  padding-bottom: 500px;
+}
+
+.carousel {
+  display: flex;
+  position: relative;
+  width: 500px;
+}
+
+.card-car {
+  margin-left: 50px;
+  border-radius: 15px;
+  position: absolute;
+  width: 600px;
+  height: 350px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-family: 'Lato', system-ui, sans-serif;
+  color: white;
+
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: carousel 15s linear infinite;
+  pointer-events: none;
+}
+
+
+
+.card-car.active {
+  pointer-events: all;
+}
+
+
+.card-car h1 {
+  font-size: 5em;
+  margin: 0;
+}
+
+.card-car p {
+  font-size: 1em;
+  margin: 10px 0;
+  max-width: 100%;
+}
+
+.card-car p,
+.card-car .btn-explore {
+  display: none;
+}
+
+.card-car.active p,
+.card-car.active .btn-explore {
+  display: block;
+}
+
+.card-car .btn-explore {
+  margin-top: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.card-car .btn-explore:hover {
+  background: #adb6a4;
+  color: white;
+}
+
+.card-car:nth-child(1) {
+  animation-delay: -3s;
+}
+.card-car:nth-child(2) {
+  animation-delay: 0s;
+}
+.card-car:nth-child(3) {
+  animation-delay: 3s;
+}
+.card-car:nth-child(4) {
+  animation-delay: 6s;
+}
+.card-car:nth-child(5) {
+  animation-delay: 9s;
+}
+
+@keyframes carousel {
+  0% {
+    transform: translateY(100%) scale(0.5);
+    opacity: 0;
+    visibility: hidden;
+  }
+  3%,
+  20% {
+    transform: translateY(100%) scale(0.7);
+    opacity: 0.4;
+    visibility: visible;
+  }
+  23%,
+  40% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    visibility: visible;
+  }
+  43%,
+  60% {
+    transform: translateY(-100%) scale(0.7);
+    opacity: 0.4;
+    visibility: visible;
+  }
+  63% {
+    transform: translateY(-100%) scale(0.5);
+    opacity: 0;
+    visibility: visible;
+  }
+  100% {
+    transform: translateY(-100%) scale(0.5);
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.card-place {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: transparent;
+  padding: 20px;
+  max-width: 900px;
+  margin: auto;
+  position: relative;
+}
+
+.card-image {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 15px;
+  perspective: 1000px;
+  margin-left: 300px;
+}
+
+/* Contenedor de cada imagen */
+.img-card {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Imagen con animación base */
+.img-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: rotateY(90deg) scale(0.8);
+  transition: all 0.8s ease;
+}
+
+/* Diferentes tamaños */
+.img-card:nth-child(1) {
+  width: 260px;
+  height: 380px;
+  transition-delay: 0.1s;
+}
+.img-card:nth-child(2) {
+  width: 220px;
+  height: 320px;
+  transition-delay: 0.3s;
+}
+.img-card:nth-child(3) {
+  width: 180px;
+  height: 260px;
+  transition-delay: 0.5s;
+}
+
+/* Activación con animación */
+.card-car.active .img-card img {
+  opacity: 1;
+  transform: rotateY(0deg) scale(1);
+}
+
+/* Título bonito sobre la imagen */
+.img-card .title {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
+}
+
+/* Bookmark elegante */
+.img-card .bookmark {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 18px;
+  color: #fff;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.img-card .bookmark:hover {
+  transform: scale(1.2);
+}
+
+.img-card .title,
+.img-card .bookmark {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.4s ease;
+}
+
+.card-car.active .img-card .title,
+.card-car.active .img-card .bookmark {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card-place {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: transparent;
+  padding: 20px;
+  max-width: 900px;
+  margin: auto;
+  position: relative;
+}
+
+.card-image {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 15px;
+  perspective: 1000px;
+  margin-left: 300px;
+}
+
+/* Contenedor de cada imagen */
+.img-card {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Imagen con animación base */
+.img-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: rotateY(90deg) scale(0.8);
+  transition: all 0.8s ease;
+}
+
+/* Diferentes tamaños */
+.img-card:nth-child(1) {
+  width: 260px;
+  height: 380px;
+  transition-delay: 0.1s;
+}
+.img-card:nth-child(2) {
+  width: 220px;
+  height: 320px;
+  transition-delay: 0.3s;
+}
+.img-card:nth-child(3) {
+  width: 180px;
+  height: 260px;
+  transition-delay: 0.5s;
+}
+
+/* Activación con animación */
+.card-car.active .img-card img {
+  opacity: 1;
+  transform: rotateY(0deg) scale(1);
+}
+
+/* Título bonito sobre la imagen */
+.img-card .title {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
+}
+
+/* Bookmark elegante */
+.img-card .bookmark {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 18px;
+  color: #fff;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.img-card .bookmark:hover {
+  transform: scale(1.2);
+}
+
+.img-card .title,
+.img-card .bookmark {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.4s ease;
+}
+
+.card-car.active .img-card .title,
+.card-car.active .img-card .bookmark {
+  opacity: 1;
+  transform: translateY(0);
+}

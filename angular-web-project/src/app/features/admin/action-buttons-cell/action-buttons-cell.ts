@@ -6,7 +6,7 @@ import { ActionButtonsParams } from './action-buttons-param';
   selector: 'app-action-buttons-cell',
   imports: [],
   templateUrl: './action-buttons-cell.html',
-  styleUrl: './action-buttons-cell.css'
+  styleUrls: ['./action-buttons-cell.css']
 })
 export class ActionButtonsComponent<T>
   implements ICellRendererAngularComp

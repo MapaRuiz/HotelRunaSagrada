@@ -5,39 +5,6 @@
   <div *ngIf="loading" class="text-muted">Cargando…</div>
 </div>
 
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>Nombre</th>
-      <th>Capacidad</th>
-      <th>Base price</th>
-      <th>Portada</th>
-      <th class="text-end">Acciones</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let rt of roomTypes; trackBy: trackById">
-      <td>{{ rt.room_type_id }}</td>
-      <td>{{ rt.name }}</td>
-      <td>{{ rt.capacity }}</td>
-      <td>{{ rt.base_price | currency : 'COP' : 'symbol-narrow' }}</td>
-      <td>
-        <img
-          *ngIf="rt.image"
-          [src]="rt.image"
-          alt="img"
-          style="width: 56px; height: 40px; object-fit: cover; border-radius: 6px"
-        />
-      </td>
-      <td class="text-end">
-        <button class="btn btn-sm btn-outline-primary me-2" (click)="edit(rt)">Editar</button>
-        <button class="btn btn-sm btn-outline-danger" (click)="remove(rt)">Eliminar</button>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
 <!-- Form inline -->
 <div *ngIf="showForm" class="card mt-3">
   <div class="card-body">
@@ -80,3 +47,36 @@
     </div>
   </div>
 </div>
+
+<table class="table table-striped" *ngIf="editingId == null">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Nombre</th>
+      <th>Capacidad</th>
+      <th>Base price</th>
+      <th>Portada</th>
+      <th class="text-end">Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let rt of roomTypes; trackBy: trackById">
+      <td>{{ rt.room_type_id }}</td>
+      <td>{{ rt.name }}</td>
+      <td>{{ rt.capacity }}</td>
+      <td>{{ rt.base_price | currency : 'COP' : 'symbol-narrow' }}</td>
+      <td>
+        <img
+          *ngIf="rt.image"
+          [src]="rt.image"
+          alt="img"
+          style="width: 56px; height: 40px; object-fit: cover; border-radius: 6px"
+        />
+      </td>
+      <td class="text-end">
+        <button class="btn btn-sm btn-outline-primary me-2" (click)="edit(rt)">Editar</button>
+        <button class="btn btn-sm btn-outline-danger" (click)="remove(rt)">Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>

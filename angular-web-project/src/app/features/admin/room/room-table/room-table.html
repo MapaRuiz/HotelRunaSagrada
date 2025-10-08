@@ -21,46 +21,6 @@
   </div>
 </div>
 
-<div *ngIf="loading" class="text-muted mb-2">Cargando…</div>
-
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>Hotel</th>
-      <th>Número</th>
-      <th>Piso</th>
-      <th>Tipo</th>
-      <th>Res</th>
-      <th>Cle</th>
-      <th>Portada</th>
-      <th class="text-end">Acciones</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let r of rooms; trackBy: trackById">
-      <td>{{ r.room_id }}</td>
-      <td>{{ r.hotel?.name || r.hotel_id }}</td>
-      <td>{{ r.number }}</td>
-      <td>{{ r.floor }}</td>
-      <td>{{ r.room_type?.name || r.room_type_id }}</td>
-      <td>{{ r.res_status }}</td>
-      <td>{{ r.cle_status }}</td>
-      <td>
-        <img
-          *ngIf="r.images?.length"
-          [src]="r.images[0]"
-          style="width: 56px; height: 40px; object-fit: cover; border-radius: 6px"
-        />
-      </td>
-      <td class="text-end">
-        <button class="btn btn-sm btn-outline-primary me-2" (click)="edit(r)">Editar</button>
-        <button class="btn btn-sm btn-outline-danger" (click)="remove(r)">Eliminar</button>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
 <!-- Form inline -->
 <div *ngIf="showForm" class="card mt-3">
   <div class="card-body">
@@ -174,3 +134,43 @@
     </div>
   </div>
 </div>
+
+<div *ngIf="loading" class="text-muted mb-2">Cargando…</div>
+
+<table class="table table-striped" *ngIf="!showForm || editingId == null">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Hotel</th>
+      <th>Número</th>
+      <th>Piso</th>
+      <th>Tipo</th>
+      <th>Res</th>
+      <th>Cle</th>
+      <th>Portada</th>
+      <th class="text-end">Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let r of rooms; trackBy: trackById">
+      <td>{{ r.room_id }}</td>
+      <td>{{ r.hotel?.name || r.hotel_id }}</td>
+      <td>{{ r.number }}</td>
+      <td>{{ r.floor }}</td>
+      <td>{{ r.room_type?.name || r.room_type_id }}</td>
+      <td>{{ r.res_status }}</td>
+      <td>{{ r.cle_status }}</td>
+      <td>
+        <img
+          *ngIf="r.images?.length"
+          [src]="r.images[0]"
+          style="width: 56px; height: 40px; object-fit: cover; border-radius: 6px"
+        />
+      </td>
+      <td class="text-end">
+        <button class="btn btn-sm btn-outline-primary me-2" (click)="edit(r)">Editar</button>
+        <button class="btn btn-sm btn-outline-danger" (click)="remove(r)">Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>

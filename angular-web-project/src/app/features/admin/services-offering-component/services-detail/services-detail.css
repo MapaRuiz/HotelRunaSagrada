@@ -1,0 +1,37 @@
+:host {
+  display: block;
+}
+
+.services-detail {
+  background: var(--c-ivory);
+  border: 1px solid rgba(21, 21, 19, 0.08);
+  color: var(--c-ink);
+}
+
+.services-detail .card-title {
+  color: var(--c-olive);
+  font-family: var(--font-title);
+}
+
+.services-detail .form-label {
+  color: var(--c-olive);
+  font-weight: 600;
+}
+
+.services-detail .form-control-plaintext,
+.services-detail .imagenes-content,
+.services-detail .list-group-item {
+  color: var(--c-ink);
+}
+
+.services-detail .imagenes-header {
+  border-bottom: 1px solid rgba(21, 21, 19, 0.08);
+}
+
+.services-detail .badge.text-bg-success {
+  background: var(--c-olive) !important;
+}
+
+.services-detail .badge.text-bg-danger {
+  background: #c34f4f !important;
+}

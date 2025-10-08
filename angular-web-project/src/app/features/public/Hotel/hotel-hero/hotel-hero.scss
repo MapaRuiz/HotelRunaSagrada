@@ -7,13 +7,6 @@
     --size-base: 100px;
   }
 
-  /* Scroll total del hero; viene por inline style desde el componente */
-  .hero-wrapper {
-    --scroll-height: 500svh;
-    --position: sticky;
-    --top: 0;
-  }
-
   /* Propiedades CSS registradas (scroll-driven) */
   @property --gap {
     syntax: '<length>';
@@ -69,7 +62,7 @@
   }
 
     .hero-section {
-      height: var(--scroll-height, 20svh);
+      height: var(200svh, 5svh);
       /* el mismo valor que pasas por [style.--scroll-height] */
       min-height: 120svh;
       /* por si reduces scrollHeight */
@@ -81,7 +74,7 @@
     top: 0;
     left: 0;
     right: 0;
-    z-index: 9999;
+    z-index: 2;
     color: #fff;
     background: #d11;
     margin: 0;
@@ -104,8 +97,9 @@
     position: sticky;
     top: 0;
     inset: 0;
-    width: 100vw;
+    width: 100%;
     height: 100svh;
+    overflow-x: clip;
 
     display: grid;
     grid-template-columns: 1fr 2fr var(--size-base) 2fr 1fr;
@@ -137,43 +131,43 @@
   /* Áreas */
   .hero-wrapper > .tile:nth-child(1) {
     grid-area: one;
-    --x: -500%;
-    --y: -200%;
+    --x: -400%;
+    --y: -100%;
   }
   .hero-wrapper > .tile:nth-child(2) {
     grid-area: two;
     --x: -75%;
-    --y: -200%;
+    --y: -100%;
   }
   .hero-wrapper > .tile:nth-child(3) {
     grid-area: three;
-    --x: 200%;
+    --x: 100%;
     --y: 0%;
   }
   .hero-wrapper > .tile:nth-child(4) {
     grid-area: four;
-    --x: 500%;
-    --y: -200%;
+    --x: 400%;
+    --y: -100%;
   }
   .hero-wrapper > .tile:nth-child(5) {
     grid-area: five;
-    --x: -500%;
+    --x: -400%;
     --y: 100%;
   }
   .hero-wrapper > .tile:nth-child(6) {
     grid-area: six;
-    --x: -200%;
+    --x: -100%;
     --y: 0%;
   }
   .hero-wrapper > .tile:nth-child(7) {
     grid-area: seven;
     --x: 75%;
-    --y: 200%;
+    --y: 100%;
   }
   .hero-wrapper > .tile:nth-child(8) {
     grid-area: eight;
-    --x: 500%;
-    --y: 200%;
+    --x: 400%;
+    --y: 100%;
   }
 
   /* Centro */

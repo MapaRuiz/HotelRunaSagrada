@@ -1,0 +1,36 @@
+<section class="location-section" [style.--plant-bg]="plantBg">
+  <div class="glass">
+    <header class="header">
+      <h3 class="title">Ubicación & Alrededores</h3>
+      <div class="sub">
+        <strong class="name">{{ hotel.name }}</strong>
+        <span class="coords">· {{ hotel.latitude }}, {{ hotel.longitude }}</span>
+      </div>
+    </header>
+
+    <div class="map-wrap">
+      <div #map class="map" aria-label="Mapa de ubicación"></div>
+    </div>
+
+    <!-- Lista de atracciones con distancia -->
+    <section class="nearby" *ngIf="attractions?.length">
+      <h4 class="nearby-title">Atracciones cercanas</h4>
+      <ul class="nearby-list">
+        <li class="nearby-item" *ngFor="let a of attractions">
+          <div class="info">
+            <div class="name">{{ a.name }}</div>
+            <div class="cat">{{ a.category }}</div>
+          </div>
+          <div class="dist">{{ distanceKm(a) }}</div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Leyenda dinámica (colores 100% iguales a los pines) -->
+    <footer class="legend" *ngIf="legend.length">
+      <ng-container *ngFor="let l of legend">
+        <span class="dot" [style.--c]="l.color"></span>{{ l.label }}
+      </ng-container>
+    </footer>
+  </div>
+</section>

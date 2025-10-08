@@ -6,13 +6,19 @@ import { HotelsService } from '../../../../services/hotels';
 import { Hotel } from '../../../../model/hotel';                // 👈 usa el modelo correcto
 import { HotelHeroComponent } from '../hotel-hero/hotel-hero';  // igual que antes
 import { HotelAmenitiesComponent } from '../hotel-amenities/hotel-amenities';
+import { HotelLocationComponent } from '../hotel-location/hotel-location';
 import { environment } from '../../../../../environments/environment';
+import { HotelServicesComponent } from '../hotel-services/hotel-services';
+import { HotelRoomsComponent } from '../hotel-rooms/hotel-rooms';
+
+
 
 @Component({
   standalone: true,
   selector: 'app-hotel-detail',
-  imports: [CommonModule, HotelHeroComponent, HotelAmenitiesComponent],
-  templateUrl: './hotel-detail.html'
+  imports: [CommonModule, HotelHeroComponent, HotelAmenitiesComponent, HotelLocationComponent, HotelServicesComponent, HotelRoomsComponent],
+  templateUrl: './hotel-detail.html',
+  styleUrls: ['./hotel-detail.css']
 })
 export class HotelDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);

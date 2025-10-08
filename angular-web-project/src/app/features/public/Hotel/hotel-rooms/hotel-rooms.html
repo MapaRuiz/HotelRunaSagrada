@@ -1,0 +1,43 @@
+<section class="rooms-section">
+  <div class="container">
+    <span class="eyebrow">Habitaciones</span>
+    <h2 class="title">Elige tu estilo</h2>
+    <p class="desc">Temas curados por hotel según la región y el piso.</p>
+
+    <!-- Escenario del menú + overlay -->
+    <div class="menu-stage">
+      <!-- PNG superpuesto; no bloquea clics -->
+      <img class="overlay-img" [src]="overlayUrl" alt="" />
+
+      <div *ngIf="loading" class="state muted">Cargando…</div>
+      <div *ngIf="!loading && error" class="state error">{{ error }}</div>
+
+      <div *ngIf="!loading && !error && items.length" class="flowing-menu">
+        <a
+          class="menu-item"
+          *ngFor="let it of items; trackBy: trackByType"
+          [routerLink]="'/room-type/' + it.typeId"
+          [queryParams]="{
+            hotelId: hotel?.hotel_id
+          }"
+          [attr.aria-label]="it.typeName + ' — ' + it.themeName"
+        >
+          <span class="label">{{ it.typeName }} — {{ it.themeName }}</span>
+
+          <div class="marquee">
+            <div class="inner">
+              <span class="repeat">{{ it.typeName }} — {{ it.themeName }}</span>
+              <span class="pill" [style.backgroundImage]="'url(' + it.image + ')'"></span>
+              <span class="repeat">{{ it.typeName }} — {{ it.themeName }}</span>
+              <span class="pill" [style.backgroundImage]="'url(' + it.image + ')'"></span>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <div *ngIf="!loading && !error && !items.length" class="state muted">
+        No hay habitaciones disponibles.
+      </div>
+    </div>
+  </div>
+</section>

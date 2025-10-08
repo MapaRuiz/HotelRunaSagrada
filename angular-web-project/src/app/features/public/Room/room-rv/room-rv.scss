@@ -1,0 +1,53 @@
+.rv {
+    margin: clamp(16px, 3vw, 28px) auto 0;
+    max-width: 1080px;
+    padding: 0 16px;
+
+    .rv__head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 10px;
+
+        h3 {
+            margin: 0;
+            font-weight: 900;
+            font-family: var(--font-title);
+        }
+
+        .rv__open {
+            font-family: var(--font-body);
+            font-weight: 700;
+            color: #0a6847;
+            background: #e9f5ef;
+            border: 1px solid #cde9de;
+            padding: .4rem .7rem;
+            border-radius: 999px;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+    }
+
+    .rv__frame {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        /* mantiene proporción */
+        min-height: 60vh;
+        /* se ve “hero-ish” */
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .07);
+
+        iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+            display: block;
+            background: #0b1520;
+        }
+    }
+}

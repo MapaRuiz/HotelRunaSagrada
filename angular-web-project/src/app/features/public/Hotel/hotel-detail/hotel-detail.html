@@ -3,11 +3,25 @@
   <app-hotel-hero [hotel]="h" [images]="gallery" [assetBase]="backendBase" scrollHeight="700svh">
   </app-hotel-hero>
 
-  <app-hotel-amenities
-    class="mt-4"
-    [hotel]="h"
-    [amenities]="h.amenities || []"
-    [assetBase]="backendBase"
-  >
-  </app-hotel-amenities>
+  <div class="content-wrapper">
+    <app-hotel-amenities
+      class="mt-4"
+      [hotel]="h"
+      [amenities]="h.amenities || []"
+      [assetBase]="backendBase"
+    >
+    </app-hotel-amenities>
+
+    <app-hotel-location
+      [hotel]="h"
+      [plantBg]="
+        'url(https://images.pexels.com/photos/122429/leaf-nature-green-spring-122429.jpeg)'
+      "
+    >
+    </app-hotel-location>
+
+    <app-hotel-services class="mt-4" [hotelId]="h.hotel_id"></app-hotel-services>
+
+    <app-hotel-rooms class="mt-4" [hotel]="h" [assetBase]="backendBase"> </app-hotel-rooms>
+  </div>
 </ng-container>

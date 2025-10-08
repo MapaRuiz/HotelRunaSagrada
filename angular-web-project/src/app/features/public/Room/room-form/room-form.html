@@ -1,0 +1,71 @@
+<section class="reserve-card" *ngIf="showForm; else cta">
+  <h3 class="card-title">Reservar esta categoría</h3>
+
+  <form [formGroup]="reserveForm" (ngSubmit)="reserve()" novalidate>
+    <!-- Habitación -->
+    <div class="form-row">
+      <label for="roomId">Habitación</label>
+      <select id="roomId" formControlName="roomId">
+        <option [ngValue]="null" disabled>Elige una habitación disponible</option>
+        <option *ngFor="let r of availableRoomsList; trackBy: trackByRoom" [value]="r.room_id">
+          {{ r.number }} — Piso {{ r.floor }}
+        </option>
+      </select>
+
+      <small class="field-hint" *ngIf="!availableRoomsList.length">
+        No hay habitaciones disponibles para hoy en esta categoría.
+      </small>
+
+      <small
+        class="field-error"
+        *ngIf="reserveForm.get('roomId')?.touched && reserveForm.get('roomId')?.invalid"
+      >
+        Debes seleccionar una habitación.
+      </small>
+    </div>
+
+    <!-- Check-in -->
+    <div class="form-row">
+      <label for="checkIn">Check-in</label>
+      <input id="checkIn" type="date" formControlName="checkIn" [min]="minCheckIn" />
+      <small
+        class="field-error"
+        *ngIf="reserveForm.get('checkIn')?.touched && reserveForm.get('checkIn')?.invalid"
+      >
+        Selecciona una fecha válida.
+      </small>
+    </div>
+
+    <!-- Check-out -->
+    <div class="form-row">
+      <label for="checkOut">Check-out <small>(exclusivo)</small></label>
+      <input id="checkOut" type="date" formControlName="checkOut" [min]="minCheckOut" />
+      <small
+        class="field-error"
+        *ngIf="reserveForm.get('checkOut')?.touched && reserveForm.get('checkOut')?.invalid"
+      >
+        Selecciona una fecha válida.
+      </small>
+    </div>
+
+    <p class="form-hint">
+      * El check-out es <strong>exclusivo</strong>. Si reservas del 10 al 12, ocupas 10 y 11; el 12
+      ya no.
+    </p>
+
+    <div *ngIf="submitError" class="error">{{ submitError }}</div>
+
+    <button class="primary" type="submit" [disabled]="isSubmitting || reserveForm.invalid">
+      <span *ngIf="!isSubmitting">Reservar</span>
+      <span *ngIf="isSubmitting" class="btn-loading">
+        <span class="spinner" aria-hidden="true"></span> Reservando…
+      </span>
+    </button>
+  </form>
+</section>
+
+<ng-template #cta>
+  <section class="reserve-cta" *ngIf="availableCount > 0">
+    <p>Selecciona una habitación <em>Disponible</em> para continuar con tu reserva.</p>
+  </section>
+</ng-template>
