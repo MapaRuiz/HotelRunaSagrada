@@ -26,9 +26,6 @@ public class Task {
 	@Column(name = "room_id")
 	private Integer roomId;
 
-	@Column(name = "res_service_id")
-	private Long resServiceId;
-
 	@Enumerated(EnumType.STRING)
 	@Column(name = "type", nullable = false)
 	private TaskType type;
@@ -50,6 +47,11 @@ public class Task {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "room_id", insertable = false, updatable = false)
 	private Room room;
+
+	@JsonIgnore
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "res_service_id")
+	private ReservationService reservationService;
 
 	// Enums
 	public enum TaskType {
