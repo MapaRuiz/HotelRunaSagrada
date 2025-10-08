@@ -35,6 +35,11 @@ public class DatabaseInit implements CommandLineRunner {
         private final ReservationRepository reservationRepo;
         private final RoomLockRepository roomLockRepo;
 
+        // Nuevos repositorios para Department, StaffMember y Task
+        private final DepartmentRepository departmentRepo;
+        private final StaffMemberRepository staffMemberRepo;
+        private final TaskRepository taskRepo;
+
         @Override
         public void run(String... args) {
                 // Datos originales: roles, usuarios y hoteles
@@ -45,6 +50,13 @@ public class DatabaseInit implements CommandLineRunner {
                 seedRoomTypesAndRooms(hotelList);
                 seedServicesForAllHotels(hotelList);
                 seedReservations(hotelList);
+
+                // Datos para Department, StaffMember y Task
+                // Los StaffMember son users con rol OPERATOR asociados a hoteles y
+                // departamentos
+                seedDepartments(hotelList);
+                seedStaffMembers(hotelList);
+                seedTasks();
         }
 
         private void seedBasicData() {
@@ -68,15 +80,15 @@ public class DatabaseInit implements CommandLineRunner {
                         return userRepo.save(u);
                 });
 
-                // --- 5 Operadores ---
-                IntStream.rangeClosed(1, 5).forEach(i -> {
+                // --- 15 Operadores ---
+                IntStream.rangeClosed(1, 15).forEach(i -> {
                         String email = "op" + i + "@hotel.com";
                         userRepo.findByEmail(email).orElseGet(() -> {
                                 User u = new User();
                                 u.setEmail(email);
                                 u.setPassword("op123");
                                 u.setFullName("Operador Hotel " + i);
-                                u.setPhone("301000000" + i);
+                                u.setPhone("301000000" + String.format("%02d", i));
                                 u.setNationalId("OP-" + String.format("%03d", i));
                                 u.setSelectedPet(pickIcon(i));
                                 u.setRoles(Set.of(operatorRole));
@@ -1444,5 +1456,155 @@ public class DatabaseInit implements CommandLineRunner {
                         case 2 -> "/images/icons/icono2.png";
                         default -> "/images/icons/icono3.png";
                 };
+        }
+
+        private void seedDepartments(List<Hotel> hotelList) {
+                if (departmentRepo.count() > 0)
+                        return;
+
+                String[] departmentNames = {
+                                "Recepción", "Limpieza", "Mantenimiento", "Cocina",
+                                "Servicio al Cliente", "Seguridad", "Recursos Humanos"
+                };
+
+                for (Hotel hotel : hotelList) {
+                        for (String deptName : departmentNames) {
+                                Department dept = new Department();
+                                dept.setHotelId(hotel.getHotelId());
+                                dept.setName(deptName);
+                                departmentRepo.save(dept);
+                        }
+                }
+        }
+
+        private void seedStaffMembers(List<Hotel> hotelList) {
+                if (staffMemberRepo.count() > 0)
+                        return; // no duplicar
+
+                // Obtener todos los users con rol OPERATOR
+                List<User> operators = userRepo.findAll().stream()
+                                .filter(u -> u.getRoles().stream().anyMatch(r -> r.getName().equals("OPERATOR")))
+                                .toList();
+
+                if (operators.isEmpty()) {
+                        return;
+                }
+
+                List<Department> allDepartments = departmentRepo.findAll();
+                Random random = new Random();
+
+                // Índice para distribuir operadores de manera equitativa
+                int operatorIndex = 0;
+
+                for (Hotel hotel : hotelList) {
+                        List<Department> hotelDepts = allDepartments.stream()
+                                        .filter(d -> d.getHotelId().equals(hotel.getHotelId()))
+                                        .toList();
+
+                        // Asignar 1-2 staff members por departamento de cada hotel
+                        for (Department dept : hotelDepts) {
+                                int staffCount = random.nextInt(2) + 1; // 1-2 staff members por departamento
+
+                                for (int i = 0; i < staffCount && operatorIndex < operators.size(); i++) {
+                                        User user = operators.get(operatorIndex % operators.size());
+
+                                        // Verificar que este user no esté ya asignado como staff member en este hotel
+                                        if (!staffMemberRepo.existsByUserIdAndHotelId(user.getUserId(),
+                                                        hotel.getHotelId())) {
+                                                StaffMember staff = new StaffMember();
+                                                staff.setUserId(user.getUserId());
+                                                staff.setHotelId(hotel.getHotelId());
+                                                staff.setDepartmentId(dept.getDepartmentId());
+
+                                                staffMemberRepo.save(staff);
+                                        }
+
+                                        operatorIndex++;
+                                }
+                        }
+                }
+        }
+
+        private void seedTasks() {
+                if (taskRepo.count() > 0)
+                        return;
+
+                List<StaffMember> staffMembers = staffMemberRepo.findAll();
+                List<Room> rooms = roomRepository.findAll();
+
+                if (staffMembers.isEmpty() || rooms.isEmpty()) {
+                        return;
+                }
+
+                // Crear exactamente 20 tareas específicas y variadas
+                createSpecificTasks(staffMembers, rooms);
+        }
+
+        private void createSpecificTasks(List<StaffMember> staffMembers, List<Room> rooms) {
+                // DELIVERY tasks - 7 tareas
+                createDeliveryTask(staffMembers.get(0 % staffMembers.size()), rooms.get(0 % rooms.size()),
+                                Task.TaskStatus.PENDING);
+                createDeliveryTask(staffMembers.get(1 % staffMembers.size()), rooms.get(1 % rooms.size()),
+                                Task.TaskStatus.PENDING);
+                createDeliveryTask(staffMembers.get(2 % staffMembers.size()), rooms.get(2 % rooms.size()),
+                                Task.TaskStatus.IN_PROGRESS);
+                createDeliveryTask(staffMembers.get(3 % staffMembers.size()), rooms.get(3 % rooms.size()),
+                                Task.TaskStatus.PENDING);
+                createDeliveryTask(staffMembers.get(4 % staffMembers.size()), rooms.get(4 % rooms.size()),
+                                Task.TaskStatus.DONE);
+                createDeliveryTask(staffMembers.get(5 % staffMembers.size()), rooms.get(5 % rooms.size()),
+                                Task.TaskStatus.PENDING);
+                createDeliveryTask(staffMembers.get(6 % staffMembers.size()), rooms.get(6 % rooms.size()),
+                                Task.TaskStatus.IN_PROGRESS);
+
+                // GUIDING tasks - 6 tareas
+                createGuidingTask(staffMembers.get(7 % staffMembers.size()), Task.TaskStatus.PENDING);
+                createGuidingTask(staffMembers.get(8 % staffMembers.size()), Task.TaskStatus.IN_PROGRESS);
+                createGuidingTask(staffMembers.get(9 % staffMembers.size()), Task.TaskStatus.PENDING);
+                createGuidingTask(staffMembers.get(10 % staffMembers.size()), Task.TaskStatus.DONE);
+                createGuidingTask(staffMembers.get(11 % staffMembers.size()), Task.TaskStatus.PENDING);
+                createGuidingTask(staffMembers.get(12 % staffMembers.size()), Task.TaskStatus.CANCELED);
+
+                // TO-DO tasks - 7 tareas
+                createToDoTask(staffMembers.get(13 % staffMembers.size()), rooms.get(7 % rooms.size()),
+                                Task.TaskStatus.PENDING);
+                createToDoTask(staffMembers.get(14 % staffMembers.size()), rooms.get(8 % rooms.size()),
+                                Task.TaskStatus.PENDING);
+                createToDoTask(staffMembers.get(0 % staffMembers.size()), rooms.get(9 % rooms.size()),
+                                Task.TaskStatus.IN_PROGRESS);
+                createToDoTask(staffMembers.get(1 % staffMembers.size()), rooms.get(10 % rooms.size()),
+                                Task.TaskStatus.PENDING);
+                createToDoTask(staffMembers.get(2 % staffMembers.size()), rooms.get(11 % rooms.size()),
+                                Task.TaskStatus.DONE);
+                createToDoTask(staffMembers.get(3 % staffMembers.size()), null, Task.TaskStatus.PENDING);
+                createToDoTask(staffMembers.get(4 % staffMembers.size()), null, Task.TaskStatus.IN_PROGRESS);
+        }
+
+        private void createDeliveryTask(StaffMember staff, Room room, Task.TaskStatus status) {
+                Task task = new Task();
+                task.setStaffId(staff.getStaffId());
+                task.setRoomId(room.getRoomId());
+                task.setType(Task.TaskType.DELIVERY);
+                task.setStatus(status);
+                taskRepo.save(task);
+        }
+
+        private void createGuidingTask(StaffMember staff, Task.TaskStatus status) {
+                Task task = new Task();
+                task.setStaffId(staff.getStaffId());
+                task.setType(Task.TaskType.GUIDING);
+                task.setStatus(status);
+                taskRepo.save(task);
+        }
+
+        private void createToDoTask(StaffMember staff, Room room, Task.TaskStatus status) {
+                Task task = new Task();
+                task.setStaffId(staff.getStaffId());
+                if (room != null) {
+                        task.setRoomId(room.getRoomId());
+                }
+                task.setType(Task.TaskType.TO_DO);
+                task.setStatus(status);
+                taskRepo.save(task);
         }
 }
