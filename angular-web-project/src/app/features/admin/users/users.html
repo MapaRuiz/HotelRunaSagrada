@@ -1,4 +1,4 @@
-<ng-container *ngIf="isBrowser && !editing">
+<ng-container *ngIf="isBrowser && !editing && !selected">
   <details #createDetails (toggle)="onCreateToggle($event)">
     <summary>Crear usuario</summary>
 
@@ -144,15 +144,21 @@
   </div>
 </ng-container>
 
+<!-- Detail Form -->
+<app-user-detail
+  *ngIf="selected && !editing"
+  [user]="selected"
+  (editRequested)="onDetailEdit($event)"
+></app-user-detail>
+
 <!-- Panel de edición como servicios -->
-<div *ngIf="editing" class="mt-3">
-  <app-user-form
-    [user]="editing"
-    [loading]="loading"
-    (onSave)="saveEdit($event)"
-    (onCancel)="cancelEdit()"
-  ></app-user-form>
-</div>
+<app-user-form
+  *ngIf="editing"
+  [user]="editing"
+  [loading]="loading"
+  (onSave)="saveEdit($event)"
+  (onCancel)="cancelEdit()"
+></app-user-form>
 
 <ng-template #empty>
   <div class="alert alert-info mt-3">No hay usuarios.</div>

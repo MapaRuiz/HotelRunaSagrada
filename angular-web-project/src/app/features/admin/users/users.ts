@@ -10,11 +10,12 @@ import { AG_GRID_LOCALE, gridTheme as sharedGridTheme } from '../sharedTable';
 import { ActionButtonsComponent } from '../action-buttons-cell/action-buttons-cell';
 import { ActionButtonsParams } from '../action-buttons-cell/action-buttons-param';
 import { UserFormComponent, UserFormPayload } from './user-form/user-form';
+import { UserDetailComponent } from './user-detail/user-detail';
 
 @Component({
   standalone: true,
   selector: 'app-admin-users',
-  imports: [CommonModule, FormsModule, AgGridAngular, UserFormComponent],
+  imports: [CommonModule, FormsModule, AgGridAngular, UserFormComponent, UserDetailComponent],
   styleUrls: ['./users.css'],
   templateUrl: `./users.html`,
 })
@@ -47,6 +48,7 @@ export class Users implements OnInit {
   // Editar - patrón servicios
   editing?: User;
   loading = false;
+  selected?: User;
 
   allRoles: Role[] = ['ADMIN','OPERATOR','CLIENT'];
 
@@ -155,6 +157,10 @@ export class Users implements OnInit {
     },
     onGridPreDestroyed: () => {
       this.gridApi = undefined;
+    },
+    onSelectionChanged: params => {
+      const [row] = params.api.getSelectedRows();
+      this.selected = row;
     },
     columnDefs: this.columnDefs
   };
@@ -307,6 +313,12 @@ export class Users implements OnInit {
         Object.assign(this.editing!, upd);
         this.users = this.users.map(x => x.user_id === upd.user_id ? upd : x);
         this.rowData = this.rowData.map(x => x.user_id === upd.user_id ? upd : x);
+        
+        // Actualizar selected si es el mismo usuario
+        if (this.selected && this.selected.user_id === upd.user_id) {
+          this.selected = upd;
+        }
+        
         this.cancelEdit();
         this.withGridApi(api => {
           api.applyTransaction({ update: [upd] });
@@ -320,6 +332,10 @@ export class Users implements OnInit {
     });
   }
 
+  onDetailEdit(user: User): void {
+    this.beginEdit(user);
+  }
+
   remove(u: User) {
     if (this.isSelf(u)) {
       alert('No puedes eliminar tu propio usuario.');
@@ -330,9 +346,18 @@ export class Users implements OnInit {
     
     this.api.delete(u.user_id).subscribe({
       next: () => {
+        // Limpiar selección si el usuario eliminado está seleccionado
+        if (this.selected && this.selected.user_id === u.user_id) {
+          this.selected = undefined;
+        }
+        
         this.users = this.users.filter(x => x.user_id !== u.user_id);
         this.rowData = this.rowData.filter(x => x.user_id !== u.user_id);
-        this.withGridApi(api => api.applyTransaction({ remove: [u] }));
+        this.withGridApi(api => {
+          api.applyTransaction({ remove: [u] });
+          // Limpiar selección del grid también
+          api.deselectAll();
+        });
       },
       error: err => alert(err?.error?.message || err.message || 'Error al eliminar usuario')
     });
