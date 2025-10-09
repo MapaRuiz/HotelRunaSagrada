@@ -1,22 +1,13 @@
 package com.runasagrada.hotelapi.model;
 
-import java.sql.Timestamp;
-import java.time.Instant;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "tasks")
@@ -24,31 +15,48 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Task {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "task_id")
+	private Long taskId;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "task_id")
-    private Long id;
+	@Column(name = "staff_id", nullable = false)
+	private Long staffId;
 
-    @Column(name = "staff_id", nullable = false)
-    private Integer staffId;
+	@Column(name = "room_id")
+	private Integer roomId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id")
-    @JsonIgnore
-    private Room room;
+	@Column(name = "res_service_id")
+	private Long resServiceId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "res_service_id")
-    @JsonIgnore
-    private ReservationService reservationService;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "type", nullable = false)
+	private TaskType type;
 
-    @Column(name = "type", nullable = false, length = 40)
-    private String type;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "status", nullable = false)
+	private TaskStatus status = TaskStatus.PENDING;
 
-    @Column(name = "status", nullable = false, length = 40)
-    private String status;
+	@Column(name = "created_at", nullable = false)
+	private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "created_at", nullable = false)
-    private Timestamp createdAt = Timestamp.from(Instant.now());
+	// Relaciones
+	@JsonIgnore
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "staff_id", insertable = false, updatable = false)
+	private StaffMember staff;
+
+	@JsonIgnore
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "room_id", insertable = false, updatable = false)
+	private Room room;
+
+	// Enums
+	public enum TaskType {
+		DELIVERY, GUIDING, TO_DO
+	}
+
+	public enum TaskStatus {
+		PENDING, IN_PROGRESS, DONE, CANCELED
+	}
 }

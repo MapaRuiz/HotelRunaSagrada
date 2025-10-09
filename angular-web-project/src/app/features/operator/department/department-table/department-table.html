@@ -1,0 +1,89 @@
+<div *ngIf="!showStaffView">
+  <h4 class="mb-3">Departamentos</h4>
+
+  <!-- Form inline -->
+
+  <div *ngIf="showForm" class="card mt-3">
+    <div class="card-body">
+      <h5 class="card-title">{{ editingId ? 'Editar departamento' : 'Nuevo departamento' }}</h5>
+
+      <div class="row g-2">
+        <div class="col-sm-6">
+          <label class="form-label">Hotel *</label>
+          <select class="form-select" [(ngModel)]="draft_hotel_id">
+            <option [ngValue]="undefined" disabled>Selecciona un hotel…</option>
+            <option *ngFor="let h of hotels" [ngValue]="h.hotel_id">{{ h.name }}</option>
+          </select>
+        </div>
+        <div class="col-sm-6">
+          <label class="form-label">Nombre del departamento *</label>
+          <input
+            class="form-control"
+            [(ngModel)]="draft.name"
+            placeholder="Ej: Recepción, Limpieza, Mantenimiento"
+            maxlength="100"
+          />
+        </div>
+      </div>
+
+      <div class="mt-3 d-flex gap-2">
+        <button class="btn btn-success" (click)="save()">Guardar</button>
+        <button class="btn btn-secondary" (click)="cancel()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="row g-2 align-items-end mb-3">
+    <div class="col-sm-4">
+      <label class="form-label">Hotel</label>
+      <select class="form-select" [(ngModel)]="hotelId">
+        <option [ngValue]="undefined">Todos</option>
+        <option *ngFor="let h of hotels" [ngValue]="h.hotel_id">{{ h.name }}</option>
+      </select>
+    </div>
+    <div class="col-sm-8 text-sm-end">
+      <button class="btn btn-primary mt-3 mt-sm-0" (click)="new()">Nuevo departamento</button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="text-muted mb-2">Cargando…</div>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Hotel</th>
+        <th>Nombre</th>
+        <th>Staff</th>
+        <th class="text-end">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let d of filteredDepartments; trackBy: trackById">
+        <td>{{ d.department_id }}</td>
+        <td>{{ getHotelName(d.hotel_id) }}</td>
+        <td>{{ d.name }}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-info" (click)="viewStaff(d)">Ver Staff</button>
+        </td>
+        <td class="text-end">
+          <button class="btn btn-sm btn-outline-primary me-2" (click)="edit(d)">Editar</button>
+          <button class="btn btn-sm btn-outline-danger" (click)="remove(d)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && filteredDepartments.length === 0" class="text-muted text-center py-4">
+    No se encontraron departamentos
+  </div>
+</div>
+
+<div *ngIf="showStaffView && selectedDepartment">
+  <app-staff-member-list
+    [departmentId]="selectedDepartment.department_id"
+    [departmentName]="selectedDepartment.name"
+    (backToParent)="backToDepartments()"
+  >
+  </app-staff-member-list>
+</div>

@@ -1,5 +1,5 @@
-import { Component, OnInit, inject, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, ViewChild, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import {
   NgApexchartsModule, ChartComponent, ApexAxisChartSeries, ApexChart, ApexXAxis,
   ApexDataLabels, ApexStroke, ApexGrid, ApexLegend, ApexFill
@@ -32,6 +32,7 @@ export type ChartOptions = {
 export class AdminDashboardComponent implements OnInit {
   private hotelsApi = inject(HotelsService);
   private amenitiesApi = inject(AmenitiesService);
+  readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   hotels: Hotel[] = [];
   amenitiesCount = 0;

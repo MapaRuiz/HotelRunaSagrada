@@ -3,37 +3,6 @@
 <div *ngIf="loading">Cargando...</div>
 
 <button (click)="new()" class="btn btn-primary mb-2">Nueva Reserva</button>
-
-<table class="table table-striped" *ngIf="!loading && reservations.length">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Cliente</th>
-      <th>Hotel</th>
-      <th>Habitación</th>
-      <th>Check-in</th>
-      <th>Check-out</th>
-      <th>Status</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let r of reservations">
-      <td>{{ r.reservation_id }}</td>
-      <td>{{ r.user?.full_name || r.user_id }}</td>
-      <td>{{ r.hotel?.name || r.hotel_id }}</td>
-      <td>{{ r.room?.number || r.room_id }}</td>
-      <td>{{ r.check_in }}</td>
-      <td>{{ r.check_out }}</td>
-      <td>{{ r.status }}</td>
-      <td>
-        <button (click)="edit(r)" class="btn btn-sm btn-outline-primary">Editar</button>
-        <button (click)="remove(r)" class="btn btn-sm btn-outline-warning">Cancelar</button>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
 <div *ngIf="showForm" class="card mt-3 p-3">
   <h5>{{ editingId ? 'Editar Reserva' : 'Nueva Reserva' }}</h5>
 
@@ -99,3 +68,36 @@
   <button (click)="save()" class="btn btn-success">Guardar</button>
   <button (click)="cancelForm()" class="btn btn-secondary">Cerrar</button>
 </div>
+
+<table
+  class="table table-striped"
+  *ngIf="!loading && reservations.length && (!showForm || !editingId)"
+>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Cliente</th>
+      <th>Hotel</th>
+      <th>Habitación</th>
+      <th>Check-in</th>
+      <th>Check-out</th>
+      <th>Status</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let r of reservations">
+      <td>{{ r.reservation_id }}</td>
+      <td>{{ r.user?.full_name || r.user_id }}</td>
+      <td>{{ r.hotel?.name || r.hotel_id }}</td>
+      <td>{{ r.room?.number || r.room_id }}</td>
+      <td>{{ r.check_in }}</td>
+      <td>{{ r.check_out }}</td>
+      <td>{{ r.status }}</td>
+      <td>
+        <button (click)="edit(r)" class="btn btn-sm btn-outline-primary">Editar</button>
+        <button (click)="remove(r)" class="btn btn-sm btn-outline-warning">Cancelar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>

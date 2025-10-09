@@ -1,5 +1,5 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ViewChild, PLATFORM_ID, inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import {
   NgApexchartsModule,
   ChartComponent,
@@ -36,6 +36,7 @@ export type ChartOptions = {
   styleUrls: ['./operator-dashboard.css']
 })
 export class OperatorDashboardComponent implements OnInit {
+  readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   cards = [
     { label: 'Servicios activos', value: '5', delta: 2.1, icon: 'bi-hammer text-info' },
     { label: 'Pendientes', value: '3', delta: -1.0, icon: 'bi-hourglass-split text-warning' },

@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Room } from '../../../../model/room';
 import { RoomService, RoomRequest } from '../../../../services/room';
@@ -7,7 +7,8 @@ import { RoomType } from '../../../../model/room-type';
 import { RoomTypeService } from '../../../../services/room-type';
 import { Hotel } from '../../../../model/hotel';
 import { HotelsService } from '../../../../services/hotels'; // tu servicio de hoteles
-import toast from 'bootstrap/js/dist/toast';
+
+type ToastCtor = new (element: string | Element, config?: any) => { show(): void };
 
 @Component({
   selector: 'app-rooms-table',
@@ -38,6 +39,8 @@ export class RoomsTableComponent implements OnInit {
   // para selects
   draft_hotel_id?: number;
   draft_room_type_id?: number;
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private toastCtor?: ToastCtor;
 
   constructor(
     private roomsSvc: RoomService,
@@ -61,11 +64,7 @@ export class RoomsTableComponent implements OnInit {
       next: (rows) => { this.rooms = rows; this.loading = false; },
       error: () => { 
         this.loading = false;
-        const toastElement = document.createElement('div');
-        toastElement.className = 'toast';
-        toastElement.textContent = 'Error loading rooms';
-        const toastInstance = new toast(toastElement);
-        toastInstance.show();
+        void this.showToast('Error loading rooms');
       }
     });
   }
@@ -105,19 +104,11 @@ export class RoomsTableComponent implements OnInit {
   save() {
     // Validaciones mínimas
     if (!this.draft_hotel_id || !this.draft_room_type_id) {
-      const toastElement = document.createElement('div');
-      toastElement.className = 'toast';
-      toastElement.textContent = 'Please select hotel and room type';
-      const toastInstance = new toast(toastElement);
-      toastInstance.show();
+      void this.showToast('Please select hotel and room type');
       return;
     }
     if (!this.draft.number?.trim()) {
-      const toastElement = document.createElement('div');
-      toastElement.className = 'toast';
-      toastElement.textContent = 'Please enter room number';
-      const toastInstance = new toast(toastElement);
-      toastInstance.show();
+      void this.showToast('Please enter room number');
       return;
     }
 
@@ -138,18 +129,10 @@ export class RoomsTableComponent implements OnInit {
 
     obs.subscribe({
       next: () => { this.showForm = false; this.refresh(); 
-        const toastElement = document.createElement('div');
-        toastElement.className = 'toast';
-        toastElement.textContent = 'Saved';
-        const toastInstance = new toast(toastElement);
-        toastInstance.show();
+        void this.showToast('Saved');
       },
       error: (e) => { 
-        const toastElement = document.createElement('div');
-        toastElement.className = 'toast';
-        toastElement.textContent = e?.error?.detail || 'Error saving';
-        const toastInstance = new toast(toastElement);
-        toastInstance.show();
+        void this.showToast(e?.error?.detail || 'Error saving');
       }
     });
   }
@@ -159,18 +142,10 @@ export class RoomsTableComponent implements OnInit {
     if (!confirm(`Delete room ${r.number}?`)) return;
     this.roomsSvc.delete(r.room_id).subscribe({
       next: () => { this.refresh(); 
-        const toastElement = document.createElement('div');
-        toastElement.className = 'toast';
-        toastElement.textContent = 'Deleted';
-        const toastInstance = new toast(toastElement);
-        toastInstance.show();
+        void this.showToast('Deleted');
       },
       error: () => { 
-        const toastElement = document.createElement('div');
-        toastElement.className = 'toast';
-        toastElement.textContent = 'Error deleting';
-        const toastInstance = new toast(toastElement);
-        toastInstance.show();
+        void this.showToast('Error deleting');
       }
     });
   }
@@ -219,4 +194,30 @@ export class RoomsTableComponent implements OnInit {
 
   onImgLoad(i: number)  { this.imageStatus[i] = 'loaded'; }
   onImgError(i: number) { this.imageStatus[i] = 'error'; }
+
+  private async showToast(message: string): Promise<void> {
+    if (!this.isBrowser) return;
+
+    if (!this.toastCtor) {
+      const module = await import('bootstrap/js/dist/toast');
+      this.toastCtor = module.default;
+    }
+
+    const Toast = this.toastCtor;
+    if (!Toast) return;
+
+    const toastElement = document.createElement('div');
+    toastElement.className = 'toast align-items-center text-bg-dark border-0 position-fixed top-0 end-0 m-3';
+    toastElement.textContent = message;
+    toastElement.setAttribute('role', 'alert');
+    toastElement.setAttribute('aria-live', 'assertive');
+    toastElement.setAttribute('aria-atomic', 'true');
+
+    document.body.appendChild(toastElement);
+
+    toastElement.addEventListener('hidden.bs.toast', () => toastElement.remove(), { once: true });
+
+    const toastInstance = new Toast(toastElement);
+    toastInstance.show();
+  }
 }
