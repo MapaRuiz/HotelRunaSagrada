@@ -9,6 +9,7 @@ import { environment } from '../../../../environments/environment';
 import { AG_GRID_LOCALE, gridTheme as sharedGridTheme } from '../sharedTable';
 import { ActionButtonsComponent } from '../action-buttons-cell/action-buttons-cell';
 import { ActionButtonsParams } from '../action-buttons-cell/action-buttons-param';
+import { HotelDetailComponent } from './hotel-detail/hotel-detail';
 
 const TEXT_FILTER_CONFIG: ITextFilterParams = {
   filterOptions: ['contains', 'equals', 'notContains', 'startsWith'],
@@ -40,7 +41,7 @@ interface Hotel {
 @Component({
   standalone: true,
   selector: 'app-admin-hotels',
-  imports: [CommonModule, FormsModule, AgGridAngular],
+  imports: [CommonModule, FormsModule, AgGridAngular, HotelDetailComponent],
   styleUrls: ['./hotels.css'],
   templateUrl: `./hotels.html`,
   encapsulation: ViewEncapsulation.None
@@ -368,8 +369,12 @@ export class HotelsComponent implements OnInit {
           api.refreshCells({ force: true });
           api.refreshClientSideRowModel('everything');
           api.setGridOption('quickFilterText', this.search || undefined);
+          // Limpiar selección del grid para volver a la tabla
+          api.deselectAll();
         });
 
+        // Limpiar selección para volver a la tabla
+        this.selected = undefined;
         this.cancelEdit();
       },
       error: e => {
@@ -390,7 +395,13 @@ export class HotelsComponent implements OnInit {
     
     this.hotelsApi.delete(h.hotel_id).subscribe({
       next: () => {
-        this.withGridApi(api => api.applyTransaction({ remove: [h] }));
+        this.withGridApi(api => {
+          api.applyTransaction({ remove: [h] });
+          api.deselectAll();
+        });
+        
+        // Limpiar selección para volver a la tabla
+        this.selected = undefined;
       },
       error: e => {
         // Rollback on error
@@ -400,5 +411,9 @@ export class HotelsComponent implements OnInit {
         alert(e?.error?.message || e.message || 'Error al eliminar hotel');
       }
     });
+  }
+
+  onDetailEdit(hotel: Hotel): void {
+    this.beginEdit(hotel);
   }
 }

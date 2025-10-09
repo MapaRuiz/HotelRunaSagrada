@@ -99,6 +99,13 @@
   </div>
 </ng-container>
 
+<!-- Detail Form -->
+<app-hotel-detail
+  *ngIf="selected && !editing"
+  [hotel]="selected"
+  (editRequested)="onDetailEdit($event)"
+></app-hotel-detail>
+
 <!-- Editing form would go here if needed -->
 <div *ngIf="editing" class="card card-body hotel-edit-form">
   <h5>Editar Hotel</h5>
