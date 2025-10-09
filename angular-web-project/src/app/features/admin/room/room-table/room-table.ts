@@ -179,7 +179,41 @@ export class RoomsTableComponent implements OnInit {
           title: 'Estados de Reserva'
         },
         field: 'res_status',
-        maxWidth: 140
+        maxWidth: 140,
+        cellRenderer: (params: any) => {
+          const room = params.data as Room;
+          const status = room.res_status;
+          let badgeClass = '';
+          let statusText = '';
+          
+          switch (status) {
+            case 'AVAILABLE':
+              badgeClass = 'text-bg-success';
+              statusText = 'Disponible';
+              break;
+            case 'BOOKED':
+              badgeClass = 'text-bg-primary';
+              statusText = 'Reservada';
+              break;
+            case 'OCCUPIED':
+              badgeClass = 'text-bg-info';
+              statusText = 'Ocupada';
+              break;
+            case 'MAINTENANCE':
+              badgeClass = 'text-bg-danger';
+              statusText = 'Mantenimiento';
+              break;
+            default:
+              badgeClass = 'text-bg-secondary';
+              statusText = status || 'N/A';
+          }
+          
+          return `
+            <div class="d-flex align-items-center justify-content-center h-100">
+              <span class="badge ${badgeClass}">${statusText}</span>
+            </div>
+          `;
+        }
       },
       { 
         headerName: 'Estado Limp.',
@@ -189,7 +223,18 @@ export class RoomsTableComponent implements OnInit {
           title: 'Estados de Limpieza'
         },
         field: 'cle_status',
-        maxWidth: 150
+        maxWidth: 150,
+        cellRenderer: (params: any) => {
+          const room = params.data as Room;
+          const status = room.cle_status;
+          const badgeClass = status === 'DIRTY' ? 'text-bg-warning' : 'text-bg-success';
+          const statusText = status === 'DIRTY' ? 'Sucia' : 'Limpia';
+          return `
+            <div class="d-flex align-items-center justify-content-center h-100">
+              <span class="badge ${badgeClass}">${statusText}</span>
+            </div>
+          `;
+        }
       },
       { 
         headerName: 'Tema',
