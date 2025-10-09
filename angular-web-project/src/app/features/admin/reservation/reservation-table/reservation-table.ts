@@ -97,22 +97,9 @@ export class ReservationTableComponent implements OnInit {
         this.hotels = hotels;
         this.users = users;
 
-        // Enriquecer reservations con datos de hotel, room y user
-        const enrichedReservations = reservations.map((reservation, index) => {
-          // El hotel_id viene del room.hotel_id
-          const hotel_id = reservation.room?.hotel_id || reservation.hotel_id;
-          // Si no hay user_id, asignar uno basado en la posición
-          const user_id = reservation.user_id || (17 + index); // Empezar desde los clientes
-          
-          return {
-            ...reservation,
-            hotel: hotels.find(h => h.hotel_id === hotel_id),
-            user: users.find(u => u.user_id === user_id),
-            // Asegurar que hotel_id y user_id estén presentes
-            hotel_id: hotel_id,
-            user_id: user_id
-          };
-        });
+        const enrichedReservations = reservations.map((reservation, index) =>
+          this.mapReservation(reservation, index)
+        );
         
         this.reservations = enrichedReservations;
         this.rowData = enrichedReservations;
@@ -235,6 +222,76 @@ export class ReservationTableComponent implements OnInit {
     this.draft.room_id  = this.toInt(roomId);
   }
 
+  private mapReservation(reservation: any, fallbackIndex?: number): Reservation {
+    const fallbackUserId = fallbackIndex !== undefined ? 17 + fallbackIndex : undefined;
+
+    const reservationId = this.toInt(reservation.reservation_id ?? reservation.reservationId);
+    const userId = this.toInt(
+      reservation.user_id ??
+      reservation.user?.user_id ??
+      reservation.userId ??
+      reservation.user?.userId ??
+      fallbackUserId
+    );
+    const hotelId = this.toInt(
+      reservation.hotel_id ??
+      reservation.hotel?.hotel_id ??
+      reservation.hotelId ??
+      reservation.hotel?.hotelId ??
+      reservation.room?.hotel_id ??
+      reservation.room?.hotelId
+    );
+    const roomId = this.toInt(
+      reservation.room_id ??
+      reservation.room?.room_id ??
+      reservation.roomId ??
+      reservation.room?.roomId
+    );
+
+    const checkIn = reservation.check_in ?? reservation.checkIn ?? '';
+    const checkOut = reservation.check_out ?? reservation.checkOut ?? '';
+    const status = (reservation.status ?? 'PENDING') as Reservation['status'];
+    const createdAt = reservation.created_at ?? reservation.createdAt;
+
+    const resolvedHotel = hotelId != null ? this.hotels.find(h => h.hotel_id === hotelId) : reservation.hotel;
+    const resolvedUser = userId != null ? this.users.find(u => u.user_id === userId) : reservation.user;
+
+    const resolvedRoom = reservation.room
+      ? {
+          ...reservation.room,
+          room_id: roomId ?? this.toInt(reservation.room.room_id ?? reservation.room.roomId),
+          hotel_id:
+            hotelId ??
+            this.toInt(
+              reservation.room.hotel_id ??
+              reservation.room.hotelId ??
+              reservation.room.hotel?.hotel_id ??
+              reservation.room.hotel?.hotelId
+            )
+        }
+      : reservation.room_id != null
+        ? ({
+            room_id: roomId ?? reservation.room_id,
+            hotel_id: hotelId
+          } as Partial<Room>)
+        : undefined;
+
+    return {
+      ...reservation,
+      reservation_id: reservationId ?? reservation.reservation_id ?? reservation.reservationId,
+      user_id: userId ?? reservation.user_id ?? fallbackUserId ?? undefined,
+      hotel_id: hotelId ?? reservation.hotel_id ?? resolvedRoom?.hotel_id,
+      room_id: roomId ?? reservation.room_id,
+      check_in: checkIn,
+      check_out: checkOut,
+      status,
+      created_at: createdAt,
+      hotel: resolvedHotel,
+      user: resolvedUser,
+      room: resolvedRoom as Room | undefined
+    } as Reservation;
+  }
+
   // ---- CRUD ----
   private buildEmptyDraft(): Partial<Reservation> {
     return {
@@ -349,11 +406,7 @@ export class ReservationTableComponent implements OnInit {
     this.createLoading = true;
     this.service.create(this.draft).subscribe({
       next: (created) => {
-        const enrichedReservation = {
-          ...created,
-          hotel: this.hotels.find(h => h.hotel_id === created.hotel_id),
-          user: this.users.find(u => u.user_id === created.user_id)
-        };
+        const enrichedReservation = this.mapReservation(created);
         
         this.reservations = [enrichedReservation, ...this.reservations];
         this.rowData = [enrichedReservation, ...this.rowData];
@@ -377,11 +430,7 @@ export class ReservationTableComponent implements OnInit {
     this.loading = true;
     this.service.update(this.editing.reservation_id, this.draft).subscribe({
       next: (updated) => {
-        const enrichedReservation = {
-          ...updated,
-          hotel: this.hotels.find(h => h.hotel_id === updated.hotel_id),
-          user: this.users.find(u => u.user_id === updated.user_id)
-        };
+        const enrichedReservation = this.mapReservation(updated);
 
         // Actualizar en las listas
         this.reservations = this.reservations.map(r => 
