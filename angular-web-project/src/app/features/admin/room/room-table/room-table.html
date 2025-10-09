@@ -1,4 +1,4 @@
-<ng-container *ngIf="isBrowser && !editing">
+<ng-container *ngIf="isBrowser && !editing && !selected">
   <details #createDetails (toggle)="onCreateToggle($event)">
     <summary>Crear habitación</summary>
 
@@ -269,6 +269,13 @@
     </ag-grid-angular>
   </div>
 </ng-container>
+
+<!-- Detail Form -->
+<app-room-detail
+  *ngIf="selected && !editing"
+  [room]="selected"
+  (editRequested)="onDetailEdit($event)"
+></app-room-detail>
 
 <!-- Edit Form -->
 <form *ngIf="editing" class="card mt-4 room-form">

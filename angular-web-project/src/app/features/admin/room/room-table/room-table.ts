@@ -16,6 +16,7 @@ import { MultiSelectFilterComponent } from '../../filters/multi-select-filter/mu
 import { gridTheme as sharedGridTheme } from '../../sharedTable';
 import type { ITextFilterParams, INumberFilterParams } from 'ag-grid-community';
 import { zip } from 'rxjs';
+import { RoomDetail } from '../room-detail/room-detail';
 
 const TEXT_FILTER_CONFIG: ITextFilterParams = {
   filterOptions: ['contains', 'equals', 'notContains', 'startsWith'],
@@ -32,7 +33,7 @@ type ToastCtor = new (element: string | Element, config?: any) => { show(): void
 @Component({
   selector: 'app-rooms-table',
   standalone: true,
-  imports: [CommonModule, FormsModule, AgGridAngular],
+  imports: [CommonModule, FormsModule, AgGridAngular, RoomDetail],
   templateUrl: './room-table.html',
   styleUrls: ['./room-table.css']
 })
@@ -70,6 +71,9 @@ export class RoomsTableComponent implements OnInit {
     cle_status: 'CLEAN',
     images: []
   };
+
+  // Selection and detail
+  selected?: Room;
   
   private gridApi?: GridApi<Room>;
   readonly gridTheme: typeof sharedGridTheme = sharedGridTheme;
@@ -127,6 +131,10 @@ export class RoomsTableComponent implements OnInit {
     },
     onGridPreDestroyed: () => {
       this.gridApi = undefined;
+    },
+    onSelectionChanged: params => {
+      const [row] = params.api.getSelectedRows();
+      this.selected = row || undefined;
     },
     columnDefs: [
       { 
@@ -322,11 +330,9 @@ export class RoomsTableComponent implements OnInit {
           api.refreshCells({ force: true });
         });
         
-        void this.showToast('Room created successfully');
       },
       error: (e) => {
         this.createLoading = false;
-        void this.showToast(e?.error?.detail || 'Error creating room');
       }
     });
   }
@@ -415,10 +421,13 @@ export class RoomsTableComponent implements OnInit {
         this.withGridApi(api => {
           api.applyTransaction({ update: [enrichedRoom] });
           api.refreshCells({ force: true });
+          // Limpiar selección del grid para volver a la tabla
+          api.deselectAll();
         });
 
+        // Limpiar selección para volver a la tabla
+        this.selected = undefined;
         this.cancelEdit();
-        void this.showToast('Room updated successfully');
       },
       error: (e) => {
         this.loading = false;
@@ -455,11 +464,16 @@ export class RoomsTableComponent implements OnInit {
         this.roomsList = this.roomsList.filter(r => r.room_id !== room.room_id);
         this.rowData = this.rowData.filter(r => r.room_id !== room.room_id);
         
-        this.withGridApi(api => api.applyTransaction({ remove: [room] }));
-        void this.showToast('Room deleted successfully');
+        this.withGridApi(api => {
+          api.applyTransaction({ remove: [room] });
+          api.deselectAll();
+        });
+        
+        // Limpiar selección para volver a la tabla
+        this.selected = undefined;
       },
       error: () => {
-        void this.showToast('Error deleting room');
+        // Error silencioso - no mostrar toast
       }
     });
   }
@@ -470,6 +484,10 @@ export class RoomsTableComponent implements OnInit {
   onSearch(term: string): void {
     this.search = term;
     this.withGridApi(api => api.setGridOption('quickFilterText', term || undefined));
+  }
+
+  onDetailEdit(room: Room): void {
+    this.beginEdit(room);
   }
 
   private withGridApi(action: (api: GridApi<Room>) => void): void {

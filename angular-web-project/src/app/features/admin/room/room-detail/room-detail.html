@@ -1,0 +1,201 @@
+<ng-container *ngIf="room as current; else detailEmpty">
+  <div class="card mt-4 room-form room-detail">
+    <div class="card-body row g-3">
+      <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2 mb-1">
+        <h5 class="card-title mb-0">Detalle de la habitación</h5>
+        <button type="button" class="btn btn-olive btn-sm" (click)="beginEdit()">Editar</button>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Número</label>
+        <div class="form-control-plaintext">{{ current.number || fallbackText }}</div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Hotel</label>
+        <div class="form-control-plaintext">
+          {{ current.hotel?.name || 'ID ' + current.hotel_id || fallbackText }}
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Piso</label>
+        <div class="form-control-plaintext">{{ current.floor || fallbackText }}</div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Tipo</label>
+        <div class="form-control-plaintext">
+          {{ current.room_type?.name || 'ID ' + current.room_type_id || fallbackText }}
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Estado de Reserva</label>
+        <div class="form-control-plaintext">
+          <span class="badge {{ getResStatusBadge(current.res_status) }}">
+            {{ getResStatusText(current.res_status) }}
+          </span>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Estado de Limpieza</label>
+        <div class="form-control-plaintext">
+          <span class="badge {{ getCleStatusBadge(current.cle_status) }}">
+            {{ getCleStatusText(current.cle_status) }}
+          </span>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Tema</label>
+        <div class="form-control-plaintext">{{ current.theme_name || fallbackText }}</div>
+      </div>
+
+      <!-- Información del tipo de habitación -->
+      <ng-container *ngIf="current.room_type">
+        <div class="col-md-4">
+          <label class="form-label">Capacidad</label>
+          <div class="form-control-plaintext">
+            <ng-container *ngIf="current.room_type.capacity != null; else emptyField">
+              {{ current.room_type.capacity }} personas
+            </ng-container>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Precio por noche</label>
+          <div class="form-control-plaintext">
+            <ng-container *ngIf="current.room_type.base_price != null; else emptyField">
+              {{ current.room_type.base_price | currency : 'USD' : 'symbol-narrow' : '1.2-2' }}
+            </ng-container>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Tipo de habitación</label>
+          <div class="form-control-plaintext">{{ current.room_type.name || fallbackText }}</div>
+        </div>
+      </ng-container>
+
+      <div class="col-12">
+        <div class="imagenes-wrapper">
+          <div
+            class="imagenes-header d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2"
+          >
+            <label class="form-label mb-0">Imágenes</label>
+            <div class="btn-group btn-group-sm" role="group" *ngIf="current.images?.length">
+              <button
+                type="button"
+                class="btn btn-outline-olive"
+                [class.active]="displayMode === 'carousel'"
+                (click)="setDisplayMode('carousel')"
+              >
+                Carrusel
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-olive"
+                [class.active]="displayMode === 'list'"
+                (click)="setDisplayMode('list')"
+              >
+                Lista
+              </button>
+            </div>
+          </div>
+
+          <div *ngIf="current.images?.length; else noImages" class="imagenes-body">
+            <ng-container [ngSwitch]="displayMode">
+              <div
+                *ngSwitchCase="'carousel'"
+                class="carousel slide mb-3 position-relative imagenes-content"
+              >
+                <div class="carousel-inner carousel-stage">
+                  <div
+                    *ngFor="let src of current.images; let i = index; trackBy: trackByIndex"
+                    class="carousel-item"
+                    [class.active]="i === activeSlide"
+                    [attr.aria-hidden]="i !== activeSlide"
+                  >
+                    <div class="carousel-frame">
+                      <img
+                        [src]="src"
+                        class="carousel-img"
+                        alt="Imagen {{ i + 1 }}"
+                        (load)="onImageLoaded(i)"
+                        (error)="onImageError(i)"
+                        [class.opacity-0]="imageStatus[i] !== 'loaded'"
+                      />
+                      <div
+                        *ngIf="imageStatus[i] === 'idle'"
+                        class="carousel-overlay carousel-overlay-light"
+                      >
+                        <span class="fw-bold text-secondary">Cargando…</span>
+                      </div>
+                      <div
+                        *ngIf="imageStatus[i] === 'error'"
+                        class="carousel-overlay carousel-overlay-error"
+                      >
+                        <i class="bi bi-exclamation-triangle-fill fs-2"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  class="carousel-control-prev"
+                  type="button"
+                  (click)="prev()"
+                  [disabled]="current.images.length < 2"
+                >
+                  <span class="carousel-control-prev-icon"></span>
+                  <span class="visually-hidden">Anterior</span>
+                </button>
+                <button
+                  class="carousel-control-next"
+                  type="button"
+                  (click)="next()"
+                  [disabled]="current.images.length < 2"
+                >
+                  <span class="carousel-control-next-icon"></span>
+                  <span class="visually-hidden">Siguiente</span>
+                </button>
+              </div>
+
+              <div *ngSwitchCase="'list'" class="imagenes-content imagenes-list">
+                <ul class="list-group">
+                  <li
+                    *ngFor="let src of current.images; let i = index; trackBy: trackByIndex"
+                    class="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <div class="me-2 text-truncate" style="max-width: 70%">
+                      {{ src }}
+                    </div>
+                    <span *ngIf="imageStatus[i] === 'error'" class="badge text-bg-danger"
+                      >Error</span
+                    >
+                    <span *ngIf="imageStatus[i] === 'loaded'" class="badge text-bg-success"
+                      >OK</span
+                    >
+                  </li>
+                </ul>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>
+
+<ng-template #emptyField>
+  <span class="text-muted">{{ fallbackText }}</span>
+</ng-template>
+
+<ng-template #noImages>
+  <div class="text-muted fst-italic">No hay imágenes registradas.</div>
+</ng-template>
+
+<ng-template #detailEmpty>
+  <div class="alert alert-info mt-4">Selecciona una habitación para ver su detalle.</div>
+</ng-template>
