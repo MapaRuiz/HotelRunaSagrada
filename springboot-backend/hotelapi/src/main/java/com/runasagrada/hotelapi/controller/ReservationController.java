@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -82,4 +83,27 @@ public class ReservationController {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    // GET /api/reservations/current?userId=...
+@GetMapping("/current")
+public List<Reservation> getCurrent(@RequestParam(required = false) Integer userId) {
+    if (userId != null) {
+        return service.findCurrentByUser(userId);
+    }
+    // si no se pasa userId devolvemos todas las actuales
+    LocalDate today = LocalDate.now();
+    return service.findAll().stream()
+            .filter(r -> r.getCheckOut() != null && !r.getCheckOut().isBefore(today))
+            .collect(Collectors.toList());
+}
+
+// GET /api/reservations/history?userId=...
+@GetMapping("/history")
+public List<Reservation> getHistory(@RequestParam(required = false) Integer userId) {
+    if (userId != null) {
+        return service.findByUser(userId);
+    }
+    return service.findAll();
+}
+
 }
