@@ -187,7 +187,7 @@ export class HotelsComponent implements OnInit {
         field: 'amenities',
         flex: 0.7,
         minWidth: 100,
-        maxWidth: 120,
+        maxWidth: 200,
         sortable: true,
         filter: 'agNumberColumnFilter',
         filterParams: NUMBER_FILTER_CONFIG,

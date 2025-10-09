@@ -13,7 +13,7 @@
           <input class="form-control" type="number" min="1" [(ngModel)]="createForm.capacity" />
         </div>
         <div class="col-sm-3">
-          <label class="form-label">Base price</label>
+          <label class="form-label">Precio Base</label>
           <input class="form-control" type="number" min="0" [(ngModel)]="createForm.base_price" />
         </div>
         <div class="col-sm-12">
@@ -49,6 +49,7 @@
   <div class="mt-3 mb-2">
     <input
       type="search"
+      class="form-control input-soft"
       placeholder="Buscar tipos de habitación…"
       [value]="search"
       (input)="onSearch($any($event.target).value)"

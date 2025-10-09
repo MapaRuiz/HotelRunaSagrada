@@ -54,12 +54,6 @@ export class TaskList implements OnInit {
     this.isBrowser = isPlatformBrowser(this.platformId);
     if (this.isBrowser) {
       ModuleRegistry.registerModules([AllCommunityModule]);
-      // Configurar acciones globales para los botones
-      (window as any).taskActions = {
-        startTask: (taskId: number) => this.startTask(taskId),
-        completeTask: (taskId: number) => this.completeTask(taskId),
-        cancelTask: (taskId: number) => this.cancelTask(taskId)
-      };
     }
   }
 
@@ -158,22 +152,37 @@ export class TaskList implements OnInit {
         minWidth: 200,
         cellRenderer: (params: any) => {
           const task = params.data;
-          let buttonsHtml = '<div class="d-flex gap-1">';
+          const container = document.createElement('div');
+          container.className = 'd-flex gap-1';
           
           if (task.status === 'PENDING') {
-            buttonsHtml += `<button class="btn btn-sm btn-outline-primary" onclick="window.taskActions.startTask(${task.task_id})" title="Iniciar tarea">Iniciar</button>`;
+            const startBtn = document.createElement('button');
+            startBtn.className = 'btn btn-sm btn-outline-primary';
+            startBtn.innerHTML = 'Iniciar';
+            startBtn.title = 'Iniciar tarea';
+            startBtn.onclick = () => this.startTask(task.task_id);
+            container.appendChild(startBtn);
           }
           
           if (task.status === 'IN_PROGRESS') {
-            buttonsHtml += `<button class="btn btn-sm btn-outline-success" onclick="window.taskActions.completeTask(${task.task_id})" title="Completar tarea">Completar</button>`;
+            const completeBtn = document.createElement('button');
+            completeBtn.className = 'btn btn-sm btn-outline-success';
+            completeBtn.innerHTML = 'Completar';
+            completeBtn.title = 'Completar tarea';
+            completeBtn.onclick = () => this.completeTask(task.task_id);
+            container.appendChild(completeBtn);
           }
           
           if (task.status !== 'CANCELED' && task.status !== 'DONE') {
-            buttonsHtml += `<button class="btn btn-sm btn-outline-danger" onclick="window.taskActions.cancelTask(${task.task_id})" title="Cancelar tarea">Cancelar</button>`;
+            const cancelBtn = document.createElement('button');
+            cancelBtn.className = 'btn btn-sm btn-outline-danger';
+            cancelBtn.innerHTML = 'Cancelar';
+            cancelBtn.title = 'Cancelar tarea';
+            cancelBtn.onclick = () => this.cancelTask(task.task_id);
+            container.appendChild(cancelBtn);
           }
           
-          buttonsHtml += '</div>';
-          return buttonsHtml;
+          return container;
         },
         sortable: false
       }

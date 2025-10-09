@@ -1,6 +1,4 @@
 <ng-container *ngIf="isBrowser && !editId">
-  <h4>Usuarios</h4>
-
   <details #createDetails (toggle)="onCreateToggle($event)">
     <summary>Crear usuario</summary>
 
@@ -128,6 +126,7 @@
   <div class="mt-3 mb-2">
     <input
       type="search"
+      class="form-control input-soft"
       placeholder="Buscar usuarios…"
       [value]="search"
       (input)="onSearch($any($event.target).value)"
