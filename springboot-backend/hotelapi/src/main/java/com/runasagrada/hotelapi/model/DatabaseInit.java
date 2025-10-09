@@ -1416,37 +1416,44 @@ public class DatabaseInit implements CommandLineRunner {
 
                 List<Room> rooms = roomRepository.findAll();
 
-                Random random = new Random();
-                LocalDate base = LocalDate.now();
+Random random = new Random();
+LocalDate base = LocalDate.of(2025, 1, 1);
+int diasDelAnio = base.lengthOfYear(); // 365 días
 
-                // Crear 15 reservas de ejemplo
-                for (int i = 0; i < 15; i++) {
-                        User user = clients.get(random.nextInt(clients.size()));
-                        Room room = rooms.get(random.nextInt(rooms.size()));
-                        Hotel hotel = room.getHotel();
+// Crear 15 reservas de ejemplo
+for (int i = 0; i < 15; i++) {
+    User user = clients.get(random.nextInt(clients.size()));
+    Room room = rooms.get(random.nextInt(rooms.size()));
+    Hotel hotel = room.getHotel();
 
-                        // checkIn y checkOut aleatorios (2 a 4 noches)
-                        LocalDate checkIn = base.plusDays(random.nextInt(10) + 1); // entre mañana y 10 días
-                        LocalDate checkOut = checkIn.plusDays(random.nextInt(3) + 2);
+    // checkIn aleatorio dentro del año y checkOut 2 a 4 noches después
+    LocalDate checkIn = base.plusDays(random.nextInt(diasDelAnio));
+    LocalDate checkOut = checkIn.plusDays(random.nextInt(3) + 2);
 
-                        Reservation res = new Reservation();
-                        res.setUser(user);
-                        res.setHotel(hotel);
-                        res.setRoom(room);
-                        res.setCheckIn(checkIn);
-                        res.setCheckOut(checkOut);
-                        res.setStatus(Reservation.Status.CONFIRMED);
+    // Asegurar que no se pase del año
+    if (checkOut.getYear() > 2025) {
+        checkOut = LocalDate.of(2025, 12, 31);
+    }
 
-                        Reservation saved = reservationRepo.save(res);
+    Reservation res = new Reservation();
+    res.setUser(user);
+    res.setHotel(hotel);
+    res.setRoom(room);
+    res.setCheckIn(checkIn);
+    res.setCheckOut(checkOut);
+    res.setStatus(Reservation.Status.CONFIRMED);
 
-                        // Crear locks por cada día
-                        LocalDate d = checkIn;
-                        while (d.isBefore(checkOut)) {
-                                RoomLock lock = new RoomLock(room.getRoomId(), d, saved);
-                                roomLockRepo.save(lock);
-                                d = d.plusDays(1);
-                        }
-                }
+    Reservation saved = reservationRepo.save(res);
+
+        // Crear locks por cada día
+        LocalDate d = checkIn;
+        while (d.isBefore(checkOut)) {
+                RoomLock lock = new RoomLock(room.getRoomId(), d, saved);
+                roomLockRepo.save(lock);
+                d = d.plusDays(1);
+        }
+        }
+
         }
 
         private String pickIcon(int i) {

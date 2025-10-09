@@ -115,9 +115,16 @@ export class ClientDashboardComponent implements OnInit {
       next: (res) => {
         console.debug('loadCurrentReservations response sample:', res?.[0]);
         const normalized = (res || []).map((r: any) => this.normalizeReservation(r));
-  this.reservations = normalized;
-  
-  this.updateSummaryAndChart();
+       
+        const today = new Date();
+        const current = (normalized || []).filter((r: any) => {
+          if (!r) return false;
+          if (!r.checkOut) return true; 
+          const co = new Date(r.checkOut);
+          return co >= today;
+        });
+        this.reservations = current;
+        this.updateSummaryAndChart();
         
         this.loading = false;
       },
@@ -135,9 +142,16 @@ export class ClientDashboardComponent implements OnInit {
       next: (res) => {
         console.debug('loadHistoryReservations response sample:', res?.[0]);
         const normalized = (res || []).map((r: any) => this.normalizeReservation(r));
-  this.reservations = normalized;
-  
-  this.updateSummaryAndChart();
+        // History: only reservations with checkOut before today (no están vigentes)
+        const today = new Date();
+        const past = (normalized || []).filter((r: any) => {
+          if (!r || !r.checkOut) return false;
+          const co = new Date(r.checkOut);
+          return co < today;
+        });
+        this.reservations = past;
+
+        this.updateSummaryAndChart();
        
         this.loading = false;
       },
