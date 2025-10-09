@@ -5,6 +5,7 @@ import { User } from '../model/user';
 
 @Injectable({ providedIn: 'root' })
 export class UsersService {
+  // Correcion 
   private http = inject(HttpClient);
   private base = environment.apiBaseUrl;
 
