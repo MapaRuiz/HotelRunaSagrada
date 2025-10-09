@@ -9,6 +9,7 @@ import { environment } from '../../../../environments/environment';
 import { AG_GRID_LOCALE, gridTheme as sharedGridTheme } from '../sharedTable';
 import { ActionButtonsComponent } from '../action-buttons-cell/action-buttons-cell';
 import { ActionButtonsParams } from '../action-buttons-cell/action-buttons-param';
+import { AmenityDetail } from './amenity-detail/amenity-detail';
 
 const TEXT_FILTER_CONFIG: ITextFilterParams = {
   filterOptions: ['contains', 'equals', 'notContains', 'startsWith'],
@@ -23,7 +24,7 @@ const NUMBER_FILTER_CONFIG: INumberFilterParams = {
 @Component({
   standalone: true,
   selector: 'app-admin-amenities',
-  imports: [CommonModule, FormsModule, AgGridAngular],
+  imports: [CommonModule, FormsModule, AgGridAngular, AmenityDetail],
   styleUrls: ['./amenities.css'],
   templateUrl: `./amenities.html`,
   encapsulation: ViewEncapsulation.None
@@ -304,8 +305,12 @@ export class AmenitiesComponent implements OnInit {
           api.refreshCells({ force: true });
           api.refreshClientSideRowModel('everything');
           api.setGridOption('quickFilterText', this.search || undefined);
+          // Limpiar selección del grid para volver a la tabla
+          api.deselectAll();
         });
 
+        // Limpiar selección para volver a la tabla
+        this.selected = undefined;
         this.cancelEdit();
       },
       error: e => {
@@ -326,7 +331,13 @@ export class AmenitiesComponent implements OnInit {
     
     this.api.delete(a.amenity_id).subscribe({
       next: () => {
-        this.withGridApi(api => api.applyTransaction({ remove: [a] }));
+        this.withGridApi(api => {
+          api.applyTransaction({ remove: [a] });
+          api.deselectAll();
+        });
+        
+        // Limpiar selección para volver a la tabla
+        this.selected = undefined;
       },
       error: e => {
         // Rollback on error
@@ -336,5 +347,9 @@ export class AmenitiesComponent implements OnInit {
         alert(e?.error?.message || e.message || 'Error al eliminar');
       }
     });
+  }
+
+  onDetailEdit(amenity: Amenity): void {
+    this.beginEdit(amenity);
   }
 }

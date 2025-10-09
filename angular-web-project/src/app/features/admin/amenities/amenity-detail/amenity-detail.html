@@ -1,0 +1,83 @@
+<ng-container *ngIf="amenity as current; else detailEmpty">
+  <div class="card mt-4 services-form services-detail">
+    <div class="card-body row g-3">
+      <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2 mb-1">
+        <h5 class="card-title mb-0">Detalle de la amenidad</h5>
+        <button type="button" class="btn btn-olive btn-sm" (click)="beginEdit()">Editar</button>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">ID</label>
+        <div class="form-control-plaintext">{{ current.amenity_id || fallbackText }}</div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Nombre</label>
+        <div class="form-control-plaintext">{{ current.name || fallbackText }}</div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Tipo</label>
+        <div class="form-control-plaintext">
+          <span class="badge {{ getTypeBadge(current.type) }}">
+            {{ getTypeText(current.type) }}
+          </span>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Imagen</label>
+        <div class="amenity-image-container">
+          <ng-container [ngSwitch]="imageStatus">
+            <!-- Imagen cargando -->
+            <div *ngSwitchCase="'idle'" class="image-placeholder">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+              </div>
+              <span class="ms-2">Cargando imagen...</span>
+            </div>
+
+            <!-- Imagen cargada exitosamente -->
+            <div *ngSwitchCase="'loaded'" class="image-success">
+              <img
+                [src]="getImageUrl(current.image)"
+                [alt]="current.name"
+                class="amenity-image"
+                (load)="onImageLoaded()"
+                (error)="onImageError()"
+              />
+            </div>
+
+            <!-- Error al cargar imagen -->
+            <div *ngSwitchCase="'error'" class="image-error">
+              <i class="bi bi-image-fill"></i>
+              <span>Error al cargar la imagen</span>
+              <small class="text-muted d-block">{{ current.image || 'URL no disponible' }}</small>
+            </div>
+          </ng-container>
+
+          <!-- Imagen inicial que dispara los eventos -->
+          <img
+            *ngIf="imageStatus === 'idle'"
+            [src]="getImageUrl(current.image)"
+            [alt]="current.name"
+            class="d-none"
+            (load)="onImageLoaded()"
+            (error)="onImageError()"
+          />
+        </div>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">URL de la imagen</label>
+        <div class="form-control-plaintext">
+          <code class="text-break">{{ current.image || fallbackText }}</code>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>
+
+<ng-template #detailEmpty>
+  <div class="alert alert-info mt-4">Selecciona una amenidad para ver su detalle.</div>
+</ng-template>

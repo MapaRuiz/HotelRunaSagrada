@@ -65,6 +65,13 @@
   </div>
 </ng-container>
 
+<!-- Detail Form -->
+<app-amenity-detail
+  *ngIf="selected && !editing"
+  [amenity]="selected"
+  (editRequested)="onDetailEdit($event)"
+></app-amenity-detail>
+
 <!-- Editing form -->
 <div *ngIf="editing" class="card card-body amenity-edit-form">
   <h5>Editar Amenity</h5>
