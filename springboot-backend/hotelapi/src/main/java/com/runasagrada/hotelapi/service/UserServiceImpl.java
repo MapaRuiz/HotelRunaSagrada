@@ -2,6 +2,7 @@ package com.runasagrada.hotelapi.service;
 
 import com.runasagrada.hotelapi.model.Role;
 import com.runasagrada.hotelapi.model.User;
+import com.runasagrada.hotelapi.repository.ReservationRepository;
 import com.runasagrada.hotelapi.repository.RoleRepository;
 import com.runasagrada.hotelapi.repository.UserRepository;
 
@@ -23,6 +24,10 @@ public class UserServiceImpl implements UserService {
     private RoleRepository roles;
     @Autowired
     private ServiceHelper helper;
+    @Autowired
+    private ReservationRepository reservationRepo;
+    @Autowired
+    private ReservationService reservationService;
 
     @Override
     public User register(User u, String roleName) {
@@ -107,5 +112,16 @@ public class UserServiceImpl implements UserService {
         }
 
         return users.save(u);
+    }
+
+    public void deleteCascade(Integer id) {
+        // 1) Borrar reservas del usuario (usa el service para que limpie RoomLocks)
+        var reservas = reservationRepo.findByUserUserId(id);
+        for (var r : reservas) {
+            reservationService.delete(r.getReservationId());
+        }
+        // 2) Borrar el usuario
+        users.deleteById(id);
+        helper.resyncIdentity("users", "user_id");
     }
 }

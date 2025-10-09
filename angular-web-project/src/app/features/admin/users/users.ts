@@ -346,10 +346,28 @@ export class Users implements OnInit {
   }
 
   remove(u: User) {
-    if (!confirm(`¿Eliminar a ${u.full_name || u.email}?`)) return;
-    this.api.delete(u.user_id).subscribe({
-      next: () => this.users = this.users.filter(x => x.user_id !== u.user_id),
-      error: err => alert(err?.error?.message || err.message || 'Error al eliminar usuario')
-    });
-  }
+  if (!confirm(`¿Eliminar a ${u.full_name || u.email}?`)) return;
+
+  this.api.delete(u.user_id, true).subscribe({
+    next: () => this.users = this.users.filter(x => x.user_id !== u.user_id),
+    error: err => {
+      // Si hay reservas -> 409 desde el back (Opción A) o FK directo
+      if (err?.status === 409 || /Referential integrity|FOREIGN KEY/i.test(err?.error || '')) {
+        const goCascade = confirm(
+          'Este usuario tiene reservas asociadas.\n' +
+          '¿Quieres eliminar también sus reservas y continuar?'
+        );
+        if (!goCascade) return;
+
+        this.api.delete(u.user_id, true).subscribe({
+          next: () => this.users = this.users.filter(x => x.user_id !== u.user_id),
+          error: e2 => alert(e2?.error?.message || e2.message || 'Error al eliminar en cascada')
+        });
+      } else {
+        alert(err?.error?.message || err.message || 'Error al eliminar usuario');
+      }
+    }
+  });
+}
+
 }

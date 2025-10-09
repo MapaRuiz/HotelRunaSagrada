@@ -5,6 +5,8 @@ import lombok.*;
 import java.time.Instant;
 import java.util.*;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @Entity
 @Table(name = "users")
 @Data
@@ -19,6 +21,7 @@ public class User {
     private String email;
 
     @Column(nullable = false, length = 255)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @Column(length = 120)

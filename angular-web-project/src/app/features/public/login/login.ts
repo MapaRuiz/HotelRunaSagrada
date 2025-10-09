@@ -78,11 +78,16 @@ onSubmit(ev?: Event) {
     
       // Guarda un shape simple que nuestra función de detalle sabe leer
       localStorage.setItem('user', JSON.stringify({
-        id:  res.user?.user_id,
-        name: res.user?.full_name,
-        roles: res.user?.roles ?? [],
-        token: res.access_token ?? null
-      }));
+  // Shape ligero que usas en el resto de la app
+  id:   res.user?.user_id,
+  name: res.user?.full_name,
+  roles: res.user?.roles ?? [],
+  token: res.access_token ?? null,
+
+  // 👉 Alias compatibles con componentes que esperan snake_case
+  user_id:  res.user?.user_id,
+  full_name: res.user?.full_name
+}));
     
       // Si veníamos de /room-type/:id?hotelId=...
       const ret = this.route.snapshot.queryParamMap.get('returnUrl');
