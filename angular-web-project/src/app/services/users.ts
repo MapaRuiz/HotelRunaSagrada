@@ -37,4 +37,13 @@ delete(id: number, cascade = false) {
 }
 
   deleteMe(cascade = false) { return this.http.delete<void>(`${this.base}/users/me`, { params: { cascade } }); }
+
+  
+  getCurrentReservations(userId: number) {
+    return this.http.get<any[]>(`${this.base}/reservations/current`, { params: { userId: String(userId) } });
+  }
+
+  getHistoryReservations(userId: number) {
+    return this.http.get<any[]>(`${this.base}/reservations/history`, { params: { userId: String(userId) } });
+  }
 }
