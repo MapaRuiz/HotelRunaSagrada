@@ -30,23 +30,26 @@ export class ClientProfileComponent implements OnInit {
     phone?: string;
     national_id?: string;
     selected_pet?: string;
-    password?: string;
-    password2?: string;
   } = {};
 
   ngOnInit() {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('user');
-      this.me = stored ? JSON.parse(stored) as User : null;
-      if (this.me) {
+    this.api.getMe().subscribe({
+      next: (u) => {
+        this.me = u;
         this.draft = {
-          full_name: this.me.full_name,
-          phone: this.me.phone,
-          national_id: this.me.national_id,
-          selected_pet: this.me.selected_pet,
+          full_name: u.full_name ?? '',
+          phone: u.phone ?? '',
+          national_id: u.national_id ?? '',
+          selected_pet: u.selected_pet ?? '',
         };
+      },
+      error: (err) => {
+        if (err?.status === 401) {
+          localStorage.removeItem('user');
+          this.router.navigate(['/login'], { queryParams: { returnUrl: '/client/profile' } });
+        }
       }
-    }
+    });
   }
 
   img(path?: string) {
@@ -54,15 +57,8 @@ export class ClientProfileComponent implements OnInit {
     return path.startsWith('http') ? path : `${this.backendBase}${path}`;
   }
 
-  isPasswordOk(v?: string) { return !!v && v.length >= 6; }
-  passwordsMatch(a?: string, b?: string) { return (a || '') === (b || ''); }
-
   save(f: NgForm) {
     this.editTouched = true;
-
-    if (this.draft.password && (!this.isPasswordOk(this.draft.password) || !this.passwordsMatch(this.draft.password, this.draft.password2))) {
-      return;
-    }
 
     const body: any = {
       full_name: this.draft.full_name,
@@ -70,15 +66,21 @@ export class ClientProfileComponent implements OnInit {
       national_id: this.draft.national_id,
       selected_pet: this.draft.selected_pet,
     };
-    if (this.draft.password) body.password = this.draft.password;
 
-    if (!this.me) return;
-
-    this.api.update(this.me.user_id, body).subscribe({
+    this.api.updateMe(body).subscribe({
       next: (upd) => {
         this.me = upd;
-        localStorage.setItem('user', JSON.stringify(upd));
         this.editTouched = false;
+
+        const prev = JSON.parse(localStorage.getItem('user') || '{}');
+        localStorage.setItem('user', JSON.stringify({
+          ...prev,
+          id: upd.user_id,
+          user_id: upd.user_id,
+          name: upd.full_name,
+          full_name: upd.full_name
+        }));
+
         alert('Perfil actualizado con éxito');
       },
       error: (err) => alert(err?.error?.message || 'Error al actualizar perfil'),
@@ -86,14 +88,12 @@ export class ClientProfileComponent implements OnInit {
   }
 
   deleteAccount() {
-    if (!this.me) return;
     if (!confirm('¿Seguro que deseas eliminar tu cuenta? Esta acción no se puede deshacer.')) return;
-
-    this.api.delete(this.me.user_id).subscribe({
+    this.api.deleteMe(true).subscribe({
       next: () => {
         localStorage.removeItem('user');
         alert('Cuenta eliminada');
-        this.router.navigate(['/']); // lo mando al landing
+        this.router.navigate(['/']);
       },
       error: (err) => alert(err?.error?.message || 'Error al eliminar cuenta'),
     });

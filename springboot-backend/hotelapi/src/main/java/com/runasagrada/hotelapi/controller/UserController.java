@@ -21,6 +21,12 @@ public class UserController {
     @Autowired
     private AuthController auth; // para leer el userId del token (simple)
 
+    @GetMapping("/users/me")
+    public User getMe(@RequestHeader("Authorization") String authHeader) {
+        Integer uid = auth.getUserId(authHeader);
+        return service.me(uid);
+    }
+
     @PutMapping("/users/me")
     public User updateMe(@RequestHeader("Authorization") String authHeader, @RequestBody User partial) {
         Integer uid = auth.getUserId(authHeader);
@@ -34,19 +40,28 @@ public class UserController {
         return service.findAll();
     }
 
-    // BORRARME (requiere Authorization: Bearer ...)
-    @DeleteMapping("/users/me")
-    public ResponseEntity<Void> deleteMe(
-            @RequestHeader(value = "Authorization", required = false) String authHeader) {
-        Integer uid = auth.getUserId(authHeader); // lanza SecurityException si no hay/malo
-        service.delete(uid); // soft delete o hard, como lo tengas
-        return ResponseEntity.noContent().build(); // 204
+    @DeleteMapping("/users/{id:\\d+}")
+    public ResponseEntity<?> deleteById(
+            @PathVariable Integer id,
+            @RequestParam(name = "cascade", defaultValue = "false") boolean cascade) {
+        if (cascade) {
+            service.deleteCascade(id);
+        } else {
+            service.delete(id); // puede lanzar IllegalStateException si hay reservas (opción mixta)
+        }
+        return ResponseEntity.noContent().build();
     }
 
-    // BORRAR POR ID (solo números, evita chocar con 'me')
-    @DeleteMapping("/users/{id:\\d+}")
-    public ResponseEntity<Void> deleteById(@PathVariable Integer id) {
-        service.delete(id);
+    @DeleteMapping("/users/me")
+    public ResponseEntity<?> deleteMe(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestParam(name = "cascade", defaultValue = "false") boolean cascade) {
+        var uid = auth.getUserId(authHeader);
+        if (cascade) {
+            service.deleteCascade(uid);
+        } else {
+            service.delete(uid);
+        }
         return ResponseEntity.noContent().build();
     }
 

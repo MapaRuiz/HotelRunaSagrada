@@ -10,6 +10,10 @@ export class UsersService {
 
   getAll() { return this.http.get<User[]>(`${this.base}/users`); }
 
+  getMe() { 
+  return this.http.get<User>(`${this.base}/users/me`); 
+}
+
   // ✔ Admin crea usuarios reutilizando /auth/register con ?role=
   create(body: Partial<User> & { role?: string; roles?: string[] }) {
     const role = body.role ?? (Array.isArray(body.roles) ? body.roles[0] : undefined);
@@ -27,7 +31,19 @@ export class UsersService {
     return this.http.put<User>(`${this.base}/users/me`, body);
   }
 
-  delete(id: number) { return this.http.delete<void>(`${this.base}/users/${id}`); }
+  // services/users.ts
+delete(id: number, cascade = false) {
+  return this.http.delete<void>(`${this.base}/users/${id}`, { params: { cascade } });
+}
 
-  deleteMe() { return this.http.delete<void>(`${this.base}/users/me`); }
+  deleteMe(cascade = false) { return this.http.delete<void>(`${this.base}/users/me`, { params: { cascade } }); }
+
+  
+  getCurrentReservations(userId: number) {
+    return this.http.get<any[]>(`${this.base}/reservations/current`, { params: { userId: String(userId) } });
+  }
+
+  getHistoryReservations(userId: number) {
+    return this.http.get<any[]>(`${this.base}/reservations/history`, { params: { userId: String(userId) } });
+  }
 }

@@ -37,37 +37,14 @@
             <label class="form-label">Documento</label>
             <input class="form-control" name="national_id" [(ngModel)]="draft.national_id" />
           </div>
-          <div class="col-md-6">
-            <label class="form-label">Nueva contraseña</label>
-            <input
-              class="form-control"
-              type="password"
-              name="password"
-              [(ngModel)]="draft.password"
-            />
-            <div class="form-text">Mínimo 6 caracteres</div>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Confirmar contraseña</label>
-            <input
-              class="form-control"
-              type="password"
-              name="password2"
-              [(ngModel)]="draft.password2"
-            />
-            <div
-              class="text-danger small"
-              *ngIf="editTouched && !passwordsMatch(draft.password, draft.password2)"
-            >
-              No coincide
-            </div>
-          </div>
         </div>
       </div>
     </div>
 
     <div class="mt-3 d-flex gap-2 justify-content-end">
-      <button class="btn btn-primary" type="submit">Guardar cambios</button>
+      <button class="btn btn-primary" type="submit" (mousedown)="editTouched = true">
+        Guardar cambios
+      </button>
       <button type="button" class="btn btn-danger" (click)="deleteAccount()">
         Eliminar cuenta
       </button>

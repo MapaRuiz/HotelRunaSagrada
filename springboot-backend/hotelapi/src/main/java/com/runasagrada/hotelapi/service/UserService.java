@@ -17,4 +17,7 @@ public interface UserService {
     void delete(Integer id);
 
     User updateByAdmin(Integer id, User partial, List<String> roleNames);
+
+    void deleteCascade(Integer id);
+
 }

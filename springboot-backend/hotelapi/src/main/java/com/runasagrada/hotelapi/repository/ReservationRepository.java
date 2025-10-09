@@ -9,4 +9,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
     List<Reservation> findByUserUserId(Integer userId);
 
     List<Reservation> findByHotelHotelId(Long hotelId);
+
+    boolean existsByUserUserId(Integer userId);
 }

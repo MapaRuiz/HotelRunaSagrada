@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -143,4 +144,22 @@ public class ReservationServiceImpl implements ReservationService {
     public List<Reservation> findByUser(Integer userId) {
         return reservationRepo.findByUserUserId(userId);
     }
+
+        @Override
+    @Transactional(readOnly = true)
+    public List<Reservation> findCurrentByUser(Integer userId) {
+        List<Reservation> all = findByUser(userId);
+        LocalDate today = LocalDate.now();
+        return all.stream()
+                .filter(r -> r.getCheckOut() != null && !r.getCheckOut().isBefore(today))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Reservation> findHistoryByUser(Integer userId) {
+
+        return findByUser(userId);
+    }
+
 }

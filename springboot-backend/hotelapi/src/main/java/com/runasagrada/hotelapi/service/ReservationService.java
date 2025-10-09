@@ -23,4 +23,7 @@ public interface ReservationService {
             LocalDate checkIn, LocalDate checkOut, Reservation.Status status);
 
     void delete(Integer id);
+
+    List<Reservation> findCurrentByUser(Integer userId);
+    List<Reservation> findHistoryByUser(Integer userId);
 }
