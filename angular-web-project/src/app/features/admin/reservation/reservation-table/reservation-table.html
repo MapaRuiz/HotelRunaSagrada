@@ -1,4 +1,4 @@
-<ng-container *ngIf="isBrowser && !editing">
+<ng-container *ngIf="isBrowser && !editing && !selected">
   <details #createDetails (toggle)="onCreateToggle($event)">
     <summary>Crear reserva</summary>
 
@@ -133,6 +133,13 @@
     </div>
   </div>
 </ng-container>
+
+<!-- Detail Form -->
+<app-reservation-detail
+  *ngIf="selected && !editing"
+  [reservation]="selected"
+  (editRequested)="onDetailEdit($event)"
+></app-reservation-detail>
 
 <!-- Edit Form -->
 <form *ngIf="editing" class="card mt-4 reservation-form">

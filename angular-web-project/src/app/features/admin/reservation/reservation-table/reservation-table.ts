@@ -18,6 +18,7 @@ import { MultiSelectFilterComponent } from '../../filters/multi-select-filter/mu
 import { gridTheme as sharedGridTheme } from '../../sharedTable';
 import type { ITextFilterParams, IDateFilterParams } from 'ag-grid-community';
 import { zip } from 'rxjs';
+import { ReservationDetail } from '../reservation-detail/reservation-detail';
 
 const TEXT_FILTER_CONFIG: ITextFilterParams = {
   filterOptions: ['contains', 'equals', 'notContains', 'startsWith'],
@@ -32,7 +33,7 @@ const DATE_FILTER_CONFIG: IDateFilterParams = {
 @Component({
   selector: 'app-reservation-table',
   standalone: true,
-  imports: [CommonModule, FormsModule, AgGridAngular],
+  imports: [CommonModule, FormsModule, AgGridAngular, ReservationDetail],
   templateUrl: './reservation-table.html',
   styleUrls: ['./reservation-table.css']
 })
@@ -437,6 +438,10 @@ export class ReservationTableComponent implements OnInit {
   onSearch(term: string): void {
     this.search = term;
     this.withGridApi(api => api.setGridOption('quickFilterText', term || undefined));
+  }
+
+  onDetailEdit(reservation: Reservation): void {
+    this.beginEdit(reservation);
   }
 
   private withGridApi(action: (api: GridApi<Reservation>) => void): void {
