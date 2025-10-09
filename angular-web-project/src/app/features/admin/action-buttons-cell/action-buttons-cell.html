@@ -1,8 +1,8 @@
 <div class="action-buttons">
-  <button type="button" class="btn btn-edit" (click)="onEdit()">
+  <button *ngIf="params.onEdit" type="button" class="btn btn-edit" (click)="onEdit()">
     {{ params.editLabel || 'Editar' }}
   </button>
-  <button type="button" class="btn btn-delete" (click)="onDelete()">
+  <button *ngIf="params.onDelete" type="button" class="btn btn-delete" (click)="onDelete()">
     {{ params.deleteLabel || 'Eliminar' }}
   </button>
   <button

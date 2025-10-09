@@ -1,44 +1,184 @@
-import { Component, inject, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit, Input, Output, EventEmitter, PLATFORM_ID, ViewChild, ElementRef } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TaskService } from '../../../../services/task';
 import { RoomService } from '../../../../services/room';
 import { Task, task_status, task_type } from '../../../../model/task';
 import { forkJoin, of } from 'rxjs';
+import { ColDef, GridOptions, GridApi, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
+import { AgGridAngular } from 'ag-grid-angular';
+import { ActionButtonsParams, AdditionalButton } from '../../../admin/action-buttons-cell/action-buttons-param';
+import { ActionButtonsComponent } from '../../../admin/action-buttons-cell/action-buttons-cell';
+import { AG_GRID_LOCALE } from '../../../admin/sharedTable';
+import { MultiSelectFilterComponent } from '../../../admin/filters/multi-select-filter/multi-select-filter';
+import { gridTheme as sharedGridTheme } from '../../../admin/sharedTable';
+import type { ITextFilterParams } from 'ag-grid-community';
+
+const TEXT_FILTER_CONFIG: ITextFilterParams = {
+  filterOptions: ['contains', 'equals', 'notContains', 'startsWith'],
+  maxNumConditions: 1
+};
 
 @Component({
   selector: 'app-task-list',
-  imports: [CommonModule, FormsModule],
+  standalone: true,
+  imports: [CommonModule, FormsModule, AgGridAngular],
   templateUrl: './task-list.html',
-  styleUrl: './task-list.css'
+  styleUrls: ['./task-list.css']
 })
 export class TaskList implements OnInit {
   private taskService = inject(TaskService);
   private roomService = inject(RoomService);
+  private platformId = inject(PLATFORM_ID);
 
   @Input() staffId?: number;
   @Input() showAllTasks = false;
   @Output() backToParent = new EventEmitter<void>();
   
-  tasks: Task[] = [];
-  filteredTasks: Task[] = [];
+  isBrowser: boolean = false;
   loading = false;
   error: string | null = null;
+  
+  // Fuente de datos
+  tasks: Task[] = [];
+  rowData: Task[] = [];
+  
+  // ag-grid
+  private gridApi?: GridApi<Task>;
+  readonly gridTheme: typeof sharedGridTheme = sharedGridTheme;
+  
+  // Search functionality
+  search = '';
 
-  // Filtros
-  selectedStatus: task_status | '' = '';
-  selectedType: task_type | '' = '';
+  constructor() {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+    if (this.isBrowser) {
+      ModuleRegistry.registerModules([AllCommunityModule]);
+      // Configurar acciones globales para los botones
+      (window as any).taskActions = {
+        startTask: (taskId: number) => this.startTask(taskId),
+        completeTask: (taskId: number) => this.completeTask(taskId),
+        cancelTask: (taskId: number) => this.cancelTask(taskId)
+      };
+    }
+  }
 
-  // Status y tipos disponibles
-  statusOptions: task_status[] = ['PENDING', 'IN_PROGRESS', 'DONE', 'CANCELED'];
-  typeOptions: task_type[] = ['DELIVERY', 'GUIDING', 'TO-DO'];
-
-  // Modal de confirmación
-  showConfirmModal = false;
-  confirmMessage = '';
-  confirmButtonText = '';
-  taskToUpdate: Task | null = null;
-  newStatusToSet: task_status | null = null;
+  gridOptions: GridOptions<Task> = {
+    localeText: AG_GRID_LOCALE,
+    rowSelection: 'single',
+    getRowId: params => params.data.task_id?.toString() || '',
+    onGridReady: params => { 
+      this.gridApi = params.api;
+      setTimeout(() => {
+        params.api.sizeColumnsToFit();
+      }, 100);
+    },
+    onGridPreDestroyed: () => {
+      this.gridApi = undefined;
+    },
+    columnDefs: [
+      { 
+        headerName: 'ID',
+        field: 'task_id',
+        minWidth: 60,
+        maxWidth: 80
+      },
+      { 
+        headerName: 'Tipo',
+        filter: MultiSelectFilterComponent,
+        filterParams: {
+          valueGetter: (row: Task) => this.getTypeLabel(row.type),
+          title: 'Tipos'
+        },
+        valueGetter: params => this.getTypeLabel(params.data?.type || 'TO-DO'),
+        cellRenderer: (params: any) => {
+          const type = params.data?.type;
+          const badgeClass = this.getTypeBadgeClass(type);
+          const text = this.getTypeLabel(type);
+          return `<span class="badge ${badgeClass}">${text}</span>`;
+        },
+        minWidth: 120,
+        maxWidth: 150
+      },
+      { 
+        headerName: 'Estado',
+        filter: MultiSelectFilterComponent,
+        filterParams: {
+          valueGetter: (row: Task) => this.getStatusLabel(row.status),
+          title: 'Estados'
+        },
+        valueGetter: params => this.getStatusLabel(params.data?.status || 'PENDING'),
+        cellRenderer: (params: any) => {
+          const status = params.data?.status;
+          const badgeClass = this.getStatusBadgeClass(status);
+          const text = this.getStatusLabel(status);
+          return `<span class="badge ${badgeClass}">${text}</span>`;
+        },
+        minWidth: 120,
+        maxWidth: 150
+      },
+      { 
+        headerName: 'Staff',
+        valueGetter: params => {
+          const staffName = params.data?.staff?.user?.full_name;
+          const staffId = params.data?.staff_id;
+          return staffName ? `${staffName} (${staffId})` : `Staff ${staffId || 'N/A'}`;
+        },
+        filter: 'agTextColumnFilter',
+        filterParams: TEXT_FILTER_CONFIG,
+        minWidth: 150,
+        flex: 1
+      },
+      { 
+        headerName: 'Habitación',
+        valueGetter: params => params.data?.room?.number ? `Hab. ${params.data.room.number}` : '-',
+        filter: 'agTextColumnFilter',
+        filterParams: TEXT_FILTER_CONFIG,
+        minWidth: 120,
+        maxWidth: 150
+      },
+      { 
+        headerName: 'Servicio',
+        valueGetter: params => params.data?.res_service_id ? `Serv. ${params.data.res_service_id}` : '-',
+        filter: 'agTextColumnFilter',
+        filterParams: TEXT_FILTER_CONFIG,
+        minWidth: 120,
+        maxWidth: 150
+      },
+      { 
+        headerName: 'Creada',
+        valueGetter: params => this.formatDate(params.data?.created_at || ''),
+        filter: 'agDateColumnFilter',
+        minWidth: 140,
+        maxWidth: 180
+      },
+      {
+        headerName: 'Acciones',
+        filter: false,
+        minWidth: 200,
+        cellRenderer: (params: any) => {
+          const task = params.data;
+          let buttonsHtml = '<div class="d-flex gap-1">';
+          
+          if (task.status === 'PENDING') {
+            buttonsHtml += `<button class="btn btn-sm btn-outline-primary" onclick="window.taskActions.startTask(${task.task_id})" title="Iniciar tarea">Iniciar</button>`;
+          }
+          
+          if (task.status === 'IN_PROGRESS') {
+            buttonsHtml += `<button class="btn btn-sm btn-outline-success" onclick="window.taskActions.completeTask(${task.task_id})" title="Completar tarea">Completar</button>`;
+          }
+          
+          if (task.status !== 'CANCELED' && task.status !== 'DONE') {
+            buttonsHtml += `<button class="btn btn-sm btn-outline-danger" onclick="window.taskActions.cancelTask(${task.task_id})" title="Cancelar tarea">Cancelar</button>`;
+          }
+          
+          buttonsHtml += '</div>';
+          return buttonsHtml;
+        },
+        sortable: false
+      }
+    ]
+  };
 
   ngOnInit() {
     this.loadTasks();
@@ -55,6 +195,7 @@ export class TaskList implements OnInit {
     request.subscribe({
       next: (tasks) => {
         this.tasks = tasks;
+        this.rowData = tasks;
         this.loadRoomDetails(tasks);
       },
       error: (error) => {
@@ -73,7 +214,7 @@ export class TaskList implements OnInit {
     ));
 
     if (roomIds.length === 0) {
-      this.applyFilters();
+      this.rowData = [...this.tasks];
       this.loading = false;
       return;
     }
@@ -97,28 +238,18 @@ export class TaskList implements OnInit {
           }
         });
 
-        this.applyFilters();
+        this.rowData = [...this.tasks];
         this.loading = false;
       },
       error: (error) => {
         console.error('Error loading room details:', error);
-        this.applyFilters();
+        this.rowData = [...this.tasks];
         this.loading = false;
       }
     });
   }
 
-  applyFilters() {
-    this.filteredTasks = this.tasks.filter(task => {
-      const matchesStatus = !this.selectedStatus || task.status === this.selectedStatus;
-      const matchesType = !this.selectedType || task.type === this.selectedType;
-      return matchesStatus && matchesType;
-    });
-  }
 
-  onFilterChange() {
-    this.applyFilters();
-  }
 
   getStatusBadgeClass(status: task_status): string {
     switch (status) {
@@ -169,83 +300,58 @@ export class TaskList implements OnInit {
     });
   }
 
-  showConfirmation(task: Task, newStatus: task_status) {
-    this.taskToUpdate = task;
-    this.newStatusToSet = newStatus;
-    
-    switch (newStatus) {
-      case 'IN_PROGRESS':
-        this.confirmMessage = '¿Estás seguro de que quieres iniciar esta tarea?';
-        this.confirmButtonText = 'Iniciar';
-        break;
-      case 'DONE':
-        this.confirmMessage = '¿Estás seguro de que quieres marcar esta tarea como completada?';
-        this.confirmButtonText = 'Completar';
-        break;
-      case 'CANCELED':
-        this.confirmMessage = '¿Estás seguro de que quieres cancelar esta tarea? Esta acción no se puede deshacer.';
-        this.confirmButtonText = 'Cancelar Tarea';
-        break;
-      default:
-        this.confirmMessage = '¿Estás seguro de que quieres realizar esta acción?';
-        this.confirmButtonText = 'Confirmar';
-    }
-    
-    this.showConfirmModal = true;
-  }
 
-  confirmAction() {
-    if (this.taskToUpdate && this.newStatusToSet) {
-      this.updateTaskStatus(this.taskToUpdate, this.newStatusToSet);
-    }
-    this.cancelConfirmation();
-  }
 
-  cancelConfirmation() {
-    this.showConfirmModal = false;
-    this.taskToUpdate = null;
-    this.newStatusToSet = null;
-    this.confirmMessage = '';
-    this.confirmButtonText = '';
-  }
-
-  getConfirmButtonClass(): string {
-    switch (this.newStatusToSet) {
-      case 'IN_PROGRESS':
-        return 'btn-primary';
-      case 'DONE':
-        return 'btn-success';
-      case 'CANCELED':
-        return 'btn-danger';
-      default:
-        return 'btn-primary';
+  // Métodos para las acciones de las tareas (para los botones del cell renderer)
+  startTask(taskId: number): void {
+    const task = this.rowData.find(t => t.task_id === taskId);
+    if (task && task.status === 'PENDING') {
+      this.taskService.update(taskId, { status: 'IN_PROGRESS' }).subscribe({
+        next: () => {
+          this.loadTasks();
+        },
+        error: (error) => {
+          console.error('Error al iniciar la tarea:', error);
+          alert('Error al iniciar la tarea');
+        }
+      });
     }
   }
 
-  getConfirmIconClass(): string {
-    switch (this.newStatusToSet) {
-      case 'IN_PROGRESS':
-        return 'fa-play me-1';
-      case 'DONE':
-        return 'fa-check me-1';
-      case 'CANCELED':
-        return 'fa-times me-1';
-      default:
-        return 'fa-check me-1';
+  completeTask(taskId: number): void {
+    const task = this.rowData.find(t => t.task_id === taskId);
+    if (task && task.status === 'IN_PROGRESS') {
+      this.taskService.update(taskId, { status: 'DONE' }).subscribe({
+        next: () => {
+          this.loadTasks();
+        },
+        error: (error) => {
+          console.error('Error al completar la tarea:', error);
+          alert('Error al completar la tarea');
+        }
+      });
     }
   }
 
-  updateTaskStatus(task: Task, newStatus: task_status) {
-    this.taskService.update(task.task_id, { status: newStatus }).subscribe({
-      next: () => {
-        task.status = newStatus;
-        this.applyFilters();
-      },
-      error: (error) => {
-        console.error('Error updating task status:', error);
-        alert('Error al actualizar el estado de la tarea');
+  cancelTask(taskId: number): void {
+    const task = this.rowData.find(t => t.task_id === taskId);
+    if (task && (task.status === 'PENDING' || task.status === 'IN_PROGRESS')) {
+      if (confirm('¿Estás seguro de que quieres cancelar esta tarea?')) {
+        this.taskService.update(taskId, { status: 'CANCELED' }).subscribe({
+          next: () => {
+            this.loadTasks();
+          },
+          error: (error) => {
+            console.error('Error al cancelar la tarea:', error);
+            alert('Error al cancelar la tarea');
+          }
+        });
       }
-    });
+    }
+  }
+
+  onQuickFilterChanged(event: any): void {
+    this.gridApi?.setGridOption('quickFilterText', event.target.value);
   }
 
   goBack() {
