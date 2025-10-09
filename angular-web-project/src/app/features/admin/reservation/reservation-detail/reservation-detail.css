@@ -1,0 +1,60 @@
+:host {
+  display: block;
+}
+
+.services-detail {
+  background: var(--c-ivory);
+  border: 1px solid rgba(21, 21, 19, 0.08);
+  color: var(--c-ink);
+}
+
+.services-detail .card-title {
+  color: var(--c-olive);
+  font-family: var(--font-title);
+}
+
+.services-detail .form-label {
+  color: var(--c-olive);
+  font-weight: 600;
+}
+
+.services-detail .form-control-plaintext {
+  padding: 0.375rem 0;
+  margin-bottom: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--c-ink);
+  background-color: transparent;
+  border: solid transparent;
+  border-width: 1px 0;
+}
+
+.services-detail .badge {
+  font-size: 0.75rem;
+}
+
+.services-detail .badge.text-bg-success {
+  background: var(--c-olive) !important;
+}
+
+.services-detail .badge.text-bg-danger {
+  background: #c34f4f !important;
+}
+
+.services-detail .table-sm {
+  font-size: 0.8rem;
+  color: var(--c-ink);
+}
+
+.services-detail .table th,
+.services-detail .table td {
+  padding: 0.25rem;
+  vertical-align: middle;
+  color: var(--c-ink);
+}
+
+.services-detail .text-muted {
+  font-size: 0.8rem;
+  color: var(--c-ink) !important;
+  opacity: 0.7;
+}

@@ -1,36 +1,170 @@
-.badge {
-  font-size: 0.75rem;
+/* Estilos base y variables de color */
+:host {
+  --c-olive: #8b966d;
+  --c-ivory: #f7f5e6;
+  --c-ink: #2c3531;
 }
 
-.table th {
-  border-top: none;
+/* Contenedor principal */
+.container-fluid {
+  padding: 20px;
+  background: linear-gradient(135deg, var(--c-ivory) 0%, #ffffff 100%);
+  min-height: 100vh;
+}
+
+/* Header */
+h4 {
+  color: var(--c-ink);
   font-weight: 600;
 }
 
-.btn-group-sm .btn {
-  padding: 0.25rem 0.5rem;
+/* Search input styling */
+.input-soft {
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  padding: 10px 15px;
+  transition: all 0.3s ease;
 }
 
-.card-header {
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
+.input-soft:focus {
+  border-color: var(--c-olive);
+  box-shadow: 0 0 0 0.2rem rgba(139, 150, 109, 0.25);
+  outline: none;
 }
 
-.table-responsive {
+.input-group-text {
+  background: white;
+  border: 2px solid #e9ecef;
+  border-right: none;
+  color: var(--c-olive);
+}
+
+/* Grid wrapper */
+.grid-wrapper {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+  min-height: 400px;
+}
+
+/* AG Grid custom styling */
+::ng-deep .ag-theme-quartz {
+  --ag-font-family: inherit;
+  --ag-font-size: 14px;
+  --ag-header-background-color: var(--c-ink);
+  --ag-header-foreground-color: white;
+  --ag-odd-row-background-color: rgba(139, 150, 109, 0.05);
+  --ag-row-hover-color: rgba(139, 150, 109, 0.1);
+  --ag-selected-row-background-color: rgba(139, 150, 109, 0.2);
   border: none;
 }
 
+::ng-deep .ag-header-cell-text {
+  font-weight: 600 !important;
+}
+
+::ng-deep .ag-cell {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+}
+
+::ng-deep .ag-row {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Badge styling */
+.badge {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* Button styling in grid */
+::ng-deep .ag-cell .btn {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  margin: 0 2px;
+}
+
+::ng-deep .ag-cell .btn-outline-primary {
+  border-color: #007bff;
+  color: #007bff;
+}
+
+::ng-deep .ag-cell .btn-outline-success {
+  border-color: #28a745;
+  color: #28a745;
+}
+
+::ng-deep .ag-cell .btn-outline-danger {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+/* Loading spinner */
 .spinner-border {
   width: 3rem;
   height: 3rem;
+  color: var(--c-olive);
 }
 
+/* Alert styling */
+.alert {
+  border-radius: 8px;
+  border: none;
+}
+
+.alert-danger {
+  background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+  color: #721c24;
+}
+
+.alert-info {
+  background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+  color: #0c5460;
+}
+
+/* Button styling */
+.btn {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-secondary {
+  border-color: var(--c-olive);
+  color: var(--c-olive);
+}
+
+.btn-outline-secondary:hover {
+  background-color: var(--c-olive);
+  border-color: var(--c-olive);
+  color: white;
+}
+
+/* Responsive design */
 @media (max-width: 768px) {
-  .table-responsive {
-    font-size: 0.875rem;
+  .container-fluid {
+    padding: 10px;
   }
   
-  .btn-group-sm .btn {
-    padding: 0.125rem 0.25rem;
+  h4 {
+    font-size: 1.3rem;
+  }
+  
+  .grid-wrapper {
+    border-radius: 8px;
+  }
+  
+  ::ng-deep .ag-theme-quartz {
+    --ag-font-size: 12px;
+  }
+  
+  ::ng-deep .ag-cell .btn {
+    font-size: 0.7rem;
+    padding: 2px 6px;
   }
 }

@@ -1,10 +1,12 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { ICellRendererAngularComp } from 'ag-grid-angular';
 import { ActionButtonsParams } from './action-buttons-param';
 
 @Component({
   selector: 'app-action-buttons-cell',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './action-buttons-cell.html',
   styleUrls: ['./action-buttons-cell.css']
 })
@@ -20,4 +22,10 @@ export class ActionButtonsComponent<T>
 
   onEdit()   { this.params.onEdit(this.params.data as T); }
   onDelete() { this.params.onDelete(this.params.data as T); }
+  
+  onAdditionalAction(btn: any) {
+    if (btn.action) {
+      btn.action(this.params.data as T);
+    }
+  }
 }

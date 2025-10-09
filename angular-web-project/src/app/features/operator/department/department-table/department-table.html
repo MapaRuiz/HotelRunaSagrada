@@ -1,83 +1,133 @@
-<div *ngIf="!showStaffView">
-  <h4 class="mb-3">Departamentos</h4>
+<ng-container *ngIf="isBrowser && !showStaffView && !editing">
+  <details #createDetails (toggle)="onCreateToggle($event)">
+    <summary>Crear departamento</summary>
 
-  <!-- Form inline -->
+    <form *ngIf="showCreate" class="card mt-4 department-form">
+      <div class="card-body row g-3">
+        <h5 class="card-title col-12">Nuevo departamento</h5>
 
-  <div *ngIf="showForm" class="card mt-3">
-    <div class="card-body">
-      <h5 class="card-title">{{ editingId ? 'Editar departamento' : 'Nuevo departamento' }}</h5>
-
-      <div class="row g-2">
-        <div class="col-sm-6">
-          <label class="form-label">Hotel *</label>
-          <select class="form-select" [(ngModel)]="draft_hotel_id">
-            <option [ngValue]="undefined" disabled>Selecciona un hotel…</option>
-            <option *ngFor="let h of hotels" [ngValue]="h.hotel_id">{{ h.name }}</option>
+        <div class="col-md-6">
+          <label class="form-label">Hotel</label>
+          <select class="form-select input-soft" [(ngModel)]="draft.hotel_id" name="hotel" required>
+            <option [ngValue]="undefined">Seleccione hotel…</option>
+            <option *ngFor="let h of hotels" [ngValue]="h.hotel_id">
+              {{ h.name }}
+            </option>
           </select>
         </div>
-        <div class="col-sm-6">
-          <label class="form-label">Nombre del departamento *</label>
+
+        <div class="col-md-6">
+          <label class="form-label">Nombre del departamento</label>
           <input
-            class="form-control"
+            class="form-control input-soft"
             [(ngModel)]="draft.name"
+            name="name"
             placeholder="Ej: Recepción, Limpieza, Mantenimiento"
             maxlength="100"
+            required
           />
         </div>
-      </div>
 
-      <div class="mt-3 d-flex gap-2">
-        <button class="btn btn-success" (click)="save()">Guardar</button>
-        <button class="btn btn-secondary" (click)="cancel()">Cancelar</button>
+        <div class="col-12 text-end">
+          <button
+            class="btn btn-outline-olive me-2"
+            (click)="cancelCreate()"
+            [disabled]="createLoading"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-olive"
+            (click)="saveCreate()"
+            [disabled]="createLoading"
+          >
+            {{ createLoading ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
       </div>
-    </div>
+    </form>
+  </details>
+
+  <div class="mt-3 mb-2">
+    <input
+      type="search"
+      class="form-control input-soft"
+      placeholder="Buscar departamentos…"
+      [value]="search"
+      (input)="onSearch($any($event.target).value)"
+    />
   </div>
 
-  <!-- Filtros -->
-  <div class="row g-2 align-items-end mb-3">
-    <div class="col-sm-4">
+  <div class="departments-grid-wrap">
+    <div *ngIf="loading" class="text-center p-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="mt-2">Cargando departamentos...</p>
+    </div>
+
+    <ag-grid-angular
+      *ngIf="!loading"
+      [theme]="gridTheme"
+      [gridOptions]="gridOptions"
+      [rowData]="rowData"
+      [pagination]="true"
+      style="width: 100%; height: 400px"
+    >
+    </ag-grid-angular>
+
+    <div *ngIf="!loading && rowData.length === 0" class="text-center p-4">
+      <p class="text-muted">No hay departamentos para mostrar.</p>
+      <p class="text-muted small">
+        Crea un nuevo departamento usando el botón "Crear departamento" arriba.
+      </p>
+      <p class="text-muted small">Datos cargados: {{ rowData.length }} departamentos</p>
+    </div>
+  </div>
+</ng-container>
+
+<!-- Edit Form -->
+<form *ngIf="editing" class="card mt-4 department-form">
+  <div class="card-body row g-3">
+    <h5 class="card-title col-12">Editar departamento</h5>
+
+    <div class="col-md-6">
       <label class="form-label">Hotel</label>
-      <select class="form-select" [(ngModel)]="hotelId">
-        <option [ngValue]="undefined">Todos</option>
-        <option *ngFor="let h of hotels" [ngValue]="h.hotel_id">{{ h.name }}</option>
+      <select class="form-select input-soft" [(ngModel)]="draft.hotel_id" name="hotel" required>
+        <option [ngValue]="undefined">Seleccione hotel…</option>
+        <option *ngFor="let h of hotels" [ngValue]="h.hotel_id">
+          {{ h.name }}
+        </option>
       </select>
     </div>
-    <div class="col-sm-8 text-sm-end">
-      <button class="btn btn-primary mt-3 mt-sm-0" (click)="new()">Nuevo departamento</button>
+
+    <div class="col-md-6">
+      <label class="form-label">Nombre del departamento</label>
+      <input
+        class="form-control input-soft"
+        [(ngModel)]="draft.name"
+        name="name"
+        placeholder="Ej: Recepción, Limpieza, Mantenimiento"
+        maxlength="100"
+        required
+      />
+    </div>
+
+    <div class="col-12 text-end">
+      <button
+        class="btn btn-outline-olive me-2"
+        (click)="cancelCreate()"
+        [disabled]="createLoading"
+      >
+        Cancelar
+      </button>
+      <button type="submit" class="btn btn-olive" (click)="saveCreate()" [disabled]="createLoading">
+        {{ createLoading ? 'Guardando...' : 'Guardar' }}
+      </button>
     </div>
   </div>
-
-  <div *ngIf="loading" class="text-muted mb-2">Cargando…</div>
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Hotel</th>
-        <th>Nombre</th>
-        <th>Staff</th>
-        <th class="text-end">Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let d of filteredDepartments; trackBy: trackById">
-        <td>{{ d.department_id }}</td>
-        <td>{{ getHotelName(d.hotel_id) }}</td>
-        <td>{{ d.name }}</td>
-        <td>
-          <button class="btn btn-sm btn-outline-info" (click)="viewStaff(d)">Ver Staff</button>
-        </td>
-        <td class="text-end">
-          <button class="btn btn-sm btn-outline-primary me-2" (click)="edit(d)">Editar</button>
-          <button class="btn btn-sm btn-outline-danger" (click)="remove(d)">Eliminar</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div *ngIf="!loading && filteredDepartments.length === 0" class="text-muted text-center py-4">
-    No se encontraron departamentos
-  </div>
-</div>
+</form>
 
 <div *ngIf="showStaffView && selectedDepartment">
   <app-staff-member-list

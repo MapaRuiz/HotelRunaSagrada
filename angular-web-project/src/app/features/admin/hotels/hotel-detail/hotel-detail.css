@@ -1,0 +1,72 @@
+:host {
+  display: block;
+}
+
+.services-detail {
+  background: var(--c-ivory);
+  border: 1px solid rgba(21, 21, 19, 0.08);
+  color: var(--c-ink);
+}
+
+.services-detail .card-title {
+  color: var(--c-olive);
+  font-family: var(--font-title);
+}
+
+.services-detail .form-label {
+  color: var(--c-olive);
+  font-weight: 600;
+}
+
+.services-detail .form-control-plaintext {
+  padding: 0.375rem 0;
+  margin-bottom: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--c-ink);
+  background-color: transparent;
+  border: solid transparent;
+  border-width: 1px 0;
+}
+
+.services-detail .badge {
+  font-size: 0.75rem;
+}
+
+.services-detail .badge.text-bg-info {
+  background: var(--c-olive) !important;
+}
+
+.hotel-image-container {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hotel-image {
+  width: 100%;
+  height: auto;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.amenities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.5rem;
+}
+
+.amenity-badge {
+  background: var(--c-olive) !important;
+  color: white;
+  font-size: 0.75rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 1rem;
+}

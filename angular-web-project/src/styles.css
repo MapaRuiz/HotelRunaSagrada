@@ -162,3 +162,16 @@ body {
 .leaflet-marker-icon.map-pin {
   z-index: 500 !important;
 }
+
+/* Estilo consistente para los títulos de crear en todos los formularios */
+details summary {
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+h4, input[type="search"] {
+  font-family: var(--font-title);
+  font-weight: 600;
+}

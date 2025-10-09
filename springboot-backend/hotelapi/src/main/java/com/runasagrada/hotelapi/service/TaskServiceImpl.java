@@ -6,6 +6,8 @@ import com.runasagrada.hotelapi.model.Task.TaskType;
 import com.runasagrada.hotelapi.repository.TaskRepository;
 import com.runasagrada.hotelapi.repository.StaffMemberRepository;
 import com.runasagrada.hotelapi.repository.RoomRepository;
+import com.runasagrada.hotelapi.repository.ReservationServiceRepository;
+import com.runasagrada.hotelapi.model.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,9 @@ public class TaskServiceImpl implements TaskService {
 	private RoomRepository rooms;
 
 	@Autowired
+	private ReservationServiceRepository reservationServices;
+
+	@Autowired
 	private ServiceHelper helper;
 
 	@Override
@@ -43,7 +48,14 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
-	public Task create(Task task) {
+	public Task create(Task task, Long resServiceId) {
+		if (resServiceId != null) {
+			ReservationService reservationService = reservationServices.findById(resServiceId)
+					.orElseThrow(
+							() -> new NoSuchElementException("ReservationService not found with id: " + resServiceId));
+			task.setReservationService(reservationService);
+		}
+
 		validate(task);
 		if (task.getTaskId() != null)
 			task.setTaskId(null);
@@ -52,15 +64,23 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
-	public Task update(Long id, Task partial) {
+	public Task update(Long id, Task partial, Long resServiceId) {
 		Task db = findById(id);
 
 		if (partial.getStaffId() != null)
 			db.setStaffId(partial.getStaffId());
 		if (partial.getRoomId() != null)
 			db.setRoomId(partial.getRoomId());
-		if (partial.getResServiceId() != null)
-			db.setResServiceId(partial.getResServiceId());
+
+		if (resServiceId != null) {
+			ReservationService reservationService = reservationServices.findById(resServiceId)
+					.orElseThrow(
+							() -> new NoSuchElementException("ReservationService not found with id: " + resServiceId));
+			db.setReservationService(reservationService);
+		} else if (resServiceId == null && partial.getReservationService() == null) {
+			db.setReservationService(null);
+		}
+
 		if (partial.getType() != null)
 			db.setType(partial.getType());
 		if (partial.getStatus() != null)
@@ -122,5 +142,12 @@ public class TaskServiceImpl implements TaskService {
 		// Verificar que el room existe
 		if (task.getRoomId() != null && !rooms.existsById(task.getRoomId()))
 			throw new NoSuchElementException("Room not found with id: " + task.getRoomId());
+
+		// Verificar que el reservation service existe si está establecido
+		if (task.getReservationService() != null && task.getReservationService().getId() != null) {
+			if (!reservationServices.existsById(task.getReservationService().getId()))
+				throw new NoSuchElementException(
+						"ReservationService not found with id: " + task.getReservationService().getId());
+		}
 	}
 }

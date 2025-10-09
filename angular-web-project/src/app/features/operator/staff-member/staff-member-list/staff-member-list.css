@@ -1,0 +1,42 @@
+.staff-grid-wrap {
+  width: 100%;
+  height: 500px;
+}
+
+.staff-grid-wrap ag-grid-angular {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 768px) {
+  .staff-grid-wrap {
+    height: auto;
+  }
+}
+
+.ag-theme-quartz .ag-header {
+  font-family: cursive;
+}
+.ag-theme-quartz .ag-header-group-cell {
+  font-weight: normal;
+  font-size: 22px;
+}
+.ag-theme-quartz .ag-header-cell {
+  font-size: 18px;
+}
+
+/* Form styles consistent with services */
+.form-label {
+  color: var(--c-olive);
+  font-weight: 600;
+}
+
+label {
+  font-weight: bold;
+}
+
+/* Badge styling */
+.badge {
+  font-size: 0.75rem;
+  padding: 0.25em 0.6em;
+}

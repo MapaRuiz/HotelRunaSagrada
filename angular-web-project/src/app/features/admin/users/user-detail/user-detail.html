@@ -1,0 +1,92 @@
+<ng-container *ngIf="user as current; else detailEmpty">
+  <div class="card mt-4 user-form user-detail">
+    <div class="card-body row g-3">
+      <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2 mb-1">
+        <h5 class="card-title mb-0">Detalle del usuario</h5>
+        <button type="button" class="btn btn-olive btn-sm" (click)="beginEdit()">Editar</button>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Email</label>
+        <div class="form-control-plaintext">{{ current.email || fallbackText }}</div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Nombre completo</label>
+        <div class="form-control-plaintext">{{ current.full_name || fallbackText }}</div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Teléfono</label>
+        <div class="form-control-plaintext">{{ current.phone || fallbackText }}</div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Cédula</label>
+        <div class="form-control-plaintext">{{ current.national_id || fallbackText }}</div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Roles</label>
+        <div class="form-control-plaintext">
+          <ng-container *ngIf="roleNames(current.roles).length > 0; else emptyField">
+            <span
+              *ngFor="let role of roleNames(current.roles); let last = last"
+              class="badge text-bg-secondary me-1"
+            >
+              {{ role }}
+            </span>
+          </ng-container>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Estado</label>
+        <div class="form-control-plaintext">
+          <span
+            class="badge"
+            [class]="current.enabled !== false ? 'text-bg-success' : 'text-bg-secondary'"
+          >
+            {{ current.enabled !== false ? 'Activo' : 'Inactivo' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">ID de usuario</label>
+        <div class="form-control-plaintext">{{ current.user_id || fallbackText }}</div>
+      </div>
+
+      <div class="col-12" *ngIf="current.selected_pet">
+        <label class="form-label">Imagen de perfil</label>
+        <div class="mt-2">
+          <img
+            [src]="img(current.selected_pet)"
+            style="
+              width: 120px;
+              height: 120px;
+              object-fit: cover;
+              border-radius: 50%;
+              border: 2px solid #dee2e6;
+            "
+            alt="Imagen de perfil"
+            (error)="$event.target.style.display = 'none'"
+          />
+        </div>
+      </div>
+
+      <div class="col-12" *ngIf="!current.selected_pet">
+        <label class="form-label">Imagen de perfil</label>
+        <div class="text-muted fst-italic">No hay imagen de perfil registrada.</div>
+      </div>
+    </div>
+  </div>
+</ng-container>
+
+<ng-template #emptyField>
+  <span class="text-muted">{{ fallbackText }}</span>
+</ng-template>
+
+<ng-template #detailEmpty>
+  <div class="alert alert-info mt-4">Selecciona un usuario para ver su detalle.</div>
+</ng-template>

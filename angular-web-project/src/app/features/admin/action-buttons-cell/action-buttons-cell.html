@@ -1,5 +1,17 @@
 <div class="action-buttons">
-  <button type="button" class="btn btn-edit" (click)="onEdit()">Editar</button>
-  <button type="button" class="btn btn-delete" (click)="onDelete()">Eliminar</button>
-  <button type="button" class="btn btn-details">Detalles</button>
+  <button *ngIf="params.onEdit" type="button" class="btn btn-edit" (click)="onEdit()">
+    {{ params.editLabel || 'Editar' }}
+  </button>
+  <button *ngIf="params.onDelete" type="button" class="btn btn-delete" (click)="onDelete()">
+    {{ params.deleteLabel || 'Eliminar' }}
+  </button>
+  <button
+    *ngFor="let btn of params.additionalButtons || []"
+    type="button"
+    class="btn"
+    [ngClass]="btn.class || 'btn-secondary'"
+    (click)="onAdditionalAction(btn)"
+  >
+    {{ btn.label }}
+  </button>
 </div>

@@ -1,0 +1,102 @@
+<ng-container *ngIf="hotel as current; else detailEmpty">
+  <div class="card mt-4 services-form services-detail">
+    <div class="card-body row g-3">
+      <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2 mb-1">
+        <h5 class="card-title mb-0">Detalle del hotel</h5>
+        <button type="button" class="btn btn-olive btn-sm" (click)="beginEdit()">Editar</button>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Nombre</label>
+        <div class="form-control-plaintext">{{ current.name || fallbackText }}</div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">ID del hotel</label>
+        <div class="form-control-plaintext">{{ current.hotel_id || fallbackText }}</div>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Descripción</label>
+        <p class="form-control-plaintext mb-0 text-wrap">
+          {{ current.description || fallbackText }}
+        </p>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Latitud</label>
+        <div class="form-control-plaintext">
+          <ng-container *ngIf="current.latitude; else emptyField">
+            {{ current.latitude }}
+          </ng-container>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Longitud</label>
+        <div class="form-control-plaintext">
+          <ng-container *ngIf="current.longitude; else emptyField">
+            {{ current.longitude }}
+          </ng-container>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Check-in después de</label>
+        <div class="form-control-plaintext">
+          <ng-container *ngIf="current.check_in_after; else emptyField">
+            {{ current.check_in_after }}
+          </ng-container>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Check-out antes de</label>
+        <div class="form-control-plaintext">
+          <ng-container *ngIf="current.check_out_before; else emptyField">
+            {{ current.check_out_before }}
+          </ng-container>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Amenities</label>
+        <div class="form-control-plaintext">
+          <ng-container *ngIf="current.amenities && current.amenities.length > 0; else emptyField">
+            <div class="amenities-grid">
+              <span *ngFor="let amenity of current.amenities" class="badge amenity-badge">
+                {{ amenity.name }}
+              </span>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Imagen del hotel</label>
+        <div class="hotel-image-container">
+          <ng-container *ngIf="current.image; else noImage">
+            <img
+              [src]="img(current.image)"
+              alt="Imagen del hotel"
+              class="hotel-image"
+              (error)="$event.target.style.display = 'none'"
+            />
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>
+
+<ng-template #emptyField>
+  <span class="text-muted">{{ fallbackText }}</span>
+</ng-template>
+
+<ng-template #noImage>
+  <div class="text-muted fst-italic">No hay imagen registrada.</div>
+</ng-template>
+
+<ng-template #detailEmpty>
+  <div class="alert alert-info mt-4">Selecciona un hotel para ver su detalle.</div>
+</ng-template>

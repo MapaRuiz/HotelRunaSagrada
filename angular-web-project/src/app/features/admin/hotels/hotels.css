@@ -1,0 +1,95 @@
+.hotels-grid-wrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 300px;
+  height: 100%;
+  max-height: 80vh;
+}
+
+@media (max-width: 768px) {
+  .hotels-grid-wrapper {
+    height: auto;
+  }
+}
+
+.ag-theme-quartz .ag-header {
+  font-family: cursive;
+}
+.ag-theme-quartz .ag-header-group-cell {
+  font-weight: normal;
+  font-size: 22px;
+}
+.ag-theme-quartz .ag-header-cell {
+  font-size: 18px;
+}
+
+/* Estilos para el formulario de crear hotel (inspirado en services-form) */
+.hotel-create-form, .hotel-edit-form {
+  max-width: 100%;
+  margin: 0 auto;
+  background: var(--c-ivory);
+  border: 1px solid rgba(21, 21, 19, 0.08);
+  color: var(--c-ink);
+  border-radius: 0.5rem;
+}
+
+.hotel-create-form .card-title, .hotel-edit-form h5 {
+  color: var(--c-olive);
+  font-family: var(--font-title);
+  font-weight: 600;
+}
+
+.hotel-create-form .form-label, .hotel-edit-form .form-label {
+  color: var(--c-olive);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-family: var(--font-title);
+}
+
+.hotel-create-form .form-control, .hotel-edit-form .form-control,
+.hotel-create-form .form-select, .hotel-edit-form .form-select {
+  border: 1px solid rgba(21, 21, 19, 0.15);
+  background-color: #fff;
+  color: var(--c-ink);
+  border-radius: 0.375rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  font-family: var(--font-body);
+}
+
+.hotel-create-form .form-control:focus, .hotel-edit-form .form-control:focus,
+.hotel-create-form .form-select:focus, .hotel-edit-form .form-select:focus {
+  border-color: var(--c-olive);
+  box-shadow: 0 0 0 0.2rem rgba(119, 142, 105, 0.25);
+}
+
+.hotel-create-form .btn-primary, .hotel-edit-form .btn-primary {
+  background-color: var(--c-olive);
+  border-color: var(--c-olive);
+  color: #fff;
+  font-weight: 600;
+  font-family: var(--font-body);
+}
+
+.hotel-create-form .btn-primary:hover, .hotel-edit-form .btn-primary:hover {
+  background-color: rgba(119, 142, 105, 0.9);
+  border-color: rgba(119, 142, 105, 0.9);
+}
+
+.hotel-create-form .btn-secondary, .hotel-edit-form .btn-secondary {
+  background-color: var(--c-sand);
+  border-color: var(--c-sand);
+  color: var(--c-ink);
+  font-weight: 600;
+  font-family: var(--font-body);
+}
+
+.hotel-create-form .btn-secondary:hover, .hotel-edit-form .btn-secondary:hover {
+  background-color: rgba(188, 195, 153, 0.8);
+  border-color: rgba(188, 195, 153, 0.8);
+}
+
+.hotel-create-form .form-check-input:checked, .hotel-edit-form .form-check-input:checked {
+  background-color: var(--c-olive);
+  border-color: var(--c-olive);
+}

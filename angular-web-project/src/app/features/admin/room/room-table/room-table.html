@@ -1,176 +1,521 @@
-<h4 class="mb-3">Rooms</h4>
+<ng-container *ngIf="isBrowser && !editing && !selected">
+  <details #createDetails (toggle)="onCreateToggle($event)">
+    <summary>Crear habitación</summary>
 
-<!-- Filtros -->
-<div class="row g-2 align-items-end mb-3">
-  <div class="col-sm-4">
-    <label class="form-label">Hotel</label>
-    <select class="form-select" [(ngModel)]="hotelId" (ngModelChange)="applyFilters()">
-      <option [ngValue]="undefined">Todos</option>
-      <option *ngFor="let h of hotels" [ngValue]="h.hotel_id">{{ h.name }}</option>
-    </select>
+    <form *ngIf="showCreate" class="card mt-4 room-form">
+      <div class="card-body row g-3">
+        <h5 class="card-title col-12">Nueva habitación</h5>
+
+        <div class="col-md-6">
+          <label class="form-label">Hotel</label>
+          <select class="form-select input-soft" [(ngModel)]="draft_hotel_id" name="hotel" required>
+            <option [ngValue]="undefined">Selecciona hotel…</option>
+            <option *ngFor="let h of hotels" [ngValue]="h.hotel_id">{{ h.name }}</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Tipo</label>
+          <select
+            class="form-select input-soft"
+            [(ngModel)]="draft_room_type_id"
+            name="roomType"
+            required
+          >
+            <option [ngValue]="undefined">Selecciona tipo…</option>
+            <option *ngFor="let t of types" [ngValue]="t.room_type_id">{{ t.name }}</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Número</label>
+          <input
+            class="form-control input-soft"
+            [(ngModel)]="draft.number"
+            name="number"
+            placeholder="1-101"
+            required
+          />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Piso</label>
+          <input
+            type="number"
+            class="form-control input-soft"
+            min="1"
+            [(ngModel)]="draft.floor"
+            name="floor"
+            required
+          />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Estado de Reserva</label>
+          <select
+            class="form-select input-soft"
+            [(ngModel)]="draft.res_status"
+            name="resStatus"
+            required
+          >
+            <option value="AVAILABLE">Disponible</option>
+            <option value="BOOKED">Reservada</option>
+            <option value="OCCUPIED">Ocupada</option>
+            <option value="MAINTENANCE">Mantenimiento</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Estado de Limpieza</label>
+          <select
+            class="form-select input-soft"
+            [(ngModel)]="draft.cle_status"
+            name="cleStatus"
+            required
+          >
+            <option value="CLEAN">Limpia</option>
+            <option value="DIRTY">Sucia</option>
+          </select>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">Tema</label>
+          <input
+            class="form-control input-soft"
+            [(ngModel)]="draft.theme_name"
+            name="theme"
+            placeholder="Balcones Coloniales"
+            required
+          />
+        </div>
+
+        <!-- Imágenes -->
+        <div class="col-12">
+          <div class="imagenes-wrapper">
+            <div
+              class="imagenes-header d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2"
+            >
+              <label class="form-label mb-0">Imágenes</label>
+              <div class="btn-group btn-group-sm" role="group">
+                <button
+                  type="button"
+                  class="btn btn-outline-olive"
+                  [class.active]="displayMode === 'carousel'"
+                  (click)="setDisplayMode('carousel')"
+                >
+                  Carrusel
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-olive"
+                  [class.active]="displayMode === 'list'"
+                  (click)="setDisplayMode('list')"
+                >
+                  Lista
+                </button>
+              </div>
+            </div>
+
+            <div class="imagenes-input input-group mb-3">
+              <input
+                type="url"
+                class="form-control input-soft"
+                placeholder="https://ejemplo.com/imagen.jpg"
+                [(ngModel)]="newImageUrl"
+                name="newImageUrl"
+              />
+              <button class="btn btn-olive" type="button" (click)="addImage()">Añadir</button>
+            </div>
+
+            <div *ngIf="draft.images.length; else noImages" class="imagenes-body">
+              <ng-container [ngSwitch]="displayMode">
+                <div
+                  *ngSwitchCase="'carousel'"
+                  class="carousel slide mb-3 position-relative imagenes-content"
+                >
+                  <div class="carousel-inner carousel-stage">
+                    <div
+                      *ngFor="let src of draft.images; let i = index; trackBy: trackByIndex"
+                      class="carousel-item"
+                      [class.active]="i === activeSlide"
+                      [attr.aria-hidden]="i !== activeSlide"
+                    >
+                      <div class="carousel-frame">
+                        <img
+                          [src]="src"
+                          class="carousel-img"
+                          alt="Imagen {{ i + 1 }}"
+                          (load)="onImgLoad(i)"
+                          (error)="onImgError(i)"
+                          [class.opacity-0]="imageStatus[i] !== 'loaded'"
+                        />
+                        <div
+                          *ngIf="imageStatus[i] === 'idle'"
+                          class="carousel-overlay carousel-overlay-light"
+                        >
+                          <span class="fw-bold text-secondary">Cargando…</span>
+                        </div>
+                        <div
+                          *ngIf="imageStatus[i] === 'error'"
+                          class="carousel-overlay carousel-overlay-error"
+                        >
+                          <i class="bi bi-exclamation-triangle-fill fs-2"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    class="carousel-control-prev"
+                    type="button"
+                    (click)="prev()"
+                    [disabled]="draft.images.length < 2"
+                  >
+                    <span class="carousel-control-prev-icon"></span>
+                    <span class="visually-hidden">Anterior</span>
+                  </button>
+                  <button
+                    class="carousel-control-next"
+                    type="button"
+                    (click)="next()"
+                    [disabled]="draft.images.length < 2"
+                  >
+                    <span class="carousel-control-next-icon"></span>
+                    <span class="visually-hidden">Siguiente</span>
+                  </button>
+                </div>
+
+                <div *ngSwitchCase="'list'" class="imagenes-content imagenes-list">
+                  <ul class="list-group">
+                    <li
+                      *ngFor="let src of draft.images; let i = index; trackBy: trackByIndex"
+                      class="list-group-item d-flex justify-content-between align-items-center"
+                    >
+                      <div class="me-2 text-truncate" style="max-width: 70%">
+                        {{ src }}
+                      </div>
+                      <div class="d-flex align-items-center gap-2">
+                        <span *ngIf="imageStatus[i] === 'error'" class="badge text-bg-danger"
+                          >Error</span
+                        >
+                        <span *ngIf="imageStatus[i] === 'loaded'" class="badge text-bg-success"
+                          >OK</span
+                        >
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-danger"
+                          (click)="removeImage(i)"
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+          <div
+            *ngIf="displayMode === 'carousel'"
+            class="d-flex flex-wrap justify-content-end gap-2 mb-3"
+          >
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-danger"
+              (click)="removeActiveImage()"
+              [disabled]="draft.images.length === 0"
+            >
+              Quitar imagen actual
+            </button>
+          </div>
+        </div>
+
+        <ng-template #noImages>
+          <div class="text-muted fst-italic">No hay imágenes todavía.</div>
+        </ng-template>
+
+        <div class="col-12 text-end">
+          <button
+            class="btn btn-outline-olive me-2"
+            (click)="cancelCreate()"
+            [disabled]="createLoading"
+          >
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-olive" (click)="save()" [disabled]="createLoading">
+            {{ createLoading ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </details>
+
+  <div class="mt-3 mb-2">
+    <input
+      type="search"
+      class="form-control input-soft"
+      placeholder="Buscar habitaciones…"
+      [value]="search"
+      (input)="onSearch($any($event.target).value)"
+    />
   </div>
-  <div class="col-sm-4">
-    <label class="form-label">Tipo de habitación</label>
-    <select class="form-select" [(ngModel)]="roomTypeId" (ngModelChange)="applyFilters()">
-      <option [ngValue]="undefined">Todos</option>
-      <option *ngFor="let t of types" [ngValue]="t.room_type_id">{{ t.name }}</option>
-    </select>
+  <div class="rooms-grid-wrap">
+    <ag-grid-angular
+      [theme]="gridTheme"
+      [gridOptions]="gridOptions"
+      [rowData]="rowData"
+      [pagination]="true"
+      style="width: 100%; height: 100%"
+    >
+    </ag-grid-angular>
   </div>
-  <div class="col-sm-4 text-sm-end">
-    <button class="btn btn-primary mt-3 mt-sm-0" (click)="new()">Nueva habitación</button>
-  </div>
-</div>
+</ng-container>
 
-<!-- Form inline -->
-<div *ngIf="showForm" class="card mt-3">
-  <div class="card-body">
-    <h5 class="card-title">{{ editingId ? 'Editar habitación' : 'Nueva habitación' }}</h5>
+<!-- Detail Form -->
+<app-room-detail
+  *ngIf="selected && !editing"
+  [room]="selected"
+  (editRequested)="onDetailEdit($event)"
+></app-room-detail>
 
-    <div class="row g-2">
-      <div class="col-sm-4">
-        <label class="form-label">Hotel</label>
-        <select class="form-select" [(ngModel)]="draft_hotel_id">
-          <option [ngValue]="undefined" disabled>Selecciona…</option>
-          <option *ngFor="let h of hotels" [ngValue]="h.hotel_id">{{ h.name }}</option>
-        </select>
-      </div>
-      <div class="col-sm-4">
-        <label class="form-label">Tipo</label>
-        <select class="form-select" [(ngModel)]="draft_room_type_id">
-          <option [ngValue]="undefined" disabled>Selecciona…</option>
-          <option *ngFor="let t of types" [ngValue]="t.room_type_id">{{ t.name }}</option>
-        </select>
-      </div>
-      <div class="col-sm-2">
-        <label class="form-label">Número</label>
-        <input class="form-control" [(ngModel)]="draft.number" placeholder="1-101" />
-      </div>
-      <div class="col-sm-2">
-        <label class="form-label">Piso</label>
-        <input type="number" class="form-control" min="1" [(ngModel)]="draft.floor" />
-      </div>
+<!-- Edit Form -->
+<form *ngIf="editing" class="card mt-4 room-form">
+  <div class="card-body row g-3">
+    <h5 class="card-title col-12">Editar habitación</h5>
 
-      <div class="col-sm-3">
-        <label class="form-label">Reserva</label>
-        <select class="form-select" [(ngModel)]="draft.res_status">
-          <option value="AVAILABLE">AVAILABLE</option>
-          <option value="BOOKED">BOOKED</option>
-          <option value="OCCUPIED">OCCUPIED</option>
-          <option value="MAINTENANCE">MAINTENANCE</option>
-        </select>
-      </div>
-      <div class="col-sm-3">
-        <label class="form-label">Limpieza</label>
-        <select class="form-select" [(ngModel)]="draft.cle_status">
-          <option value="CLEAN">CLEAN</option>
-          <option value="DIRTY">DIRTY</option>
-        </select>
-      </div>
-      <div class="col-sm-6">
-        <label class="form-label">Tema</label>
-        <input
-          class="form-control"
-          [(ngModel)]="draft.theme_name"
-          placeholder="Balcones Coloniales"
-        />
-      </div>
+    <div class="col-md-6">
+      <label class="form-label">Hotel</label>
+      <select class="form-select input-soft" [(ngModel)]="draft_hotel_id" name="hotel" required>
+        <option [ngValue]="undefined">Selecciona hotel…</option>
+        <option *ngFor="let h of hotels" [ngValue]="h.hotel_id">{{ h.name }}</option>
+      </select>
     </div>
 
-    <!-- Galería -->
-    <div class="mt-3">
-      <label class="form-label">Imágenes (URLs)</label>
-      <div class="input-group mb-2">
-        <input class="form-control" [(ngModel)]="newImageUrl" placeholder="https://…" />
-        <button class="btn btn-outline-primary" type="button" (click)="addImage()">Añadir</button>
-      </div>
+    <div class="col-md-6">
+      <label class="form-label">Tipo</label>
+      <select
+        class="form-select input-soft"
+        [(ngModel)]="draft_room_type_id"
+        name="roomType"
+        required
+      >
+        <option [ngValue]="undefined">Selecciona tipo…</option>
+        <option *ngFor="let t of types" [ngValue]="t.room_type_id">{{ t.name }}</option>
+      </select>
+    </div>
 
-      <ul class="list-group">
-        <li
-          class="list-group-item d-flex justify-content-between align-items-center"
-          *ngFor="let src of draft.images; let i = index"
+    <div class="col-md-6">
+      <label class="form-label">Número</label>
+      <input
+        class="form-control input-soft"
+        [(ngModel)]="draft.number"
+        name="number"
+        placeholder="1-101"
+        required
+      />
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Piso</label>
+      <input
+        type="number"
+        class="form-control input-soft"
+        min="1"
+        [(ngModel)]="draft.floor"
+        name="floor"
+        required
+      />
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Estado de Reserva</label>
+      <select
+        class="form-select input-soft"
+        [(ngModel)]="draft.res_status"
+        name="resStatus"
+        required
+      >
+        <option value="AVAILABLE">Disponible</option>
+        <option value="BOOKED">Reservada</option>
+        <option value="OCCUPIED">Ocupada</option>
+        <option value="MAINTENANCE">Mantenimiento</option>
+      </select>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Estado de Limpieza</label>
+      <select
+        class="form-select input-soft"
+        [(ngModel)]="draft.cle_status"
+        name="cleStatus"
+        required
+      >
+        <option value="CLEAN">Limpia</option>
+        <option value="DIRTY">Sucia</option>
+      </select>
+    </div>
+
+    <div class="col-12">
+      <label class="form-label">Tema</label>
+      <input
+        class="form-control input-soft"
+        [(ngModel)]="draft.theme_name"
+        name="theme"
+        placeholder="Balcones Coloniales"
+        required
+      />
+    </div>
+
+    <!-- Imágenes -->
+    <div class="col-12">
+      <div class="imagenes-wrapper">
+        <div
+          class="imagenes-header d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2"
         >
-          <div class="d-flex align-items-center gap-2">
-            <img
-              [src]="src"
-              (load)="onImgLoad(i)"
-              (error)="onImgError(i)"
-              style="width: 72px; height: 54px; object-fit: cover; border-radius: 6px"
-            />
-            <div class="small text-truncate" style="max-width: 380px">{{ src }}</div>
-            <span *ngIf="imageStatus[i] === 'error'" class="badge text-bg-danger">Error</span>
-            <span *ngIf="imageStatus[i] === 'loaded'" class="badge text-bg-success">OK</span>
+          <label class="form-label mb-0">Imágenes</label>
+          <div class="btn-group btn-group-sm" role="group">
+            <button
+              type="button"
+              class="btn btn-outline-olive"
+              [class.active]="displayMode === 'carousel'"
+              (click)="setDisplayMode('carousel')"
+            >
+              Carrusel
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-olive"
+              [class.active]="displayMode === 'list'"
+              (click)="setDisplayMode('list')"
+            >
+              Lista
+            </button>
           </div>
-          <div class="d-flex align-items-center gap-2">
-            <button
-              class="btn btn-sm btn-outline-secondary"
-              (click)="moveImage(i, -1)"
-              [disabled]="i === 0"
+        </div>
+
+        <div class="imagenes-input input-group mb-3">
+          <input
+            type="url"
+            class="form-control input-soft"
+            placeholder="https://ejemplo.com/imagen.jpg"
+            [(ngModel)]="newImageUrl"
+            name="newImageUrl"
+          />
+          <button class="btn btn-olive" type="button" (click)="addImage()">Añadir</button>
+        </div>
+
+        <div *ngIf="draft.images.length; else noImagesEdit" class="imagenes-body">
+          <ng-container [ngSwitch]="displayMode">
+            <div
+              *ngSwitchCase="'carousel'"
+              class="carousel slide mb-3 position-relative imagenes-content"
             >
-              ↑
-            </button>
-            <button
-              class="btn btn-sm btn-outline-secondary"
-              (click)="moveImage(i, 1)"
-              [disabled]="i === (draft.images.length || 1) - 1"
-            >
-              ↓
-            </button>
-            <button
-              class="btn btn-sm btn-outline-primary"
-              (click)="setCover(i)"
-              [disabled]="i === 0"
-            >
-              Portada
-            </button>
-            <button class="btn btn-sm btn-outline-danger" (click)="removeImage(i)">Eliminar</button>
-          </div>
-        </li>
-      </ul>
+              <div class="carousel-inner carousel-stage">
+                <div
+                  *ngFor="let src of draft.images; let i = index; trackBy: trackByIndex"
+                  class="carousel-item"
+                  [class.active]="i === activeSlide"
+                  [attr.aria-hidden]="i !== activeSlide"
+                >
+                  <div class="carousel-frame">
+                    <img
+                      [src]="src"
+                      class="carousel-img"
+                      alt="Imagen {{ i + 1 }}"
+                      (load)="onImgLoad(i)"
+                      (error)="onImgError(i)"
+                      [class.opacity-0]="imageStatus[i] !== 'loaded'"
+                    />
+                    <div
+                      *ngIf="imageStatus[i] === 'idle'"
+                      class="carousel-overlay carousel-overlay-light"
+                    >
+                      <span class="fw-bold text-secondary">Cargando…</span>
+                    </div>
+                    <div
+                      *ngIf="imageStatus[i] === 'error'"
+                      class="carousel-overlay carousel-overlay-error"
+                    >
+                      <i class="bi bi-exclamation-triangle-fill fs-2"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button
+                class="carousel-control-prev"
+                type="button"
+                (click)="prev()"
+                [disabled]="draft.images.length < 2"
+              >
+                <span class="carousel-control-prev-icon"></span>
+                <span class="visually-hidden">Anterior</span>
+              </button>
+              <button
+                class="carousel-control-next"
+                type="button"
+                (click)="next()"
+                [disabled]="draft.images.length < 2"
+              >
+                <span class="carousel-control-next-icon"></span>
+                <span class="visually-hidden">Siguiente</span>
+              </button>
+            </div>
+
+            <div *ngSwitchCase="'list'" class="imagenes-content imagenes-list">
+              <ul class="list-group">
+                <li
+                  *ngFor="let src of draft.images; let i = index; trackBy: trackByIndex"
+                  class="list-group-item d-flex justify-content-between align-items-center"
+                >
+                  <div class="me-2 text-truncate" style="max-width: 70%">
+                    {{ src }}
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <span *ngIf="imageStatus[i] === 'error'" class="badge text-bg-danger"
+                      >Error</span
+                    >
+                    <span *ngIf="imageStatus[i] === 'loaded'" class="badge text-bg-success"
+                      >OK</span
+                    >
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      (click)="removeImage(i)"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+      <div
+        *ngIf="displayMode === 'carousel'"
+        class="d-flex flex-wrap justify-content-end gap-2 mb-3"
+      >
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-danger"
+          (click)="removeActiveImage()"
+          [disabled]="draft.images.length === 0"
+        >
+          Quitar imagen actual
+        </button>
+      </div>
     </div>
 
-    <div class="mt-3 d-flex gap-2">
-      <button class="btn btn-success" (click)="save()">Guardar</button>
-      <button class="btn btn-secondary" (click)="cancel()">Cancelar</button>
+    <ng-template #noImagesEdit>
+      <div class="text-muted fst-italic">No hay imágenes todavía.</div>
+    </ng-template>
+
+    <div class="col-12 text-end">
+      <button class="btn btn-outline-olive me-2" (click)="cancelEdit()" [disabled]="loading">
+        Cancelar
+      </button>
+      <button type="submit" class="btn btn-olive" (click)="saveEdit()" [disabled]="loading">
+        {{ loading ? 'Guardando...' : 'Guardar' }}
+      </button>
     </div>
   </div>
-</div>
-
-<div *ngIf="loading" class="text-muted mb-2">Cargando…</div>
-
-<table class="table table-striped" *ngIf="!showForm || editingId == null">
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>Hotel</th>
-      <th>Número</th>
-      <th>Piso</th>
-      <th>Tipo</th>
-      <th>Res</th>
-      <th>Cle</th>
-      <th>Portada</th>
-      <th class="text-end">Acciones</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let r of rooms; trackBy: trackById">
-      <td>{{ r.room_id }}</td>
-      <td>{{ r.hotel?.name || r.hotel_id }}</td>
-      <td>{{ r.number }}</td>
-      <td>{{ r.floor }}</td>
-      <td>{{ r.room_type?.name || r.room_type_id }}</td>
-      <td>{{ r.res_status }}</td>
-      <td>{{ r.cle_status }}</td>
-      <td>
-        <img
-          *ngIf="r.images?.length"
-          [src]="r.images[0]"
-          style="width: 56px; height: 40px; object-fit: cover; border-radius: 6px"
-        />
-      </td>
-      <td class="text-end">
-        <button class="btn btn-sm btn-outline-primary me-2" (click)="edit(r)">Editar</button>
-        <button class="btn btn-sm btn-outline-danger" (click)="remove(r)">Eliminar</button>
-      </td>
-    </tr>
-  </tbody>
-</table>
+</form>

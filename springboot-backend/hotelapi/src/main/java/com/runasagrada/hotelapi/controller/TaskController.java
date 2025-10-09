@@ -60,10 +60,9 @@ public class TaskController {
 		Task task = new Task();
 		task.setStaffId(body.getStaffId());
 		task.setRoomId(body.getRoomId());
-		task.setResServiceId(body.getResServiceId());
 		task.setType(body.getType());
 		task.setStatus(body.getStatus() != null ? body.getStatus() : TaskStatus.PENDING);
-		return ResponseEntity.ok(service.create(task));
+		return ResponseEntity.ok(service.create(task, body.getResServiceId()));
 	}
 
 	@PutMapping("/task/{id}")
@@ -71,17 +70,16 @@ public class TaskController {
 		Task partial = new Task();
 		partial.setStaffId(body.getStaffId());
 		partial.setRoomId(body.getRoomId());
-		partial.setResServiceId(body.getResServiceId());
 		partial.setType(body.getType());
 		partial.setStatus(body.getStatus());
-		return ResponseEntity.ok(service.update(id, partial));
+		return ResponseEntity.ok(service.update(id, partial, body.getResServiceId()));
 	}
 
 	@PutMapping("/task/{id}/status")
 	public ResponseEntity<Task> updateStatus(@PathVariable Long id, @RequestBody TaskStatusRequest body) {
 		Task partial = new Task();
 		partial.setStatus(body.getStatus());
-		return ResponseEntity.ok(service.update(id, partial));
+		return ResponseEntity.ok(service.update(id, partial, null));
 	}
 
 	@DeleteMapping("/task/{id}")

@@ -1,0 +1,29 @@
+.amenity-form {
+  max-width: 100%;
+  margin: 0 auto;
+  background: var(--c-ivory);
+  border: 1px solid rgba(21, 21, 19, 0.08);
+  color: var(--c-ink);
+}
+
+.amenity-form .card-title {
+  color: var(--c-olive);
+  font-family: var(--font-title);
+}
+
+.amenity-form .form-label {
+  color: var(--c-olive);
+  font-weight: 600;
+}
+
+.image-preview {
+  text-align: center;
+}
+
+.image-preview img {
+  transition: opacity 0.2s ease;
+}
+
+.opacity-0 {
+  opacity: 0;
+}

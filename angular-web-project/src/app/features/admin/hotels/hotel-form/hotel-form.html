@@ -1,0 +1,126 @@
+<form (ngSubmit)="submit()" #form="ngForm" class="card mt-4 hotel-form">
+  <div class="card-body row g-3">
+    <h5 class="card-title col-12">Editar hotel</h5>
+
+    <div class="col-md-6">
+      <label class="form-label">Nombre *</label>
+      <input class="form-control input-soft" [(ngModel)]="draft.name" name="name" required />
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Descripción</label>
+      <input class="form-control input-soft" [(ngModel)]="draft.description" name="description" />
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Latitud</label>
+      <input
+        type="number"
+        step="any"
+        class="form-control input-soft"
+        [(ngModel)]="draft.latitude"
+        name="latitude"
+      />
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Longitud</label>
+      <input
+        type="number"
+        step="any"
+        class="form-control input-soft"
+        [(ngModel)]="draft.longitude"
+        name="longitude"
+      />
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Check-in después de</label>
+      <input
+        type="time"
+        class="form-control input-soft"
+        [(ngModel)]="draft.check_in_after"
+        name="check_in_after"
+      />
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Check-out antes de</label>
+      <input
+        type="time"
+        class="form-control input-soft"
+        [(ngModel)]="draft.check_out_before"
+        name="check_out_before"
+      />
+    </div>
+
+    <div class="col-12">
+      <label class="form-label">Imagen (URL)</label>
+      <input
+        type="url"
+        class="form-control input-soft"
+        [(ngModel)]="draft.image"
+        name="image"
+        placeholder="https://ejemplo.com/imagen.jpg"
+      />
+
+      <div class="mt-3" *ngIf="draft.image">
+        <div class="image-preview">
+          <img
+            [src]="img(draft.image)"
+            (load)="onImageLoad()"
+            (error)="onImageError()"
+            [class.opacity-0]="imgBroken"
+            style="
+              width: 200px;
+              height: 140px;
+              object-fit: cover;
+              border-radius: 8px;
+              border: 1px solid #dee2e6;
+            "
+            alt="Vista previa de la imagen"
+          />
+          <div *ngIf="imgBroken" class="text-danger mt-2">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            No se pudo cargar la imagen
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12" *ngIf="allAmenities.length > 0">
+      <label class="form-label">Amenities</label>
+      <div class="row g-2">
+        <div class="col-md-4" *ngFor="let amenity of allAmenities">
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              [id]="'edit-amenity-' + amenity.amenity_id"
+              [checked]="editAmenityIds.has(amenity.amenity_id)"
+              (change)="toggleEditAmenity(amenity.amenity_id, $any($event.target).checked)"
+            />
+            <label class="form-check-label" [for]="'edit-amenity-' + amenity.amenity_id">
+              {{ amenity.name }}
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 text-end">
+      <button
+        type="button"
+        class="btn btn-outline-olive me-2"
+        (click)="cancelEdit()"
+        [disabled]="loading"
+      >
+        Cancelar
+      </button>
+      <button type="submit" class="btn btn-olive" [disabled]="loading || form.invalid">
+        <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"></span>
+        {{ loading ? 'Guardando...' : 'Guardar' }}
+      </button>
+    </div>
+  </div>
+</form>

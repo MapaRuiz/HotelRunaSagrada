@@ -1,0 +1,64 @@
+.hotel-form {
+  background-color: var(--c-ivory);
+}
+
+.hotel-form .card-title {
+  font-family: var(--font-title);
+  font-weight: 600;
+  color: var(--c-dark-green);
+  margin-bottom: 1.5rem;
+}
+
+.hotel-form .form-label {
+  font-family: var(--font-body);
+  font-weight: 500;
+  color: var(--c-dark-green);
+}
+
+.hotel-form .input-soft {
+  border: 1px solid #d4d4d8;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-family: var(--font-body);
+}
+
+.hotel-form .input-soft:focus {
+  border-color: var(--c-olive);
+  box-shadow: 0 0 0 0.2rem rgba(107, 114, 128, 0.25);
+}
+
+.hotel-form .btn-olive {
+  background-color: var(--c-olive);
+  border-color: var(--c-olive);
+  color: white;
+  font-family: var(--font-body);
+  font-weight: 500;
+}
+
+.hotel-form .btn-olive:hover {
+  background-color: var(--c-dark-green);
+  border-color: var(--c-dark-green);
+}
+
+.hotel-form .btn-outline-olive {
+  border-color: var(--c-olive);
+  color: var(--c-olive);
+  font-family: var(--font-body);
+  font-weight: 500;
+}
+
+.hotel-form .btn-outline-olive:hover {
+  background-color: var(--c-olive);
+  border-color: var(--c-olive);
+  color: white;
+}
+
+.hotel-form .form-check-input:checked {
+  background-color: var(--c-olive);
+  border-color: var(--c-olive);
+}
+
+.hotel-form .form-check-label {
+  font-family: var(--font-body);
+  color: var(--c-dark-green);
+}

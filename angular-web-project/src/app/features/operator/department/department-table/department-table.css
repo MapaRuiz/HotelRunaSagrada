@@ -1,66 +1,53 @@
-/* Department table styling to match rooms table */
-.table th {
-  background-color: #f8f9fa;
-  border-top: none;
-  font-weight: 600;
-  color: #495057;
+.departments-grid-wrap {
+  width: 100%;
+  height: 500px;
 }
 
-.table td {
-  vertical-align: middle;
+.departments-grid-wrap ag-grid-angular {
+  width: 100%;
+  height: 100%;
 }
 
-.badge {
-  font-size: 0.75rem;
-}
-
-.card {
-  border: 1px solid #dee2e6;
-  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-}
-
-.card-title {
-  color: #495057;
-  font-weight: 600;
-}
-
-.btn-sm {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.875rem;
-}
-
-.form-label {
-  font-weight: 500;
-  color: #495057;
-  margin-bottom: 0.5rem;
-}
-
-.form-select,
-.form-control {
-  border: 1px solid #ced4da;
-}
-
-.form-select:focus,
-.form-control:focus {
-  border-color: #86b7fe;
-  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-}
-
-/* Loading and empty states */
-.text-muted {
-  font-style: italic;
-}
-
-/* Responsive improvements */
-@media (max-width: 576px) {
-  .btn-sm {
-    padding: 0.125rem 0.25rem;
-    font-size: 0.75rem;
+@media (max-width: 768px) {
+  .departments-grid-wrap {
+    height: auto;
   }
-  
-  .table th,
-  .table td {
-    padding: 0.5rem 0.25rem;
-    font-size: 0.875rem;
-  }
+}
+
+.ag-theme-quartz .ag-header {
+  font-family: cursive;
+}
+.ag-theme-quartz .ag-header-group-cell {
+  font-weight: normal;
+  font-size: 22px;
+}
+.ag-theme-quartz .ag-header-cell {
+  font-size: 18px;
+}
+
+details summary {
+  cursor: pointer;
+}
+
+/* Department Form Styles - Similar to Services Form */
+.department-form {
+  max-width: 100%;
+  margin: 0 auto;
+  background: var(--c-ivory);
+  border: 1px solid rgba(21, 21, 19, 0.08);
+  color: var(--c-ink);
+}
+
+.department-form .card-title {
+  color: var(--c-olive);
+  font-family: var(--font-title);
+}
+
+.department-form .form-label {
+  color: var(--c-olive);
+  font-weight: 600;
+}
+
+label {
+  font-weight: bold;
 }
