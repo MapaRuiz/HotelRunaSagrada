@@ -56,6 +56,9 @@ export class ReservationTableComponent implements OnInit {
   editing?: Reservation;
   draft: Partial<Reservation> = {};
   createLoading = false;
+
+  // Selection and detail
+  selected?: Reservation;
   
   private gridApi?: GridApi<Reservation>;
   readonly gridTheme: typeof sharedGridTheme = sharedGridTheme;
@@ -131,6 +134,10 @@ export class ReservationTableComponent implements OnInit {
     },
     onGridPreDestroyed: () => {
       this.gridApi = undefined;
+    },
+    onSelectionChanged: params => {
+      const [row] = params.api.getSelectedRows();
+      this.selected = row || undefined;
     },
     columnDefs: [
       { 
@@ -386,8 +393,12 @@ export class ReservationTableComponent implements OnInit {
         this.withGridApi(api => {
           api.applyTransaction({ update: [enrichedReservation] });
           api.refreshCells({ force: true });
+          // Limpiar selección del grid para volver a la tabla
+          api.deselectAll();
         });
 
+        // Limpiar selección para volver a la tabla
+        this.selected = undefined;
         this.cancelEdit();
       },
       error: () => {
@@ -406,7 +417,13 @@ export class ReservationTableComponent implements OnInit {
         this.reservations = this.reservations.filter(r => r.reservation_id !== reservation.reservation_id);
         this.rowData = this.rowData.filter(r => r.reservation_id !== reservation.reservation_id);
         
-        this.withGridApi(api => api.applyTransaction({ remove: [reservation] }));
+        this.withGridApi(api => {
+          api.applyTransaction({ remove: [reservation] });
+          api.deselectAll();
+        });
+        
+        // Limpiar selección para volver a la tabla
+        this.selected = undefined;
       },
       error: () => {
         alert('Error deleting reservation');
