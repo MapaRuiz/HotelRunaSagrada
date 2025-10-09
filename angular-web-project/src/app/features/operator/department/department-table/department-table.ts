@@ -1,151 +1,252 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit, PLATFORM_ID, ViewChild, ElementRef } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Department } from '../../../../model/department';
 import { Hotel } from '../../../../model/hotel';
 import { DepartmentService } from '../../../../services/department';
 import { HotelsService } from '../../../../services/hotels';
 import { StaffMemberList } from '../../staff-member/staff-member-list/staff-member-list';
+import { ColDef, GridOptions, GridApi, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
+import { AgGridAngular } from 'ag-grid-angular';
+import { ActionButtonsParams, AdditionalButton } from '../../../admin/action-buttons-cell/action-buttons-param';
+import { ActionButtonsComponent } from '../../../admin/action-buttons-cell/action-buttons-cell';
+import { AG_GRID_LOCALE } from '../../../admin/sharedTable';
+import { MultiSelectFilterComponent } from '../../../admin/filters/multi-select-filter/multi-select-filter';
+import { gridTheme as sharedGridTheme } from '../../../admin/sharedTable';
+import type { ITextFilterParams } from 'ag-grid-community';
+import { zip } from 'rxjs';
 
+
+const TEXT_FILTER_CONFIG: ITextFilterParams = {
+  filterOptions: ['contains', 'equals', 'notContains', 'startsWith'],
+  maxNumConditions: 1
+};
 
 @Component({
   selector: 'app-department-table',
-  imports: [CommonModule, FormsModule, StaffMemberList],
+  standalone: true,
+  imports: [CommonModule, FormsModule, StaffMemberList, AgGridAngular],
   templateUrl: './department-table.html',
-  styleUrl: './department-table.css'
+  styleUrls: ['./department-table.css']
 })
 export class DepartmentTable implements OnInit {
   private departmentService = inject(DepartmentService);
   private hotelsService = inject(HotelsService);
-
+  private platformId = inject(PLATFORM_ID);
+  
+  isBrowser: boolean = false;
+  loading: boolean = true;
+  
+  // Fuente de datos
   departments: Department[] = [];
+  rowData: Department[] = [];
+
+  // catálogos
   hotels: Hotel[] = [];
-  loading = false;
-  showForm = false;
-  editingId: number | undefined;
 
-  // Filtros
-  hotelId: number | undefined;
-
-  // Draft para crear/editar
+  // Form control
+  showCreate = false;
+  editing?: Department;
   draft: Partial<Department> = {};
-  draft_hotel_id: number | undefined;
+  createLoading = false;
+  
+  private gridApi?: GridApi<Department>;
+  readonly gridTheme: typeof sharedGridTheme = sharedGridTheme;
 
   // Ver el staff
   showStaffView = false;
   selectedDepartment: Department | undefined;
+  
+  // Search functionality
+  search = '';
+
+  @ViewChild('createDetails') private createDetails?: ElementRef<HTMLDetailsElement>;
+
+  constructor() {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+    if (this.isBrowser) {
+      ModuleRegistry.registerModules([AllCommunityModule]);
+    }
+  }
 
   ngOnInit() {
-    this.loadHotels();
-    this.loadDepartments();
+    this.loadData();
   }
 
-  loadHotels() {
-    this.hotelsService.list().subscribe({
-      next: (hotels) => {
-        this.hotels = hotels || [];
-      },
-      error: (error) => {
-        console.error('Error loading hotels:', error);
-      }
-    });
-  }
-
-  loadDepartments() {
+  loadData() {
     this.loading = true;
-    this.departmentService.list().subscribe({
-      next: (departments) => {
+    
+    zip([
+      this.departmentService.list(),
+      this.hotelsService.list()
+    ]).subscribe({
+      next: ([departments, hotels]) => {
         this.departments = departments || [];
+        this.hotels = hotels || [];
+
+        // Enriquecer departments con datos de hotel
+        const enrichedDepartments = this.departments.map(department => ({
+          ...department,
+          hotel: hotels.find(h => h.hotel_id === department.hotel_id)
+        }));
+        
+        this.rowData = enrichedDepartments;
         this.loading = false;
       },
       error: (error) => {
-        console.error('Error loading departments:', error);
+        console.error('Error loading departments data:', error);
         this.loading = false;
       }
     });
   }
 
-  get filteredDepartments() {
-    let filtered = [...this.departments];
-    
-    if (this.hotelId !== undefined) {
-      filtered = filtered.filter(d => d.hotel_id === this.hotelId);
+  gridOptions: GridOptions<Department> = {
+    localeText: AG_GRID_LOCALE,
+    rowSelection: 'single',
+    getRowId: params => params.data.department_id?.toString() || '',
+    onGridReady: params => { 
+      this.gridApi = params.api;
+      setTimeout(() => {
+        params.api.sizeColumnsToFit();
+      }, 100);
+    },
+    onGridPreDestroyed: () => {
+      this.gridApi = undefined;
+    },
+    columnDefs: [
+      { 
+        headerName: 'ID',
+        field: 'department_id',
+        minWidth: 60,
+        maxWidth: 80
+      },
+      { 
+        headerName: 'Hotel',
+        filter: MultiSelectFilterComponent,
+        filterParams: {
+          valueGetter: (row: Department & { hotel?: Hotel }) => row.hotel?.name || `Hotel ${row.hotel_id}`,
+          title: 'Hoteles'
+        },
+        valueGetter: params => params.data?.hotel?.name || `Hotel ${params.data?.hotel_id || 'N/A'}`,
+        minWidth: 150,
+        maxWidth: 400
+      },
+      { 
+        headerName: 'Nombre',
+        field: 'name',
+        filter: 'agTextColumnFilter',
+        filterParams: TEXT_FILTER_CONFIG,
+        minWidth: 150,
+        maxWidth: 400
+      },
+      {
+        headerName: 'Acciones',
+        filter: false,
+        minWidth: 200,
+        cellRenderer: ActionButtonsComponent<Department>,
+        cellRendererParams: {
+          onEdit: (department: Department) => this.beginEdit(department),
+          onDelete: (department: Department) => this.deleteDepartment(department),
+          editLabel: 'Editar',
+          deleteLabel: 'Eliminar',
+          additionalButtons: [
+            {
+              label: 'Ver Staff',
+              action: (department: Department) => this.viewStaff(department),
+              class: 'btn-details'
+            }
+          ]
+        },
+        sortable: false
+      }
+    ]
+  };
+
+  // Search functionality
+  onSearch(query: string) {
+    this.search = query;
+    this.gridApi?.setGridOption('quickFilterText', query);
+  }
+
+  // Create/Edit form methods
+  onCreateToggle(event: Event) {
+    const details = event.target as HTMLDetailsElement;
+    this.showCreate = details.open;
+    if (!this.showCreate) {
+      this.cancelCreate();
     }
-    
-    return filtered;
   }
 
-  trackById(index: number, item: Department) {
-    return item.department_id;
-  }
-
-  getHotelName(hotelId: number): string {
-    const hotel = this.hotels.find(h => h.hotel_id === hotelId);
-    return hotel ? hotel.name : `Hotel #${hotelId}`;
-  }
-
-  new() {
-    this.editingId = undefined;
+  beginCreate() {
     this.draft = {};
-    this.draft_hotel_id = undefined;
-    this.showForm = true;
+    this.editing = undefined;
+    this.showCreate = true;
+    this.createDetails?.nativeElement.setAttribute('open', '');
   }
 
-  edit(department: Department) {
-    this.editingId = department.department_id;
-    this.draft = { ...department };
-    this.draft_hotel_id = department.hotel_id;
-    this.showForm = true;
+  beginEdit(department: Department) {
+    this.editing = department;
+    this.draft = { 
+      ...department,
+      hotel_id: department.hotel_id
+    };
+    this.showCreate = true;
+    this.createDetails?.nativeElement.setAttribute('open', '');
   }
 
-  save() {
-    if (!this.draft_hotel_id || !this.draft.name?.trim()) {
+  saveCreate() {
+    if (!this.draft.hotel_id || !this.draft.name?.trim()) {
       alert('Por favor completa todos los campos requeridos');
       return;
     }
 
+    this.createLoading = true;
+    
     const payload: Partial<Department> = {
       name: this.draft.name.trim(),
-      hotel_id: this.draft_hotel_id
+      hotel_id: this.draft.hotel_id
     };
 
-    const operation = this.editingId 
-      ? this.departmentService.update(this.editingId, payload)
+    const operation = this.editing 
+      ? this.departmentService.update(this.editing.department_id, payload)
       : this.departmentService.create(payload);
 
     operation.subscribe({
       next: () => {
-        this.loadDepartments();
-        this.cancel();
+        this.loadData();
+        this.cancelCreate();
+        this.createLoading = false;
       },
       error: (error) => {
         console.error('Error saving department:', error);
         alert('Error al guardar el departamento');
+        this.createLoading = false;
       }
     });
   }
 
-  remove(department: Department) {
+  cancelCreate() {
+    this.showCreate = false;
+    this.editing = undefined;
+    this.draft = {};
+    this.createLoading = false;
+    this.createDetails?.nativeElement.removeAttribute('open');
+  }
+
+  deleteDepartment(department: Department) {
     if (!confirm(`¿Estás seguro de eliminar el departamento "${department.name}"?`)) {
       return;
     }
 
     this.departmentService.delete(department.department_id).subscribe({
       next: () => {
-        this.loadDepartments();
+        this.loadData();
       },
       error: (error) => {
         console.error('Error removing department:', error);
         alert('Error al eliminar el departamento');
       }
     });
-  }
-
-  cancel() {
-    this.showForm = false;
-    this.editingId = undefined;
-    this.draft = {};
-    this.draft_hotel_id = undefined;
   }
 
   viewStaff(department: Department) {
