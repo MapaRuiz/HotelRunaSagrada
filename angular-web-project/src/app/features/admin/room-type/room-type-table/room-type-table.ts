@@ -8,6 +8,7 @@ import { RoomTypeService, RoomTypeRequest } from '../../../../services/room-type
 import { AG_GRID_LOCALE, gridTheme as sharedGridTheme } from '../../sharedTable';
 import { ActionButtonsComponent } from '../../action-buttons-cell/action-buttons-cell';
 import { ActionButtonsParams } from '../../action-buttons-cell/action-buttons-param';
+import { RoomTypeFormComponent, RoomTypeFormPayload } from '../room-type-form/room-type-form';
 
 const TEXT_FILTER_CONFIG: ITextFilterParams = {
   filterOptions: ['contains', 'equals', 'notContains', 'startsWith'],
@@ -22,7 +23,7 @@ const NUMBER_FILTER_CONFIG: INumberFilterParams = {
 @Component({
   selector: 'app-room-types-table',
   standalone: true,
-  imports: [CommonModule, FormsModule, AgGridAngular],
+  imports: [CommonModule, FormsModule, AgGridAngular, RoomTypeFormComponent],
   templateUrl: './room-type-table.html',
   styleUrls: ['./room-type-table.css'],
   encapsulation: ViewEncapsulation.None
@@ -49,10 +50,9 @@ export class RoomTypesTableComponent implements OnInit {
   selected?: RoomType;
   search = '';
 
-  // Editar
+  // Room type editing
   editing?: RoomType;
   draft: Partial<RoomType> = {};
-  imgBrokenEdit = false;
   loading = false;
 
   // AG-Grid configuration
@@ -144,7 +144,7 @@ export class RoomTypesTableComponent implements OnInit {
         width: 350,
         cellRenderer: ActionButtonsComponent,
         cellRendererParams: {
-          onEdit: (data: RoomType) => this.edit(data),
+          onEdit: (data: RoomType) => this.beginEdit(data),
           onDelete: (data: RoomType) => this.delete(data)
         }
       }
@@ -203,9 +203,7 @@ export class RoomTypesTableComponent implements OnInit {
     this.resetCreateForm();
   }
 
-  saveEdit(): void {
-    this.update();
-  }
+
 
   create(): void {
     const payload: Omit<RoomType, 'room_type_id'> = {
@@ -234,25 +232,30 @@ export class RoomTypesTableComponent implements OnInit {
     });
   }
 
-  edit(roomType: RoomType): void {
+  beginEdit(roomType: RoomType): void {
     this.editing = roomType;
     this.draft = { ...roomType };
-    this.selected = roomType;
   }
 
-  update(): void {
-    if (!this.editing?.room_type_id) return;
+  cancelEdit(): void {
+    this.editing = undefined;
+    this.draft = {};
+    this.loading = false;
+  }
 
-    const payload: Omit<RoomType, 'room_type_id'> = {
-      name: this.draft.name!,
-      capacity: this.draft.capacity!,
-      base_price: this.draft.base_price!,
-      description: this.draft.description!,
-      image: this.draft.image!,
+  saveEdit(payload: RoomTypeFormPayload): void {
+    if (!this.editing) return;
+
+    const updatePayload: Omit<RoomType, 'room_type_id'> = {
+      name: payload.draft.name!,
+      capacity: payload.draft.capacity!,
+      base_price: payload.draft.base_price!,
+      description: payload.draft.description!,
+      image: payload.draft.image!,
     };
 
     this.loading = true;
-    this.svc.update(this.editing.room_type_id, payload).subscribe({
+    this.svc.update(this.editing.room_type_id!, updatePayload).subscribe({
       next: () => {
         this.loading = false;
         this.cancelEdit();
@@ -280,12 +283,6 @@ export class RoomTypesTableComponent implements OnInit {
     }
   }
 
-  cancelEdit(): void {
-    this.editing = undefined;
-    this.draft = {};
-    this.selected = undefined;
-  }
-
   private resetCreateForm(): void {
     this.createForm = { 
       name: '', 
@@ -299,9 +296,5 @@ export class RoomTypesTableComponent implements OnInit {
 
   onCreateImageError(): void {
     this.imgBrokenCreate = true;
-  }
-
-  onEditImageError(): void {
-    this.imgBrokenEdit = true;
   }
 }

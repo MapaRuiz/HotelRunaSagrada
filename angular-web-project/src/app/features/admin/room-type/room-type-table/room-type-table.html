@@ -74,44 +74,10 @@
   </div>
 </ng-container>
 
-<!-- Editing form -->
-<div *ngIf="editing" class="card card-body room-type-edit-form">
-  <h5>Editar Tipo de Habitación</h5>
-  <div class="row g-2">
-    <div class="col-sm-6">
-      <label class="form-label">Nombre</label>
-      <input class="form-control" [(ngModel)]="draft.name" />
-    </div>
-    <div class="col-sm-3">
-      <label class="form-label">Capacidad</label>
-      <input class="form-control" type="number" min="1" [(ngModel)]="draft.capacity" />
-    </div>
-    <div class="col-sm-3">
-      <label class="form-label">Base price</label>
-      <input class="form-control" type="number" min="0" [(ngModel)]="draft.base_price" />
-    </div>
-    <div class="col-sm-12">
-      <label class="form-label">Descripción</label>
-      <textarea class="form-control" rows="2" [(ngModel)]="draft.description"></textarea>
-    </div>
-    <div class="col-sm-12">
-      <label class="form-label">Imagen (URL portada)</label>
-      <input class="form-control" [(ngModel)]="draft.image" />
-      <div class="mt-2" *ngIf="draft.image">
-        <img
-          [src]="draft.image"
-          (error)="imgBrokenEdit = true"
-          (load)="imgBrokenEdit = false"
-          style="width: 160px; height: 110px; object-fit: cover; border-radius: 8px"
-        />
-        <div class="text-danger small mt-1" *ngIf="imgBrokenEdit">No se pudo cargar la imagen.</div>
-      </div>
-    </div>
-  </div>
-  <div class="mt-3 d-flex gap-2">
-    <button class="btn btn-primary" (click)="saveEdit()" [disabled]="loading">
-      {{ loading ? 'Guardando...' : 'Guardar' }}
-    </button>
-    <button class="btn btn-secondary" (click)="cancelEdit()">Cancelar</button>
-  </div>
-</div>
+<app-room-type-form
+  *ngIf="editing"
+  [draft]="draft"
+  [loading]="loading"
+  (cancel)="cancelEdit()"
+  (save)="saveEdit($event)"
+></app-room-type-form>
