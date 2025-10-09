@@ -6,6 +6,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -74,7 +75,8 @@ public class ReservationService {
     @JsonIgnore
     private ServiceRating rating;
 
-    @OneToMany(mappedBy = "reservationService", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "res_service_id", referencedColumnName = "res_service_id")
     @JsonIgnore
     private List<Task> tasks = new ArrayList<>();
 }
