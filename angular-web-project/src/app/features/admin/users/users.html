@@ -1,4 +1,4 @@
-<ng-container *ngIf="isBrowser && !editId">
+<ng-container *ngIf="isBrowser && !editing">
   <details #createDetails (toggle)="onCreateToggle($event)">
     <summary>Crear usuario</summary>
 
@@ -144,126 +144,15 @@
   </div>
 </ng-container>
 
-<!-- Modal de edición -->
-<div
-  class="modal"
-  [class.show]="showEditModal"
-  [style.display]="showEditModal ? 'block' : 'none'"
-  *ngIf="showEditModal"
->
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Editar Usuario</h5>
-        <button type="button" class="btn-close" (click)="cancel()"></button>
-      </div>
-      <div class="modal-body">
-        <form>
-          <div class="row g-2">
-            <div class="col-md-6">
-              <label class="form-label">Nombre completo</label>
-              <input class="form-control" [(ngModel)]="draft.full_name" name="full_name" />
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Email *</label>
-              <input
-                class="form-control"
-                [(ngModel)]="draft.email"
-                name="email"
-                [class.is-invalid]="editTouched && !isEmailValid(draft.email)"
-              />
-              <div class="invalid-feedback">Email inválido.</div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Teléfono</label>
-              <input class="form-control" [(ngModel)]="draft.phone" name="phone" />
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Documento</label>
-              <input class="form-control" [(ngModel)]="draft.national_id" name="national_id" />
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Rol</label>
-              <select class="form-select" [(ngModel)]="draft.role" name="role">
-                <option *ngFor="let r of allRoles" [value]="r">{{ r }}</option>
-              </select>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Activo</label>
-              <div>
-                <input
-                  class="form-check-input"
-                  type="checkbox"
-                  [(ngModel)]="draft.enabled"
-                  name="enabled"
-                />
-                <label class="form-check-label ms-1">Sí</label>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <label class="form-label">Imagen (ruta/URL)</label>
-              <input
-                class="form-control"
-                [(ngModel)]="draft.selected_pet"
-                name="selected_pet"
-                placeholder="/images/icons/icono1.png o https://..."
-              />
-              <div class="mt-2" *ngIf="draft.selected_pet as src">
-                <img
-                  [src]="img(src)"
-                  (error)="imgBrokenEdit = true"
-                  (load)="imgBrokenEdit = false"
-                  style="width: 64px; height: 64px; object-fit: cover; border-radius: 50%"
-                />
-                <div class="text-danger small mt-1" *ngIf="imgBrokenEdit">
-                  No se pudo cargar la imagen.
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Nueva contraseña (opcional)</label>
-              <input
-                class="form-control"
-                [(ngModel)]="draft.password"
-                type="password"
-                name="password"
-              />
-              <div class="form-text" *ngIf="draft.password">Mín. 6 caracteres.</div>
-            </div>
-            <div class="col-md-6" *ngIf="draft.password">
-              <label class="form-label">Confirmar contraseña</label>
-              <input
-                class="form-control"
-                [(ngModel)]="draft.password2"
-                type="password"
-                name="password2"
-                [class.is-invalid]="editTouched && !passwordsMatch(draft.password, draft.password2)"
-              />
-              <div class="invalid-feedback">Las contraseñas no coinciden.</div>
-            </div>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="cancel()">Cancelar</button>
-        <button
-          type="button"
-          class="btn btn-primary"
-          (click)="saveFromModal()"
-          (mousedown)="editTouched = true"
-          [disabled]="
-            !isEmailValid(draft.email) ||
-            (draft.password &&
-              (!isPasswordOk(draft.password) || !passwordsMatch(draft.password, draft.password2)))
-          "
-        >
-          Guardar
-        </button>
-      </div>
-    </div>
-  </div>
+<!-- Panel de edición como servicios -->
+<div *ngIf="editing" class="mt-3">
+  <app-user-form
+    [user]="editing"
+    [loading]="loading"
+    (onSave)="saveEdit($event)"
+    (onCancel)="cancelEdit()"
+  ></app-user-form>
 </div>
-<div class="modal-backdrop" [class.show]="showEditModal" *ngIf="showEditModal"></div>
 
 <ng-template #empty>
   <div class="alert alert-info mt-3">No hay usuarios.</div>

@@ -9,11 +9,12 @@ import { environment } from '../../../../environments/environment';
 import { AG_GRID_LOCALE, gridTheme as sharedGridTheme } from '../sharedTable';
 import { ActionButtonsComponent } from '../action-buttons-cell/action-buttons-cell';
 import { ActionButtonsParams } from '../action-buttons-cell/action-buttons-param';
+import { UserFormComponent, UserFormPayload } from './user-form/user-form';
 
 @Component({
   standalone: true,
   selector: 'app-admin-users',
-  imports: [CommonModule, FormsModule, AgGridAngular],
+  imports: [CommonModule, FormsModule, AgGridAngular, UserFormComponent],
   styleUrls: ['./users.css'],
   templateUrl: `./users.html`,
 })
@@ -43,22 +44,9 @@ export class Users implements OnInit {
   imgBrokenCreate = false;
   createLoading = false;
 
-  // Editar
-  editId: number | null = null;
-  draft: {
-    email: string;
-    full_name?: string;
-    phone?: string;
-    national_id?: string;
-    selected_pet?: string;
-    password?: string;
-    password2?: string;
-    role: Role;
-    enabled: boolean;
-  } = this.emptyDraft();
-  editTouched = false;
-  imgBrokenEdit = false;
-  showEditModal = false;
+  // Editar - patrón servicios
+  editing?: User;
+  loading = false;
 
   allRoles: Role[] = ['ADMIN','OPERATOR','CLIENT'];
 
@@ -284,66 +272,51 @@ export class Users implements OnInit {
   beginEdit(u: User) {
     if (this.isSelf(u)) return; // No permitir editar a uno mismo
     
-    this.editId = u.user_id;
-    this.editTouched = false;
-    this.imgBrokenEdit = false;
-    this.showEditModal = true;
-    this.draft = {
-      email: u.email,
-      full_name: u.full_name,
-      phone: u.phone,
-      national_id: u.national_id,
-      selected_pet: u.selected_pet,
-      role: (this.roleNames(u.roles)[0] as Role) || 'CLIENT',
-      enabled: u.enabled !== false
-    };
+    this.editing = u;
   }
 
-  cancel() {
-    this.editId = null;
-    this.editTouched = false;
-    this.imgBrokenEdit = false;
-    this.showEditModal = false;
-    this.draft = this.emptyDraft();
+  cancelEdit() {
+    this.editing = undefined;
+    this.loading = false;
   }
 
-  saveFromModal() {
-    if (!this.editId) return;
-    const user = this.users.find(u => u.user_id === this.editId);
-    if (user) {
-      this.save(user);
-    }
-  }
-
-  save(u: User) {
-    this.editTouched = true;
-    if (!this.isEmailValid(this.draft.email)) return;
-    if (this.draft.password && (!this.isPasswordOk(this.draft.password) || !this.passwordsMatch(this.draft.password, this.draft.password2))) {
+  saveEdit(payload: UserFormPayload) {
+    if (!this.editing) return;
+    
+    const draft = payload.draft;
+    if (!this.isEmailValid(draft.email)) return;
+    if (draft.password && (!this.isPasswordOk(draft.password) || !this.passwordsMatch(draft.password, draft.password2))) {
       return;
     }
 
-    const body: any = {
-      email: this.draft.email,
-      full_name: this.draft.full_name,
-      phone: this.draft.phone,
-      national_id: this.draft.national_id,
-      selected_pet: this.draft.selected_pet,
-      enabled: this.draft.enabled,
-      roles: [this.draft.role]
-    };
-    if (this.draft.password) body.password = this.draft.password;
+    this.loading = true;
 
-    this.api.update(u.user_id, body).subscribe({
+    const body: any = {
+      email: draft.email,
+      full_name: draft.full_name,
+      phone: draft.phone,
+      national_id: draft.national_id,
+      selected_pet: draft.selected_pet,
+      enabled: draft.enabled,
+      roles: [draft.role]
+    };
+    if (draft.password) body.password = draft.password;
+
+    this.api.update(this.editing.user_id, body).subscribe({
       next: upd => {
+        Object.assign(this.editing!, upd);
         this.users = this.users.map(x => x.user_id === upd.user_id ? upd : x);
         this.rowData = this.rowData.map(x => x.user_id === upd.user_id ? upd : x);
-        this.cancel();
+        this.cancelEdit();
         this.withGridApi(api => {
           api.applyTransaction({ update: [upd] });
           api.refreshCells({ force: true });
         });
       },
-      error: err => alert(err?.error?.message || err.message || 'Error al actualizar usuario')
+      error: err => {
+        this.loading = false;
+        alert(err?.error?.message || err.message || 'Error al actualizar usuario');
+      }
     });
   }
 
