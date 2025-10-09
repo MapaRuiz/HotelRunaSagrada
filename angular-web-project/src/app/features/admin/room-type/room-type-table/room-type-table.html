@@ -74,6 +74,13 @@
   </div>
 </ng-container>
 
+<!-- Detail Form -->
+<app-room-type-detail
+  *ngIf="selected && !editing"
+  [roomType]="selected"
+  (editRequested)="onDetailEdit($event)"
+></app-room-type-detail>
+
 <app-room-type-form
   *ngIf="editing"
   [draft]="draft"

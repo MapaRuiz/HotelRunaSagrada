@@ -9,6 +9,7 @@ import { AG_GRID_LOCALE, gridTheme as sharedGridTheme } from '../../sharedTable'
 import { ActionButtonsComponent } from '../../action-buttons-cell/action-buttons-cell';
 import { ActionButtonsParams } from '../../action-buttons-cell/action-buttons-param';
 import { RoomTypeFormComponent, RoomTypeFormPayload } from '../room-type-form/room-type-form';
+import { RoomTypeDetailComponent } from '../room-type-detail/room-type-detail';
 
 const TEXT_FILTER_CONFIG: ITextFilterParams = {
   filterOptions: ['contains', 'equals', 'notContains', 'startsWith'],
@@ -23,7 +24,7 @@ const NUMBER_FILTER_CONFIG: INumberFilterParams = {
 @Component({
   selector: 'app-room-types-table',
   standalone: true,
-  imports: [CommonModule, FormsModule, AgGridAngular, RoomTypeFormComponent],
+  imports: [CommonModule, FormsModule, AgGridAngular, RoomTypeFormComponent, RoomTypeDetailComponent],
   templateUrl: './room-type-table.html',
   styleUrls: ['./room-type-table.css'],
   encapsulation: ViewEncapsulation.None
@@ -80,6 +81,12 @@ export class RoomTypesTableComponent implements OnInit {
     domLayout: 'normal',
     rowHeight: 100,
     headerHeight: 50,
+    rowSelection: 'single',
+    getRowId: params => params.data.room_type_id?.toString() || '',
+    onSelectionChanged: params => {
+      const [row] = params.api.getSelectedRows();
+      this.selected = row;
+    },
     columnDefs: [
       {
         headerName: 'ID',
@@ -256,10 +263,21 @@ export class RoomTypesTableComponent implements OnInit {
 
     this.loading = true;
     this.svc.update(this.editing.room_type_id!, updatePayload).subscribe({
-      next: () => {
+      next: (updatedRoomType) => {
+        // Actualizar el roomType en las listas
+        const index = this.roomTypes.findIndex(rt => rt.room_type_id === this.editing!.room_type_id);
+        if (index !== -1) {
+          this.roomTypes[index] = updatedRoomType;
+          this.rowData = [...this.roomTypes];
+        }
+        
+        // Actualizar selected si es el mismo room type
+        if (this.selected && this.selected.room_type_id === updatedRoomType.room_type_id) {
+          this.selected = updatedRoomType;
+        }
+        
         this.loading = false;
         this.cancelEdit();
-        this.fetchData();
       },
       error: (err) => {
         console.error('Error updating room type:', err);
@@ -268,13 +286,27 @@ export class RoomTypesTableComponent implements OnInit {
     });
   }
 
+  onDetailEdit(roomType: RoomType): void {
+    this.beginEdit(roomType);
+  }
+
   delete(roomType: RoomType): void {
     if (!roomType.room_type_id) return;
     
     if (confirm(`¿Estás seguro de que quieres eliminar "${roomType.name}"?`)) {
       this.svc.delete(roomType.room_type_id).subscribe({
         next: () => {
+          // Limpiar selección si el room type eliminado está seleccionado
+          if (this.selected && this.selected.room_type_id === roomType.room_type_id) {
+            this.selected = undefined;
+          }
+          
           this.fetchData();
+          
+          // Limpiar selección del grid también
+          if (this.gridApi) {
+            this.gridApi.deselectAll();
+          }
         },
         error: (err) => {
           console.error('Error deleting room type:', err);
