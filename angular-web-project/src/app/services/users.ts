@@ -46,4 +46,12 @@ delete(id: number, cascade = false) {
   getHistoryReservations(userId: number) {
     return this.http.get<any[]>(`${this.base}/reservations/history`, { params: { userId: String(userId) } });
   }
+
+  existsByEmail(email: string) {
+    return this.http.get<boolean>(`${this.base}/users/${encodeURIComponent(email)}`);
+  }
+
+  existsByNationalId(nationalId: string) {
+    return this.http.get<boolean>(`${this.base}/users/nationalId/${encodeURIComponent(nationalId)}`);
+  }
 }

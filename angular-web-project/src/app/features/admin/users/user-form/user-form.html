@@ -8,12 +8,28 @@
         type="email"
         class="form-control input-soft"
         [(ngModel)]="draft.email"
+        (ngModelChange)="checkEmailExists($event)"
         name="email"
         required
-        [class.is-invalid]="!isEmailValid(draft.email) && draft.email"
+        [class.is-invalid]="(!isEmailValid(draft.email) || emailExists) && draft.email"
       />
-      <div class="invalid-feedback" *ngIf="!isEmailValid(draft.email) && draft.email">
-        Email inválido
+      <div class="d-flex align-items-center mt-1">
+        <span
+          *ngIf="checkingEmail"
+          class="spinner-border spinner-border-sm text-primary me-2"
+        ></span>
+        <div
+          class="invalid-feedback d-block"
+          *ngIf="!isEmailValid(draft.email) && draft.email && !emailExists"
+        >
+          Email inválido
+        </div>
+        <div
+          class="invalid-feedback d-block"
+          *ngIf="emailExists && draft.email && draft.email !== originalEmail"
+        >
+          Este correo ya está registrado
+        </div>
       </div>
     </div>
 
@@ -29,7 +45,27 @@
 
     <div class="col-md-6">
       <label class="form-label">Cédula</label>
-      <input class="form-control input-soft" [(ngModel)]="draft.national_id" name="national_id" />
+      <input
+        class="form-control input-soft"
+        [(ngModel)]="draft.national_id"
+        (ngModelChange)="checkNationalIdExists($event)"
+        name="national_id"
+        [class.is-invalid]="
+          draft.national_id && nationalIdExists && draft.national_id !== originalNationalId
+        "
+      />
+      <div class="d-flex align-items-center mt-1">
+        <span
+          *ngIf="checkingNationalId"
+          class="spinner-border spinner-border-sm text-primary me-2"
+        ></span>
+        <div
+          class="invalid-feedback d-block"
+          *ngIf="nationalIdExists && draft.national_id && draft.national_id !== originalNationalId"
+        >
+          Este documento ya está registrado
+        </div>
+      </div>
     </div>
 
     <div class="col-md-6">

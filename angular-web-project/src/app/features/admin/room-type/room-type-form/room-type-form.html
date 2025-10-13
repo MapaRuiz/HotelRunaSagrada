@@ -7,7 +7,7 @@
       <input class="form-control input-soft" [(ngModel)]="draft.name" name="name" required />
     </div>
 
-    <div class="col-md-6">
+    <div class="col-md-3">
       <label class="form-label">Capacidad</label>
       <input
         type="number"
@@ -19,17 +19,7 @@
       />
     </div>
 
-    <div class="col-md-6">
-      <label class="form-label">Descripción</label>
-      <input
-        class="form-control input-soft"
-        [(ngModel)]="draft.description"
-        name="description"
-        required
-      />
-    </div>
-
-    <div class="col-md-6">
+    <div class="col-md-3">
       <label class="form-label">Precio Base</label>
       <input
         type="number"
@@ -39,6 +29,17 @@
         min="0"
         required
       />
+    </div>
+
+    <div class="col-12">
+      <label class="form-label">Descripción</label>
+      <textarea
+        class="form-control input-soft"
+        [(ngModel)]="draft.description"
+        name="description"
+        rows="2"
+        required
+      ></textarea>
     </div>
 
     <div class="col-12">

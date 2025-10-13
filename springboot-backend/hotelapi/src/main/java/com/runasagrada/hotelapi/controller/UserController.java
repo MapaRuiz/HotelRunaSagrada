@@ -88,6 +88,16 @@ public class UserController {
         return ResponseEntity.ok(updated);
     }
 
+    @GetMapping("/users/{email}")
+    public boolean existsByEmail(@PathVariable String email) {
+        return service.existsByEmail(email);
+    }
+
+    @GetMapping("/users/nationalId/{nationalId}")
+    public boolean existsByNationalId(@PathVariable String nationalId) {
+        return service.existsByNationalId(nationalId);
+    }
+
     @Data
     static class AdminUpdateUserRequest {
         private String email;

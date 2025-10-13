@@ -20,4 +20,7 @@ public interface UserService {
 
     void deleteCascade(Integer id);
 
+    boolean existsByEmail(String email);
+
+    boolean existsByNationalId(String nationalId);
 }

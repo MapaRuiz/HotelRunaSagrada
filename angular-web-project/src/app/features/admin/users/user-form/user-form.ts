@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { User, Role, RoleEntity } from '../../../../model/user';
 import { environment } from '../../../../../environments/environment';
+import { UsersService } from '../../../../services/users';
+import { debounceTime, Subject } from 'rxjs';
 
 export interface UserFormPayload {
   draft: {
@@ -31,6 +33,8 @@ export class UserFormComponent implements OnInit {
   @Output() onCancel = new EventEmitter<void>();
   @Output() onSave = new EventEmitter<UserFormPayload>();
 
+  private api = inject(UsersService);
+
   draft: {
     email: string;
     full_name?: string;
@@ -45,15 +49,39 @@ export class UserFormComponent implements OnInit {
 
   allRoles: Role[] = ['ADMIN','OPERATOR','CLIENT'];
   imgBroken = false;
+  emailExists = false;
+  checkingEmail = false;
+  originalEmail = '';
+  private emailCheckSubject = new Subject<string>();
+  nationalIdExists = false;
+  checkingNationalId = false;
+  originalNationalId = '';
+  private nationalIdCheckSubject = new Subject<string>();
 
   // Base del backend para imágenes
   private backendBase = (environment as any).backendBaseUrl
     || (environment.apiBaseUrl ? environment.apiBaseUrl.replace(/\/api\/?$/, '') : '');
 
-  constructor() {}
+  constructor() {
+    // Configurar debounce para verificación de email
+    this.emailCheckSubject.pipe(
+      debounceTime(500) // Esperar 500ms después de que el usuario deje de escribir
+    ).subscribe(email => {
+      this.performEmailCheck(email);
+    });
+
+    // Configurar debounce para verificación de documento
+    this.nationalIdCheckSubject.pipe(
+      debounceTime(500) // Esperar 500ms después de que el usuario deje de escribir
+    ).subscribe(nationalId => {
+      this.performNationalIdCheck(nationalId);
+    });
+  }
 
   ngOnInit(): void {
     if (this.user) {
+      this.originalEmail = this.user.email;
+      this.originalNationalId = this.user.national_id || '';
       this.draft = {
         email: this.user.email,
         full_name: this.user.full_name,
@@ -79,7 +107,12 @@ export class UserFormComponent implements OnInit {
 
   // Validaciones
   isEmailValid(v?: string) { 
-    return !!v && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); 
+    if (!v) return false;
+    const formatValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    // Si el email es el mismo que el original, no verificamos duplicados
+    if (v === this.originalEmail) return formatValid;
+    // Si cambió el email, verificamos que no exista y tenga formato válido
+    return formatValid && !this.emailExists;
   }
   
   isPasswordOk(v?: string) { 
@@ -90,8 +123,90 @@ export class UserFormComponent implements OnInit {
     return (a || '') === (b || ''); 
   }
 
+  // Método público que se llama desde el template
+  checkEmailExists(email: string) {
+    // Si el email es el mismo que el original, no necesitamos verificar
+    if (email === this.originalEmail) {
+      this.emailExists = false;
+      this.checkingEmail = false;
+      return;
+    }
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      this.emailExists = false;
+      this.checkingEmail = false;
+      return;
+    }
+    
+    this.emailCheckSubject.next(email);
+  }
+
+  // Método privado que realiza la verificación real con debounce
+  private performEmailCheck(email: string) {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email === this.originalEmail) {
+      this.emailExists = false;
+      this.checkingEmail = false;
+      return;
+    }
+
+    this.checkingEmail = true;
+    this.api.existsByEmail(email).subscribe({
+      next: (exists) => {
+        this.emailExists = exists;
+        this.checkingEmail = false;
+      },
+      error: () => {
+        this.emailExists = false;
+        this.checkingEmail = false;
+      }
+    });
+  }
+
+  // Método público que se llama desde el template para verificar documento
+  checkNationalIdExists(nationalId: string) {
+    // Si el documento es el mismo que el original, no necesitamos verificar
+    if (nationalId === this.originalNationalId) {
+      this.nationalIdExists = false;
+      this.checkingNationalId = false;
+      return;
+    }
+
+    if (!nationalId || nationalId.trim().length === 0) {
+      this.nationalIdExists = false;
+      this.checkingNationalId = false;
+      return;
+    }
+    
+    this.nationalIdCheckSubject.next(nationalId.trim());
+  }
+
+  // Método privado que realiza la verificación real con debounce para documento
+  private performNationalIdCheck(nationalId: string) {
+    if (!nationalId || nationalId.trim().length === 0 || nationalId === this.originalNationalId) {
+      this.nationalIdExists = false;
+      this.checkingNationalId = false;
+      return;
+    }
+
+    this.checkingNationalId = true;
+    this.api.existsByNationalId(nationalId).subscribe({
+      next: (exists) => {
+        this.nationalIdExists = exists;
+        this.checkingNationalId = false;
+      },
+      error: () => {
+        this.nationalIdExists = false;
+        this.checkingNationalId = false;
+      }
+    });
+  }
+
   isFormValid(): boolean {
     return this.isEmailValid(this.draft.email) &&
+           !this.emailExists &&
+           !this.checkingEmail &&
+           !this.nationalIdExists &&
+           !this.checkingNationalId &&
            this.isPasswordOk(this.draft.password) &&
            this.passwordsMatch(this.draft.password, this.draft.password2);
   }

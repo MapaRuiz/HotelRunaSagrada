@@ -124,4 +124,12 @@ public class UserServiceImpl implements UserService {
         users.deleteById(id);
         helper.resyncIdentity("users", "user_id");
     }
+
+    public boolean existsByEmail(String email) {
+        return users.existsByEmail(email);
+    }
+
+    public boolean existsByNationalId(String nationalId) {
+        return users.existsByNationalId(nationalId);
+    }
 }
