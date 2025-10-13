@@ -3,17 +3,70 @@
     <summary>Crear hotel</summary>
 
     <div class="card card-body hotel-create-form" *ngIf="showCreate">
-      <div class="row g-2">
-        <div class="col-md-4">
+      <div class="row g-3">
+        <div class="col-md-6">
           <label class="form-label">Nombre *</label>
-          <input class="form-control" [(ngModel)]="createForm.name" />
+          <input
+            class="form-control input-soft"
+            [(ngModel)]="createForm.name"
+            name="name"
+            required
+          />
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
+          <label class="form-label">Check-in</label>
+          <input
+            class="form-control input-soft"
+            [(ngModel)]="createForm.check_in_after"
+            name="check_in_after"
+            placeholder="15:00"
+            type="time"
+          />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Check-out</label>
+          <input
+            class="form-control input-soft"
+            [(ngModel)]="createForm.check_out_before"
+            name="check_out_before"
+            placeholder="12:00"
+            type="time"
+          />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Latitud</label>
+          <input
+            class="form-control input-soft"
+            [(ngModel)]="createForm.latitude"
+            name="latitude"
+            placeholder="Ej: 40.7128"
+          />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Longitud</label>
+          <input
+            class="form-control input-soft"
+            [(ngModel)]="createForm.longitude"
+            name="longitude"
+            placeholder="Ej: -74.0060"
+          />
+        </div>
+        <div class="col-12">
+          <label class="form-label">Descripción</label>
+          <textarea
+            class="form-control input-soft"
+            rows="2"
+            [(ngModel)]="createForm.description"
+            name="description"
+          ></textarea>
+        </div>
+        <div class="col-12">
           <label class="form-label">Imagen (ruta/URL)</label>
           <input
-            class="form-control"
+            class="form-control input-soft"
             [(ngModel)]="createForm.image"
-            placeholder="/images/hotels/ejemplo.jpg o https://..."
+            name="image"
+            placeholder="https://ejemplo.com/imagen.jpg"
           />
           <div class="mt-2" *ngIf="createForm.image as src">
             <img
@@ -26,30 +79,6 @@
               No se pudo cargar la imagen.
             </div>
           </div>
-        </div>
-        <div class="col-md-2">
-          <label class="form-label">Check-in</label>
-          <input class="form-control" [(ngModel)]="createForm.check_in_after" placeholder="15:00" />
-        </div>
-        <div class="col-md-2">
-          <label class="form-label">Check-out</label>
-          <input
-            class="form-control"
-            [(ngModel)]="createForm.check_out_before"
-            placeholder="12:00"
-          />
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Latitud</label>
-          <input class="form-control" [(ngModel)]="createForm.latitude" />
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Longitud</label>
-          <input class="form-control" [(ngModel)]="createForm.longitude" />
-        </div>
-        <div class="col-12">
-          <label class="form-label">Descripción</label>
-          <textarea class="form-control" rows="2" [(ngModel)]="createForm.description"></textarea>
         </div>
       </div>
 
@@ -70,10 +99,17 @@
       </div>
 
       <div class="mt-3 d-flex gap-2">
-        <button class="btn btn-primary" (click)="create()" [disabled]="createLoading">
+        <button
+          type="button"
+          class="btn btn-outline-olive me-2"
+          (click)="cancelCreate()"
+          [disabled]="createLoading"
+        >
+          Cancelar
+        </button>
+        <button class="btn btn-olive" (click)="create()" [disabled]="createLoading">
           {{ createLoading ? 'Creando...' : 'Crear' }}
         </button>
-        <button class="btn btn-secondary" (click)="cancelCreate()">Cancelar</button>
       </div>
     </div>
   </details>
@@ -112,21 +148,14 @@
   <div class="row g-3">
     <div class="col-md-6">
       <label class="form-label">Nombre *</label>
-      <input class="form-control" [(ngModel)]="draft.name" required />
-    </div>
-    <div class="col-md-6">
-      <label class="form-label">Imagen (ruta/URL)</label>
-      <input
-        class="form-control"
-        [(ngModel)]="draft.image"
-        placeholder="/images/hotels/ejemplo.jpg o https://..."
-      />
+      <input class="form-control input-soft" [(ngModel)]="draft.name" name="name" required />
     </div>
     <div class="col-md-3">
       <label class="form-label">Check-in</label>
       <input
-        class="form-control"
+        class="form-control input-soft"
         [(ngModel)]="draft.check_in_after"
+        name="check_in_after"
         placeholder="15:00"
         type="time"
       />
@@ -134,23 +163,48 @@
     <div class="col-md-3">
       <label class="form-label">Check-out</label>
       <input
-        class="form-control"
+        class="form-control input-soft"
         [(ngModel)]="draft.check_out_before"
+        name="check_out_before"
         placeholder="12:00"
         type="time"
       />
     </div>
-    <div class="col-md-3">
+    <div class="col-md-6">
       <label class="form-label">Latitud</label>
-      <input class="form-control" [(ngModel)]="draft.latitude" placeholder="Ej: 40.7128" />
+      <input
+        class="form-control input-soft"
+        [(ngModel)]="draft.latitude"
+        name="latitude"
+        placeholder="Ej: 40.7128"
+      />
     </div>
-    <div class="col-md-3">
+    <div class="col-md-6">
       <label class="form-label">Longitud</label>
-      <input class="form-control" [(ngModel)]="draft.longitude" placeholder="Ej: -74.0060" />
+      <input
+        class="form-control input-soft"
+        [(ngModel)]="draft.longitude"
+        name="longitude"
+        placeholder="Ej: -74.0060"
+      />
     </div>
     <div class="col-12">
       <label class="form-label">Descripción</label>
-      <textarea class="form-control" rows="3" [(ngModel)]="draft.description"></textarea>
+      <textarea
+        class="form-control input-soft"
+        rows="3"
+        [(ngModel)]="draft.description"
+        name="description"
+      ></textarea>
+    </div>
+    <div class="col-12">
+      <label class="form-label">Imagen (ruta/URL)</label>
+      <input
+        class="form-control input-soft"
+        [(ngModel)]="draft.image"
+        name="image"
+        placeholder="https://ejemplo.com/imagen.jpg"
+      />
     </div>
     <div class="col-12" *ngIf="draft.image">
       <div class="text-center">
@@ -180,9 +234,16 @@
     </div>
   </div>
   <div class="mt-3 d-flex gap-2">
-    <button class="btn btn-primary" (click)="saveEdit()" [disabled]="loading">
+    <button
+      type="button"
+      class="btn btn-outline-olive me-2"
+      (click)="cancelEdit()"
+      [disabled]="loading"
+    >
+      Cancelar
+    </button>
+    <button class="btn btn-olive" (click)="saveEdit()" [disabled]="loading">
       {{ loading ? 'Guardando...' : 'Guardar' }}
     </button>
-    <button class="btn btn-secondary" (click)="cancelEdit()">Cancelar</button>
   </div>
 </div>

@@ -3,26 +3,56 @@
     <summary>Crear tipo de habitación</summary>
 
     <div class="card card-body room-type-create-form" *ngIf="showCreate">
-      <div class="row g-2">
-        <div class="col-sm-6">
+      <div class="row g-3">
+        <div class="col-md-6">
           <label class="form-label">Nombre</label>
-          <input class="form-control" [(ngModel)]="createForm.name" />
+          <input
+            class="form-control input-soft"
+            [(ngModel)]="createForm.name"
+            name="name"
+            required
+          />
         </div>
-        <div class="col-sm-3">
+        <div class="col-md-3">
           <label class="form-label">Capacidad</label>
-          <input class="form-control" type="number" min="1" [(ngModel)]="createForm.capacity" />
+          <input
+            class="form-control input-soft"
+            type="number"
+            min="1"
+            [(ngModel)]="createForm.capacity"
+            name="capacity"
+            required
+          />
         </div>
-        <div class="col-sm-3">
+        <div class="col-md-3">
           <label class="form-label">Precio Base</label>
-          <input class="form-control" type="number" min="0" [(ngModel)]="createForm.base_price" />
+          <input
+            class="form-control input-soft"
+            type="number"
+            min="0"
+            [(ngModel)]="createForm.base_price"
+            name="base_price"
+            required
+          />
         </div>
-        <div class="col-sm-12">
+        <div class="col-12">
           <label class="form-label">Descripción</label>
-          <textarea class="form-control" rows="2" [(ngModel)]="createForm.description"></textarea>
+          <textarea
+            class="form-control input-soft"
+            rows="2"
+            [(ngModel)]="createForm.description"
+            name="description"
+            required
+          ></textarea>
         </div>
-        <div class="col-sm-12">
+        <div class="col-12">
           <label class="form-label">Imagen (URL portada)</label>
-          <input class="form-control" [(ngModel)]="createForm.image" />
+          <input
+            class="form-control input-soft"
+            [(ngModel)]="createForm.image"
+            name="image"
+            placeholder="https://ejemplo.com/imagen.jpg"
+          />
           <div class="mt-2" *ngIf="createForm.image">
             <img
               [src]="createForm.image"
@@ -38,10 +68,17 @@
       </div>
 
       <div class="mt-3 d-flex gap-2">
-        <button class="btn btn-primary" (click)="create()" [disabled]="createLoading">
+        <button
+          type="button"
+          class="btn btn-outline-olive me-2"
+          (click)="cancelCreate()"
+          [disabled]="createLoading"
+        >
+          Cancelar
+        </button>
+        <button class="btn btn-olive" (click)="create()" [disabled]="createLoading">
           {{ createLoading ? 'Creando...' : 'Crear' }}
         </button>
-        <button class="btn btn-secondary" (click)="cancelCreate()">Cancelar</button>
       </div>
     </div>
   </details>
