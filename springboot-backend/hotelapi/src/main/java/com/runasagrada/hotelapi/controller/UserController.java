@@ -93,6 +93,11 @@ public class UserController {
         return service.existsByEmail(email);
     }
 
+    @GetMapping("/users/nationalId/{nationalId}")
+    public boolean existsByNationalId(@PathVariable String nationalId) {
+        return service.existsByNationalId(nationalId);
+    }
+
     @Data
     static class AdminUpdateUserRequest {
         private String email;

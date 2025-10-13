@@ -48,6 +48,9 @@ export class Users implements OnInit {
   emailExists = false;
   checkingEmail = false;
   private emailCheckSubject = new Subject<string>();
+  nationalIdExists = false;
+  checkingNationalId = false;
+  private nationalIdCheckSubject = new Subject<string>();
 
   // Editar - patrón servicios
   editing?: User;
@@ -78,6 +81,13 @@ export class Users implements OnInit {
       debounceTime(500) // Esperar 500ms después de que el usuario deje de escribir
     ).subscribe(email => {
       this.performEmailCheck(email);
+    });
+
+    // Configurar debounce para verificación de documento
+    this.nationalIdCheckSubject.pipe(
+      debounceTime(500) // Esperar 500ms después de que el usuario deje de escribir
+    ).subscribe(nationalId => {
+      this.performNationalIdCheck(nationalId);
     });
   }
   
@@ -249,6 +259,38 @@ export class Users implements OnInit {
       error: () => {
         this.emailExists = false;
         this.checkingEmail = false;
+      }
+    });
+  }
+
+  // Método público que se llama desde el template para verificar documento
+  checkNationalIdExists(nationalId: string) {
+    if (!nationalId || nationalId.trim().length === 0) {
+      this.nationalIdExists = false;
+      this.checkingNationalId = false;
+      return;
+    }
+    
+    this.nationalIdCheckSubject.next(nationalId.trim());
+  }
+
+  // Método privado que realiza la verificación real con debounce para documento
+  private performNationalIdCheck(nationalId: string) {
+    if (!nationalId || nationalId.trim().length === 0) {
+      this.nationalIdExists = false;
+      this.checkingNationalId = false;
+      return;
+    }
+
+    this.checkingNationalId = true;
+    this.api.existsByNationalId(nationalId).subscribe({
+      next: (exists) => {
+        this.nationalIdExists = exists;
+        this.checkingNationalId = false;
+      },
+      error: () => {
+        this.nationalIdExists = false;
+        this.checkingNationalId = false;
       }
     });
   }

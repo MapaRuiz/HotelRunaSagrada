@@ -50,4 +50,8 @@ delete(id: number, cascade = false) {
   existsByEmail(email: string) {
     return this.http.get<boolean>(`${this.base}/users/${encodeURIComponent(email)}`);
   }
+
+  existsByNationalId(nationalId: string) {
+    return this.http.get<boolean>(`${this.base}/users/nationalId/${encodeURIComponent(nationalId)}`);
+  }
 }

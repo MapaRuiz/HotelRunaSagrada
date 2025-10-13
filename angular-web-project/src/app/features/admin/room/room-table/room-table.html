@@ -43,11 +43,16 @@
           <input
             type="number"
             class="form-control input-soft"
+            [class.is-invalid]="draft.floor && (draft.floor < 1 || draft.floor > 5)"
             min="1"
+            max="5"
             [(ngModel)]="draft.floor"
             name="floor"
             required
           />
+          <div *ngIf="draft.floor && (draft.floor < 1 || draft.floor > 5)" class="invalid-feedback">
+            El piso debe estar entre 1 y 5
+          </div>
         </div>
 
         <div class="col-md-6">
@@ -241,7 +246,12 @@
           >
             Cancelar
           </button>
-          <button type="submit" class="btn btn-olive" (click)="save()" [disabled]="createLoading">
+          <button
+            type="submit"
+            class="btn btn-olive"
+            (click)="save()"
+            [disabled]="createLoading || (draft.floor && (draft.floor < 1 || draft.floor > 5))"
+          >
             {{ createLoading ? 'Guardando...' : 'Guardar' }}
           </button>
         </div>
@@ -319,11 +329,16 @@
       <input
         type="number"
         class="form-control input-soft"
+        [class.is-invalid]="draft.floor && (draft.floor < 1 || draft.floor > 5)"
         min="1"
+        max="5"
         [(ngModel)]="draft.floor"
         name="floor"
         required
       />
+      <div *ngIf="draft.floor && (draft.floor < 1 || draft.floor > 5)" class="invalid-feedback">
+        El piso debe estar entre 1 y 5
+      </div>
     </div>
 
     <div class="col-md-6">
@@ -513,7 +528,12 @@
       <button class="btn btn-outline-olive me-2" (click)="cancelEdit()" [disabled]="loading">
         Cancelar
       </button>
-      <button type="submit" class="btn btn-olive" (click)="saveEdit()" [disabled]="loading">
+      <button
+        type="submit"
+        class="btn btn-olive"
+        (click)="saveEdit()"
+        [disabled]="loading || (draft.floor && (draft.floor < 1 || draft.floor > 5))"
+      >
         {{ loading ? 'Guardando...' : 'Guardar' }}
       </button>
     </div>

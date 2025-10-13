@@ -45,7 +45,27 @@
 
     <div class="col-md-6">
       <label class="form-label">Cédula</label>
-      <input class="form-control input-soft" [(ngModel)]="draft.national_id" name="national_id" />
+      <input
+        class="form-control input-soft"
+        [(ngModel)]="draft.national_id"
+        (ngModelChange)="checkNationalIdExists($event)"
+        name="national_id"
+        [class.is-invalid]="
+          draft.national_id && nationalIdExists && draft.national_id !== originalNationalId
+        "
+      />
+      <div class="d-flex align-items-center mt-1">
+        <span
+          *ngIf="checkingNationalId"
+          class="spinner-border spinner-border-sm text-primary me-2"
+        ></span>
+        <div
+          class="invalid-feedback d-block"
+          *ngIf="nationalIdExists && draft.national_id && draft.national_id !== originalNationalId"
+        >
+          Este documento ya está registrado
+        </div>
+      </div>
     </div>
 
     <div class="col-md-6">

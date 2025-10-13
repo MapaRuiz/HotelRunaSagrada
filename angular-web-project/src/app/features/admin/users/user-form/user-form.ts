@@ -53,6 +53,10 @@ export class UserFormComponent implements OnInit {
   checkingEmail = false;
   originalEmail = '';
   private emailCheckSubject = new Subject<string>();
+  nationalIdExists = false;
+  checkingNationalId = false;
+  originalNationalId = '';
+  private nationalIdCheckSubject = new Subject<string>();
 
   // Base del backend para imágenes
   private backendBase = (environment as any).backendBaseUrl
@@ -65,11 +69,19 @@ export class UserFormComponent implements OnInit {
     ).subscribe(email => {
       this.performEmailCheck(email);
     });
+
+    // Configurar debounce para verificación de documento
+    this.nationalIdCheckSubject.pipe(
+      debounceTime(500) // Esperar 500ms después de que el usuario deje de escribir
+    ).subscribe(nationalId => {
+      this.performNationalIdCheck(nationalId);
+    });
   }
 
   ngOnInit(): void {
     if (this.user) {
       this.originalEmail = this.user.email;
+      this.originalNationalId = this.user.national_id || '';
       this.draft = {
         email: this.user.email,
         full_name: this.user.full_name,
@@ -150,10 +162,51 @@ export class UserFormComponent implements OnInit {
     });
   }
 
+  // Método público que se llama desde el template para verificar documento
+  checkNationalIdExists(nationalId: string) {
+    // Si el documento es el mismo que el original, no necesitamos verificar
+    if (nationalId === this.originalNationalId) {
+      this.nationalIdExists = false;
+      this.checkingNationalId = false;
+      return;
+    }
+
+    if (!nationalId || nationalId.trim().length === 0) {
+      this.nationalIdExists = false;
+      this.checkingNationalId = false;
+      return;
+    }
+    
+    this.nationalIdCheckSubject.next(nationalId.trim());
+  }
+
+  // Método privado que realiza la verificación real con debounce para documento
+  private performNationalIdCheck(nationalId: string) {
+    if (!nationalId || nationalId.trim().length === 0 || nationalId === this.originalNationalId) {
+      this.nationalIdExists = false;
+      this.checkingNationalId = false;
+      return;
+    }
+
+    this.checkingNationalId = true;
+    this.api.existsByNationalId(nationalId).subscribe({
+      next: (exists) => {
+        this.nationalIdExists = exists;
+        this.checkingNationalId = false;
+      },
+      error: () => {
+        this.nationalIdExists = false;
+        this.checkingNationalId = false;
+      }
+    });
+  }
+
   isFormValid(): boolean {
     return this.isEmailValid(this.draft.email) &&
            !this.emailExists &&
            !this.checkingEmail &&
+           !this.nationalIdExists &&
+           !this.checkingNationalId &&
            this.isPasswordOk(this.draft.password) &&
            this.passwordsMatch(this.draft.password, this.draft.password2);
   }

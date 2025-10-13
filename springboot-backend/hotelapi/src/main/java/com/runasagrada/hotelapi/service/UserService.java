@@ -22,4 +22,5 @@ public interface UserService {
 
     boolean existsByEmail(String email);
 
+    boolean existsByNationalId(String nationalId);
 }

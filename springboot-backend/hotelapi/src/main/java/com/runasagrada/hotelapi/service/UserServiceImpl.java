@@ -128,4 +128,8 @@ public class UserServiceImpl implements UserService {
     public boolean existsByEmail(String email) {
         return users.existsByEmail(email);
     }
+
+    public boolean existsByNationalId(String nationalId) {
+        return users.existsByNationalId(nationalId);
+    }
 }

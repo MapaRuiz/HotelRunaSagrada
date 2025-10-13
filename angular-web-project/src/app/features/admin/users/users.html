@@ -80,7 +80,21 @@
               class="form-control input-soft"
               name="national_id"
               [(ngModel)]="createDraft.national_id"
+              (ngModelChange)="checkNationalIdExists($event)"
+              [class.is-invalid]="createDraft.national_id && nationalIdExists"
             />
+            <div class="d-flex align-items-center mt-1">
+              <span
+                *ngIf="checkingNationalId"
+                class="spinner-border spinner-border-sm text-primary me-2"
+              ></span>
+              <div
+                class="invalid-feedback d-block"
+                *ngIf="nationalIdExists && createDraft.national_id"
+              >
+                Este documento ya está registrado.
+              </div>
+            </div>
           </div>
 
           <div class="col-md-6">
@@ -148,8 +162,10 @@
             [disabled]="
               createLoading ||
               checkingEmail ||
+              checkingNationalId ||
               !isEmailValid(createDraft.email) ||
               emailExists ||
+              nationalIdExists ||
               !isPasswordOk(createDraft.password) ||
               !passwordsMatch(createDraft.password, createDraft.password2)
             "
