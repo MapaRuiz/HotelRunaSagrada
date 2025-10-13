@@ -64,10 +64,9 @@ export class RoomFormComponent {
 
     // Form
     this.reserveForm = this.fb.group({
-  roomId: [{ value: null, disabled: true }, Validators.required],
-  checkIn: [todayISO(), Validators.required],
-  checkOut: [addDaysISO(1), Validators.required],
-});
+      checkIn: [todayISO(), Validators.required],
+      checkOut: [addDaysISO(1), Validators.required],
+    });
     this.reserveForm.get('checkIn')?.valueChanges.subscribe((v: string) => {
       if (v) this.minCheckOut = v;
     });
@@ -91,28 +90,21 @@ export class RoomFormComponent {
     .sort((a: any, b: any) => String(a.number ?? '').localeCompare(String(b.number ?? '')));
   this.availableCount = this.availableRoomsList.length;
 
-  const roomIdCtrl = this.reserveForm.get('roomId');
-
-  if (this.availableRoomsList.length) {
-    roomIdCtrl?.enable({ emitEvent: false });
-
-    // respetar intención guardada; si no hay, preseleccionar primera
-    const p = safeSessionGet('pendingReservation');
-    if (p && p.hotelId === this.hotelId && p.typeId === this.typeId) {
-      this.showForm = true;
-      if (p.roomId) this.reserveForm.patchValue({ roomId: String(p.roomId) }, { emitEvent: false });
-      this.reserveForm.patchValue({ checkIn: todayISO(), checkOut: addDaysISO(1) }, { emitEvent: false });
-      safeSessionRemove('pendingReservation');
-    } else if (!roomIdCtrl?.value) {
-      this.reserveForm.patchValue({ roomId: String(this.availableRoomsList[0].room_id) }, { emitEvent: false });
-    }
-  } else {
-    roomIdCtrl?.reset({ value: null, disabled: true }, { emitEvent: false });
+  // Check for pending reservation from session storage
+  const p = safeSessionGet('pendingReservation');
+  if (p && p.hotelId === this.hotelId && p.typeId === this.typeId) {
+    this.showForm = true;
+    this.reserveForm.patchValue({ checkIn: todayISO(), checkOut: addDaysISO(1) }, { emitEvent: false });
+    safeSessionRemove('pendingReservation');
   }
 });
   }
 
-  trackByRoom = (i: number, r: any) => r?.room_id ?? r?.number ?? i;
+  private getRandomRoom(): Room | null {
+    if (!this.availableRoomsList.length) return null;
+    const randomIndex = Math.floor(Math.random() * this.availableRoomsList.length);
+    return this.availableRoomsList[randomIndex];
+  }
 
   private ensureLoggedInClient(): number | null {
     const info = getFullUserNormalized();
@@ -121,8 +113,8 @@ export class RoomFormComponent {
 
     // Guarda intención y manda al login
     safeSessionSet('pendingReservation', {
-      hotelId: this.hotelId, typeId: this.typeId,
-      roomId: this.reserveForm?.value?.roomId ?? null,
+      hotelId: this.hotelId, 
+      typeId: this.typeId,
     });
     this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
     return null;
@@ -139,7 +131,14 @@ export class RoomFormComponent {
       return;
     }
 
-    const { roomId, checkIn, checkOut } = this.reserveForm.value;
+    // Automatically select a random available room
+    const selectedRoom = this.getRandomRoom();
+    if (!selectedRoom) {
+      this.submitError = 'No hay habitaciones disponibles para reservar.';
+      return;
+    }
+
+    const { checkIn, checkOut } = this.reserveForm.value;
     if (!isDateRangeValid(checkIn, checkOut)) {
       this.submitError = 'El check-out debe ser posterior al check-in.';
       return;
@@ -148,7 +147,7 @@ export class RoomFormComponent {
     const body: Partial<Reservation> = {
       user_id: uid,
       hotel_id: this.hotelId,
-      room_id: Number(roomId),
+      room_id: selectedRoom.room_id!,
       check_in: checkIn as string,
       check_out: checkOut as string,
       status: 'PENDING' as Reservation['status'],
@@ -164,7 +163,7 @@ export class RoomFormComponent {
           reservationCode: buildReservationCode(reservationId),
           hotelId: this.hotelId,
           typeId: this.typeId,
-          roomId: Number(roomId),
+          roomId: selectedRoom.room_id!,
           checkIn: body.check_in!,
           checkOut: body.check_out!,
         };

@@ -2,25 +2,9 @@
   <h3 class="card-title">Reservar esta categoría</h3>
 
   <form [formGroup]="reserveForm" (ngSubmit)="reserve()" novalidate>
-    <!-- Habitación -->
-    <div class="form-row">
-      <label for="roomId">Habitación</label>
-      <select id="roomId" formControlName="roomId">
-        <option [ngValue]="null" disabled>Elige una habitación disponible</option>
-        <option *ngFor="let r of availableRoomsList; trackBy: trackByRoom" [value]="r.room_id">
-          {{ r.number }} — Piso {{ r.floor }}
-        </option>
-      </select>
-
-      <small class="field-hint" *ngIf="!availableRoomsList.length">
+    <div class="form-row" *ngIf="!availableRoomsList.length">
+      <small class="field-hint">
         No hay habitaciones disponibles para hoy en esta categoría.
-      </small>
-
-      <small
-        class="field-error"
-        *ngIf="reserveForm.get('roomId')?.touched && reserveForm.get('roomId')?.invalid"
-      >
-        Debes seleccionar una habitación.
       </small>
     </div>
 
@@ -52,6 +36,9 @@
       * El check-out es <strong>exclusivo</strong>. Si reservas del 10 al 12, ocupas 10 y 11; el 12
       ya no.
     </p>
+    <p class="form-hint">
+      * Se te asignará automáticamente una habitación disponible de esta categoría.
+    </p>
 
     <div *ngIf="submitError" class="error">{{ submitError }}</div>
 
@@ -66,6 +53,8 @@
 
 <ng-template #cta>
   <section class="reserve-cta" *ngIf="availableCount > 0">
-    <p>Selecciona una habitación <em>Disponible</em> para continuar con tu reserva.</p>
+    <p>
+      Hay habitaciones disponibles en esta categoría. Inicia sesión para continuar con tu reserva.
+    </p>
   </section>
 </ng-template>
