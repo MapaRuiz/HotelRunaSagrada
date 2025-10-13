@@ -11,10 +11,27 @@
               class="form-control"
               name="email"
               [(ngModel)]="createDraft.email"
+              (ngModelChange)="checkEmailExists($event)"
               required
-              [class.is-invalid]="createTouched && !isEmailValid(createDraft.email)"
+              [class.is-invalid]="
+                createTouched && (!isEmailValid(createDraft.email) || emailExists)
+              "
             />
-            <div class="invalid-feedback">Ingresa un correo válido.</div>
+            <div class="d-flex align-items-center mt-1">
+              <span
+                *ngIf="checkingEmail"
+                class="spinner-border spinner-border-sm text-primary me-2"
+              ></span>
+              <div
+                class="invalid-feedback d-block"
+                *ngIf="createTouched && !isEmailValid(createDraft.email) && !emailExists"
+              >
+                Ingresa un correo válido.
+              </div>
+              <div class="invalid-feedback d-block" *ngIf="emailExists && createDraft.email">
+                Este correo ya está registrado.
+              </div>
+            </div>
           </div>
 
           <div class="col-md-4">
@@ -38,9 +55,7 @@
               name="password2"
               [(ngModel)]="createDraft.password2"
               required
-              [class.is-invalid]="
-                createTouched && !passwordsMatch(createDraft.password, createDraft.password2)
-              "
+              [class.is-invalid]="!passwordsMatch(createDraft.password, createDraft.password2)"
             />
             <div class="invalid-feedback">Las contraseñas no coinciden.</div>
           </div>
@@ -109,7 +124,9 @@
             (click)="createTouched = true"
             [disabled]="
               createLoading ||
+              checkingEmail ||
               !isEmailValid(createDraft.email) ||
+              emailExists ||
               !isPasswordOk(createDraft.password) ||
               !passwordsMatch(createDraft.password, createDraft.password2)
             "

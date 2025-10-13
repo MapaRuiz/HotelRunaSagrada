@@ -8,12 +8,28 @@
         type="email"
         class="form-control input-soft"
         [(ngModel)]="draft.email"
+        (ngModelChange)="checkEmailExists($event)"
         name="email"
         required
-        [class.is-invalid]="!isEmailValid(draft.email) && draft.email"
+        [class.is-invalid]="(!isEmailValid(draft.email) || emailExists) && draft.email"
       />
-      <div class="invalid-feedback" *ngIf="!isEmailValid(draft.email) && draft.email">
-        Email inválido
+      <div class="d-flex align-items-center mt-1">
+        <span
+          *ngIf="checkingEmail"
+          class="spinner-border spinner-border-sm text-primary me-2"
+        ></span>
+        <div
+          class="invalid-feedback d-block"
+          *ngIf="!isEmailValid(draft.email) && draft.email && !emailExists"
+        >
+          Email inválido
+        </div>
+        <div
+          class="invalid-feedback d-block"
+          *ngIf="emailExists && draft.email && draft.email !== originalEmail"
+        >
+          Este correo ya está registrado
+        </div>
       </div>
     </div>
 

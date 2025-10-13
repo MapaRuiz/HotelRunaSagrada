@@ -11,6 +11,7 @@ import { ActionButtonsComponent } from '../action-buttons-cell/action-buttons-ce
 import { ActionButtonsParams } from '../action-buttons-cell/action-buttons-param';
 import { UserFormComponent, UserFormPayload } from './user-form/user-form';
 import { UserDetailComponent } from './user-detail/user-detail';
+import { debounceTime, Subject } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -44,6 +45,9 @@ export class Users implements OnInit {
   createTouched = false;
   imgBrokenCreate = false;
   createLoading = false;
+  emailExists = false;
+  checkingEmail = false;
+  private emailCheckSubject = new Subject<string>();
 
   // Editar - patrón servicios
   editing?: User;
@@ -68,6 +72,13 @@ export class Users implements OnInit {
       // Tells ag-grid to use all the modules
       ModuleRegistry.registerModules([AllCommunityModule]);
     }
+
+    // Configurar debounce para verificación de email
+    this.emailCheckSubject.pipe(
+      debounceTime(500) // Esperar 500ms después de que el usuario deje de escribir
+    ).subscribe(email => {
+      this.performEmailCheck(email);
+    });
   }
   
   columnDefs: ColDef[] = [
@@ -202,9 +213,45 @@ export class Users implements OnInit {
   isSelf(u: User) { return this.meId && u.user_id === this.meId; }
 
   // Validaciones
-  isEmailValid(v?: string) { return !!v && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+  isEmailValid(v?: string) { 
+    if (!v) return false;
+    const formatValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    return formatValid && !this.emailExists;
+  }
   isPasswordOk(v?: string) { return !!v && v.length >= 6; }
   passwordsMatch(a?: string, b?: string) { return (a || '') === (b || ''); }
+
+  // Método público que se llama desde el template
+  checkEmailExists(email: string) {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      this.emailExists = false;
+      this.checkingEmail = false;
+      return;
+    }
+    
+    this.emailCheckSubject.next(email);
+  }
+
+  // Método privado que realiza la verificación real con debounce
+  private performEmailCheck(email: string) {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      this.emailExists = false;
+      this.checkingEmail = false;
+      return;
+    }
+
+    this.checkingEmail = true;
+    this.api.existsByEmail(email).subscribe({
+      next: (exists) => {
+        this.emailExists = exists;
+        this.checkingEmail = false;
+      },
+      error: () => {
+        this.emailExists = false;
+        this.checkingEmail = false;
+      }
+    });
+  }
 
   onCreateToggle(event: Event): void {
     const details = event.target as HTMLDetailsElement;
@@ -216,6 +263,8 @@ export class Users implements OnInit {
     this.createDraft = { email: '', password: '', password2: '', role: 'CLIENT', enabled: true };
     this.createTouched = false;
     this.imgBrokenCreate = false;
+    this.emailExists = false;
+    this.checkingEmail = false;
   }
 
   private closeCreatePanel(): void {
@@ -232,6 +281,8 @@ export class Users implements OnInit {
     this.createLoading = false;
     this.createTouched = false;
     this.imgBrokenCreate = false;
+    this.emailExists = false;
+    this.checkingEmail = false;
     this.closeCreatePanel();
   }
 
@@ -239,6 +290,7 @@ export class Users implements OnInit {
     this.createTouched = true;
     this.createLoading = true;
     if (!this.isEmailValid(this.createDraft.email) ||
+        this.emailExists ||
         !this.isPasswordOk(this.createDraft.password) ||
         !this.passwordsMatch(this.createDraft.password, this.createDraft.password2)) {
       this.createLoading = false;
