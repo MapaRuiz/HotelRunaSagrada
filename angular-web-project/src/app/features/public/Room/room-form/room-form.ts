@@ -78,26 +78,26 @@ export class RoomFormComponent {
     });
 
     this.roomSvc.listByHotel(this.hotelId).subscribe((hotelRooms: any[]) => {
-  const byType = (hotelRooms ?? []).filter((r: any) => {
-    const rtId = toNumber(r.room_type_id ?? r.roomTypeId);
-    const hId = toNumber(r.hotel_id ?? r.hotelId);
-    return rtId === this.typeId && hId === this.hotelId;
-  });
-  const statusOf = (r: any) => String(r?.res_status ?? r?.status ?? '').toUpperCase();
+      const byType = (hotelRooms ?? []).filter((r: any) => {
+        const rtId = toNumber(r.room_type_id ?? r.roomTypeId);
+        const hId = toNumber(r.hotel_id ?? r.hotelId);
+        return rtId === this.typeId && hId === this.hotelId;
+      });
+      const statusOf = (r: any) => String(r?.res_status ?? r?.status ?? '').toUpperCase();
 
-  this.availableRoomsList = byType
-    .filter(r => statusOf(r) === 'AVAILABLE')
-    .sort((a: any, b: any) => String(a.number ?? '').localeCompare(String(b.number ?? '')));
-  this.availableCount = this.availableRoomsList.length;
+      this.availableRoomsList = byType
+        .filter(r => statusOf(r) === 'AVAILABLE')
+        .sort((a: any, b: any) => String(a.number ?? '').localeCompare(String(b.number ?? '')));
+      this.availableCount = this.availableRoomsList.length;
 
-  // Check for pending reservation from session storage
-  const p = safeSessionGet('pendingReservation');
-  if (p && p.hotelId === this.hotelId && p.typeId === this.typeId) {
-    this.showForm = true;
-    this.reserveForm.patchValue({ checkIn: todayISO(), checkOut: addDaysISO(1) }, { emitEvent: false });
-    safeSessionRemove('pendingReservation');
-  }
-});
+      // Check for pending reservation from session storage
+      const p = safeSessionGet('pendingReservation');
+      if (p && p.hotelId === this.hotelId && p.typeId === this.typeId) {
+        this.showForm = true;
+        this.reserveForm.patchValue({ checkIn: todayISO(), checkOut: addDaysISO(1) }, { emitEvent: false });
+        safeSessionRemove('pendingReservation');
+      }
+    });
   }
 
   private getRandomRoom(): Room | null {
@@ -113,7 +113,7 @@ export class RoomFormComponent {
 
     // Guarda intención y manda al login
     safeSessionSet('pendingReservation', {
-      hotelId: this.hotelId, 
+      hotelId: this.hotelId,
       typeId: this.typeId,
     });
     this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
@@ -178,28 +178,28 @@ export class RoomFormComponent {
 }
 
 /* ===== Helpers locales ===== */
-function toNumber(v: any): number | null { if (v==null) return null; const n=Number(v); return Number.isFinite(n)?n:null; }
-function todayISO(): string { const d=new Date(); const m=`${d.getMonth()+1}`.padStart(2,'0'); const day=`${d.getDate()}`.padStart(2,'0'); return `${d.getFullYear()}-${m}-${day}`; }
-function addDaysISO(n: number): string { const d=new Date(); d.setDate(d.getDate()+n); const m=`${d.getMonth()+1}`.padStart(2,'0'); const day=`${d.getDate()}`.padStart(2,'0'); return `${d.getFullYear()}-${m}-${day}`; }
+function toNumber(v: any): number | null { if (v == null) return null; const n = Number(v); return Number.isFinite(n) ? n : null; }
+function todayISO(): string { const d = new Date(); const m = `${d.getMonth() + 1}`.padStart(2, '0'); const day = `${d.getDate()}`.padStart(2, '0'); return `${d.getFullYear()}-${m}-${day}`; }
+function addDaysISO(n: number): string { const d = new Date(); d.setDate(d.getDate() + n); const m = `${d.getMonth() + 1}`.padStart(2, '0'); const day = `${d.getDate()}`.padStart(2, '0'); return `${d.getFullYear()}-${m}-${day}`; }
 function isDateRangeValid(inclStart: string, exclEnd: string): boolean { return new Date(exclEnd) > new Date(inclStart); }
-function readServerMessage(err: any): string | null { const msg = err?.error?.message ?? err?.message ?? null; return typeof msg==='string'? msg : null; }
+function readServerMessage(err: any): string | null { const msg = err?.error?.message ?? err?.message ?? null; return typeof msg === 'string' ? msg : null; }
 function isBrowser(): boolean { return typeof window !== 'undefined'; }
-function safeSessionGet(key: string): any | null { if (!isBrowser()) return null; try { const raw=sessionStorage.getItem(key); return raw? JSON.parse(raw): null; } catch { return null; } }
-function safeSessionSet(key: string, val: any): void { if (!isBrowser()) return; try { sessionStorage.setItem(key, JSON.stringify(val)); } catch {} }
-function safeSessionRemove(key: string): void { if (!isBrowser()) return; try { sessionStorage.removeItem(key); } catch {} }
-type NormalizedUser = { id?: number|string; roles?: string[]; [k: string]: any };
+function safeSessionGet(key: string): any | null { if (!isBrowser()) return null; try { const raw = sessionStorage.getItem(key); return raw ? JSON.parse(raw) : null; } catch { return null; } }
+function safeSessionSet(key: string, val: any): void { if (!isBrowser()) return; try { sessionStorage.setItem(key, JSON.stringify(val)); } catch { } }
+function safeSessionRemove(key: string): void { if (!isBrowser()) return; try { sessionStorage.removeItem(key); } catch { } }
+type NormalizedUser = { id?: number | string; roles?: string[];[k: string]: any };
 function getFullUserNormalized(): NormalizedUser {
   if (!isBrowser()) return {};
-  try{
+  try {
     const raw = localStorage.getItem('user') || localStorage.getItem('currentUser') || localStorage.getItem('auth');
-    if(!raw) return {};
+    if (!raw) return {};
     const obj = JSON.parse(raw); const u = obj?.user ?? obj;
-    const roles: string[] = ((u?.roles ?? obj?.roles) || []).map((r:any)=> (r?.name ?? r)).filter(Boolean).map((x:any)=> String(x));
+    const roles: string[] = ((u?.roles ?? obj?.roles) || []).map((r: any) => (r?.name ?? r)).filter(Boolean).map((x: any) => String(x));
     return { id: u?.id ?? obj?.id ?? u?.user_id ?? obj?.user_id, roles };
-  }catch{ return {}; }
+  } catch { return {}; }
 }
 function buildReservationCode(id: number | null): string {
-  if (id && Number.isFinite(id)) return `RS-${String(id).padStart(6,'0')}`;
+  if (id && Number.isFinite(id)) return `RS-${String(id).padStart(6, '0')}`;
   const rnd = Math.floor(100000 + Math.random() * 900000);
   return `RS-${rnd}`;
 }

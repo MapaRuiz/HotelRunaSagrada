@@ -72,15 +72,15 @@ export class RoomDetailComponent {
     return String((r.res_status ?? r.status) || '').toUpperCase();
   }
   isAvailable = (r: Partial<Room> & { status?: string }) => this.statusOf(r) === 'AVAILABLE';
-  isBooked    = (r: Partial<Room> & { status?: string }) => this.statusOf(r) === 'BOOKED';
+  isBooked = (r: Partial<Room> & { status?: string }) => this.statusOf(r) === 'BOOKED';
   isMaintenance = (r: Partial<Room> & { status?: string }) => this.statusOf(r) === 'MAINTENANCE';
 
   statusLabel(r: Partial<Room> & { status?: string }): string {
     const s = this.statusOf(r);
-    return s === 'AVAILABLE'   ? 'Disponible'
-         : s === 'BOOKED'      ? 'Reservada'
-         : s === 'MAINTENANCE' ? 'Mantenimiento'
-         : '—';
+    return s === 'AVAILABLE' ? 'Disponible'
+      : s === 'BOOKED' ? 'Reservada'
+        : s === 'MAINTENANCE' ? 'Mantenimiento'
+          : '—';
   }
 
   ngOnInit() {
@@ -127,8 +127,8 @@ export class RoomDetailComponent {
 
       // Contadores
       const st = (r: any) => String(r.res_status ?? r.status ?? '').toUpperCase();
-      this.availableCount   = this.rooms.filter(r => st(r) === 'AVAILABLE').length;
-      this.bookedCount      = this.rooms.filter(r => st(r) === 'BOOKED').length;
+      this.availableCount = this.rooms.filter(r => st(r) === 'AVAILABLE').length;
+      this.bookedCount = this.rooms.filter(r => st(r) === 'BOOKED').length;
       this.maintenanceCount = this.rooms.filter(r => st(r) === 'MAINTENANCE').length;
 
       // Tema
@@ -140,9 +140,9 @@ export class RoomDetailComponent {
         this.heroImg, // principal
         // nuevas imágenes pedidas
         'https://images.pexels.com/photos/2507007/pexels-photo-2507007.jpeg',
-      'https://images.pexels.com/photos/1838554/pexels-photo-1838554.jpeg',
-      'https://images.pexels.com/photos/5379219/pexels-photo-5379219.jpeg',
-      'https://images.pexels.com/photos/1268855/pexels-photo-1268855.jpeg',
+        'https://images.pexels.com/photos/1838554/pexels-photo-1838554.jpeg',
+        'https://images.pexels.com/photos/5379219/pexels-photo-5379219.jpeg',
+        'https://images.pexels.com/photos/1268855/pexels-photo-1268855.jpeg',
       ].filter(Boolean);
 
       this.startAuto(); // autoplay más rápido
@@ -188,12 +188,12 @@ export class RoomDetailComponent {
     checkIn: string; checkOut: string;
   }) {
     this.lastReservationId = e.reservationId;
-    this.reservationCode   = e.reservationCode;
+    this.reservationCode = e.reservationCode;
     this.modalHotelId = e.hotelId;
-    this.modalTypeId  = e.typeId;
-    this.modalRoomId  = e.roomId;
+    this.modalTypeId = e.typeId;
+    this.modalRoomId = e.roomId;
     this.modalCheckIn = e.checkIn;
-    this.modalCheckOut= e.checkOut;
+    this.modalCheckOut = e.checkOut;
     this.showModal = true;
   }
 
@@ -206,7 +206,7 @@ export class RoomDetailComponent {
   trackByRoom = (i: number, r: any) => r?.room_id ?? r?.number ?? i;
 }
 
-function toNumber(v: any): number | null { if (v==null) return null; const n=Number(v); return Number.isFinite(n)?n:null; }
+function toNumber(v: any): number | null { if (v == null) return null; const n = Number(v); return Number.isFinite(n) ? n : null; }
 function mostCommon(arr: string[]): string | undefined {
   if (!arr.length) return undefined;
   const m = new Map<string, number>();
@@ -216,4 +216,4 @@ function mostCommon(arr: string[]): string | undefined {
   return best;
 }
 function isBrowser(): boolean { return typeof window !== 'undefined'; }
-function safeSessionSet(key: string, val: any): void { if (!isBrowser()) return; try { sessionStorage.setItem(key, JSON.stringify(val)); } catch {} }
+function safeSessionSet(key: string, val: any): void { if (!isBrowser()) return; try { sessionStorage.setItem(key, JSON.stringify(val)); } catch { } }

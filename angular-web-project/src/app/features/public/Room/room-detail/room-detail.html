@@ -101,15 +101,6 @@
               >
                 {{ statusLabel(r) }}
               </span>
-
-              <button
-                *ngIf="isAvailable(r)"
-                type="button"
-                class="reserve-btn"
-                (click)="beginReservation(r)"
-              >
-                Reservar
-              </button>
             </div>
           </li>
         </ul>
