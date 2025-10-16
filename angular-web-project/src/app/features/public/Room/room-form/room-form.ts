@@ -3,6 +3,7 @@ import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 
 // Servicios / modelos
 import { RoomService } from '../../../../services/room';
@@ -37,6 +38,7 @@ export class RoomFormComponent {
   private reservationSvc = inject(ReservationService);
 
   @Output() reservationCreated = new EventEmitter<ReservationCreatedPayload>();
+  @Output() datesChanged = new EventEmitter<{ checkIn: string, checkOut: string }>();
 
   // Ruta
   private typeId!: number;
@@ -45,6 +47,8 @@ export class RoomFormComponent {
   // Datos para el form
   reserveForm!: FormGroup;
   availableRoomsList: Room[] = [];
+  allRoomsList: Room[] = [];
+  allReservations: Reservation[] = [];
   availableCount = 0;
 
   // Estados UI
@@ -67,8 +71,24 @@ export class RoomFormComponent {
       checkIn: [todayISO(), Validators.required],
       checkOut: [addDaysISO(1), Validators.required],
     });
+
+    // Emit initial dates
+    this.datesChanged.emit({
+      checkIn: todayISO(),
+      checkOut: addDaysISO(1)
+    });
+
     this.reserveForm.get('checkIn')?.valueChanges.subscribe((v: string) => {
-      if (v) this.minCheckOut = v;
+      if (v) {
+        this.minCheckOut = v;
+        this.emitDatesChanged();
+      }
+    });
+
+    this.reserveForm.get('checkOut')?.valueChanges.subscribe((v: string) => {
+      if (v) {
+        this.emitDatesChanged();
+      }
     });
 
     // Carga room type (para base_price) y habitaciones disponibles
@@ -77,27 +97,81 @@ export class RoomFormComponent {
       this.basePrice = Number.isFinite(base) ? base : null;
     });
 
-    this.roomSvc.listByHotel(this.hotelId).subscribe((hotelRooms: any[]) => {
-      const byType = (hotelRooms ?? []).filter((r: any) => {
-        const rtId = toNumber(r.room_type_id ?? r.roomTypeId);
-        const hId = toNumber(r.hotel_id ?? r.hotelId);
-        return rtId === this.typeId && hId === this.hotelId;
-      });
-      const statusOf = (r: any) => String(r?.res_status ?? r?.status ?? '').toUpperCase();
+    forkJoin({
+      hotelRooms: this.roomSvc.listByHotel(this.hotelId),
+      allReservations: this.reservationSvc.getAll()
+    }).subscribe({
+      next: ({ hotelRooms, allReservations }) => {
+        this.allReservations = allReservations || [];
 
-      this.availableRoomsList = byType
-        .filter(r => statusOf(r) === 'AVAILABLE')
-        .sort((a: any, b: any) => String(a.number ?? '').localeCompare(String(b.number ?? '')));
-      this.availableCount = this.availableRoomsList.length;
+        const byType = (hotelRooms ?? []).filter((r: any) => {
+          const rtId = toNumber(r.room_type_id ?? r.roomTypeId);
+          const hId = toNumber(r.hotel_id ?? r.hotelId);
+          return rtId === this.typeId && hId === this.hotelId;
+        });
 
-      // Check for pending reservation from session storage
-      const p = safeSessionGet('pendingReservation');
-      if (p && p.hotelId === this.hotelId && p.typeId === this.typeId) {
-        this.showForm = true;
-        this.reserveForm.patchValue({ checkIn: todayISO(), checkOut: addDaysISO(1) }, { emitEvent: false });
-        safeSessionRemove('pendingReservation');
+        this.allRoomsList = byType.sort((a: any, b: any) =>
+          String(a.number ?? '').localeCompare(String(b.number ?? ''))
+        );
+
+        this.updateAvailableRoomsList();
+
+        const p = safeSessionGet('pendingReservation');
+        if (p && p.hotelId === this.hotelId && p.typeId === this.typeId) {
+          this.showForm = true;
+          this.reserveForm.patchValue({ checkIn: todayISO(), checkOut: addDaysISO(1) }, { emitEvent: false });
+          safeSessionRemove('pendingReservation');
+        }
+      },
+      error: (error) => {
+        console.error('Error loading rooms and reservations:', error);
       }
     });
+  }
+
+  private emitDatesChanged(): void {
+    const checkIn = this.reserveForm.get('checkIn')?.value;
+    const checkOut = this.reserveForm.get('checkOut')?.value;
+    if (checkIn && checkOut) {
+      this.datesChanged.emit({ checkIn, checkOut });
+      this.updateAvailableRoomsList();
+    }
+  }
+
+  private hasConfirmedReservationForDates(roomId: number, checkIn: string, checkOut: string): boolean {
+    const selectedStart = new Date(checkIn);
+    const selectedEnd = new Date(checkOut);
+
+    return this.allReservations.some(reservation => {
+      if (reservation.room?.room_id !== roomId || reservation.status !== 'CONFIRMED') {
+        return false;
+      }
+
+      const resStart = new Date(reservation.check_in);
+      const resEnd = new Date(reservation.check_out);
+
+      return selectedStart < resEnd && selectedEnd > resStart;
+    });
+  }
+
+  private updateAvailableRoomsList(): void {
+    const checkIn = this.reserveForm.get('checkIn')?.value;
+    const checkOut = this.reserveForm.get('checkOut')?.value;
+
+    if (!checkIn || !checkOut) {
+      const statusOf = (r: any) => String(r?.res_status ?? r?.status ?? '').toUpperCase();
+      this.availableRoomsList = this.allRoomsList.filter(r => statusOf(r) === 'AVAILABLE');
+    } else {
+      this.availableRoomsList = this.allRoomsList.filter(room => {
+        const statusOf = (r: any) => String(r?.res_status ?? r?.status ?? '').toUpperCase();
+
+        if (statusOf(room) === 'MAINTENANCE') return false;
+
+        return !this.hasConfirmedReservationForDates(room.room_id!, checkIn, checkOut);
+      });
+    }
+
+    this.availableCount = this.availableRoomsList.length;
   }
 
   private getRandomRoom(): Room | null {
@@ -131,12 +205,27 @@ export class RoomFormComponent {
       return;
     }
 
+    // Update available rooms list before selecting
+    this.updateAvailableRoomsList();
+
+    console.log('Available rooms for reservation:', this.availableRoomsList.map(r => ({
+      id: r.room_id,
+      number: r.number,
+      status: r.res_status
+    })));
+
     // Automatically select a random available room
     const selectedRoom = this.getRandomRoom();
     if (!selectedRoom) {
-      this.submitError = 'No hay habitaciones disponibles para reservar.';
+      this.submitError = 'No hay habitaciones disponibles para reservar en las fechas seleccionadas.';
       return;
     }
+
+    console.log('Selected room for reservation:', {
+      id: selectedRoom.room_id,
+      number: selectedRoom.number,
+      status: selectedRoom.res_status
+    });
 
     const { checkIn, checkOut } = this.reserveForm.value;
     if (!isDateRangeValid(checkIn, checkOut)) {

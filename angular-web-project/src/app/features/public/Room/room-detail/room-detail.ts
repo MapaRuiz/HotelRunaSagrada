@@ -7,7 +7,9 @@ import { forkJoin } from 'rxjs';
 import { RoomService } from '../../../../services/room';
 import { RoomTypeService } from '../../../../services/room-type';
 import { HotelsService } from '../../../../services/hotels';
+import { ReservationService } from '../../../../services/reservation';
 import { Room } from '../../../../model/room';
+import { Reservation } from '../../../../model/reservation';
 import { RoomFormComponent } from '../room-form/room-form';
 import { RoomModalComponent } from '../room-modal/room-modal';
 import { RoomRvComponent } from '../room-rv/room-rv';
@@ -26,6 +28,7 @@ export class RoomDetailComponent {
   private roomSvc = inject(RoomService);
   private typeSvc = inject(RoomTypeService);
   private hotelSvc = inject(HotelsService, { optional: true });
+  private reservationSvc = inject(ReservationService);
 
   @ViewChild('reserveSection') reserveSection!: ElementRef;
 
@@ -52,6 +55,11 @@ export class RoomDetailComponent {
   bookedCount = 0;
   maintenanceCount = 0;
 
+  // Selected dates for dynamic status checking
+  selectedCheckIn: string = '';
+  selectedCheckOut: string = '';
+  allReservations: Reservation[] = [];
+
   // Modal state
   showModal = false;
   lastReservationId: number | null = null;
@@ -71,16 +79,67 @@ export class RoomDetailComponent {
   private statusOf(r: Partial<Room> & { status?: string }): string {
     return String((r.res_status ?? r.status) || '').toUpperCase();
   }
-  isAvailable = (r: Partial<Room> & { status?: string }) => this.statusOf(r) === 'AVAILABLE';
-  isBooked = (r: Partial<Room> & { status?: string }) => this.statusOf(r) === 'BOOKED';
+
+  // Check if room has confirmed reservation for selected dates
+  private hasConfirmedReservationForDates(roomId: number): boolean {
+    if (!this.selectedCheckIn || !this.selectedCheckOut) return false;
+
+    const selectedStart = new Date(this.selectedCheckIn);
+    const selectedEnd = new Date(this.selectedCheckOut);
+
+    return this.allReservations.some(reservation => {
+      if (reservation.room?.room_id !== roomId || reservation.status !== 'CONFIRMED') {
+        return false;
+      }
+
+      const resStart = new Date(reservation.check_in);
+      const resEnd = new Date(reservation.check_out);
+
+      // Check if there's any overlap between the date ranges
+      return selectedStart < resEnd && selectedEnd > resStart;
+    });
+  }
+
+  isAvailable = (r: Partial<Room> & { status?: string }) => {
+    // If room is in maintenance, it's not available
+    if (this.statusOf(r) === 'MAINTENANCE') return false;
+
+    // If there are selected dates, check for confirmed reservations
+    if (this.selectedCheckIn && this.selectedCheckOut && r.room_id) {
+      return !this.hasConfirmedReservationForDates(r.room_id);
+    }
+
+    // Default to room's stored status
+    return this.statusOf(r) === 'AVAILABLE';
+  };
+
+  isBooked = (r: Partial<Room> & { status?: string }) => {
+    // If room is in maintenance, it's not just booked
+    if (this.statusOf(r) === 'MAINTENANCE') return false;
+
+    // If there are selected dates, check for confirmed reservations
+    if (this.selectedCheckIn && this.selectedCheckOut && r.room_id) {
+      return this.hasConfirmedReservationForDates(r.room_id);
+    }
+
+    // Default to room's stored status
+    return this.statusOf(r) === 'BOOKED';
+  };
+
   isMaintenance = (r: Partial<Room> & { status?: string }) => this.statusOf(r) === 'MAINTENANCE';
 
   statusLabel(r: Partial<Room> & { status?: string }): string {
-    const s = this.statusOf(r);
-    return s === 'AVAILABLE' ? 'Disponible'
-      : s === 'BOOKED' ? 'Reservada'
-        : s === 'MAINTENANCE' ? 'Mantenimiento'
-          : '—';
+    if (this.isMaintenance(r)) return 'Mantenimiento';
+    if (this.isBooked(r)) return 'Reservada';
+    if (this.isAvailable(r)) return 'Disponible';
+    return '—';
+  }
+
+  // Update room counts based on current date selection
+  updateRoomCounts(): void {
+    this.availableCount = this.rooms.filter(r => this.isAvailable(r)).length;
+    this.bookedCount = this.rooms.filter(r => this.isBooked(r)).length;
+    this.maintenanceCount = this.rooms.filter(r => this.isMaintenance(r)).length;
   }
 
   ngOnInit() {
@@ -102,7 +161,10 @@ export class RoomDetailComponent {
     forkJoin({
       roomType: this.typeSvc.getById(this.typeId),
       hotelRooms: this.roomSvc.listByHotel(this.hotelId),
-    }).subscribe(({ roomType, hotelRooms }) => {
+      allReservations: this.reservationSvc.getAll()
+    }).subscribe(({ roomType, hotelRooms, allReservations }) => {
+      // Load all reservations for date-based status checking
+      this.allReservations = allReservations;
       // RoomType
       if (roomType) {
         this.typeName = (roomType as any).name ?? '';
@@ -125,11 +187,8 @@ export class RoomDetailComponent {
         String(a.number ?? '').localeCompare(String(b.number ?? ''))
       );
 
-      // Contadores
-      const st = (r: any) => String(r.res_status ?? r.status ?? '').toUpperCase();
-      this.availableCount = this.rooms.filter(r => st(r) === 'AVAILABLE').length;
-      this.bookedCount = this.rooms.filter(r => st(r) === 'BOOKED').length;
-      this.maintenanceCount = this.rooms.filter(r => st(r) === 'MAINTENANCE').length;
+      // Initial room counts (will be updated when dates are selected)
+      this.updateRoomCounts();
 
       // Tema
       const themes = this.rooms.map((r: any) => r.theme_name ?? r.themeName).filter(Boolean) as string[];
@@ -181,6 +240,14 @@ export class RoomDetailComponent {
       hotelId: this.hotelId, typeId: this.typeId, roomId: room?.room_id ?? null,
     });
     this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+  }
+
+  onDatesChanged(dates: { checkIn: string, checkOut: string }): void {
+    setTimeout(() => {
+      this.selectedCheckIn = dates.checkIn;
+      this.selectedCheckOut = dates.checkOut;
+      this.updateRoomCounts();
+    }, 0);
   }
 
   onReservationCreated(e: {
