@@ -1,5 +1,5 @@
 import { RoomType } from './room-type';
-export type ReservationStatus = 'AVAILABLE' | 'BOOKED' | 'OCCUPIED' | 'MAINTENANCE';
+export type ReservationStatus = 'AVAILABLE' | 'BOOKED' | 'MAINTENANCE';
 export type CleaningStatus    = 'CLEAN' | 'DIRTY';
 
 export interface Room {

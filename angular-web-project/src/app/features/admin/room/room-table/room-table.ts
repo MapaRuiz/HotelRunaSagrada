@@ -203,10 +203,6 @@ export class RoomsTableComponent implements OnInit {
               badgeClass = 'text-bg-primary';
               statusText = 'Reservada';
               break;
-            case 'OCCUPIED':
-              badgeClass = 'text-bg-info';
-              statusText = 'Ocupada';
-              break;
             case 'MAINTENANCE':
               badgeClass = 'text-bg-danger';
               statusText = 'Mantenimiento';

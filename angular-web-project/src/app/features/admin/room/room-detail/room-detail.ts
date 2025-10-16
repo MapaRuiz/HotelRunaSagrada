@@ -53,7 +53,6 @@ export class RoomDetail implements OnChanges {
     switch (status) {
       case 'AVAILABLE': return 'Disponible';
       case 'BOOKED': return 'Reservada';
-      case 'OCCUPIED': return 'Ocupada';
       case 'MAINTENANCE': return 'Mantenimiento';
       default: return status || 'N/A';
     }
@@ -63,7 +62,6 @@ export class RoomDetail implements OnChanges {
     switch (status) {
       case 'AVAILABLE': return 'text-bg-success';
       case 'BOOKED': return 'text-bg-primary';
-      case 'OCCUPIED': return 'text-bg-info';
       case 'MAINTENANCE': return 'text-bg-danger';
       default: return 'text-bg-secondary';
     }
