@@ -17,7 +17,7 @@ type ReservationRequest = {
 export class ReservationService {
   private readonly resource = `${environment.apiBaseUrl}/reservations`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getAll(): Observable<Reservation[]> {
     return this.http.get<Reservation[]>(this.resource);
@@ -38,7 +38,7 @@ export class ReservationService {
     };
     return this.http.post<Reservation>(this.resource, body);
   }
-  
+
   update(id: number, draft: Partial<Reservation>) {
     const body = {
       userId: Number(draft.user_id!),   // opcional para back (lo ignoras si quieres)
@@ -53,5 +53,9 @@ export class ReservationService {
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.resource}/${id}`);
+  }
+
+  getToday(): Observable<Reservation[]> {
+    return this.http.get<Reservation[]>(`${this.resource}/today`);
   }
 }

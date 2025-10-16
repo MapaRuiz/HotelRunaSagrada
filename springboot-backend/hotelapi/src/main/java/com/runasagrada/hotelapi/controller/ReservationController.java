@@ -85,25 +85,30 @@ public class ReservationController {
     }
 
     // GET /api/reservations/current?userId=...
-@GetMapping("/current")
-public List<Reservation> getCurrent(@RequestParam(required = false) Integer userId) {
-    if (userId != null) {
-        return service.findCurrentByUser(userId);
+    @GetMapping("/current")
+    public List<Reservation> getCurrent(@RequestParam(required = false) Integer userId) {
+        if (userId != null) {
+            return service.findCurrentByUser(userId);
+        }
+        // si no se pasa userId devolvemos todas las actuales
+        LocalDate today = LocalDate.now();
+        return service.findAll().stream()
+                .filter(r -> r.getCheckOut() != null && !r.getCheckOut().isBefore(today))
+                .collect(Collectors.toList());
     }
-    // si no se pasa userId devolvemos todas las actuales
-    LocalDate today = LocalDate.now();
-    return service.findAll().stream()
-            .filter(r -> r.getCheckOut() != null && !r.getCheckOut().isBefore(today))
-            .collect(Collectors.toList());
-}
 
-// GET /api/reservations/history?userId=...
-@GetMapping("/history")
-public List<Reservation> getHistory(@RequestParam(required = false) Integer userId) {
-    if (userId != null) {
-        return service.findByUser(userId);
+    // GET /api/reservations/history?userId=...
+    @GetMapping("/history")
+    public List<Reservation> getHistory(@RequestParam(required = false) Integer userId) {
+        if (userId != null) {
+            return service.findByUser(userId);
+        }
+        return service.findAll();
     }
-    return service.findAll();
-}
+
+    @GetMapping("/today")
+    public List<Reservation> getToday() {
+        return service.findForToday();
+    }
 
 }

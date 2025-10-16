@@ -25,5 +25,8 @@ public interface ReservationService {
     void delete(Integer id);
 
     List<Reservation> findCurrentByUser(Integer userId);
+
     List<Reservation> findHistoryByUser(Integer userId);
+
+    List<Reservation> findForToday();
 }

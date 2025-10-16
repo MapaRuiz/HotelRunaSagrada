@@ -145,7 +145,7 @@ public class ReservationServiceImpl implements ReservationService {
         return reservationRepo.findByUserUserId(userId);
     }
 
-        @Override
+    @Override
     @Transactional(readOnly = true)
     public List<Reservation> findCurrentByUser(Integer userId) {
         List<Reservation> all = findByUser(userId);
@@ -160,6 +160,26 @@ public class ReservationServiceImpl implements ReservationService {
     public List<Reservation> findHistoryByUser(Integer userId) {
 
         return findByUser(userId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Reservation> findForToday() {
+        LocalDate today = LocalDate.now();
+        return reservationRepo.findAll().stream()
+                .filter(reservation -> {
+                    LocalDate checkIn = reservation.getCheckIn();
+                    LocalDate checkOut = reservation.getCheckOut();
+
+                    // Verificar que las fechas no sean null
+                    if (checkIn == null || checkOut == null) {
+                        return false;
+                    }
+
+                    // La reserva está activa hoy si: checkIn <= hoy < checkOut
+                    return !checkIn.isAfter(today) && today.isBefore(checkOut);
+                })
+                .collect(Collectors.toList());
     }
 
 }
