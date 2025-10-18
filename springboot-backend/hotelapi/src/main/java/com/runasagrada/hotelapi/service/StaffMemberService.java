@@ -9,6 +9,8 @@ public interface StaffMemberService {
 
 	StaffMember findById(Long id);
 
+	StaffMember findByUserId(Long userId);
+
 	StaffMember create(StaffMember staffMember);
 
 	StaffMember update(Long id, StaffMember partial);

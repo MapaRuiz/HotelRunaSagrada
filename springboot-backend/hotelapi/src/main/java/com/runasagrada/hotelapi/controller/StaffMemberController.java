@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api")
@@ -27,6 +29,11 @@ public class StaffMemberController {
 	@GetMapping("/staff-members/{id}")
 	public StaffMember get(@PathVariable Long id) {
 		return service.findById(id);
+	}
+
+	@GetMapping("/staff-members/staff-info/{userId}")
+	public StaffMember getByUserID(@PathVariable Long userId) {
+		return service.findByUserId(userId);
 	}
 
 	@GetMapping("/staff-members/hotel/{hotelId}")

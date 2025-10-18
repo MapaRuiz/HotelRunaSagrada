@@ -33,6 +33,11 @@ public class StaffMemberServiceImpl implements StaffMemberService {
 	}
 
 	@Override
+	public StaffMember findByUserId(Long userId) {
+		return staffMembers.findByUserId(userId);
+	}
+
+	@Override
 	public StaffMember create(StaffMember staffMember) {
 		validate(staffMember);
 		if (staffMember.getStaffId() != null)

@@ -16,4 +16,6 @@ public interface StaffMemberRepository extends JpaRepository<StaffMember, Long> 
 
 	@Query("SELECT s FROM StaffMember s JOIN FETCH s.user WHERE s.departmentId = :departmentId ORDER BY s.staffId")
 	List<StaffMember> findByDepartmentIdWithUser(@Param("departmentId") Long departmentId);
+
+	StaffMember findByUserId(Long userId);
 }
