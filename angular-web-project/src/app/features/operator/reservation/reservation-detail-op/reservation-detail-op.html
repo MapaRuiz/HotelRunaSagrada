@@ -1,139 +1,12 @@
 <ng-container *ngIf="reservation as current">
   <div class="card mt-4 reservation-form">
     <div class="card-body row g-3">
-      <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2 mb-1">
-        <h5 class="card-title col-12">Detalle de la reserva</h5>
-        <div class="d-flex gap-2">
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+        <h5 class="card-title mb-0">Detalle de la reserva</h5>
+        <div class="ms-auto d-flex align-items-center gap-2">
           <button type="button" class="btn btn-outline-secondary btn-sm" (click)="closeDetail()">
             Volver a la tabla
           </button>
-          <ng-container *ngIf="!editingServices; else editBtns">
-            <button type="button" class="btn btn-olive btn-sm" (click)="addServices()">
-              Agregar servicios
-            </button>
-          </ng-container>
-          <ng-template #editBtns>
-            <button
-              type="button"
-              class="btn btn-outline-secondary btn-sm"
-              (click)="closeServices()"
-            >
-              Cerrar edición
-            </button>
-          </ng-template>
-        </div>
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label">ID de Reserva</label>
-        <div class="form-control-plaintext">{{ current.reservation_id || fallbackText }}</div>
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label">Estado</label>
-        <div class="form-control-plaintext">
-          <span class="badge {{ getStatusBadge(current.status) }}">
-            {{ getStatusText(current.status) }}
-          </span>
-        </div>
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label">Cliente</label>
-        <div class="form-control-plaintext">
-          {{ current.user?.full_name || 'ID: ' + current.user_id || fallbackText }}
-        </div>
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label">Hotel</label>
-        <div class="form-control-plaintext">
-          {{ current.hotel?.name?.slice(12) || 'ID: ' + current.hotel_id || fallbackText }}
-        </div>
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label">Habitación</label>
-        <div class="form-control-plaintext">
-          {{ current.room?.number || 'ID: ' + current.room_id || fallbackText }}
-          <ng-container *ngIf="current.room?.room_type?.name">
-            <small class="text-muted"> ({{ current.room?.room_type?.name }})</small>
-          </ng-container>
-        </div>
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label">Noches</label>
-        <div class="form-control-plaintext">
-          {{ calculateNights() }} {{ calculateNights() === 1 ? 'noche' : 'noches' }}
-        </div>
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label">Check-in</label>
-        <div class="form-control-plaintext">{{ formatDate(current.check_in) }}</div>
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label">Check-out</label>
-        <div class="form-control-plaintext">{{ formatDate(current.check_out) }}</div>
-      </div>
-
-      <!-- Servicios Adicionales -->
-      <div class="col-12" *ngIf="!editingServices">
-        <ng-container *ngIf="current.services && current.services.length > 0; else noServices">
-          <label class="form-label">Servicios Adicionales</label>
-          <div class="row g-2">
-            <div class="col-auto" *ngFor="let service of current.services">
-              <span class="badge text-bg-info">
-                {{ service.service?.name || 'Servicio ' + service.service_id }}
-              </span>
-            </div>
-          </div>
-        </ng-container>
-        <ng-template #noServices>
-          <div class="text-muted fst-italic">No hay servicios adicionales.</div>
-        </ng-template>
-      </div>
-
-      <!-- Pagos -->
-      <div
-        class="col-12"
-        *ngIf="!editingServices && current.payments && current.payments.length > 0"
-      >
-        <label class="form-label">Historial de Pagos</label>
-        <div class="table-responsive">
-          <table class="table table-sm">
-            <thead>
-              <tr>
-                <th>Monto</th>
-                <th>Método</th>
-                <th>Estado</th>
-                <th>Referencia</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let payment of current.payments">
-                <td>{{ payment.amount | currency : 'USD' : 'symbol' : '1.2-2' }}</td>
-                <td>{{ payment.payment_method?.type || fallbackText }}</td>
-                <td>
-                  <span
-                    class="badge"
-                    [class]="
-                      payment.status === 'PAID'
-                        ? 'text-bg-success'
-                        : payment.status === 'PENDING'
-                        ? 'text-bg-warning'
-                        : 'text-bg-danger'
-                    "
-                  >
-                    {{ payment.status }}
-                  </span>
-                </td>
-                <td>{{ payment.tx_reference || '-' }}</td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
 
@@ -150,6 +23,217 @@
       <!-- Modo edición de servicios -->
       <div class="col-12" *ngIf="editingServices">
         <app-services-add-form></app-services-add-form>
+      </div>
+    </div>
+
+    <div id="accordion">
+      <div class="card rounded-0">
+        <div class="card-header" id="aboutReservation">
+          <h5 class="mb-0">
+            <button
+              class="accordion-title"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapseOne"
+              aria-expanded="true"
+              aria-controls="collapseOne"
+            >
+              Acerca de la reserva
+            </button>
+          </h5>
+        </div>
+
+        <div
+          id="collapseOne"
+          class="collapse show"
+          aria-labelledby="aboutReservation"
+          data-bs-parent="#accordion"
+        >
+          <div class="card-body card reservation-form rounded-0">
+            <div class="row">
+              <div class="col-12 col-md-6">
+                <div class="mb-2">
+                  <label class="form-label">ID de Reserva</label>
+                  <div class="form-control-plaintext">
+                    {{ current.reservation_id || fallbackText }}
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Estado</label>
+                  <div class="form-control-plaintext">
+                    <span class="badge {{ getStatusBadge(current.status) }}">
+                      {{ getStatusText(current.status) }}
+                    </span>
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Cliente</label>
+                  <div class="form-control-plaintext">
+                    {{ current.user?.full_name || 'ID: ' + current.user_id || fallbackText }}
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Hotel</label>
+                  <div class="form-control-plaintext">
+                    {{
+                      current.hotel?.name?.slice(12) || 'ID: ' + current.hotel_id || fallbackText
+                    }}
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-md-6">
+                <div class="mb-2">
+                  <label class="form-label">Habitación</label>
+                  <div class="form-control-plaintext">
+                    {{ current.room?.number || 'ID: ' + current.room_id || fallbackText }}
+                    <ng-container *ngIf="current.room?.room_type?.name">
+                      <small class="text-muted"> ({{ current.room?.room_type?.name }})</small>
+                    </ng-container>
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Noches</label>
+                  <div class="form-control-plaintext">
+                    {{ calculateNights() }} {{ calculateNights() === 1 ? 'noche' : 'noches' }}
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Check-in</label>
+                  <div class="form-control-plaintext">{{ formatDate(current.check_in) }}</div>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Check-out</label>
+                  <div class="form-control-plaintext">{{ formatDate(current.check_out) }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card rounded-0 rounded-0">
+        <div class="card-header" id="reservationServices">
+          <h5 class="mb-0">
+            <button
+              class="accordion-title"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapseTwo"
+              aria-expanded="false"
+              aria-controls="collapseTwo"
+            >
+              Servicios Contratados
+            </button>
+          </h5>
+        </div>
+        <div
+          id="collapseTwo"
+          class="collapse"
+          aria-labelledby="reservationServices"
+          data-bs-parent="#accordion"
+        >
+          <div class="d-flex gap-2">
+            +
+            <ng-container *ngIf="!editingServices; else editBtns">
+              <button type="button" class="btn btn-olive btn-sm" (click)="addServices()">
+                Agregar servicios
+              </button>
+            </ng-container>
+            <ng-template #editBtns>
+              <button
+                type="button"
+                class="btn btn-outline-secondary btn-sm"
+                (click)="closeServices()"
+              >
+                Cerrar edición
+              </button>
+            </ng-template>
+          </div>
+          <div class="card-body">
+            <!-- Servicios Adicionales -->
+            <div class="col-12" *ngIf="!editingServices">
+              <ng-container
+                *ngIf="current.services && current.services.length > 0; else noServices"
+              >
+                <label class="form-label">Servicios Adicionales</label>
+                <div class="row g-2">
+                  <div class="col-auto" *ngFor="let service of current.services">
+                    <span class="badge text-bg-info">
+                      {{ service.service?.name || 'Servicio ' + service.service_id }}
+                    </span>
+                  </div>
+                </div>
+              </ng-container>
+              <ng-template #noServices>
+                <div class="text-muted fst-italic">No hay servicios adicionales.</div>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card rounded-0">
+        <div class="card-header" id="headingThree">
+          <h5 class="mb-0">
+            <button
+              class="accordion-title"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapseThree"
+              aria-expanded="false"
+              aria-controls="collapseThree"
+            >
+              Pagos
+            </button>
+          </h5>
+        </div>
+        <div
+          id="collapseThree"
+          class="collapse"
+          aria-labelledby="headingThree"
+          data-bs-parent="#accordion"
+        >
+          <div class="card-body">
+            <!-- Pagos -->
+            <div
+              class="col-12"
+              *ngIf="!editingServices && current.payments && current.payments.length > 0"
+            >
+              <label class="form-label">Historial de Pagos</label>
+              <div class="table-responsive">
+                <table class="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>Monto</th>
+                      <th>Método</th>
+                      <th>Estado</th>
+                      <th>Referencia</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let payment of current.payments">
+                      <td>{{ payment.amount | currency : 'USD' : 'symbol' : '1.2-2' }}</td>
+                      <td>{{ payment.payment_method?.type || fallbackText }}</td>
+                      <td>
+                        <span
+                          class="badge"
+                          [class]="
+                            payment.status === 'PAID'
+                              ? 'text-bg-success'
+                              : payment.status === 'PENDING'
+                              ? 'text-bg-warning'
+                              : 'text-bg-danger'
+                          "
+                        >
+                          {{ payment.status }}
+                        </span>
+                      </td>
+                      <td>{{ payment.tx_reference || '-' }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

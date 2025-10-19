@@ -1,13 +1,19 @@
-/* Label: value presentation for details */
-.detail-kv dt {
-  font-weight: 600;
+.accordion-title {
   color: var(--c-olive);
+  width: 100%;
+  height: 100%;
+  text-align: left;
+  font-size: 1rem;
+  background: var(--c-ivory);
+  border: var(--c-sage);
+  padding: 10px;
 }
-.detail-kv dt::after {
-  content: ':';
-  margin: 0 .25rem 0 .25rem;
+
+.accordion-title:hover {
+  cursor: pointer;
+  color: darkgreen;
 }
-.detail-kv dd {
-  margin-bottom: .5rem;
-  color: var(--c-ink);
+
+#accordion .card-header {
+  padding: 0;
 }
