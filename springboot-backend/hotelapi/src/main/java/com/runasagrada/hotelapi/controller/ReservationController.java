@@ -2,12 +2,16 @@ package com.runasagrada.hotelapi.controller;
 
 import com.runasagrada.hotelapi.model.Reservation;
 import com.runasagrada.hotelapi.service.ReservationService;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,6 +29,17 @@ public class ReservationController {
         if (userId != null)
             return service.findByUser(userId);
         return service.findAll();
+    }
+
+    // Get all reservation by hotel
+    @GetMapping("/hotel/{hotelId}")
+    public List<ReservationDTO> allByHotel(@PathVariable Long hotelId) {
+        List<Reservation> all = service.findByHotelId(hotelId);
+        List<ReservationDTO> response = new ArrayList<>();
+        for (Reservation res : all) {
+            response.add(buildDTO(res));
+        }
+        return response;
     }
 
     @GetMapping("/{id}")
@@ -111,4 +126,20 @@ public class ReservationController {
         return service.findForToday();
     }
 
+    @Data
+    @AllArgsConstructor
+    static class ReservationDTO {
+        private Integer reservationId;
+        private Integer userId;
+        private Long hotelId;
+        private Integer roomId;
+        private LocalDate checkIn;
+        private LocalDate checkOut;
+        private Reservation.Status status;
+    }
+
+    private ReservationDTO buildDTO(Reservation r) {
+        return new ReservationDTO(r.getReservationId(), r.getUser().getUserId(), r.getHotel().getHotelId(),
+                r.getRoom().getRoomId(), r.getCheckIn(), r.getCheckOut(), r.getStatus());
+    }
 }

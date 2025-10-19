@@ -140,6 +140,11 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
+    public List<Reservation> findByHotelId(Long hotelId) {
+        return reservationRepo.findByHotelHotelId(hotelId);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<Reservation> findByUser(Integer userId) {
         return reservationRepo.findByUserUserId(userId);
@@ -181,5 +186,4 @@ public class ReservationServiceImpl implements ReservationService {
                 })
                 .collect(Collectors.toList());
     }
-
 }

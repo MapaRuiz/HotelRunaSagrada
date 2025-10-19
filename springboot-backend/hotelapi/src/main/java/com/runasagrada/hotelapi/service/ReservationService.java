@@ -7,26 +7,28 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ReservationService {
-    List<Reservation> findAll();
+        List<Reservation> findAll();
 
-    Optional<Reservation> findById(Integer id);
+        List<Reservation> findByHotelId(Long hotelId);
 
-    List<Reservation> findByUser(Integer userId);
+        Optional<Reservation> findById(Integer id);
 
-    // Crear con status opcional (si es null, se usa default)
-    Reservation create(Integer userId, Long hotelId, Integer roomId,
-            LocalDate checkIn, LocalDate checkOut, Reservation.Status status);
+        List<Reservation> findByUser(Integer userId);
 
-    // Update con status opcional (si es null, no se toca)
-    Reservation update(Integer id,
-            Integer userId, Long hotelId, Integer roomId,
-            LocalDate checkIn, LocalDate checkOut, Reservation.Status status);
+        // Crear con status opcional (si es null, se usa default)
+        Reservation create(Integer userId, Long hotelId, Integer roomId,
+                        LocalDate checkIn, LocalDate checkOut, Reservation.Status status);
 
-    void delete(Integer id);
+        // Update con status opcional (si es null, no se toca)
+        Reservation update(Integer id,
+                        Integer userId, Long hotelId, Integer roomId,
+                        LocalDate checkIn, LocalDate checkOut, Reservation.Status status);
 
-    List<Reservation> findCurrentByUser(Integer userId);
+        void delete(Integer id);
 
-    List<Reservation> findHistoryByUser(Integer userId);
+        List<Reservation> findCurrentByUser(Integer userId);
 
-    List<Reservation> findForToday();
+        List<Reservation> findHistoryByUser(Integer userId);
+
+        List<Reservation> findForToday();
 }

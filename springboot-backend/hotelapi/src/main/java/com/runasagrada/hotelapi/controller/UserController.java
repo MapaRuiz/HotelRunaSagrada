@@ -107,7 +107,7 @@ public class UserController {
         private String nationalId;
         private String selectedPet;
         private Boolean enabled;
-        private java.util.List<String> roles; // ['ADMIN','OPERATOR','CLIENT']
+        private List<String> roles; // ['ADMIN','OPERATOR','CLIENT']
     }
 
 }
