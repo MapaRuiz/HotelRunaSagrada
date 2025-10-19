@@ -23,6 +23,10 @@ export class ReservationService {
     return this.http.get<Reservation[]>(this.resource);
   }
 
+  getAllByHotel(hotelId: number): Observable<Reservation[]> {
+    return this.http.get<Reservation[]>(`${this.resource}/hotel/${hotelId}`);
+  }
+
   getById(id: number): Observable<Reservation> {
     return this.http.get<Reservation>(`${this.resource}/${id}`);
   }

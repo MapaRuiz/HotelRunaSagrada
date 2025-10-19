@@ -10,6 +10,7 @@ export class StaffMemberService {
 
   list() { return this.http.get<StaffMember[]>(`${this.base}/staff-members`); }
   get(id: number) { return this.http.get<StaffMember>(`${this.base}/staff-members/${id}`); }
+  getByUser(userId: number) { return this.http.get<StaffMember>(`${this.base}/staff-members/user/${userId}`); }
   create(body: Partial<StaffMember>) { return this.http.post<StaffMember>(`${this.base}/staff-members`, body); }
   update(id: number, body: Partial<StaffMember>) { return this.http.put<StaffMember>(`${this.base}/staff-members/${id}`, body); }
   delete(id: number) { return this.http.delete<void>(`${this.base}/staff-members/${id}`); }

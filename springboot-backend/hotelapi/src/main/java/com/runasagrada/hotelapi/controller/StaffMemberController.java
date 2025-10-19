@@ -31,7 +31,7 @@ public class StaffMemberController {
 		return service.findById(id);
 	}
 
-	@GetMapping("/staff-members/staff-info/{userId}")
+	@GetMapping("/staff-members/user/{userId}")
 	public StaffMember getByUserID(@PathVariable Long userId) {
 		return service.findByUserId(userId);
 	}

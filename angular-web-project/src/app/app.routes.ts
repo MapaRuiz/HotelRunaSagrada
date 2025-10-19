@@ -44,6 +44,7 @@ export const routes: Routes = [
       { path: 'staff-member', loadComponent: () => import('./features/operator/staff-member/staff-member').then(m => m.StaffMemberComponent)},
       { path: 'profile', loadComponent: () => import('./features/operator/operator-profile/operator-profile').then(m => m.OperatorProfileComponent) },
       { path: 'reservation-service', loadComponent: () => import('./features/operator/operator-reservation-service/operator-reservation-service').then(m => m.ReservationServiceComponent)},
+      { path: 'reservation-table', loadComponent: () => import('./features/operator/reservation/reservation-table/reservation-table').then(m => m.ReservationTableOperatorComponent) },
     ]
   },
   // ADMIN - shell con children
