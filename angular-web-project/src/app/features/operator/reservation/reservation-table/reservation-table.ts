@@ -186,8 +186,9 @@ export class ReservationTableOperatorComponent implements OnInit {
         minWidth: 200,
         cellRenderer: ActionButtonsComponent<Reservation>,
         cellRendererParams: {
+          // Edit services for a reservation
           onEdit: (row: Reservation) => this.todo() /*this.beginEdit(row)*/,
-          onDelete: (row: Reservation) => this.todo() /*this.deleteReservation(row)*/
+          onDelete: (row: Reservation) => this.deleteReservation(row) /*this.deleteReservation(row)*/
         } satisfies Pick<ActionButtonsParams<Reservation>, 'onEdit' | 'onDelete'>
       } as ColDef<Reservation> 
     ]
@@ -197,4 +198,36 @@ export class ReservationTableOperatorComponent implements OnInit {
     
   }
 
+  deleteReservation(reservation: Reservation): void {
+    if (!reservation.reservation_id) return;
+    if (!confirm('¿Cancelar (eliminar) esta reserva?')) return;
+    
+    this.service.delete(reservation.reservation_id).subscribe({
+      next: () => {
+        this.reservations = this.reservations.filter(r => r.reservation_id !== reservation.reservation_id);
+        this.rowData = this.rowData.filter(r => r.reservation_id !== reservation.reservation_id);
+        
+        this.withGridApi(api => {
+          api.applyTransaction({ remove: [reservation] });
+          api.deselectAll();
+        });
+        
+        // Limpiar selección para volver a la tabla
+        this.selected = undefined;
+      },
+      error: () => {
+        alert('Error deleting reservation');
+      }
+    });
+  }
+
+  private withGridApi(action: (api: GridApi<Reservation>) => void): void {
+    const api = this.gridApi;
+    if (!api) return;
+    const maybeDestroyed = (api as GridApi<Reservation> & { isDestroyed?: () => boolean }).isDestroyed;
+    if (typeof maybeDestroyed === 'function' && maybeDestroyed.call(api)) {
+      return;
+    }
+    action(api);
+  }
 }
