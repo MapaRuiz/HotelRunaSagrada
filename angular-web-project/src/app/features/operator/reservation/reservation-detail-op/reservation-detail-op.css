@@ -1,0 +1,13 @@
+/* Label: value presentation for details */
+.detail-kv dt {
+  font-weight: 600;
+  color: var(--c-olive);
+}
+.detail-kv dt::after {
+  content: ':';
+  margin: 0 .25rem 0 .25rem;
+}
+.detail-kv dd {
+  margin-bottom: .5rem;
+  color: var(--c-ink);
+}

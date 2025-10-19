@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, PLATFORM_ID } from '@angular/core';
-import { ReservationDetail } from '../../../admin/reservation/reservation-detail/reservation-detail';
+import { ReservationDetailOp } from '../reservation-detail-op/reservation-detail-op';
 import { AgGridAngular } from 'ag-grid-angular';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
@@ -21,7 +21,7 @@ import { forkJoin, map, of } from 'rxjs';
 
 @Component({
   selector: 'app-reservation-table',
-  imports: [CommonModule, FormsModule, AgGridAngular, ReservationDetail],
+  imports: [CommonModule, FormsModule, AgGridAngular, ReservationDetailOp],
   templateUrl: './reservation-table.html',
   styleUrl: './reservation-table.css'
 })
@@ -29,12 +29,14 @@ export class ReservationTableOperatorComponent implements OnInit {
   isBrowser: boolean = false;
   loading: boolean = true;
 
-  // Fuente de datos
+  // Data source
   reservations: Reservation[] = [];
   rowData: Reservation[] = [];
 
   // Selection and detail
   selected?: Reservation;
+  // Hide table when detail enters edit mode
+  detailEditing = false;
 
   private gridApi?: GridApi<Reservation>;
   readonly gridTheme: typeof sharedGridTheme = sharedGridTheme;
@@ -193,15 +195,15 @@ export class ReservationTableOperatorComponent implements OnInit {
         cellRenderer: ActionButtonsComponent<Reservation>,
         cellRendererParams: {
           // Edit services for a reservation
-          onEdit: (row: Reservation) => this.todo() /*this.beginEdit(row)*/,
+          onEdit: (row: Reservation) => this.openEditForRow(row),
           onDelete: (row: Reservation) => this.deleteReservation(row) /*this.deleteReservation(row)*/
         } satisfies Pick<ActionButtonsParams<Reservation>, 'onEdit' | 'onDelete'>
       } as ColDef<Reservation> 
     ]
   }
 
-  todo() {
-    
+  openEditForRow(row: Reservation) {
+    this.selected = row;
   }
 
   // Delete
@@ -246,5 +248,11 @@ export class ReservationTableOperatorComponent implements OnInit {
       return;
     }
     action(api);
+  }
+
+  // editingChanged is handled in template to set detailEditing
+  onCloseDetail() {
+    this.selected = undefined;
+    this.detailEditing = false;
   }
 }

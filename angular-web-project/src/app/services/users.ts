@@ -55,7 +55,8 @@ export class UsersService {
     return this.http.get<boolean>(`${this.base}/users/nationalId/${encodeURIComponent(nationalId)}`);
   }
 
+  // Backend endpoint is GET /api/user/id/{userId}
   getById(userId: number) {
-    return this.http.get<User>(`${this.base}/users/${userId}`);
+    return this.http.get<User>(`${this.base}/user/id/${userId}`);
   }
 }

@@ -1,9 +1,27 @@
-<ng-container *ngIf="reservation as current; else detailEmpty">
-  <div class="card mt-4 services-form services-detail">
+<ng-container *ngIf="reservation as current">
+  <div class="card mt-4 reservation-form">
     <div class="card-body row g-3">
       <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2 mb-1">
-        <h5 class="card-title mb-0">Detalle de la reserva</h5>
-        <button type="button" class="btn btn-olive btn-sm" (click)="beginEdit()">Editar</button>
+        <h5 class="card-title col-12">Detalle de la reserva</h5>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="closeDetail()">
+            Volver a la tabla
+          </button>
+          <ng-container *ngIf="!editingServices; else editBtns">
+            <button type="button" class="btn btn-olive btn-sm" (click)="addServices()">
+              Agregar servicios
+            </button>
+          </ng-container>
+          <ng-template #editBtns>
+            <button
+              type="button"
+              class="btn btn-outline-secondary btn-sm"
+              (click)="closeServices()"
+            >
+              Cerrar edición
+            </button>
+          </ng-template>
+        </div>
       </div>
 
       <div class="col-md-6">
@@ -61,25 +79,28 @@
         <div class="form-control-plaintext">{{ formatDate(current.check_out) }}</div>
       </div>
 
-      <div class="col-md-6">
-        <label class="form-label">Fecha de Creación</label>
-        <div class="form-control-plaintext">{{ formatDateTime(current.created_at) }}</div>
-      </div>
-
       <!-- Servicios Adicionales -->
-      <div class="col-12" *ngIf="current.services && current.services.length > 0">
-        <label class="form-label">Servicios Adicionales</label>
-        <div class="row g-2">
-          <div class="col-auto" *ngFor="let service of current.services">
-            <span class="badge text-bg-info">
-              {{ service.service?.name || 'Servicio ' + service.service_id }}
-            </span>
+      <div class="col-12" *ngIf="!editingServices">
+        <ng-container *ngIf="current.services && current.services.length > 0; else noServices">
+          <label class="form-label">Servicios Adicionales</label>
+          <div class="row g-2">
+            <div class="col-auto" *ngFor="let service of current.services">
+              <span class="badge text-bg-info">
+                {{ service.service?.name || 'Servicio ' + service.service_id }}
+              </span>
+            </div>
           </div>
-        </div>
+        </ng-container>
+        <ng-template #noServices>
+          <div class="text-muted fst-italic">No hay servicios adicionales.</div>
+        </ng-template>
       </div>
 
       <!-- Pagos -->
-      <div class="col-12" *ngIf="current.payments && current.payments.length > 0">
+      <div
+        class="col-12"
+        *ngIf="!editingServices && current.payments && current.payments.length > 0"
+      >
         <label class="form-label">Historial de Pagos</label>
         <div class="table-responsive">
           <table class="table table-sm">
@@ -117,15 +138,19 @@
       </div>
 
       <!-- Información adicional -->
-      <div class="col-12" *ngIf="!current.services?.length && !current.payments?.length">
+      <div
+        class="col-12"
+        *ngIf="!editingServices && !current.services?.length && !current.payments?.length"
+      >
         <div class="text-muted fst-italic">
           No hay servicios adicionales ni pagos registrados para esta reserva.
         </div>
       </div>
+
+      <!-- Modo edición de servicios -->
+      <div class="col-12" *ngIf="editingServices">
+        <app-services-add-form></app-services-add-form>
+      </div>
     </div>
   </div>
 </ng-container>
-
-<ng-template #detailEmpty>
-  <div class="alert alert-info mt-4">Selecciona una reserva para ver su detalle.</div>
-</ng-template>
