@@ -132,4 +132,9 @@ public class UserServiceImpl implements UserService {
     public boolean existsByNationalId(String nationalId) {
         return users.existsByNationalId(nationalId);
     }
+
+    @Override
+    public User findById(Integer userId) {
+        return users.findById(userId).orElseThrow();
+    }
 }

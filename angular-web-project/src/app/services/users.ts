@@ -11,8 +11,8 @@ export class UsersService {
   getAll() { return this.http.get<User[]>(`${this.base}/users`); }
 
   getMe() { 
-  return this.http.get<User>(`${this.base}/users/me`); 
-}
+    return this.http.get<User>(`${this.base}/users/me`); 
+  }
 
   // ✔ Admin crea usuarios reutilizando /auth/register con ?role=
   create(body: Partial<User> & { role?: string; roles?: string[] }) {
@@ -31,10 +31,10 @@ export class UsersService {
     return this.http.put<User>(`${this.base}/users/me`, body);
   }
 
-  // services/users.ts
-delete(id: number, cascade = false) {
-  return this.http.delete<void>(`${this.base}/users/${id}`, { params: { cascade } });
-}
+    // services/users.ts
+  delete(id: number, cascade = false) {
+    return this.http.delete<void>(`${this.base}/users/${id}`, { params: { cascade } });
+  }
 
   deleteMe(cascade = false) { return this.http.delete<void>(`${this.base}/users/me`, { params: { cascade } }); }
 
@@ -53,5 +53,9 @@ delete(id: number, cascade = false) {
 
   existsByNationalId(nationalId: string) {
     return this.http.get<boolean>(`${this.base}/users/nationalId/${encodeURIComponent(nationalId)}`);
+  }
+
+  getById(userId: number) {
+    return this.http.get<User>(`${this.base}/users/${userId}`);
   }
 }

@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api")
@@ -38,6 +40,11 @@ public class UserController {
     @GetMapping("/users")
     public List<User> all() {
         return service.findAll();
+    }
+
+    @GetMapping("/user/id/{userId}")
+    public User getMethodName(@PathVariable Integer userId) {
+        return service.findById(userId);
     }
 
     @DeleteMapping("/users/{id:\\d+}")
