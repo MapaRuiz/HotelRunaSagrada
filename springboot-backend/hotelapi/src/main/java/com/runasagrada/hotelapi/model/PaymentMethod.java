@@ -13,11 +13,11 @@ public class PaymentMethod {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer methodId;
+	private Integer paymentMethodId;
 
 	@OneToOne
 	@JoinColumn(name = "user_id", nullable = false)
-	private User user;
+	private User userId;
 
 	private String type;
 

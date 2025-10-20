@@ -1,5 +1,6 @@
 package com.runasagrada.hotelapi.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,16 +16,18 @@ public class Payment {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer paymentId;
 
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "reservation_id", nullable = false)
-	private Reservation reservation;
+	@JsonIgnore
+	private Reservation reservationId;
 
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "payment_method_id", nullable = false)
-	private PaymentMethod paymentMethod;
+	@JsonIgnore
+	private PaymentMethod paymentMethodId;
 
 	private double amount;
 
-	private String Status;
+	private String status;
 
 }

@@ -46,7 +46,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
 
 	@Override
 	public PaymentMethod create(PaymentMethod pm) {
-		if (pm.getUser() == null || pm.getUser().getUserId() == null)
+		if (pm.getUserId() == null || pm.getUserId().getUserId() == null)
 			throw new IllegalArgumentException("User is required");
 		if (pm.getType() == null || pm.getType().isBlank())
 			throw new IllegalArgumentException("Payment method type is required");
@@ -54,9 +54,9 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
 			throw new IllegalArgumentException("Holder name is required");
 
 		// Verificar que el usuario existe
-		User user = users.findById(pm.getUser().getUserId())
+		User user = users.findById(pm.getUserId().getUserId())
 				.orElseThrow(() -> new NoSuchElementException("User not found"));
-		pm.setUser(user);
+		pm.setUserId(user);
 
 		helper.resyncIdentity("payment_method", "method_id");
 		return paymentMethods.save(pm);

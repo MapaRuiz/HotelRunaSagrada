@@ -40,6 +40,10 @@ public class DatabaseInit implements CommandLineRunner {
         private final StaffMemberRepository staffMemberRepo;
         private final TaskRepository taskRepo;
 
+        // Repositorios para Payment y PaymentMethod
+        private final PaymentMethodRepository paymentMethodRepo;
+        private final PaymentRepository paymentRepo;
+
         @Override
         public void run(String... args) {
                 // Datos originales: roles, usuarios y hoteles
@@ -57,6 +61,9 @@ public class DatabaseInit implements CommandLineRunner {
                 seedDepartments(hotelList);
                 seedStaffMembers(hotelList);
                 seedTasks();
+
+                // Datos para PaymentMethod y Payment
+                seedPaymentMethodsAndPayments();
         }
 
         private void seedBasicData() {
@@ -1416,43 +1423,43 @@ public class DatabaseInit implements CommandLineRunner {
 
                 List<Room> rooms = roomRepository.findAll();
 
-Random random = new Random();
-LocalDate base = LocalDate.of(2025, 1, 1);
-int diasDelAnio = base.lengthOfYear(); // 365 días
+                Random random = new Random();
+                LocalDate base = LocalDate.of(2025, 1, 1);
+                int diasDelAnio = base.lengthOfYear(); // 365 días
 
-// Crear 15 reservas de ejemplo
-for (int i = 0; i < 15; i++) {
-    User user = clients.get(random.nextInt(clients.size()));
-    Room room = rooms.get(random.nextInt(rooms.size()));
-    Hotel hotel = room.getHotel();
+                // Crear 15 reservas de ejemplo
+                for (int i = 0; i < 15; i++) {
+                        User user = clients.get(random.nextInt(clients.size()));
+                        Room room = rooms.get(random.nextInt(rooms.size()));
+                        Hotel hotel = room.getHotel();
 
-    // checkIn aleatorio dentro del año y checkOut 2 a 4 noches después
-    LocalDate checkIn = base.plusDays(random.nextInt(diasDelAnio));
-    LocalDate checkOut = checkIn.plusDays(random.nextInt(3) + 2);
+                        // checkIn aleatorio dentro del año y checkOut 2 a 4 noches después
+                        LocalDate checkIn = base.plusDays(random.nextInt(diasDelAnio));
+                        LocalDate checkOut = checkIn.plusDays(random.nextInt(3) + 2);
 
-    // Asegurar que no se pase del año
-    if (checkOut.getYear() > 2025) {
-        checkOut = LocalDate.of(2025, 12, 31);
-    }
+                        // Asegurar que no se pase del año
+                        if (checkOut.getYear() > 2025) {
+                                checkOut = LocalDate.of(2025, 12, 31);
+                        }
 
-    Reservation res = new Reservation();
-    res.setUser(user);
-    res.setHotel(hotel);
-    res.setRoom(room);
-    res.setCheckIn(checkIn);
-    res.setCheckOut(checkOut);
-    res.setStatus(Reservation.Status.CONFIRMED);
+                        Reservation res = new Reservation();
+                        res.setUser(user);
+                        res.setHotel(hotel);
+                        res.setRoom(room);
+                        res.setCheckIn(checkIn);
+                        res.setCheckOut(checkOut);
+                        res.setStatus(Reservation.Status.CONFIRMED);
 
-    Reservation saved = reservationRepo.save(res);
+                        Reservation saved = reservationRepo.save(res);
 
-        // Crear locks por cada día
-        LocalDate d = checkIn;
-        while (d.isBefore(checkOut)) {
-                RoomLock lock = new RoomLock(room.getRoomId(), d, saved);
-                roomLockRepo.save(lock);
-                d = d.plusDays(1);
-        }
-        }
+                        // Crear locks por cada día
+                        LocalDate d = checkIn;
+                        while (d.isBefore(checkOut)) {
+                                RoomLock lock = new RoomLock(room.getRoomId(), d, saved);
+                                roomLockRepo.save(lock);
+                                d = d.plusDays(1);
+                        }
+                }
 
         }
 
@@ -1613,5 +1620,123 @@ for (int i = 0; i < 15; i++) {
                 task.setType(Task.TaskType.TO_DO);
                 task.setStatus(status);
                 taskRepo.save(task);
+        }
+
+        private void seedPaymentMethodsAndPayments() {
+                if (paymentMethodRepo.count() > 0)
+                        return; // No duplicar
+
+                // Obtener algunos clientes
+                List<User> clients = userRepo.findAll().stream()
+                                .filter(u -> u.getRoles().stream().anyMatch(r -> r.getName().equals("CLIENT")))
+                                .limit(3)
+                                .toList();
+
+                if (clients.isEmpty())
+                        return;
+
+                // Crear 3 métodos de pago
+                PaymentMethod pm1 = new PaymentMethod();
+                pm1.setUserId(clients.get(0));
+                pm1.setType("Visa");
+                pm1.setLastfour(4532);
+                pm1.setHolderName(clients.get(0).getFullName());
+                pm1.setBillingAddress("Calle 123 #45-67, Bogotá");
+                paymentMethodRepo.save(pm1);
+
+                PaymentMethod pm2 = new PaymentMethod();
+                pm2.setUserId(clients.get(1 % clients.size()));
+                pm2.setType("Mastercard");
+                pm2.setLastfour(8765);
+                pm2.setHolderName(clients.get(1 % clients.size()).getFullName());
+                pm2.setBillingAddress("Carrera 10 #20-30, Medellín");
+                paymentMethodRepo.save(pm2);
+
+                PaymentMethod pm3 = new PaymentMethod();
+                pm3.setUserId(clients.get(2 % clients.size()));
+                pm3.setType("American Express");
+                pm3.setLastfour(9012);
+                pm3.setHolderName(clients.get(2 % clients.size()).getFullName());
+                pm3.setBillingAddress("Avenida 5 #12-34, Cali");
+                paymentMethodRepo.save(pm3);
+
+                // Obtener algunas reservaciones
+                List<Reservation> reservations = reservationRepo.findAll().stream()
+                                .limit(10)
+                                .toList();
+
+                if (reservations.isEmpty())
+                        return;
+
+                // Crear 10 pagos con diferentes estados
+                Payment payment1 = new Payment();
+                payment1.setReservationId(reservations.get(0));
+                payment1.setPaymentMethodId(pm1);
+                payment1.setAmount(450000.00);
+                payment1.setStatus("COMPLETED");
+                paymentRepo.save(payment1);
+
+                Payment payment2 = new Payment();
+                payment2.setReservationId(reservations.get(1 % reservations.size()));
+                payment2.setPaymentMethodId(pm2);
+                payment2.setAmount(680000.00);
+                payment2.setStatus("PENDING");
+                paymentRepo.save(payment2);
+
+                Payment payment3 = new Payment();
+                payment3.setReservationId(reservations.get(2 % reservations.size()));
+                payment3.setPaymentMethodId(pm3);
+                payment3.setAmount(320000.00);
+                payment3.setStatus("COMPLETED");
+                paymentRepo.save(payment3);
+
+                Payment payment4 = new Payment();
+                payment4.setReservationId(reservations.get(3 % reservations.size()));
+                payment4.setPaymentMethodId(pm1);
+                payment4.setAmount(550000.00);
+                payment4.setStatus("FAILED");
+                paymentRepo.save(payment4);
+
+                Payment payment5 = new Payment();
+                payment5.setReservationId(reservations.get(4 % reservations.size()));
+                payment5.setPaymentMethodId(pm2);
+                payment5.setAmount(890000.00);
+                payment5.setStatus("COMPLETED");
+                paymentRepo.save(payment5);
+
+                Payment payment6 = new Payment();
+                payment6.setReservationId(reservations.get(5 % reservations.size()));
+                payment6.setPaymentMethodId(pm3);
+                payment6.setAmount(420000.00);
+                payment6.setStatus("PENDING");
+                paymentRepo.save(payment6);
+
+                Payment payment7 = new Payment();
+                payment7.setReservationId(reservations.get(6 % reservations.size()));
+                payment7.setPaymentMethodId(pm1);
+                payment7.setAmount(760000.00);
+                payment7.setStatus("COMPLETED");
+                paymentRepo.save(payment7);
+
+                Payment payment8 = new Payment();
+                payment8.setReservationId(reservations.get(7 % reservations.size()));
+                payment8.setPaymentMethodId(pm2);
+                payment8.setAmount(290000.00);
+                payment8.setStatus("REFUNDED");
+                paymentRepo.save(payment8);
+
+                Payment payment9 = new Payment();
+                payment9.setReservationId(reservations.get(8 % reservations.size()));
+                payment9.setPaymentMethodId(pm3);
+                payment9.setAmount(1250000.00);
+                payment9.setStatus("COMPLETED");
+                paymentRepo.save(payment9);
+
+                Payment payment10 = new Payment();
+                payment10.setReservationId(reservations.get(9 % reservations.size()));
+                payment10.setPaymentMethodId(pm1);
+                payment10.setAmount(510000.00);
+                payment10.setStatus("PENDING");
+                paymentRepo.save(payment10);
         }
 }

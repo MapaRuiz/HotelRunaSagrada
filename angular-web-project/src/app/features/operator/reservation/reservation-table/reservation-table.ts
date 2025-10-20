@@ -21,7 +21,7 @@ import { forkJoin, map } from 'rxjs';
 
 @Component({
   selector: 'app-reservation-table',
-  imports: [CommonModule, FormsModule, AgGridAngular, ReservationDetail],
+  imports: [CommonModule, FormsModule, AgGridAngular],
   templateUrl: './reservation-table.html',
   styleUrl: './reservation-table.css'
 })
@@ -52,11 +52,11 @@ export class ReservationTableOperatorComponent implements OnInit {
     this.isBrowser = isPlatformBrowser(this.platformId);
     if (this.isBrowser) {
       ModuleRegistry.registerModules([AllCommunityModule]);
-    }   
+    }
   }
 
   private platformId = inject(PLATFORM_ID);
-  
+
 
   ngOnInit(): void {
     this.loadData();
@@ -102,7 +102,7 @@ export class ReservationTableOperatorComponent implements OnInit {
     localeText: AG_GRID_LOCALE,
     rowSelection: 'single',
     getRowId: params => params.data.reservation_id?.toString() || '',
-    onGridReady: params => { 
+    onGridReady: params => {
       this.gridApi = params.api
       params.api.sizeColumnsToFit();
     },
@@ -114,13 +114,13 @@ export class ReservationTableOperatorComponent implements OnInit {
       this.selected = row || undefined;
     },
     columnDefs: [
-      { 
+      {
         headerName: 'ID',
         field: 'reservation_id',
         minWidth: 60,
         maxWidth: 80
       },
-      { 
+      {
         headerName: 'Cliente',
         filter: MultiSelectFilterComponent,
         filterParams: {
@@ -138,7 +138,7 @@ export class ReservationTableOperatorComponent implements OnInit {
         filterParams: TEXT_FILTER_CONFIG,
         maxWidth: 160
       },
-      { 
+      {
         headerName: 'Hotel',
         filter: MultiSelectFilterComponent,
         filterParams: {
@@ -149,28 +149,28 @@ export class ReservationTableOperatorComponent implements OnInit {
         minWidth: 150,
         maxWidth: 200
       },
-      { 
+      {
         headerName: 'Habitación',
         valueGetter: params => params.data?.room?.number || `Habitación ${params.data?.room_id || 'N/A'}`,
         filter: 'agTextColumnFilter',
         filterParams: TEXT_FILTER_CONFIG,
         maxWidth: 140
       },
-      { 
+      {
         headerName: 'Check-in',
         field: 'check_in',
         filter: 'agDateColumnFilter',
         filterParams: DATE_FILTER_CONFIG,
         maxWidth: 140
       },
-      { 
+      {
         headerName: 'Check-out',
         field: 'check_out',
         filter: 'agDateColumnFilter',
         filterParams: DATE_FILTER_CONFIG,
         maxWidth: 140
       },
-      { 
+      {
         headerName: 'Estado',
         filter: MultiSelectFilterComponent,
         filterParams: {
@@ -190,28 +190,28 @@ export class ReservationTableOperatorComponent implements OnInit {
           onEdit: (row: Reservation) => this.todo() /*this.beginEdit(row)*/,
           onDelete: (row: Reservation) => this.deleteReservation(row) /*this.deleteReservation(row)*/
         } satisfies Pick<ActionButtonsParams<Reservation>, 'onEdit' | 'onDelete'>
-      } as ColDef<Reservation> 
+      } as ColDef<Reservation>
     ]
   }
 
   todo() {
-    
+
   }
 
   deleteReservation(reservation: Reservation): void {
     if (!reservation.reservation_id) return;
     if (!confirm('¿Cancelar (eliminar) esta reserva?')) return;
-    
+
     this.service.delete(reservation.reservation_id).subscribe({
       next: () => {
         this.reservations = this.reservations.filter(r => r.reservation_id !== reservation.reservation_id);
         this.rowData = this.rowData.filter(r => r.reservation_id !== reservation.reservation_id);
-        
+
         this.withGridApi(api => {
           api.applyTransaction({ remove: [reservation] });
           api.deselectAll();
         });
-        
+
         // Limpiar selección para volver a la tabla
         this.selected = undefined;
       },

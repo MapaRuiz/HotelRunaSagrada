@@ -50,11 +50,11 @@ public class PaymentController {
 
 		Reservation reservation = new Reservation();
 		reservation.setReservationId(body.getReservationId());
-		payment.setReservation(reservation);
+		payment.setReservationId(reservation);
 
 		PaymentMethod paymentMethod = new PaymentMethod();
-		paymentMethod.setMethodId(body.getPaymentMethodId());
-		payment.setPaymentMethod(paymentMethod);
+		paymentMethod.setPaymentMethodId(body.getPaymentMethodId());
+		payment.setPaymentMethodId(paymentMethod);
 
 		payment.setAmount(body.getAmount());
 		payment.setStatus(body.getStatus());
@@ -68,8 +68,8 @@ public class PaymentController {
 
 		if (body.getPaymentMethodId() != null) {
 			PaymentMethod paymentMethod = new PaymentMethod();
-			paymentMethod.setMethodId(body.getPaymentMethodId());
-			partial.setPaymentMethod(paymentMethod);
+			paymentMethod.setPaymentMethodId(body.getPaymentMethodId());
+			partial.setPaymentMethodId(paymentMethod);
 		}
 
 		partial.setAmount(body.getAmount());

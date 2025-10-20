@@ -46,13 +46,13 @@ public class PaymentServiceImpl implements PaymentService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<Payment> getByReservationId(Integer reservationId) {
-		return payments.findByReservationId(reservationId);
+		return payments.findByReservationId_ReservationId(reservationId);
 	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public List<Payment> getByPaymentMethodId(Integer paymentMethodId) {
-		return payments.findByPaymentMethodId(paymentMethodId);
+		return payments.findByPaymentMethodId_PaymentMethodId(paymentMethodId);
 	}
 
 	@Override
@@ -63,9 +63,9 @@ public class PaymentServiceImpl implements PaymentService {
 
 	@Override
 	public Payment create(Payment payment) {
-		if (payment.getReservation() == null || payment.getReservation().getReservationId() == null)
+		if (payment.getReservationId() == null || payment.getReservationId().getReservationId() == null)
 			throw new IllegalArgumentException("Reservation is required");
-		if (payment.getPaymentMethod() == null || payment.getPaymentMethod().getMethodId() == null)
+		if (payment.getPaymentMethodId() == null || payment.getPaymentMethodId().getPaymentMethodId() == null)
 			throw new IllegalArgumentException("Payment method is required");
 		if (payment.getAmount() <= 0)
 			throw new IllegalArgumentException("Amount must be greater than 0");
@@ -73,14 +73,14 @@ public class PaymentServiceImpl implements PaymentService {
 			throw new IllegalArgumentException("Status is required");
 
 		// Verificar que la reservación existe
-		Reservation reservation = reservations.findById(payment.getReservation().getReservationId())
+		Reservation reservation = reservations.findById(payment.getReservationId().getReservationId())
 				.orElseThrow(() -> new NoSuchElementException("Reservation not found"));
-		payment.setReservation(reservation);
+		payment.setReservationId(reservation);
 
 		// Verificar que el método de pago existe
-		PaymentMethod paymentMethod = paymentMethods.findById(payment.getPaymentMethod().getMethodId())
+		PaymentMethod paymentMethod = paymentMethods.findById(payment.getPaymentMethodId().getPaymentMethodId())
 				.orElseThrow(() -> new NoSuchElementException("Payment method not found"));
-		payment.setPaymentMethod(paymentMethod);
+		payment.setPaymentMethodId(paymentMethod);
 
 		helper.resyncIdentity("payment", "payment_id");
 		return payments.save(payment);
@@ -97,10 +97,10 @@ public class PaymentServiceImpl implements PaymentService {
 			db.setStatus(partial.getStatus());
 
 		// Permitir actualizar método de pago
-		if (partial.getPaymentMethod() != null && partial.getPaymentMethod().getMethodId() != null) {
-			PaymentMethod paymentMethod = paymentMethods.findById(partial.getPaymentMethod().getMethodId())
+		if (partial.getPaymentMethodId() != null && partial.getPaymentMethodId().getPaymentMethodId() != null) {
+			PaymentMethod paymentMethod = paymentMethods.findById(partial.getPaymentMethodId().getPaymentMethodId())
 					.orElseThrow(() -> new NoSuchElementException("Payment method not found"));
-			db.setPaymentMethod(paymentMethod);
+			db.setPaymentMethodId(paymentMethod);
 		}
 
 		return payments.save(db);
