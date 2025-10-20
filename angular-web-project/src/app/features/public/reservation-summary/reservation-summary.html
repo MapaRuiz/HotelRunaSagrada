@@ -27,82 +27,136 @@
 
     <!-- Progress Steps -->
     <div class="progress-steps">
-      <div class="step active">
-        <div class="step-number">1</div>
-        <span class="step-label">Información de la estadia</span>
+      <div class="step completed">
+        <div class="step-circle">✓</div>
+        <span class="step-label">Reserva Creada</span>
       </div>
+      <div class="step-line"></div>
+      <div class="step active">
+        <div class="step-circle">2</div>
+        <span class="step-label">Confirmación</span>
+      </div>
+      <div class="step-line inactive"></div>
       <div class="step">
-        <div class="step-number">2</div>
-        <span class="step-label">Método de pago</span>
+        <div class="step-circle">3</div>
+        <span class="step-label">Pago</span>
       </div>
     </div>
 
     <div class="main-content">
       <div class="form-section">
 
-        <h2 class="section-title">Datos Personales</h2>
-        <p class="section-subtitle">Deberá presentar una identificación oficial al llegar al alojamiento.</p>
-
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Nombre Completo</label>
-            <input 
-              type="text" 
-              placeholder="Cargando..." 
-              class="form-input"
-              [value]="userName"
-              [class.has-value]="userName"
-              readonly>
-          </div>
-		  <div class="form-group">
-            <label>Documento</label>
-            <input 
-              type="text" 
-              placeholder="Cargando..." 
-              class="form-input"
-              [value]="userDocument"
-              [class.has-value]="userDocument"
-              readonly>
+        <!-- Datos Personales -->
+        <div class="section-card">
+          <h3 class="card-title">Datos Personales</h3>
+          <div class="card-content">
+            <div class="info-row">
+              <span class="label">Nombre</span>
+              <span class="value">{{ userName || 'Cargando...' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Documento</span>
+              <span class="value">{{ userDocument || 'Cargando...' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Email</span>
+              <span class="value">{{ userEmail || 'Cargando...' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Teléfono</span>
+              <span class="value">{{ userPhone || 'Cargando...' }}</span>
+            </div>
           </div>
         </div>
 
-        <div class="form-group">
-          <label>Correo electrónico</label>
-          <input 
-            type="email" 
-            placeholder="Cargando..." 
-            class="form-input"
-            [value]="userEmail"
-            [class.has-value]="userEmail"
-            readonly>
-        </div>
-
-        <div class="form-group">
-          <label>Teléfono</label>
-          <div class="phone-input">
-            <input 
-              type="tel" 
-              placeholder="Cargando..." 
-              class="form-input"
-              [value]="userPhone"
-              [class.has-value]="userPhone"
-              readonly>
+        <!-- Información del Hotel -->
+        <div class="section-card">
+          <h3 class="card-title">Hotel</h3>
+          <div class="card-content">
+            <div class="info-row primary">
+              <span class="value large">{{ hotelName || 'Cargando...' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Ubicación</span>
+              <span class="value">{{ hotelLatitude || 'N/A' }}, {{ hotelLongitude || 'N/A' }}</span>
+            </div>
           </div>
         </div>
 
-        <h2 class="section-title mt-4">Facturación</h2>
-        <p class="section-description">La factura llegará en las próximas 24 horas al correo de su reservación después de la confirmación.</p>
-
-        <div class="checkbox-group">
-          <input type="checkbox" id="needInvoice" disabled>
-          <label for="needInvoice">Necesito facturar mi compra</label>
+        <!-- Fechas de Estadía -->
+        <div class="section-card">
+          <h3 class="card-title">Fechas de Estadía</h3>
+          <div class="card-content">
+            <div class="dates-row">
+              <div class="date-col">
+                <span class="date-label">Check-in</span>
+                <span class="date-value">{{ formatDate(checkIn) }}</span>
+                <span class="time-value">15:00</span>
+              </div>
+              <div class="date-divider">→</div>
+              <div class="date-col">
+                <span class="date-label">Check-out</span>
+                <span class="date-value">{{ formatDate(checkOut) }}</span>
+                <span class="time-value">12:00</span>
+              </div>
+            </div>
+            <div class="info-row highlight">
+              <span class="label">Duración</span>
+              <span class="value">{{ nights }} noche{{ nights !== 1 ? 's' : '' }}</span>
+            </div>
+          </div>
         </div>
 
-        <div class="terms-section">
-          <p>Al hacer clic en el botón "Continuar", acepto las <a href="">políticas de reservación</a> y nuestro <a href="">aviso de privacidad</a>.</p>
+        <!-- Información de la Habitación -->
+        <div class="section-card">
+          <h3 class="card-title">Habitación</h3>
+          <div class="card-content">
+            <div class="info-row">
+              <span class="label">Tipo</span>
+              <span class="value">{{ roomTypeName || 'N/A' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Número</span>
+              <span class="value">{{ roomNumber || 'N/A' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Tema</span>
+              <span class="value">{{ roomTheme || 'N/A' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Capacidad</span>
+              <span class="value">{{ capacity ? (capacity + ' persona' + (capacity !== 1 ? 's' : '')) : 'N/A' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Precio/noche</span>
+              <span class="value">{{ basePrice ? formatCurrency(basePrice) : '$ 0 COP' }}</span>
+            </div>
+            <div class="info-row highlight">
+              <span class="label">Código</span>
+              <span class="value code">{{ reservationCode }}</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span class="footer-text">✓ Cancelación gratuita hasta {{ formatDate(checkIn) }}</span>
+          </div>
         </div>
 
-        <button class="btn-continue" (click)="continuarReserva()">Continuar</button>
+        <!-- Términos -->
+        <div class="section-card terms">
+          <div class="card-content">
+            <label class="checkbox-label">
+              <input type="checkbox" id="needInvoice" disabled>
+              <span>Requiero factura</span>
+            </label>
+            <p class="terms-text">
+              Al continuar, acepto las <a href="#">políticas de reservación</a> y el <a href="#">aviso de privacidad</a>.
+            </p>
+          </div>
+        </div>
+
+        <button class="btn-primary" (click)="continuarReserva()">
+          Continuar con el Pago
+        </button>
       </div>
 
       <!-- Right Column - Summary Section -->
@@ -115,7 +169,7 @@
             <span class="price">{{ formatCurrency(subtotal) }}</span>
           </div>
           <div class="price-row">
-            <span>Impuestos</span>
+            <span>Impuestos (19%)</span>
             <span class="price">{{ taxes ? formatCurrency(taxes) : 'No incluidos' }}</span>
           </div>
         </div>
@@ -131,82 +185,6 @@
             <span class="charge-price">{{ formatCurrency(taxes) }}</span>
           </div>
           <p class="charges-note">*Pagarás los cargos adicionales al llegar al alojamiento.</p>
-        </div>
-
-        <div class="reservation-details">
-          <h4 class="details-title">
-            <span class="hotel-icon">🏨</span>
-            Hotel
-            <button class="collapse-btn">▲</button>
-          </h4>
-
-          <div class="hotel-info">
-            <h5 class="hotel-name">{{ hotelName }}</h5>
-            <div class="hotel-coordinates">
-              <p class="coordinate-item">
-                <span class="coordinate-label">📍 Latitud:</span>
-                <span class="coordinate-value">{{ hotelLatitude || 'N/A' }}</span>
-              </p>
-              <p class="coordinate-item">
-                <span class="coordinate-label">📍 Longitud:</span>
-                <span class="coordinate-value">{{ hotelLongitude || 'N/A' }}</span>
-              </p>
-            </div>
-          </div>
-
-          <div class="reservation-dates">
-            <div class="date-info">
-              <span class="date-label">Llegada</span>
-              <span class="date-value">{{ formatDate(checkIn) }} {{ formatTime(checkIn, '15:00') }} - 00:00</span>
-            </div>
-            <div class="date-info">
-              <span class="date-label">Salida</span>
-              <span class="date-value">{{ formatDate(checkOut) }} {{ formatTime(checkOut, '12:00') }} (medio día)</span>
-            </div>
-          </div>
-
-          <div class="stay-duration">
-            <span class="duration-label">Duración de la estancia</span>
-            <span class="duration-value">{{ nights }} noche{{ nights !== 1 ? 's' : '' }}</span>
-          </div>
-
-          <h4 class="details-subtitle">
-            <span class="room-icon">🛏️</span>
-            Información de la Habitación
-          </h4>
-
-          <div class="room-info-grid">
-            <div class="info-item">
-              <span class="info-label">Tipo de habitación:</span>
-              <span class="info-value">{{ roomTypeName ? roomTypeName : 'N/A' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Número de habitación:</span>
-              <span class="info-value">{{ roomNumber ? roomNumber : 'N/A' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Tema/Decoración:</span>
-              <span class="info-value">{{ roomTheme ? roomTheme : 'N/A' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Capacidad:</span>
-              <span class="info-value">{{ capacity ? (capacity + ' persona' + (capacity !== 1 ? 's' : '')) : 'N/A' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Precio por noche:</span>
-              <span class="info-value">{{ basePrice ? formatCurrency(basePrice) : '$ 0 COP' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Código de reserva:</span>
-              <span class="info-value highlight">{{ reservationCode }}</span>
-            </div>
-          </div>
-
-          <div class="cancellation-info">
-            <p class="cancellation-policy">
-              ✓ Cancelación gratuita hasta el {{ formatDate(checkIn) }}
-            </p>
-          </div>
         </div>
       </div>
     </div>
