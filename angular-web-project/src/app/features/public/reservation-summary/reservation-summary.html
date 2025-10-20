@@ -29,7 +29,7 @@
     <div class="progress-steps">
       <div class="step active">
         <div class="step-number">1</div>
-        <span class="step-label">Información del huesped</span>
+        <span class="step-label">Información de la estadia</span>
       </div>
       <div class="step">
         <div class="step-number">2</div>
@@ -178,23 +178,23 @@
           <div class="room-info-grid">
             <div class="info-item">
               <span class="info-label">Tipo de habitación:</span>
-              <span class="info-value">{{ roomTypeName || 'N/A' }}</span>
+              <span class="info-value">{{ roomTypeName ? roomTypeName : 'N/A' }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Número de habitación:</span>
-              <span class="info-value">{{ roomNumber || 'N/A' }}</span>
+              <span class="info-value">{{ roomNumber ? roomNumber : 'N/A' }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Tema/Decoración:</span>
-              <span class="info-value">{{ roomTheme || 'N/A' }}</span>
+              <span class="info-value">{{ roomTheme ? roomTheme : 'N/A' }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Capacidad:</span>
-              <span class="info-value">{{ capacity || 'N/A' }} persona{{ capacity !== 1 ? 's' : '' }}</span>
+              <span class="info-value">{{ capacity ? (capacity + ' persona' + (capacity !== 1 ? 's' : '')) : 'N/A' }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Precio por noche:</span>
-              <span class="info-value">{{ formatCurrency(basePrice) }}</span>
+              <span class="info-value">{{ basePrice ? formatCurrency(basePrice) : '$ 0 COP' }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Código de reserva:</span>

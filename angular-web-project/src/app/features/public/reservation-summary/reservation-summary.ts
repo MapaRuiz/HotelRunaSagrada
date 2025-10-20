@@ -69,6 +69,9 @@ export class ReservationSummaryComponent implements OnInit {
 
 		this.reservationId = Number(this.route.snapshot.queryParamMap.get('reservationId'));
 
+		console.log('=== RESERVATION SUMMARY INIT ===');
+		console.log('Reservation ID:', this.reservationId);
+
 		if (!this.reservationId) {
 			this.loadError = 'No se encontró el ID de la reserva.';
 			this.isLoading = false;
@@ -98,11 +101,12 @@ export class ReservationSummaryComponent implements OnInit {
 	}
 
 	private loadReservationData(): void {
-		this.reservationSvc.getAll().subscribe({
-			next: (reservations: Reservation[]) => {
-				this.reservation = reservations.find(r =>
-					r.reservation_id === this.reservationId
-				) || null;
+		// Usar getById en lugar de getAll para obtener una reserva específica
+		this.reservationSvc.getById(this.reservationId!).subscribe({
+			next: (reservation: Reservation) => {
+				this.reservation = reservation;
+
+				console.log('Reservation data:', reservation);
 
 				if (!this.reservation) {
 					this.loadError = 'No se encontró la reserva.';
@@ -115,15 +119,62 @@ export class ReservationSummaryComponent implements OnInit {
 				this.checkOut = this.reservation.check_out || '';
 				this.nights = this.calcNights(this.checkIn, this.checkOut);
 
+				if (this.reservation.hotel) {
+					const hotel = this.reservation.hotel;
+					console.log('Hotel from reservation:', hotel);
+					this.hotelName = hotel.name ?? '';
+					this.hotelLatitude = hotel.latitude ? String(hotel.latitude) : '';
+					this.hotelLongitude = hotel.longitude ? String(hotel.longitude) : '';
+				}
+
+				if (this.reservation.room) {
+					const room = this.reservation.room;
+					console.log('Room from reservation:', room);
+					this.roomNumber = room.number ?? '';
+					this.roomTheme = room.theme_name ?? '';
+
+					if (room.room_type) {
+						const rt = room.room_type;
+						console.log('RoomType from room:', rt);
+						this.roomTypeName = rt.name ?? '';
+						this.capacity = rt.capacity ? Number(rt.capacity) : null;
+						const base = Number(rt.base_price ?? (rt as any).basePrice ?? 0);
+						this.basePrice = Number.isFinite(base) && base > 0 ? base : null;
+						this.calculatePrices();
+						this.isLoading = false;
+						return;
+					}
+
+					const roomTypeId = room.room_type_id;
+					if (roomTypeId) {
+						this.typeSvc.getById(roomTypeId).subscribe({
+							next: (rt: any) => {
+								console.log('RoomType data:', rt);
+								this.roomTypeName = rt?.name ?? '';
+								this.capacity = rt?.capacity ? Number(rt.capacity) : null;
+								const base = Number(rt?.base_price ?? rt?.basePrice ?? 0);
+								this.basePrice = Number.isFinite(base) && base > 0 ? base : null;
+								this.calculatePrices();
+								this.isLoading = false;
+							},
+							error: (err) => {
+								console.error('Error loading room type:', err);
+								this.isLoading = false;
+							}
+						});
+						return;
+					}
+				}
+
 				const hotelId = this.reservation.hotel_id;
 				const roomId = this.reservation.room_id;
 
 				const requests: any = {};
-				if (hotelId) {
+				if (hotelId && !this.reservation.hotel) {
 					requests.hotel = this.hotelSvc.get(hotelId);
 				}
-				if (roomId) {
-					requests.room = (this.roomSvc as any).getById(roomId);
+				if (roomId && !this.reservation.room) {
+					requests.room = this.roomSvc.getById(roomId);
 				}
 
 				if (Object.keys(requests).length > 0) {
@@ -132,11 +183,14 @@ export class ReservationSummaryComponent implements OnInit {
 							const hotel = results.hotel;
 							const room = results.room;
 
+							console.log('Hotel data (forkJoin):', hotel);
+							console.log('Room data (forkJoin):', room);
+
 							// Hotel
 							if (hotel) {
 								this.hotelName = hotel.name ?? '';
-								this.hotelLatitude = hotel.latitude ?? '';
-								this.hotelLongitude = hotel.longitude ?? '';
+								this.hotelLatitude = hotel.latitude ? String(hotel.latitude) : '';
+								this.hotelLongitude = hotel.longitude ? String(hotel.longitude) : '';
 							}
 
 							// Room
@@ -144,18 +198,25 @@ export class ReservationSummaryComponent implements OnInit {
 								this.roomNumber = room.number ?? '';
 								this.roomTheme = room.theme_name ?? '';
 
-								const roomTypeId = room.room_type_id ?? '';
+								const roomTypeId = room.room_type_id;
 
 								// Room Type
 								if (roomTypeId) {
-									this.typeSvc.getById(roomTypeId).subscribe((rt: any) => {
-										this.roomTypeName = rt?.name ?? '';
-										this.capacity = Number(rt?.capacity ?? null);
-										const base = Number(rt?.base_price ?? rt?.basePrice);
-										this.basePrice = Number.isFinite(base) ? base : null;
+									this.typeSvc.getById(roomTypeId).subscribe({
+										next: (rt: any) => {
+											console.log('RoomType data (nested):', rt);
+											this.roomTypeName = rt?.name ?? '';
+											this.capacity = rt?.capacity ? Number(rt.capacity) : null;
+											const base = Number(rt?.base_price ?? rt?.basePrice ?? 0);
+											this.basePrice = Number.isFinite(base) && base > 0 ? base : null;
 
-										this.calculatePrices();
-										this.isLoading = false;
+											this.calculatePrices();
+											this.isLoading = false;
+										},
+										error: (err) => {
+											console.error('Error loading room type:', err);
+											this.isLoading = false;
+										}
 									});
 								} else {
 									this.isLoading = false;
