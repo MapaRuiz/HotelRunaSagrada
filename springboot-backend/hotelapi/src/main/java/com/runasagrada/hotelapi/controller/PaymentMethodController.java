@@ -38,7 +38,7 @@ public class PaymentMethodController {
 		PaymentMethod pm = new PaymentMethod();
 		User user = new User();
 		user.setUserId(body.getUserId());
-		pm.setUser(user);
+		pm.setUserId(user);
 		pm.setType(body.getType());
 		pm.setLastfour(body.getLastfour());
 		pm.setHolderName(body.getHolderName());

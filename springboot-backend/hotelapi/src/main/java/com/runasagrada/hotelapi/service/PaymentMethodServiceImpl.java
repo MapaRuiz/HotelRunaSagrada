@@ -41,7 +41,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<PaymentMethod> getByUserId(Integer userId) {
-		return paymentMethods.findByUserId(userId);
+		return paymentMethods.findByUserId_UserId(userId);
 	}
 
 	@Override
