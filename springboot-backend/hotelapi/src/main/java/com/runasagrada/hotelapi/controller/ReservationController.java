@@ -15,6 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -90,6 +95,18 @@ public class ReservationController {
         Reservation.Status status = asStatus(body.get("status")); // opcional
 
         Reservation updated = service.update(id, userId, hotelId, roomId, checkIn, checkOut, status);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PutMapping("/activate/{id}")
+    public ResponseEntity<Reservation> activate(@PathVariable Integer id, @RequestParam String status) {
+        Reservation updated = service.activate(id, status);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PutMapping("/deactivate/{id}")
+    public ResponseEntity<Reservation> deactivate(@PathVariable Integer id) {
+        Reservation updated = service.deactivate(id);
         return ResponseEntity.ok(updated);
     }
 

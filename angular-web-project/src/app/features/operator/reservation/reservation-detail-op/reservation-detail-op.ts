@@ -3,17 +3,20 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Reservation } from '../../../../model/reservation';
 import { ReservationService } from '../../../../services/reservation';
 import { ServicesAddForm } from '../services-add-form/services-add-form';
+import { getStatusBadge, getStatusText } from '../reservation';
 
 @Component({
   selector: 'app-reservation-detail-op',
   standalone: true,
   imports: [CommonModule, ServicesAddForm],
   templateUrl: './reservation-detail-op.html',
-  styleUrls: ['./reservation-detail-op.css','../../../admin/reservation/reservation-detail/reservation-detail.css','../../../admin/reservation/reservation-table/reservation-table.css'
-  ]
+  styleUrls: [
+    './reservation-detail-op.css',
+    '../../../admin/reservation/reservation-detail/reservation-detail.css',
+    '../../../admin/reservation/reservation-table/reservation-table.css',
+  ],
 })
 export class ReservationDetailOp {
-
   @Input() reservation?: Reservation;
 
   @Output() servicesModified = new EventEmitter<ReservationService[]>();
@@ -22,20 +25,23 @@ export class ReservationDetailOp {
   @Output() closeRequested = new EventEmitter<void>();
 
   editingServices = false;
-  
+
+  badge = getStatusBadge;
+  text = getStatusText;
+
   ngOnChanges(changes: SimpleChanges): void {
     // No hay imágenes en reservations, pero mantenemos la estructura
   }
 
   formatDate(dateString?: string): string {
     if (!dateString) return this.fallbackText;
-    
+
     try {
       const date = new Date(dateString);
       return date.toLocaleDateString('es-ES', {
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
       });
     } catch {
       return dateString;
@@ -44,7 +50,7 @@ export class ReservationDetailOp {
 
   readonly fallbackText = 'Sin información';
 
-  addServices(){
+  addServices() {
     if (this.reservation) {
       this.addServicesRequested.emit(this.reservation);
     }
@@ -52,18 +58,18 @@ export class ReservationDetailOp {
     this.editingChanged.emit(true);
   }
 
-  closeServices(){
+  closeServices() {
     this.editingServices = false;
     this.editingChanged.emit(false);
   }
 
-  closeDetail(){
+  closeDetail() {
     this.closeRequested.emit();
   }
 
   calculateNights(): number {
     if (!this.reservation?.check_in || !this.reservation?.check_out) return 0;
-    
+
     try {
       const checkIn = new Date(this.reservation.check_in);
       const checkOut = new Date(this.reservation.check_out);
@@ -74,22 +80,4 @@ export class ReservationDetailOp {
       return 0;
     }
   }
-
-  getStatusBadge(status: string): string {
-    switch (status) {
-      case 'PENDING': return 'text-bg-warning';
-      case 'CONFIRMED': return 'text-bg-success';
-      default: return 'text-bg-secondary';
-    }
-  }
-
-  getStatusText(status: string): string {
-    switch (status) {
-      case 'PENDING': return 'Pendiente';
-      case 'CONFIRMED': return 'Confirmada';
-      default: return status || 'N/A';
-    }
-  }
-
-
 }

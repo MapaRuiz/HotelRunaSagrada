@@ -20,8 +20,8 @@ export class ActionButtonsComponent<T>
   }
   refresh(): boolean { return false; }
 
-  onEdit()   { this.params.onEdit(this.params.data as T); }
-  onDelete() { this.params.onDelete(this.params.data as T); }
+  onEdit()   { this.params.onEdit?.(this.params.data as T); }
+  onDelete() { this.params.onDelete?.(this.params.data as T); }
   
   onAdditionalAction(btn: any) {
     if (btn.action) {

@@ -7,8 +7,8 @@ export interface AdditionalButton<T> {
 }
 
 export interface ActionButtonsParams<T> extends ICellRendererParams<T, void> {
-  onEdit: (row: T) => void;
-  onDelete: (row: T) => void;
+  onEdit?: (row: T) => void;
+  onDelete?: (row: T) => void;
   editLabel?: string;
   deleteLabel?: string;
   additionalButtons?: AdditionalButton<T>[];

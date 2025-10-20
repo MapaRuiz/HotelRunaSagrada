@@ -3,8 +3,19 @@ import { ReservationDetailOp } from '../reservation-detail-op/reservation-detail
 import { AgGridAngular } from 'ag-grid-angular';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { AG_GRID_LOCALE, DATE_FILTER_CONFIG, gridTheme as sharedGridTheme, TEXT_FILTER_CONFIG } from '../../../sharedTableConfig';
-import { AllCommunityModule, ColDef, GridApi, GridOptions, ModuleRegistry } from 'ag-grid-community';
+import {
+  AG_GRID_LOCALE,
+  DATE_FILTER_CONFIG,
+  gridTheme as sharedGridTheme,
+  TEXT_FILTER_CONFIG,
+} from '../../../sharedTableConfig';
+import {
+  AllCommunityModule,
+  ColDef,
+  GridApi,
+  GridOptions,
+  ModuleRegistry,
+} from 'ag-grid-community';
 import { ReservationService } from '../../../../services/reservation';
 import { AuthService } from '../../../../services/auth';
 import { StaffMemberService } from '../../../../services/staff-member';
@@ -18,12 +29,13 @@ import { HotelsService } from '../../../../services/hotels';
 import { UsersService } from '../../../../services/users';
 import { RoomService } from '../../../../services/room';
 import { forkJoin, map, of } from 'rxjs';
+import { getStatusBadge, getStatusText } from '../reservation';
 
 @Component({
   selector: 'app-reservation-table',
   imports: [CommonModule, FormsModule, AgGridAngular, ReservationDetailOp],
   templateUrl: './reservation-table.html',
-  styleUrl: './reservation-table.css'
+  styleUrl: './reservation-table.css',
 })
 export class ReservationTableOperatorComponent implements OnInit {
   isBrowser: boolean = false;
@@ -54,11 +66,10 @@ export class ReservationTableOperatorComponent implements OnInit {
     this.isBrowser = isPlatformBrowser(this.platformId);
     if (this.isBrowser) {
       ModuleRegistry.registerModules([AllCommunityModule]);
-    }   
+    }
   }
 
   private platformId = inject(PLATFORM_ID);
-  
 
   ngOnInit(): void {
     this.loadData();
@@ -67,140 +78,178 @@ export class ReservationTableOperatorComponent implements OnInit {
   loadData() {
     this.loading = true;
     const uid = this.auth.userSnapshot()?.user_id;
-    if (!uid) { this.loading = false; return; }
+    if (!uid) {
+      this.loading = false;
+      return;
+    }
 
-    this.staffService.getByUser(uid).pipe(
-      switchMap(staff => {
-        this.staffInfo = staff;
-        return forkJoin({
-          reservations: this.service.getAllByHotel(staff.hotel_id),
-          hotel: this.hotelsService.get(Number(staff.hotel_id)),
-          rooms: this.roomService.listByHotel(Number(staff.hotel_id))
-        });
-      }),
-      switchMap(({ reservations, hotel, rooms }) => {
-        const userIds = Array.from(new Set(reservations.map(r => r.user_id)));
-        const userRequests = userIds.length
-          ? forkJoin(userIds.map(id => this.usersService.getById(id)))
-          : of([]);
-        return userRequests.pipe(map(users => ({ reservations, hotel, rooms, users })));
-      }),
-      map(({ reservations, hotel, rooms, users }) => {
-        const usersById = new Map(users.map(u => [u.user_id, u] as const));
-        const roomsById = new Map(rooms.map(r => [r.room_id, r] as const));
-        const enriched = reservations.map(r => ({
-          ...r,
-          hotel,
-          user: usersById.get(r.user_id),
-          room: roomsById.get(r.room_id)
-        }));
-        return enriched;
-      }),
-      finalize(() => this.loading = false)
-    ).subscribe({
-      next: enriched => {
-        this.reservations = enriched;
-        this.rowData = enriched;
-      },
-      error: err => console.error('Error loading reservations:', err)
-    });
+    this.staffService
+      .getByUser(uid)
+      .pipe(
+        switchMap((staff) => {
+          this.staffInfo = staff;
+          return forkJoin({
+            reservations: this.service.getAllByHotel(staff.hotel_id),
+            hotel: this.hotelsService.get(Number(staff.hotel_id)),
+            rooms: this.roomService.listByHotel(Number(staff.hotel_id)),
+          });
+        }),
+        switchMap(({ reservations, hotel, rooms }) => {
+          const userIds = Array.from(new Set(reservations.map((r) => r.user_id)));
+          const userRequests = userIds.length
+            ? forkJoin(userIds.map((id) => this.usersService.getById(id)))
+            : of([]);
+          return userRequests.pipe(map((users) => ({ reservations, hotel, rooms, users })));
+        }),
+        map(({ reservations, hotel, rooms, users }) => {
+          const usersById = new Map(users.map((u) => [u.user_id, u] as const));
+          const roomsById = new Map(rooms.map((r) => [r.room_id, r] as const));
+          const enriched = reservations.map((r) => ({
+            ...r,
+            hotel,
+            user: usersById.get(r.user_id),
+            room: roomsById.get(r.room_id),
+          }));
+          return enriched;
+        }),
+        finalize(() => (this.loading = false))
+      )
+      .subscribe({
+        next: (enriched) => {
+          this.reservations = enriched;
+          this.rowData = enriched;
+        },
+        error: (err) => console.error('Error loading reservations:', err),
+      });
   }
 
   gridOptions: GridOptions<Reservation> = {
     localeText: AG_GRID_LOCALE,
     rowSelection: 'single',
-    getRowId: params => params.data.reservation_id?.toString() || '',
-    onGridReady: params => { 
-      this.gridApi = params.api
+    getRowId: (params) => params.data.reservation_id?.toString() || '',
+    onGridReady: (params) => {
+      this.gridApi = params.api;
       params.api.sizeColumnsToFit();
     },
     onGridPreDestroyed: () => {
       this.gridApi = undefined;
     },
-    onSelectionChanged: params => {
+    onSelectionChanged: (params) => {
       const [row] = params.api.getSelectedRows();
       this.selected = row || undefined;
     },
     columnDefs: [
-      { 
+      {
         headerName: 'ID',
         field: 'reservation_id',
         minWidth: 60,
-        maxWidth: 80
+        maxWidth: 80,
       },
-      { 
+      {
         headerName: 'Cliente',
         filter: MultiSelectFilterComponent,
         filterParams: {
           valueGetter: (row: Reservation) => row.user?.full_name || `Usuario ${row.user_id}`,
-          title: 'Clientes'
+          title: 'Clientes',
         },
-        valueGetter: params => params.data?.user?.full_name || `Usuario ${params.data?.user_id || 'N/A'}`,
+        valueGetter: (params) =>
+          params.data?.user?.full_name || `Usuario ${params.data?.user_id || 'N/A'}`,
         minWidth: 150,
-        maxWidth: 200
+        maxWidth: 200,
       },
       {
         headerName: 'Identificador',
-        valueGetter: params => params.data?.user?.national_id || '',
+        valueGetter: (params) => params.data?.user?.national_id || '',
         filter: 'agTextColumnFilter',
         filterParams: TEXT_FILTER_CONFIG,
-        maxWidth: 160
+        maxWidth: 160,
       },
-      { 
+      {
         headerName: 'Hotel',
         filter: MultiSelectFilterComponent,
         filterParams: {
           valueGetter: (row: Reservation) => row.hotel?.name || `Hotel ${row.hotel_id}`,
-          title: 'Hoteles'
+          title: 'Hoteles',
         },
-        valueGetter: params => params.data?.hotel?.name || `Hotel ${params.data?.hotel_id || 'N/A'}`,
+        valueGetter: (params) =>
+          params.data?.hotel?.name || `Hotel ${params.data?.hotel_id || 'N/A'}`,
         minWidth: 150,
-        maxWidth: 200
+        maxWidth: 200,
       },
-      { 
+      {
         headerName: 'Habitación',
-        valueGetter: params => params.data?.room?.number || `Habitación ${params.data?.room_id || 'N/A'}`,
+        valueGetter: (params) =>
+          params.data?.room?.number || `Habitación ${params.data?.room_id || 'N/A'}`,
         filter: 'agTextColumnFilter',
         filterParams: TEXT_FILTER_CONFIG,
-        maxWidth: 140
+        maxWidth: 140,
       },
-      { 
+      {
         headerName: 'Check-in',
         field: 'check_in',
         filter: 'agDateColumnFilter',
         filterParams: DATE_FILTER_CONFIG,
-        maxWidth: 140
+        maxWidth: 140,
       },
-      { 
+      {
         headerName: 'Check-out',
         field: 'check_out',
         filter: 'agDateColumnFilter',
         filterParams: DATE_FILTER_CONFIG,
-        maxWidth: 140
+        maxWidth: 140,
       },
-      { 
+      {
         headerName: 'Estado',
+        field: 'status',
         filter: MultiSelectFilterComponent,
         filterParams: {
-          valueGetter: (row: Reservation) => row.status,
-          title: 'Estados'
+          valueGetter: (row: Reservation) => getStatusText(row.status),
+          title: 'Estados',
         },
-        field: 'status',
-        maxWidth: 120
+        cellRenderer: (p: any) => {
+          const s = String(p.value || '');
+          const el = document.createElement('span');
+          el.classList.add('badge', getStatusBadge(s));
+          el.textContent = getStatusText(s);
+          return el;
+        },
+        maxWidth: 140,
       },
       {
         headerName: 'Acciones',
         filter: false,
         minWidth: 200,
         cellRenderer: ActionButtonsComponent<Reservation>,
-        cellRendererParams: {
-          // Edit services for a reservation
-          onEdit: (row: Reservation) => this.openEditForRow(row),
-          onDelete: (row: Reservation) => this.deleteReservation(row) /*this.deleteReservation(row)*/
-        } satisfies Pick<ActionButtonsParams<Reservation>, 'onEdit' | 'onDelete'>
-      } as ColDef<Reservation> 
-    ]
-  }
+        cellRendererParams: (p: { data: Reservation }) => {
+          const row = p.data as Reservation;
+          const status = row?.status;
+          const canEdit = status === 'PENDING' || status === 'CONFIRMED';
+          const extraButton =
+            status === 'PENDING'
+              ? {
+                  label: 'Activar',
+                  class: 'btn-details',
+                  action: (r: Reservation) => this.openEditForRow(r),
+                }
+              : status === 'CONFIRMED'
+              ? {
+                  label: 'Pagar',
+                  class: 'btn-details',
+                  action: (r: Reservation) => this.openEditForRow(r),
+                }
+              : undefined;
+          return {
+            onEdit: canEdit ? (r: Reservation) => this.openEditForRow(r) : undefined,
+            onDelete: (r: Reservation) => this.deleteReservation(r),
+            additionalButtons: extraButton ? [extraButton] : [],
+          } satisfies Pick<
+            ActionButtonsParams<Reservation>,
+            'onEdit' | 'onDelete' | 'additionalButtons'
+          >;
+        },
+      } as ColDef<Reservation>,
+    ],
+  };
 
   openEditForRow(row: Reservation) {
     this.selected = row;
@@ -210,23 +259,25 @@ export class ReservationTableOperatorComponent implements OnInit {
   deleteReservation(reservation: Reservation): void {
     if (!reservation.reservation_id) return;
     if (!confirm('¿Cancelar (eliminar) esta reserva?')) return;
-    
+
     this.service.delete(reservation.reservation_id).subscribe({
       next: () => {
-        this.reservations = this.reservations.filter(r => r.reservation_id !== reservation.reservation_id);
-        this.rowData = this.rowData.filter(r => r.reservation_id !== reservation.reservation_id);
-        
-        this.withGridApi(api => {
+        this.reservations = this.reservations.filter(
+          (r) => r.reservation_id !== reservation.reservation_id
+        );
+        this.rowData = this.rowData.filter((r) => r.reservation_id !== reservation.reservation_id);
+
+        this.withGridApi((api) => {
           api.applyTransaction({ remove: [reservation] });
           api.deselectAll();
         });
-        
+
         // Limpiar selección para volver a la tabla
         this.selected = undefined;
       },
       error: () => {
         alert('Error deleting reservation');
-      }
+      },
     });
   }
 
@@ -235,7 +286,7 @@ export class ReservationTableOperatorComponent implements OnInit {
 
   onSearch(term: string): void {
     this.search = term;
-    this.withGridApi(api => api.setGridOption('quickFilterText', term || undefined));
+    this.withGridApi((api) => api.setGridOption('quickFilterText', term || undefined));
   }
 
   // Edit Reservation Services
@@ -243,7 +294,8 @@ export class ReservationTableOperatorComponent implements OnInit {
   private withGridApi(action: (api: GridApi<Reservation>) => void): void {
     const api = this.gridApi;
     if (!api) return;
-    const maybeDestroyed = (api as GridApi<Reservation> & { isDestroyed?: () => boolean }).isDestroyed;
+    const maybeDestroyed = (api as GridApi<Reservation> & { isDestroyed?: () => boolean })
+      .isDestroyed;
     if (typeof maybeDestroyed === 'function' && maybeDestroyed.call(api)) {
       return;
     }

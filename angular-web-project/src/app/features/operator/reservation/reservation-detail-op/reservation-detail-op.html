@@ -61,8 +61,8 @@
                 <div class="mb-2">
                   <label class="form-label">Estado</label>
                   <div class="form-control-plaintext">
-                    <span class="badge {{ getStatusBadge(current.status) }}">
-                      {{ getStatusText(current.status) }}
+                    <span class="badge" [ngClass]="badge(current.status)">
+                      {{ text(current.status) }}
                     </span>
                   </div>
                 </div>
