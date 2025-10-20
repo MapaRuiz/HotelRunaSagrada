@@ -1,0 +1,129 @@
+<div class="confirmation-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Cargando información de la reserva...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="!isLoading && loadError" class="error-state">
+    <div class="error-icon">⚠️</div>
+    <h2>Error al cargar</h2>
+    <p>{{ loadError }}</p>
+    <button class="btn-primary" (click)="goToHome()">Volver al inicio</button>
+  </div>
+
+  <!-- Confirmation Content -->
+  <div *ngIf="!isLoading && !loadError && reservation" class="confirmation-content">
+    <!-- Header -->
+    <div class="header">
+      <h1 class="page-title">¡Reserva Confirmada!</h1>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-steps">
+      <div class="step completed">
+        <div class="step-circle">✓</div>
+        <span class="step-label">Reserva</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step completed">
+        <div class="step-circle">✓</div>
+        <span class="step-label">Confirmación</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step completed">
+        <div class="step-circle">✓</div>
+        <span class="step-label">Pago</span>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <!-- Confirmation Card -->
+      <div class="confirmation-card">
+        <div class="success-icon">✓</div>
+        <h2>¡Gracias por su reserva!</h2>
+        <p class="confirmation-message">Su reserva ha sido procesada exitosamente.</p>
+        
+        <div class="confirmation-code-box">
+          <span class="confirmation-label">Código de confirmación:</span>
+          <span class="confirmation-code">{{ confirmationCode }}</span>
+        </div>
+        
+        <p class="save-info">Por favor guarde este código para futuras referencias.</p>
+      </div>
+
+      <!-- Reservation Details -->
+      <div class="section-card">
+        <h3 class="card-title">Detalles de la Reserva</h3>
+        <div class="card-content">
+          <div class="detail-row">
+            <span class="detail-label">Hotel:</span>
+            <span class="detail-value">{{ reservation.room?.hotel?.name }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Habitación:</span>
+            <span class="detail-value">{{ reservation.room?.number }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Tipo:</span>
+            <span class="detail-value">{{ reservation.room?.room_type?.name }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Fecha de llegada:</span>
+            <span class="detail-value">{{ reservation.check_in | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Fecha de salida:</span>
+            <span class="detail-value">{{ reservation.check_out | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Estado:</span>
+            <span class="detail-value status-confirmed">Confirmada</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Details -->
+      <div class="section-card">
+        <h3 class="card-title">Detalles del Pago</h3>
+        <div class="card-content">
+          <div class="detail-row">
+            <span class="detail-label">Subtotal:</span>
+            <span class="detail-value">{{ subtotal | currency:'USD' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Impuestos:</span>
+            <span class="detail-value">{{ taxes | currency:'USD' }}</span>
+          </div>
+          <div class="detail-row total-row">
+            <span class="detail-label">Total:</span>
+            <span class="detail-value">{{ total | currency:'USD' }}</span>
+          </div>
+          <div class="detail-row" *ngIf="paymentMethod">
+            <span class="detail-label">Método de pago:</span>
+            <span class="detail-value">
+              <span class="method-icon">{{ getPaymentTypeIcon(paymentMethod.type) }}</span>
+              {{ getPaymentTypeName(paymentMethod.type) }}
+              <span *ngIf="paymentMethod.last4"> •••• {{ paymentMethod.last4 }}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions-container">
+        <button class="btn-secondary" (click)="printConfirmation()">
+          <span class="icon">🖨️</span>
+          <span>Imprimir confirmación</span>
+        </button>
+        <button class="btn-primary" (click)="goToReservations()">
+          <span>Ver mis reservas</span>
+        </button>
+        <button class="btn-outline" (click)="goToHome()">
+          <span>Volver al inicio</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -218,8 +218,11 @@ export class PaymentComponent implements OnInit {
 			if (this.isBrowser()) localStorage.removeItem('reservationPricing');
 
 			setTimeout(() => {
-				this.router.navigate(['/payment-confirmation'], {
-					queryParams: { paymentId: (payment as any).payment_id ?? (payment as any).id }
+				this.router.navigate(['/reservation-confirmation'], {
+					queryParams: { 
+						reservationId: this.reservationId,
+						paymentId: payment.payment_id
+					}
 				});
 			}, 2000);
 

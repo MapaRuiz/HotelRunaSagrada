@@ -23,6 +23,12 @@ export const routes: Routes = [
       import('./features/public/payment/payment')
         .then(m => m.PaymentComponent),
   },
+  {
+    path: 'reservation-confirmation',
+    loadComponent: () =>
+      import('./features/public/reservation-confirmation/reservation-confirmation')
+        .then(m => m.ReservationConfirmationComponent),
+  },
 
   // CLIENT - shell con children
   {
