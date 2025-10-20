@@ -2,23 +2,28 @@ import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RoomService } from '../../../services/room';
-import { ClientInfoComponent } from './client-info/client-info';
 import { AuthService } from '../../../services/auth';
 import { StaffMemberService } from '../../../services/staff-member';
 import { Reservation } from '../../../model/reservation';
+import { SearchResultTable } from './search-result-table/search-result-table';
+import { ReservationDetailOp } from '../reservation/reservation-detail-op/reservation-detail-op';
 
 @Component({
   selector: 'app-operator-reservation-service',
-  imports: [FormsModule, CommonModule, ClientInfoComponent],
+  imports: [FormsModule, CommonModule, SearchResultTable, ReservationDetailOp],
   templateUrl: './operator-reservation-service.html',
-  styleUrl: './operator-reservation-service.css',
+  styleUrls: ['./operator-reservation-service.css', '../../../../styles.css'],
 })
 export class ReservationServiceComponent {
   roomNumber: string = '';
   roomQuery: string = '';
   errorMessage: string = '';
   regexRoom: RegExp = /[1-5]0[1-4]/;
-  reservation: Reservation | null = null;
+  // Search state
+  searchPerformed = false;
+  reservations: Reservation[] = [];
+  // Detail state
+  selected?: Reservation;
   loading: boolean = true;
   hotelId: number = 0;
 
@@ -48,7 +53,8 @@ export class ReservationServiceComponent {
   search() {
     if (this.regexRoom.test(this.roomNumber) === false) {
       this.errorMessage = 'El número de habitación debe estar entre 101 y 504';
-      this.reservation = null;
+      this.reservations = [];
+      this.searchPerformed = false;
       return;
     } else {
       this.roomQuery = this.hotelId + '-' + this.roomNumber;
@@ -56,10 +62,19 @@ export class ReservationServiceComponent {
 
     this.roomService.getReservations(this.roomQuery).subscribe({
       next: (reservations) => {
-        this.reservation = reservations.length > 0 ? reservations[0] : null;
-        console.log('Reservation:', reservations);
+        this.reservations = reservations || [];
+        this.searchPerformed = true;
+        console.log('Reservations:', reservations);
         this.errorMessage = '';
       },
     });
+  }
+
+  onOpenDetail(res: Reservation) {
+    this.selected = res;
+  }
+
+  onCloseDetail() {
+    this.selected = undefined;
   }
 }
