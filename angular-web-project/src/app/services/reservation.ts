@@ -5,19 +5,21 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Reservation } from '../model/reservation';
 
+export type ReservationStatus = 'PENDING' | 'CONFIRMED' | 'FINISHED';
+
 type ReservationRequest = {
   userId: number;
   hotelId: number;
   roomId: number;
-  checkIn: string;   // 'yyyy-MM-dd'
-  checkOut: string;  // 'yyyy-MM-dd'
+  checkIn: string; // 'yyyy-MM-dd'
+  checkOut: string; // 'yyyy-MM-dd'
 };
 
 @Injectable({ providedIn: 'root' })
 export class ReservationService {
   private readonly resource = `${environment.apiBaseUrl}/reservations`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getAll(): Observable<Reservation[]> {
     return this.http.get<Reservation[]>(this.resource);
@@ -38,19 +40,19 @@ export class ReservationService {
       roomId: Number(draft.room_id!),
       checkIn: draft.check_in!,
       checkOut: draft.check_out!,
-      status: draft.status!        // <<<<<<<<<<<<<<
+      status: draft.status!, // <<<<<<<<<<<<<<
     };
     return this.http.post<Reservation>(this.resource, body);
   }
 
   update(id: number, draft: Partial<Reservation>) {
     const body = {
-      userId: Number(draft.user_id!),   // opcional para back (lo ignoras si quieres)
+      userId: Number(draft.user_id!), // opcional para back (lo ignoras si quieres)
       hotelId: Number(draft.hotel_id!),
       roomId: Number(draft.room_id!),
       checkIn: draft.check_in!,
       checkOut: draft.check_out!,
-      status: draft.status!             // <<<<<<<<<<<<<<
+      status: draft.status!, // <<<<<<<<<<<<<<
     };
     return this.http.put<Reservation>(`${this.resource}/${id}`, body);
   }
@@ -61,5 +63,13 @@ export class ReservationService {
 
   getToday(): Observable<Reservation[]> {
     return this.http.get<Reservation[]>(`${this.resource}/today`);
+  }
+
+  activate(reservation_id: number): Observable<Reservation> {
+    const status: string = 'CONFIRMED';
+    return this.http.put<Reservation>(
+      `${this.resource}/activate/${reservation_id}?status=${status}`,
+      null
+    );
   }
 }

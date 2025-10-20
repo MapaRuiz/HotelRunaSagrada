@@ -223,29 +223,34 @@ export class ReservationTableOperatorComponent implements OnInit {
         cellRendererParams: (p: { data: Reservation }) => {
           const row = p.data as Reservation;
           const status = row?.status;
-          const canEdit = status === 'PENDING' || status === 'CONFIRMED';
+          const canEditDelete = status === 'PENDING' || status === 'CONFIRMED';
+
           const extraButton =
             status === 'PENDING'
               ? {
                   label: 'Activar',
                   class: 'btn-details',
-                  action: (r: Reservation) => this.openEditForRow(r),
+                  action: (r: Reservation) => this.activateReservation(r),
                 }
               : status === 'CONFIRMED'
               ? {
                   label: 'Pagar',
                   class: 'btn-details',
-                  action: (r: Reservation) => this.openEditForRow(r),
+                  action: (r: Reservation) => this.payReservation(r),
+                }
+              : status === 'FINISHED'
+              ? {
+                  label: 'Detalles',
+                  class: 'btn-edit',
+                  action: (r: Reservation) => (console.log('Detalles'), this.openEditForRow(r)),
                 }
               : undefined;
+
           return {
-            onEdit: canEdit ? (r: Reservation) => this.openEditForRow(r) : undefined,
-            onDelete: (r: Reservation) => this.deleteReservation(r),
+            onEdit: canEditDelete ? (r: Reservation) => this.beginEdit(r) : undefined,
+            onDelete: canEditDelete ? (r: Reservation) => this.deleteReservation(r) : undefined,
             additionalButtons: extraButton ? [extraButton] : [],
-          } satisfies Pick<
-            ActionButtonsParams<Reservation>,
-            'onEdit' | 'onDelete' | 'additionalButtons'
-          >;
+          };
         },
       } as ColDef<Reservation>,
     ],
@@ -255,6 +260,26 @@ export class ReservationTableOperatorComponent implements OnInit {
     this.selected = row;
   }
 
+  beginEdit(row: Reservation) {
+    // Open the detail view for the selected reservation
+    this.selected = row;
+  }
+
+  activateReservation(reservation: Reservation): void {
+    if (!reservation.reservation_id) return;
+    this.service.activate(reservation.reservation_id).subscribe({
+      next: () => {
+        this.loadData();
+      },
+      error: () => {
+        alert('Error activating reservation');
+      },
+    });
+  }
+
+  payReservation(r: Reservation) {
+    throw new Error('Method not implemented.');
+  }
   // Delete
   deleteReservation(reservation: Reservation): void {
     if (!reservation.reservation_id) return;
