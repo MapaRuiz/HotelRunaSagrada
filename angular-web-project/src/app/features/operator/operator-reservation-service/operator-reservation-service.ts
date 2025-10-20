@@ -51,10 +51,13 @@ export class ReservationServiceComponent {
   }
 
   search() {
+    if (this.roomNumber.length === 0) {
+      return;
+    }
+
     if (this.regexRoom.test(this.roomNumber) === false) {
       this.errorMessage = 'El número de habitación debe estar entre 101 y 504';
       this.reservations = [];
-      this.searchPerformed = false;
       return;
     } else {
       this.roomQuery = this.hotelId + '-' + this.roomNumber;
@@ -63,9 +66,12 @@ export class ReservationServiceComponent {
     this.roomService.getReservations(this.roomQuery).subscribe({
       next: (reservations) => {
         this.reservations = reservations || [];
-        this.searchPerformed = true;
         console.log('Reservations:', reservations);
         this.errorMessage = '';
+
+        if (this.reservations.length === 0) {
+          this.errorMessage = 'No se encontraron reservas';
+        }
       },
     });
   }

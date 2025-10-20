@@ -14,7 +14,6 @@
   <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
 
   <app-search-result-table
-    *ngIf="searchPerformed"
     [reservations]="reservations"
     (openDetail)="onOpenDetail($event)"
   ></app-search-result-table>
