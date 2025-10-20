@@ -1,0 +1,635 @@
+.reservation-summary-container {
+	min-height: 100vh;
+	background-color: #f5f5f5;
+	padding: 0;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+// Loading & Error States
+.loading-state,
+.error-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-height: 60vh;
+	text-align: center;
+	padding: 2rem;
+}
+
+.spinner {
+	width: 50px;
+	height: 50px;
+	border: 4px solid #f3f3f3;
+	border-top: 4px solid #0066cc;
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+	margin-bottom: 1rem;
+}
+
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+.error-icon {
+	font-size: 4rem;
+	margin-bottom: 1rem;
+}
+
+.error-state h2 {
+	color: #d32f2f;
+	margin-bottom: 0.5rem;
+}
+
+// Header
+.header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 1rem 2rem;
+	background-color: white;
+	border-bottom: 1px solid #e0e0e0;
+
+	.logo img {
+		height: 40px;
+	}
+
+	.contact-info {
+		font-size: 0.9rem;
+		color: #333;
+	}
+}
+
+// Progress Steps
+.progress-steps {
+	display: flex;
+	gap: 2rem;
+	padding: 2rem;
+	background-color: white;
+	border-bottom: 3px solid #e0e0e0;
+	max-width: 1200px;
+	margin: 0 auto;
+
+	.step {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		color: #999;
+
+		&.active {
+			color: #333;
+
+			.step-number {
+				background-color: #4CAF50;
+				color: white;
+			}
+
+			.step-label {
+				color: #333;
+				font-weight: 600;
+			}
+		}
+
+		.step-number {
+			width: 30px;
+			height: 30px;
+			border-radius: 50%;
+			background-color: #e0e0e0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-weight: bold;
+			font-size: 0.9rem;
+		}
+
+		.step-label {
+			font-size: 0.9rem;
+		}
+	}
+}
+
+// Main Content
+.main-content {
+	display: grid;
+	grid-template-columns: 1fr 400px;
+	gap: 2rem;
+	max-width: 1200px;
+	margin: 2rem auto;
+	padding: 0 2rem;
+
+	@media (max-width: 968px) {
+		grid-template-columns: 1fr;
+	}
+}
+
+// Form Section
+.form-section {
+	background-color: white;
+	padding: 2rem;
+	border-radius: 8px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+	.auth-notice {
+		background-color: #f0f8ff;
+		padding: 1rem;
+		border-radius: 6px;
+		margin-bottom: 2rem;
+		font-size: 0.95rem;
+
+		.user-icon {
+			margin-right: 0.5rem;
+		}
+
+		a {
+			color: #0066cc;
+			text-decoration: none;
+			font-weight: 500;
+
+			&:hover {
+				text-decoration: underline;
+			}
+		}
+	}
+
+	.section-title {
+		font-size: 1.3rem;
+		font-weight: 600;
+		margin-bottom: 0.5rem;
+		color: #333;
+	}
+
+	.section-subtitle,
+	.section-description {
+		color: #666;
+		font-size: 0.9rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.form-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1rem;
+
+		@media (max-width: 600px) {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	.form-group {
+		margin-bottom: 1.5rem;
+
+		label {
+			display: block;
+			margin-bottom: 0.5rem;
+			color: #333;
+			font-size: 0.9rem;
+			font-weight: 500;
+		}
+
+		.form-input {
+			width: 100%;
+			padding: 0.75rem;
+			border: 1px solid #ddd;
+			border-radius: 4px;
+			font-size: 0.95rem;
+			transition: border-color 0.2s, background-color 0.2s;
+
+			&:focus {
+				outline: none;
+				border-color: #0066cc;
+			}
+
+			&:read-only {
+				background-color: #f5f5f5;
+				cursor: not-allowed;
+			}
+
+			&.has-value {
+				background-color: #e8f5e9;
+				border-color: #4CAF50;
+				font-weight: 500;
+			}
+		}
+	}
+
+	.phone-input {
+		display: flex;
+		gap: 0.5rem;
+
+		.country-code {
+			width: 100px;
+			padding: 0.75rem;
+			border: 1px solid #ddd;
+			border-radius: 4px;
+			font-size: 0.95rem;
+		}
+
+		.form-input {
+			flex: 1;
+		}
+	}
+
+	.checkbox-group {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 1.5rem;
+
+		input[type="checkbox"] {
+			width: 18px;
+			height: 18px;
+			cursor: pointer;
+		}
+
+		label {
+			margin: 0;
+			cursor: pointer;
+			font-size: 0.95rem;
+		}
+	}
+
+	.terms-section {
+		margin: 1.5rem 0;
+		font-size: 0.85rem;
+		color: #666;
+
+		a {
+			color: #0066cc;
+			text-decoration: none;
+
+			&:hover {
+				text-decoration: underline;
+			}
+		}
+	}
+
+	.btn-continue {
+		width: 100%;
+		padding: 1rem;
+		background-color: #0066cc;
+		color: white;
+		border: none;
+		border-radius: 6px;
+		font-size: 1rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: background-color 0.2s;
+
+		&:hover {
+			background-color: #0052a3;
+		}
+
+		&:active {
+			transform: scale(0.98);
+		}
+	}
+
+	.mt-4 {
+		margin-top: 2rem;
+	}
+}
+
+// Summary Section
+.summary-section {
+	background-color: white;
+	padding: 2rem;
+	border-radius: 8px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	height: fit-content;
+	position: sticky;
+	top: 2rem;
+
+	.summary-title {
+		font-size: 1.3rem;
+		font-weight: 600;
+		margin-bottom: 1.5rem;
+		color: #333;
+	}
+
+	.price-breakdown {
+		border-bottom: 1px solid #e0e0e0;
+		padding-bottom: 1rem;
+		margin-bottom: 1rem;
+
+		.price-row {
+			display: flex;
+			justify-content: space-between;
+			margin-bottom: 0.75rem;
+			font-size: 0.95rem;
+
+			span {
+				color: #666;
+			}
+
+			.price {
+				font-weight: 500;
+				color: #333;
+			}
+		}
+	}
+
+	.total-section {
+		border-top: 2px solid #e0e0e0;
+		padding-top: 1rem;
+		margin-top: 1rem;
+
+		.total-row {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 1rem;
+
+			.total-label {
+				font-size: 1.2rem;
+				font-weight: 600;
+				color: #333;
+			}
+
+			.total-price {
+				font-size: 1.4rem;
+				font-weight: 700;
+				color: #333;
+			}
+		}
+
+		.additional-charges {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			padding: 0.75rem;
+			background-color: #e3f2fd;
+			border-radius: 4px;
+			margin-bottom: 0.5rem;
+			font-size: 0.9rem;
+
+			.info-icon {
+				font-size: 1rem;
+			}
+
+			.charge-price {
+				margin-left: auto;
+				font-weight: 600;
+			}
+		}
+
+		.charges-note {
+			font-size: 0.8rem;
+			color: #666;
+			margin: 0.5rem 0 0 0;
+		}
+	}
+
+	.reservation-details {
+		margin-top: 2rem;
+		padding-top: 2rem;
+		border-top: 1px solid #e0e0e0;
+
+		.details-title {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			font-size: 1.1rem;
+			font-weight: 600;
+			margin-bottom: 1rem;
+			color: #333;
+
+			.hotel-icon {
+				margin-right: 0.5rem;
+			}
+
+			.collapse-btn {
+				background: none;
+				border: none;
+				cursor: pointer;
+				font-size: 0.8rem;
+				color: #666;
+			}
+		}
+
+		.hotel-info {
+			margin-bottom: 1.5rem;
+
+			.hotel-name {
+				font-size: 1.1rem;
+				font-weight: 600;
+				margin-bottom: 0.75rem;
+				color: #333;
+			}
+
+			.hotel-coordinates {
+				display: flex;
+				flex-direction: column;
+				gap: 0.5rem;
+				padding: 0.75rem;
+				background-color: #f9f9f9;
+				border-radius: 4px;
+
+				.coordinate-item {
+					display: flex;
+					justify-content: space-between;
+					margin: 0;
+					font-size: 0.9rem;
+
+					.coordinate-label {
+						color: #666;
+						font-weight: 500;
+					}
+
+					.coordinate-value {
+						color: #333;
+						font-weight: 600;
+						font-family: 'Courier New', monospace;
+					}
+				}
+			}
+		}
+
+		.details-subtitle {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			font-size: 1rem;
+			font-weight: 600;
+			margin: 1.5rem 0 1rem 0;
+			color: #333;
+			padding-top: 1rem;
+			border-top: 1px solid #e0e0e0;
+
+			.room-icon {
+				font-size: 1.2rem;
+			}
+		}
+
+		.room-info-grid {
+			display: grid;
+			grid-template-columns: 1fr;
+			gap: 0.75rem;
+			margin-bottom: 1rem;
+
+			.info-item {
+				display: flex;
+				justify-content: space-between;
+				padding: 0.75rem;
+				background-color: #f9f9f9;
+				border-radius: 4px;
+				border-left: 3px solid #0066cc;
+
+				.info-label {
+					font-size: 0.85rem;
+					color: #666;
+					font-weight: 500;
+				}
+
+				.info-value {
+					font-size: 0.85rem;
+					color: #333;
+					font-weight: 600;
+					text-align: right;
+
+					&.highlight {
+						color: #0066cc;
+						font-size: 0.95rem;
+						font-weight: 700;
+					}
+				}
+			}
+		}
+
+		.cancellation-info {
+			margin-top: 1rem;
+			padding: 0.75rem;
+			background-color: #e8f5e9;
+			border-radius: 4px;
+			border-left: 3px solid #4CAF50;
+
+			.cancellation-policy {
+				margin: 0;
+				font-size: 0.9rem;
+				color: #2e7d32;
+				font-weight: 500;
+			}
+		}
+
+		.reservation-dates {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 1rem;
+			margin-bottom: 1rem;
+
+			.date-info {
+				display: flex;
+				flex-direction: column;
+				gap: 0.25rem;
+
+				.date-label {
+					font-size: 0.85rem;
+					font-weight: 600;
+					color: #333;
+				}
+
+				.date-value {
+					font-size: 0.85rem;
+					color: #666;
+				}
+			}
+		}
+
+		.stay-duration,
+		.room-selection {
+			display: flex;
+			flex-direction: column;
+			gap: 0.25rem;
+			margin-bottom: 1rem;
+
+			.duration-label,
+			.selection-label {
+				font-size: 0.85rem;
+				font-weight: 600;
+				color: #333;
+			}
+
+			.duration-value,
+			.selection-value {
+				font-size: 0.85rem;
+				color: #666;
+			}
+		}
+
+		.toggle-details {
+			width: 100%;
+			padding: 0.75rem;
+			background-color: transparent;
+			border: none;
+			color: #0066cc;
+			font-size: 0.9rem;
+			font-weight: 500;
+			cursor: pointer;
+			text-align: left;
+			margin-bottom: 1rem;
+
+			.arrow {
+				float: right;
+			}
+
+			&:hover {
+				text-decoration: underline;
+			}
+		}
+
+		.room-details {
+			display: flex;
+			gap: 1rem;
+			padding: 1rem;
+			background-color: #f9f9f9;
+			border-radius: 4px;
+
+			.room-count {
+				font-weight: 600;
+				color: #333;
+			}
+
+			.room-info {
+				flex: 1;
+
+				.room-type {
+					font-weight: 600;
+					margin-bottom: 0.25rem;
+					color: #333;
+				}
+
+				.room-amenities,
+				.cancellation-policy {
+					font-size: 0.85rem;
+					color: #666;
+					margin-bottom: 0.25rem;
+				}
+
+				.cancellation-policy {
+					color: #4CAF50;
+				}
+			}
+		}
+	}
+}
+
+.btn-primary {
+	padding: 0.75rem 1.5rem;
+	background-color: #0066cc;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-size: 1rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background-color 0.2s;
+
+	&:hover {
+		background-color: #0052a3;
+	}
+}

@@ -11,14 +11,13 @@ import { ReservationService } from '../../../../services/reservation';
 import { Room } from '../../../../model/room';
 import { Reservation } from '../../../../model/reservation';
 import { RoomFormComponent } from '../room-form/room-form';
-import { RoomModalComponent } from '../room-modal/room-modal';
 import { RoomRvComponent } from '../room-rv/room-rv';
 import { RoomGalleryComponent } from '../room-gallery/room-gallery';
 
 @Component({
   selector: 'app-room-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, RoomFormComponent, RoomModalComponent, RoomRvComponent, RoomGalleryComponent],
+  imports: [CommonModule, RouterModule, RoomFormComponent, RoomRvComponent, RoomGalleryComponent],
   templateUrl: './room-detail.html',
   styleUrls: ['./room-detail.scss'],
 })
@@ -59,18 +58,6 @@ export class RoomDetailComponent {
   selectedCheckIn: string = '';
   selectedCheckOut: string = '';
   allReservations: Reservation[] = [];
-
-  // Modal state
-  showModal = false;
-  lastReservationId: number | null = null;
-  reservationCode = '';
-
-  // para modal inputs
-  modalHotelId!: number | null;
-  modalTypeId!: number | null;
-  modalRoomId!: number | null;
-  modalCheckIn = '';
-  modalCheckOut = '';
 
   // hotel
   hotelName = '';
@@ -254,19 +241,12 @@ export class RoomDetailComponent {
     reservationId: number; reservationCode: string; hotelId: number; typeId: number; roomId: number;
     checkIn: string; checkOut: string;
   }) {
-    this.lastReservationId = e.reservationId;
-    this.reservationCode = e.reservationCode;
-    this.modalHotelId = e.hotelId;
-    this.modalTypeId = e.typeId;
-    this.modalRoomId = e.roomId;
-    this.modalCheckIn = e.checkIn;
-    this.modalCheckOut = e.checkOut;
-    this.showModal = true;
-  }
-
-  closeModalGoHome() {
-    this.showModal = false;
-    this.router.navigateByUrl('/');
+    // Redirigir a la página de resumen de reserva
+    this.router.navigate(['/reservation-summary'], {
+      queryParams: {
+        reservationId: e.reservationId
+      }
+    });
   }
 
   // ===== Utils locales =====
