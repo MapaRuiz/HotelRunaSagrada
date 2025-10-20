@@ -211,6 +211,11 @@ export class PaymentComponent implements OnInit {
 					status: 'PENDING'
 				})
 			);
+			
+			// Actualizar el estado de la reserva a confirmado
+			await firstValueFrom(
+				this.reservationSvc.updateStatus(this.reservationId!, 'CONFIRMED')
+			);
 
 			this.paymentSuccess = true;
 			this.isProcessing = false;

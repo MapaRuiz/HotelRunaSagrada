@@ -186,4 +186,13 @@ public class ReservationServiceImpl implements ReservationService {
                 })
                 .collect(Collectors.toList());
     }
+
+    public Reservation updateStatus(Integer id, String status) {
+        Reservation res = reservationRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Reservation not found: " + id));
+        Reservation.Status newStatus = Reservation.Status.valueOf(status.toUpperCase());
+        res.setStatus(newStatus);
+        return reservationRepo.save(res);
+    }
+
 }

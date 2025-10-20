@@ -62,4 +62,8 @@ export class ReservationService {
   getToday(): Observable<Reservation[]> {
     return this.http.get<Reservation[]>(`${this.resource}/today`);
   }
+
+  updateStatus(id: number, status: string): Observable<Reservation> {
+    return this.http.put<Reservation>(`${this.resource}/${id}/status/${status}`, null);
+  }
 }

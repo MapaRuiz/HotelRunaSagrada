@@ -31,4 +31,7 @@ public interface ReservationService {
         List<Reservation> findHistoryByUser(Integer userId);
 
         List<Reservation> findForToday();
+
+        Reservation updateStatus(Integer id, String status);
+
 }
