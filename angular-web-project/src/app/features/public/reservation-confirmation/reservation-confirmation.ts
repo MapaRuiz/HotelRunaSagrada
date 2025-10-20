@@ -5,13 +5,14 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ReservationService } from '../../../services/reservation';
 import { PaymentService } from '../../../services/payment';
 import { PaymentMethodService } from '../../../services/payment-method';
-import { HotelsService } from '../../../services/hotels';
 import { RoomService } from '../../../services/room';
+import { RoomTypeService } from '../../../services/room-type';
 import { Reservation } from '../../../model/reservation';
 import { Payment } from '../../../model/payment';
 import { PaymentMethod } from '../../../model/payment-method';
 import { Hotel } from '../../../model/hotel';
 import { Room } from '../../../model/room';
+import { RoomType } from '../../../model/room-type';
 
 @Component({
   selector: 'app-reservation-confirmation',
@@ -26,8 +27,9 @@ export class ReservationConfirmationComponent implements OnInit {
   private reservationSvc = inject(ReservationService);
   private paymentSvc = inject(PaymentService);
   private paymentMethodSvc = inject(PaymentMethodService);
-  private hotelSvc = inject(HotelsService);
   private roomSvc = inject(RoomService);
+  private roomTypeSvc = inject(RoomTypeService);
+
 
   // Datos
   reservationId: number | null = null;
@@ -37,6 +39,7 @@ export class ReservationConfirmationComponent implements OnInit {
   paymentMethod: PaymentMethod | null = null;
   hotel: Hotel | null = null;
   room: Room | null = null;
+  roomType: RoomType | null = null;
   confirmationCode: string = '';
 
   // Precios
@@ -59,22 +62,42 @@ export class ReservationConfirmationComponent implements OnInit {
     }
 
     this.loadReservation();
+
   }
 
+  //Esto lo tengo que revisar 
   private loadReservation(): void {
     this.reservationSvc.getById(this.reservationId!).subscribe({
       next: (reservation) => {
         this.reservation = reservation;
         this.generateConfirmationCode();
 
-        // Cargar hotel y habitación
-        if (reservation.hotel_id) {
-          console.log(reservation.hotel_id);
-          this.loadHotel(reservation.hotel_id);
-        }
-
-        if (reservation.room_id) {
-          this.loadRoom(reservation.room_id);
+        if (reservation.room?.room_id) {
+          this.roomSvc.getById(reservation.room.room_id).subscribe({
+            next: (room) => {
+              this.room = room;
+              console.log('room_type_id:', room.room_type_id);
+              if (room.room_type_id !== undefined) {
+                this.roomTypeSvc.getById(room.room_type_id).subscribe({
+                  next: (roomType) => {
+                    console.log('roomType cargado:', roomType);
+                    this.roomType = roomType;
+                    this.isLoading = false;
+                  },
+                  error: (err) => {
+                    console.error('Error loading room type:', err);
+                    this.isLoading = false;
+                  }
+                });
+              } else {
+                console.warn('room_type_id está undefined');
+                this.isLoading = false;
+              }
+            },
+            error: (err) => {
+              console.error('Error loading room:', err);
+            }
+          });
         }
 
         if (this.paymentId) {
@@ -94,28 +117,29 @@ export class ReservationConfirmationComponent implements OnInit {
     });
   }
 
-  private loadHotel(hotelId: number): void {
-    this.hotelSvc.get(hotelId).subscribe({
-      next: (hotel) => {
-        this.hotel = hotel;
-        this.checkLoadingComplete();
-      },
-      error: (err) => {
-        console.error('Error loading hotel:', err);
-        this.checkLoadingComplete();
-      }
-    });
-  }
-
   private loadRoom(roomId: number): void {
     this.roomSvc.getById(roomId).subscribe({
       next: (room) => {
         this.room = room;
-        this.checkLoadingComplete();
+        console.log('Room:', this.room);
+        this.isLoading = false;
       },
       error: (err) => {
         console.error('Error loading room:', err);
-        this.checkLoadingComplete();
+        this.isLoading = false;
+      }
+    });
+  }
+
+  private loadRoomType(roomTypeId: number): void {
+    this.roomTypeSvc.getById(roomTypeId).subscribe({
+      next: (roomType) => {
+        this.roomType = roomType;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Error loading room type:', err);
+        this.isLoading = false;
       }
     });
   }
@@ -126,40 +150,31 @@ export class ReservationConfirmationComponent implements OnInit {
         this.payment = payment;
         this.calculatePrices();
         this.loadPaymentMethod();
+        this.isLoading = false;
       },
       error: (err) => {
         console.error('Error loading payment:', err);
-        this.checkLoadingComplete();
+        this.isLoading = false;
       }
     });
   }
 
   private loadPaymentMethod(): void {
     if (!this.payment || !this.payment.payment_method_id) {
-      this.checkLoadingComplete();
+      this.isLoading = false;
       return;
     }
 
     this.paymentMethodSvc.getById(this.payment.payment_method_id).subscribe({
       next: (method) => {
         this.paymentMethod = method;
-        this.checkLoadingComplete();
+        this.isLoading = false;
       },
       error: (err) => {
         console.error('Error loading payment method:', err);
-        this.checkLoadingComplete();
+        this.isLoading = false;
       }
     });
-  }
-
-  private checkLoadingComplete(): void {
-    // Verificar si todos los datos necesarios ya se han cargado
-    const paymentLoaded = !this.paymentId || this.payment !== null;
-    const hotelLoaded = !this.reservation?.hotel_id || this.hotel !== null;
-    const roomLoaded = !this.reservation?.room_id || this.room !== null;
-
-    // Actualizar el estado de carga
-    this.isLoading = !(paymentLoaded && hotelLoaded && roomLoaded);
   }
 
   private calculatePrices(): void {

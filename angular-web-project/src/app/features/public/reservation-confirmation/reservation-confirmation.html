@@ -59,15 +59,15 @@
         <div class="card-content">
           <div class="detail-row">
             <span class="detail-label">Hotel:</span>
-            <span class="detail-value">{{ hotel?.name || 'Cargando...' }}</span>
+            <span class="detail-value">{{ reservation.hotel?.name || 'Cargando...' }}</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Habitación:</span>
-            <span class="detail-value">{{ room?.number || 'Cargando...' }}</span>
+            <span class="detail-value">{{ reservation.room?.number || 'Cargando...' }}</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Tipo:</span>
-            <span class="detail-value">{{ room?.room_type?.name || 'Cargando...' }}</span>
+            <span class="detail-value">{{ roomType?.name || 'Cargando...' }}</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Fecha de llegada:</span>
