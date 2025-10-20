@@ -1,5 +1,6 @@
 package com.runasagrada.hotelapi.repository;
 
+import com.runasagrada.hotelapi.model.Reservation;
 import com.runasagrada.hotelapi.model.RoomLock;
 import com.runasagrada.hotelapi.model.RoomLockId;
 import java.time.LocalDate;
@@ -17,4 +18,7 @@ public interface RoomLockRepository extends JpaRepository<RoomLock, RoomLockId> 
     @Query("SELECT rl FROM RoomLock rl WHERE rl.roomId = :roomId AND rl.lockDate >= :lockDate ORDER BY rl.lockDate ASC")
     List<RoomLock> findNextLocksForRoom(@Param("roomId") Integer roomId,
             @Param("lockDate") LocalDate lockDate);
+
+    @Query("select distinct rl.reservation from RoomLock rl where rl.roomId = :roomId and rl.reservation is not null")
+    List<Reservation> findReservationsByRoomId(@Param("roomId") Integer roomId);
 }

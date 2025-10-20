@@ -145,7 +145,7 @@ public class ReservationController {
 
     @Data
     @AllArgsConstructor
-    static class ReservationDTO {
+    public static class ReservationDTO {
         private Integer reservationId;
         private Integer userId;
         private Long hotelId;

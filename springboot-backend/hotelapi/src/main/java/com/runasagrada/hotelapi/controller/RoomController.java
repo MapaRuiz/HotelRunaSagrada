@@ -1,5 +1,6 @@
 package com.runasagrada.hotelapi.controller;
 
+import com.runasagrada.hotelapi.controller.ReservationController.ReservationDTO;
 import com.runasagrada.hotelapi.model.Reservation;
 import com.runasagrada.hotelapi.model.Room;
 import com.runasagrada.hotelapi.model.RoomLock;
@@ -11,11 +12,14 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Hibernate;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api")
@@ -61,6 +65,16 @@ public class RoomController {
                     return ResponseEntity.ok(payload);
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/room/reservations/{roomNum}")
+    public ResponseEntity<List<ReservationRes>> getReservForRoom(@PathVariable String roomNum) {
+        List<Reservation> reservations = service.getReservations(roomNum);
+        List<ReservationRes> resDto = new ArrayList<>();
+        for (Reservation res : reservations) {
+            resDto.add(ReservationRes.from(res));
+        }
+        return ResponseEntity.ok(resDto);
     }
 
     @PostMapping("/rooms")

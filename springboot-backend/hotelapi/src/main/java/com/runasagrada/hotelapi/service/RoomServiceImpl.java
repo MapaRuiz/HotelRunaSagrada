@@ -1,6 +1,7 @@
 package com.runasagrada.hotelapi.service;
 
 import com.runasagrada.hotelapi.model.Hotel;
+import com.runasagrada.hotelapi.model.Reservation;
 import com.runasagrada.hotelapi.model.Room;
 import com.runasagrada.hotelapi.model.RoomLock;
 import com.runasagrada.hotelapi.model.RoomType;
@@ -10,10 +11,13 @@ import com.runasagrada.hotelapi.repository.RoomRepository;
 import com.runasagrada.hotelapi.repository.RoomTypeRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -132,5 +136,15 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public List<Room> listByHotelAndType(Long hotelId, Long roomTypeId) {
         return roomRepository.findByHotelIdAndTypeId(hotelId, roomTypeId);
+    }
+
+    @Override
+    public List<Reservation> getReservations(String roomNum) {
+        Optional<Room> room = roomRepository.findByNumber(roomNum);
+        if (room.isPresent()) {
+            List<Reservation> res = roomLockRepository.findReservationsByRoomId(room.get().getRoomId());
+            return res;
+        }
+        return new ArrayList<>();
     }
 }

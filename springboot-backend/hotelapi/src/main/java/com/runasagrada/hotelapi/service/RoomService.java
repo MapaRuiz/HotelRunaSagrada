@@ -1,11 +1,14 @@
 package com.runasagrada.hotelapi.service;
 
+import com.runasagrada.hotelapi.model.Reservation;
 import com.runasagrada.hotelapi.model.Room;
 import com.runasagrada.hotelapi.model.RoomLock;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.http.ResponseEntity;
 
 public interface RoomService {
     List<Room> findAll();
@@ -29,4 +32,6 @@ public interface RoomService {
     List<Room> listByHotel(Long hotelId);
 
     List<Room> listByHotelAndType(Long hotelId, Long roomTypeId);
+
+    List<Reservation> getReservations(String roomNum);
 }

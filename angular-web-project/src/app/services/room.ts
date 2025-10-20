@@ -74,4 +74,8 @@ export class RoomService {
   listByHotel(hotelId: number): Observable<Room[]> {
     return this.http.get<Room[]>(`${this.resource}/hotel/${hotelId}`);
   }
+
+  getReservations(roomNumber: string): Observable<ReservationSummary[]> {
+    return this.http.get<ReservationSummary[]>(`${this.resource}/reservations/${roomNumber}`);
+  }
 }
