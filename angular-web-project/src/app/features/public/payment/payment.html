@@ -1,0 +1,236 @@
+<div class="payment-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Cargando información de pago...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="!isLoading && loadError" class="error-state">
+    <div class="error-icon">⚠️</div>
+    <h2>Error al cargar</h2>
+    <p>{{ loadError }}</p>
+    <button class="btn-primary" (click)="goBack()">Volver</button>
+  </div>
+
+  <!-- Success State -->
+  <div *ngIf="paymentSuccess" class="success-state">
+    <div class="success-icon">✓</div>
+    <h2>¡Pago Procesado!</h2>
+    <p>Su pago ha sido procesado exitosamente.</p>
+    <p class="redirect-text">Redirigiendo a la confirmación...</p>
+  </div>
+
+  <!-- Payment Form -->
+  <div *ngIf="!isLoading && !loadError && !paymentSuccess" class="payment-content">
+    <!-- Header -->
+    <div class="header">
+      <button class="btn-back" (click)="goBack()">
+        <span class="back-icon">←</span>
+        <span>Volver</span>
+      </button>
+      <h1 class="page-title">Pago</h1>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-steps">
+      <div class="step completed">
+        <div class="step-circle">✓</div>
+        <span class="step-label">Reserva</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step completed">
+        <div class="step-circle">✓</div>
+        <span class="step-label">Confirmación</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step active">
+        <div class="step-circle">3</div>
+        <span class="step-label">Pago</span>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <!-- Left Column - Payment Form -->
+      <div class="form-section">
+        <!-- Métodos de Pago Guardados -->
+        <div class="section-card">
+          <h3 class="card-title">Método de Pago</h3>
+          <div class="card-content">
+            <!-- Métodos guardados -->
+            <div *ngIf="(paymentMethods?.length ?? 0) > 0" class="payment-methods-list">
+              <label *ngFor="let method of paymentMethods; trackBy: trackMethod"
+                     class="payment-method-item"
+                     [class.selected]="selectedPaymentMethodId === toNumber(method.method_id)"
+                     [attr.for]="'method-' + method.method_id">
+                <input
+                  type="radio"
+                  [id]="'method-' + method.method_id"
+                  name="paymentMethod"
+                  [value]="toNumber(method.method_id)"
+                  [(ngModel)]="selectedPaymentMethodId" />
+                <span class="method-label">
+                  <span class="method-icon">{{ getPaymentTypeIcon(method.type) }}</span>
+                  <span class="method-info">
+                    <span class="method-type">{{ getPaymentTypeName(method.type) }}</span>
+                    <span class="method-details" *ngIf="method.last4">•••• {{ method.last4 }}</span>
+                    <span class="method-holder" *ngIf="method.holder_name">{{ method.holder_name }}</span>
+                  </span>
+                </span>
+              </label>
+            </div>
+
+            <!-- Botón para agregar nuevo método -->
+            <button class="btn-add-method" (click)="toggleNewPaymentForm()">
+              <span class="add-icon">{{ showNewPaymentForm ? '−' : '+' }}</span>
+              <span>{{ showNewPaymentForm ? 'Cancelar' : 'Agregar nuevo método de pago' }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Formulario de Nuevo Método de Pago -->
+        <div *ngIf="showNewPaymentForm" class="section-card">
+          <h3 class="card-title">Nuevo Método de Pago</h3>
+          <div class="card-content">
+            <!-- Tipo de pago -->
+            <div class="form-group">
+              <label>Tipo de Pago</label>
+              <select [(ngModel)]="newPaymentMethod.type" class="form-input">
+                <option value="TARJETA">Tarjeta de Crédito/Débito</option>
+                <option value="PAYPAL">PayPal</option>
+                <option value="EFECTIVO">Efectivo</option>
+              </select>
+            </div>
+
+            <!-- Campos para tarjeta -->
+            <div *ngIf="newPaymentMethod.type === 'TARJETA'">
+              <div class="form-group">
+                <label>Número de Tarjeta</label>
+                <input type="text"
+                       class="form-input"
+                       [(ngModel)]="cardNumber"
+                       (input)="formatCardNumber()"
+                       maxlength="19"
+                       placeholder="1234 5678 9012 3456">
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Fecha de Expiración</label>
+                  <input type="text"
+                         class="form-input"
+                         [(ngModel)]="cardExpiry"
+                         (input)="formatExpiry()"
+                         maxlength="5"
+                         placeholder="MM/YY">
+                </div>
+                <div class="form-group">
+                  <label>CVV</label>
+                  <input type="text"
+                         class="form-input"
+                         [(ngModel)]="cardCVV"
+                         maxlength="4"
+                         placeholder="123">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Nombre del Titular</label>
+                <input type="text"
+                       class="form-input"
+                       [(ngModel)]="newPaymentMethod.holderName"
+                       placeholder="Como aparece en la tarjeta">
+              </div>
+            </div>
+
+            <!-- Campos para otros métodos -->
+            <div *ngIf="newPaymentMethod.type !== 'TARJETA'">
+              <div class="form-group">
+                <label>Nombre del Titular</label>
+                <input type="text"
+                       class="form-input"
+                       [(ngModel)]="newPaymentMethod.holderName"
+                       placeholder="Nombre completo">
+              </div>
+            </div>
+
+            <!-- Dirección de facturación -->
+            <div class="form-group">
+              <label>Dirección de Facturación</label>
+              <textarea class="form-input"
+                        [(ngModel)]="newPaymentMethod.billingAddress"
+                        rows="2"
+                        placeholder="Dirección completa"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error de Pago -->
+        <div *ngIf="paymentError" class="error-banner">
+          <span class="error-icon">⚠️</span>
+          <span>{{ paymentError }}</span>
+        </div>
+
+        <!-- Botón de Pago -->
+        <button class="btn-pay"
+                (click)="processPayment()"
+                [disabled]="!canPay">
+          <span *ngIf="!isProcessing">Procesar Pago - {{ formatCurrency(total) }}</span>
+          <span *ngIf="isProcessing">
+            <span class="spinner-small"></span>
+            Procesando...
+          </span>
+        </button>
+
+        <!-- Información de Seguridad -->
+        <div class="security-info">
+          <span class="security-icon">🔒</span>
+          <p>Su información está segura. Utilizamos encriptación de nivel bancario.</p>
+        </div>
+      </div>
+
+      <!-- Right Column - Summary -->
+      <div class="summary-section">
+        <div class="summary-card">
+          <h3 class="summary-title">Resumen del Pedido</h3>
+
+          <div class="summary-content">
+            <div class="summary-row">
+              <span class="label">Reserva</span>
+              <span class="value">#{{ reservationId }}</span>
+            </div>
+            <div class="summary-row" *ngIf="currentUser as u">
+              <span class="label">Cliente</span>
+              <span class="value">{{ u.full_name }}</span>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-row">
+              <span class="label">Subtotal</span>
+              <span class="value">{{ formatCurrency(subtotal) }}</span>
+            </div>
+            <div class="summary-row">
+              <span class="label">Impuestos (19%)</span>
+              <span class="value">{{ formatCurrency(taxes) }}</span>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-row total">
+              <span class="label">Total a Pagar</span>
+              <span class="value">{{ formatCurrency(total) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Información adicional -->
+        <div class="info-card">
+          <h4 class="info-title">Información Importante</h4>
+          <ul class="info-list">
+            <li>El pago se procesará de inmediato</li>
+            <li>Recibirá un correo de confirmación</li>
+            <li>Cancelación gratuita hasta 24h antes</li>
+            <li>Puede modificar su reserva si es necesario</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -69,9 +69,6 @@ export class ReservationSummaryComponent implements OnInit {
 
 		this.reservationId = Number(this.route.snapshot.queryParamMap.get('reservationId'));
 
-		console.log('=== RESERVATION SUMMARY INIT ===');
-		console.log('Reservation ID:', this.reservationId);
-
 		if (!this.reservationId) {
 			this.loadError = 'No se encontró el ID de la reserva.';
 			this.isLoading = false;
@@ -106,8 +103,6 @@ export class ReservationSummaryComponent implements OnInit {
 			next: (reservation: Reservation) => {
 				this.reservation = reservation;
 
-				console.log('Reservation data:', reservation);
-
 				if (!this.reservation) {
 					this.loadError = 'No se encontró la reserva.';
 					this.isLoading = false;
@@ -121,7 +116,6 @@ export class ReservationSummaryComponent implements OnInit {
 
 				if (this.reservation.hotel) {
 					const hotel = this.reservation.hotel;
-					console.log('Hotel from reservation:', hotel);
 					this.hotelName = hotel.name ?? '';
 					this.hotelLatitude = hotel.latitude ? String(hotel.latitude) : '';
 					this.hotelLongitude = hotel.longitude ? String(hotel.longitude) : '';
@@ -129,13 +123,11 @@ export class ReservationSummaryComponent implements OnInit {
 
 				if (this.reservation.room) {
 					const room = this.reservation.room;
-					console.log('Room from reservation:', room);
 					this.roomNumber = room.number ?? '';
 					this.roomTheme = room.theme_name ?? '';
 
 					if (room.room_type) {
 						const rt = room.room_type;
-						console.log('RoomType from room:', rt);
 						this.roomTypeName = rt.name ?? '';
 						this.capacity = rt.capacity ? Number(rt.capacity) : null;
 						const base = Number(rt.base_price ?? (rt as any).basePrice ?? 0);
@@ -149,7 +141,6 @@ export class ReservationSummaryComponent implements OnInit {
 					if (roomTypeId) {
 						this.typeSvc.getById(roomTypeId).subscribe({
 							next: (rt: any) => {
-								console.log('RoomType data:', rt);
 								this.roomTypeName = rt?.name ?? '';
 								this.capacity = rt?.capacity ? Number(rt.capacity) : null;
 								const base = Number(rt?.base_price ?? rt?.basePrice ?? 0);
@@ -183,9 +174,6 @@ export class ReservationSummaryComponent implements OnInit {
 							const hotel = results.hotel;
 							const room = results.room;
 
-							console.log('Hotel data (forkJoin):', hotel);
-							console.log('Room data (forkJoin):', room);
-
 							// Hotel
 							if (hotel) {
 								this.hotelName = hotel.name ?? '';
@@ -204,7 +192,6 @@ export class ReservationSummaryComponent implements OnInit {
 								if (roomTypeId) {
 									this.typeSvc.getById(roomTypeId).subscribe({
 										next: (rt: any) => {
-											console.log('RoomType data (nested):', rt);
 											this.roomTypeName = rt?.name ?? '';
 											this.capacity = rt?.capacity ? Number(rt.capacity) : null;
 											const base = Number(rt?.base_price ?? rt?.basePrice ?? 0);
