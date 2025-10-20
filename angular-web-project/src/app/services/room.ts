@@ -33,11 +33,6 @@ export interface GuestSummary {
   phone: string | null;
 }
 
-export interface ReservationLookupPayload {
-  reservation: Reservation | null;
-  guest?: User | null;
-}
-
 @Injectable({ providedIn: 'root' })
 export class RoomService {
   private readonly resource = `${environment.apiBaseUrl}/rooms`;
@@ -53,10 +48,6 @@ export class RoomService {
 
   getById(id: number): Observable<Room> {
     return this.http.get<Room>(`${this.resource}/${id}`);
-  }
-
-  getTodayReservation(number: string): Observable<ReservationLookupPayload> {
-    return this.http.get<ReservationLookupPayload>(`${this.resource}/number/${number}`);
   }
 
   create(payload: RoomRequest): Observable<Room> {
@@ -75,7 +66,7 @@ export class RoomService {
     return this.http.get<Room[]>(`${this.resource}/hotel/${hotelId}`);
   }
 
-  getReservations(roomNumber: string): Observable<ReservationSummary[]> {
-    return this.http.get<ReservationSummary[]>(`${this.resource}/reservations/${roomNumber}`);
+  getReservations(roomNumber: string): Observable<Reservation[]> {
+    return this.http.get<Reservation[]>(`${this.resource}/reservations/${roomNumber}`);
   }
 }

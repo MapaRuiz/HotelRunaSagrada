@@ -67,12 +67,12 @@ public class RoomController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/room/reservations/{roomNum}")
-    public ResponseEntity<List<ReservationRes>> getReservForRoom(@PathVariable String roomNum) {
+    @GetMapping("/rooms/reservations/{roomNum}")
+    public ResponseEntity<List<ReservationDTO>> getReservForRoom(@PathVariable String roomNum) {
         List<Reservation> reservations = service.getReservations(roomNum);
-        List<ReservationRes> resDto = new ArrayList<>();
+        List<ReservationDTO> resDto = new ArrayList<>();
         for (Reservation res : reservations) {
-            resDto.add(ReservationRes.from(res));
+            resDto.add(ReservationDTO.buildDTO(res));
         }
         return ResponseEntity.ok(resDto);
     }

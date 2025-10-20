@@ -42,7 +42,7 @@ public class ReservationController {
         List<Reservation> all = service.findByHotelId(hotelId);
         List<ReservationDTO> response = new ArrayList<>();
         for (Reservation res : all) {
-            response.add(buildDTO(res));
+            response.add(ReservationDTO.buildDTO(res));
         }
         return response;
     }
@@ -153,10 +153,11 @@ public class ReservationController {
         private LocalDate checkIn;
         private LocalDate checkOut;
         private Reservation.Status status;
+
+        public static ReservationDTO buildDTO(Reservation r) {
+            return new ReservationDTO(r.getReservationId(), r.getUser().getUserId(), r.getHotel().getHotelId(),
+                    r.getRoom().getRoomId(), r.getCheckIn(), r.getCheckOut(), r.getStatus());
+        }
     }
 
-    private ReservationDTO buildDTO(Reservation r) {
-        return new ReservationDTO(r.getReservationId(), r.getUser().getUserId(), r.getHotel().getHotelId(),
-                r.getRoom().getRoomId(), r.getCheckIn(), r.getCheckOut(), r.getStatus());
-    }
 }
