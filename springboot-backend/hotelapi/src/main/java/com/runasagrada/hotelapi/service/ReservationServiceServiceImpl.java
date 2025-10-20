@@ -48,7 +48,8 @@ public class ReservationServiceServiceImpl implements ReservationServiceService 
     @Override
     public ReservationService save(ReservationService reservationService, Long reservationId, Long serviceId,
             Long scheduleId) {
-        Reservation targetReservation = reservationRepository.findById(resolveReservationId(reservationService, reservationId))
+        Reservation targetReservation = reservationRepository
+                .findById(resolveReservationId(reservationService, reservationId))
                 .orElseThrow(() -> new EntityNotFoundException("Reservation not found"));
 
         Long targetServiceId = resolveServiceId(reservationService, serviceId);
@@ -107,6 +108,11 @@ public class ReservationServiceServiceImpl implements ReservationServiceService 
             return current.getId();
         }
         return null;
+    }
+
+    @Override
+    public List<ReservationService> findByReservation(Long id) {
+        return reservationServiceRepository.findByReservationReservationId(id);
     }
 
 }

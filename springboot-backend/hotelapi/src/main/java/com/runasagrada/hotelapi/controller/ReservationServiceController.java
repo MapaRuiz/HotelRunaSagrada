@@ -1,6 +1,7 @@
 package com.runasagrada.hotelapi.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -21,6 +22,7 @@ import com.runasagrada.hotelapi.service.ReservationServiceService;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @RestController
@@ -31,19 +33,35 @@ public class ReservationServiceController {
     private ReservationServiceService reservationService;
 
     @GetMapping
-    public List<ReservationService> list() {
-        return reservationService.getAll();
+    public List<ReservationServiceDTO> list() {
+        return reservationService.getAll()
+                .stream()
+                .map(ReservationServiceDTO::from)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ReservationService> getById(@PathVariable Long id) {
+    public ResponseEntity<ReservationServiceDTO> getById(@PathVariable Long id) {
         return reservationService.searchById(id)
+                .map(ReservationServiceDTO::from)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/reservation/{id}")
+    public ResponseEntity<List<ReservationServiceDTO>> getByReservationId(@PathVariable Long id) {
+        List<ReservationService> list = reservationService.findByReservation(id);
+        if (list == null || list.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        List<ReservationServiceDTO> dtoList = list.stream()
+                .map(ReservationServiceDTO::from)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtoList);
+    }
+
     @PostMapping("/add")
-    public ResponseEntity<ReservationService> create(@RequestBody ReservationServiceRequest request) {
+    public ResponseEntity<ReservationServiceDTO> create(@RequestBody ReservationServiceDTO request) {
         if (!request.hasRequiredIdentifiers() || request.getQty() == null || request.getUnitPrice() == null) {
             return ResponseEntity.badRequest().build();
         }
@@ -54,22 +72,22 @@ public class ReservationServiceController {
         try {
             ReservationService stored = reservationService.save(newReservationService, request.getReservationId(),
                     request.getServiceId(), request.getScheduleId());
-            return ResponseEntity.status(HttpStatus.CREATED).body(stored);
+            return ResponseEntity.status(HttpStatus.CREATED).body(ReservationServiceDTO.from(stored));
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ReservationService> update(@PathVariable Long id,
-            @RequestBody ReservationServiceRequest request) {
+    public ResponseEntity<ReservationServiceDTO> update(@PathVariable Long id,
+            @RequestBody ReservationServiceDTO request) {
         return reservationService.searchById(id)
                 .map(existing -> buildReServiceUpdateResponse(existing, request))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    private ResponseEntity<ReservationService> buildReServiceUpdateResponse(ReservationService existing,
-            ReservationServiceRequest request) {
+    private ResponseEntity<ReservationServiceDTO> buildReServiceUpdateResponse(ReservationService existing,
+            ReservationServiceDTO request) {
         applyRequest(existing, request);
         try {
             Long reservationId = resolveReservationId(existing, request);
@@ -80,7 +98,7 @@ public class ReservationServiceController {
 
             Long scheduleId = resolveScheduleId(existing, request);
             ReservationService updated = reservationService.save(existing, reservationId, serviceId, scheduleId);
-            return ResponseEntity.ok(updated);
+            return ResponseEntity.ok(ReservationServiceDTO.from(updated));
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -96,7 +114,7 @@ public class ReservationServiceController {
         }
     }
 
-    private void applyRequest(ReservationService target, ReservationServiceRequest request) {
+    private void applyRequest(ReservationService target, ReservationServiceDTO request) {
         if (request.getQty() != null) {
             target.setQty(request.getQty());
         }
@@ -110,7 +128,7 @@ public class ReservationServiceController {
         }
     }
 
-    private Long resolveReservationId(ReservationService existing, ReservationServiceRequest request) {
+    private Long resolveReservationId(ReservationService existing, ReservationServiceDTO request) {
         if (request.hasReservationId()) {
             return request.getReservationId();
         }
@@ -120,7 +138,7 @@ public class ReservationServiceController {
         return null;
     }
 
-    private Long resolveServiceId(ReservationService existing, ReservationServiceRequest request) {
+    private Long resolveServiceId(ReservationService existing, ReservationServiceDTO request) {
         if (request.hasServiceId()) {
             return request.getServiceId();
         }
@@ -130,7 +148,7 @@ public class ReservationServiceController {
         return null;
     }
 
-    private Long resolveScheduleId(ReservationService existing, ReservationServiceRequest request) {
+    private Long resolveScheduleId(ReservationService existing, ReservationServiceDTO request) {
         if (request.hasScheduleId()) {
             return request.getScheduleId();
         }
@@ -141,7 +159,8 @@ public class ReservationServiceController {
     }
 
     @Data
-    public static class ReservationServiceRequest {
+    @AllArgsConstructor
+    public static class ReservationServiceDTO {
         @Schema(name = "reservation_id")
         private Long reservationId;
         @Schema(name = "service_id")
@@ -152,6 +171,16 @@ public class ReservationServiceController {
         @Schema(name = "unit_price")
         private Double unitPrice;
         private ReservationService.Status status;
+
+        public static ReservationServiceDTO from(ReservationService rService) {
+            return new ReservationServiceDTO(
+                    rService.getReservation().getReservationId().longValue(),
+                    rService.getService().getId(),
+                    rService.getSchedule() != null ? rService.getSchedule().getId() : null,
+                    rService.getQty(),
+                    rService.getUnitPrice(),
+                    rService.getStatus());
+        }
 
         boolean hasRequiredIdentifiers() {
             return hasReservationId() && hasServiceId();

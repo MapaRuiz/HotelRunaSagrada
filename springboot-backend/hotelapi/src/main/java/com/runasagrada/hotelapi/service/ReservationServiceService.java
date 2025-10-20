@@ -14,4 +14,6 @@ public interface ReservationServiceService {
             Long scheduleId);
 
     void delete(Long id);
+
+    List<ReservationService> findByReservation(Long id);
 }
