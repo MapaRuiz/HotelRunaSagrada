@@ -234,7 +234,7 @@ export class ReservationTableOperatorComponent implements OnInit {
                 }
               : status === 'CONFIRMED'
               ? {
-                  label: 'Pagar',
+                  label: 'Desactivar',
                   class: 'btn-details',
                   action: (r: Reservation) => this.payReservation(r),
                 }

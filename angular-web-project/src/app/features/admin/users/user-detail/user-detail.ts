@@ -8,17 +8,20 @@ import { environment } from '../../../../../environments/environment';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './user-detail.html',
-  styleUrls: ['./user-detail.css', '../user-form/user-form.css']
+  styleUrls: ['./user-detail.css', '../user-form/user-form.css'],
 })
 export class UserDetailComponent {
   @Input() user?: User;
+  @Input() showEdit: boolean = true; // show/hide edit
+  @Input() operatorView: boolean = false;
   @Output() editRequested = new EventEmitter<User>();
 
   readonly fallbackText = 'Sin información';
 
   // Base del backend para imágenes
-  private backendBase = (environment as any).backendBaseUrl
-    || (environment.apiBaseUrl ? environment.apiBaseUrl.replace(/\/api\/?$/, '') : '');
+  private backendBase =
+    (environment as any).backendBaseUrl ||
+    (environment.apiBaseUrl ? environment.apiBaseUrl.replace(/\/api\/?$/, '') : '');
 
   img(path?: string) {
     if (!path) return '';
@@ -28,7 +31,7 @@ export class UserDetailComponent {
   roleNames(roles?: RoleEntity[] | string[]): string[] {
     if (!roles) return [];
     if (typeof roles[0] === 'string') return roles as string[];
-    return (roles as RoleEntity[]).map(r => r.name);
+    return (roles as RoleEntity[]).map((r) => r.name);
   }
 
   beginEdit(): void {

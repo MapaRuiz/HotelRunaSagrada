@@ -4,11 +4,12 @@ import { Reservation } from '../../../../model/reservation';
 import { ReservationService } from '../../../../services/reservation';
 import { ServicesAddForm } from '../services-add-form/services-add-form';
 import { getStatusBadge, getStatusText } from '../reservation';
+import { UserDetailComponent } from '../../../admin/users/user-detail/user-detail';
 
 @Component({
   selector: 'app-reservation-detail-op',
   standalone: true,
-  imports: [CommonModule, ServicesAddForm],
+  imports: [CommonModule, ServicesAddForm, UserDetailComponent],
   templateUrl: './reservation-detail-op.html',
   styleUrls: [
     './reservation-detail-op.css',
