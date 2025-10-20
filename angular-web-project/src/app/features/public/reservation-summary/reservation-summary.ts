@@ -282,9 +282,20 @@ export class ReservationSummaryComponent implements OnInit {
 	}
 
 	continuarReserva(): void {
-		// Aquí puedes redirigir a una página de pago o confirmación
-		console.log('Continuar con la reserva:', this.reservationId);
-		// Por ejemplo: this.router.navigate(['/payment'], { queryParams: { reservationId: this.reservationId } });
+		if (this.reservationId) {
+			if (this.isBrowser()) {
+				const priceData = {
+					subtotal: this.subtotal || 0,
+					taxes: this.taxes || 0,
+					total: this.total || 0,
+					nights: this.nights,
+					basePrice: this.basePrice || 0
+				};
+				localStorage.setItem('reservationPricing', JSON.stringify(priceData));
+			}
+
+			this.router.navigate(['/payment'], { queryParams: { reservationId: this.reservationId } });
+		}
 	}
 
 	goHome(): void {

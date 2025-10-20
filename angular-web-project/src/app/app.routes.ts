@@ -17,6 +17,12 @@ export const routes: Routes = [
       import('./features/public/reservation-summary/reservation-summary')
         .then(m => m.ReservationSummaryComponent),
   },
+  {
+    path: 'payment',
+    loadComponent: () =>
+      import('./features/public/payment/payment')
+        .then(m => m.PaymentComponent),
+  },
 
   // CLIENT - shell con children
   {

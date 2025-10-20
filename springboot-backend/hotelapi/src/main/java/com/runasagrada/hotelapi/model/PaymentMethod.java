@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Data
 @AllArgsConstructor
@@ -15,8 +17,9 @@ public class PaymentMethod {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer paymentMethodId;
 
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "user_id", nullable = false)
+	@JsonIgnore
 	private User userId;
 
 	private String type;

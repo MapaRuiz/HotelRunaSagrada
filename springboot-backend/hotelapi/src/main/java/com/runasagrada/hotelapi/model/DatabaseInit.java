@@ -1638,7 +1638,7 @@ public class DatabaseInit implements CommandLineRunner {
                 // Crear 3 métodos de pago
                 PaymentMethod pm1 = new PaymentMethod();
                 pm1.setUserId(clients.get(0));
-                pm1.setType("Visa");
+                pm1.setType("TARJETA");
                 pm1.setLastfour(4532);
                 pm1.setHolderName(clients.get(0).getFullName());
                 pm1.setBillingAddress("Calle 123 #45-67, Bogotá");
@@ -1646,7 +1646,7 @@ public class DatabaseInit implements CommandLineRunner {
 
                 PaymentMethod pm2 = new PaymentMethod();
                 pm2.setUserId(clients.get(1 % clients.size()));
-                pm2.setType("Mastercard");
+                pm2.setType("TARJETA");
                 pm2.setLastfour(8765);
                 pm2.setHolderName(clients.get(1 % clients.size()).getFullName());
                 pm2.setBillingAddress("Carrera 10 #20-30, Medellín");
@@ -1654,7 +1654,7 @@ public class DatabaseInit implements CommandLineRunner {
 
                 PaymentMethod pm3 = new PaymentMethod();
                 pm3.setUserId(clients.get(2 % clients.size()));
-                pm3.setType("American Express");
+                pm3.setType("TARJETA");
                 pm3.setLastfour(9012);
                 pm3.setHolderName(clients.get(2 % clients.size()).getFullName());
                 pm3.setBillingAddress("Avenida 5 #12-34, Cali");
