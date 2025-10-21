@@ -47,6 +47,7 @@ export class ReservationServicesTable implements OnChanges {
     if (this.isBrowser) {
       ModuleRegistry.registerModules([AllCommunityModule]);
     }
+    console.log('[ReservationServicesTable] constructed');
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -203,6 +204,15 @@ export class ReservationServicesTable implements OnChanges {
   };
 
   private onEditRow(row: ReservationServiceModel) {
+    console.log('[ReservationServicesTable] onEditRow, emitting editRequested for row:', row);
+    // publish selection via facade as a reliable channel
+    try {
+      this.facade.selectReservationService(row);
+      console.log('[ReservationServicesTable] published selection to facade');
+    } catch (e) {
+      console.warn('[ReservationServicesTable] facade publish failed', e);
+    }
+    // Also emit via EventEmitter for backwards compatibility
     this.editRequested.emit(row);
   }
 

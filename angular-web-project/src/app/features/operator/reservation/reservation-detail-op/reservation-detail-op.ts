@@ -1,4 +1,15 @@
-import { Component, EventEmitter, Input, Output, SimpleChanges, ViewChild, inject } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  SimpleChanges,
+  ViewChild,
+  AfterViewInit,
+  OnDestroy,
+  inject,
+} from '@angular/core';
+import { Subscription } from 'rxjs';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Reservation } from '../../../../model/reservation';
 import { ReservationService } from '../../../../services/reservation';
@@ -35,6 +46,8 @@ export class ReservationDetailOp {
   text = getStatusText;
 
   private facade = inject(ReservationFacade);
+  private childSub?: Subscription;
+  private facadeSub?: Subscription;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['reservation'] && this.reservation?.reservation_id) {
@@ -52,6 +65,35 @@ export class ReservationDetailOp {
         },
       });
     }
+  }
+
+  ngAfterViewInit(): void {
+    // Subscribe to child's editRequested as an additional check
+    setTimeout(() => {
+      if (!this.servicesTable) {
+        console.log('[ReservationDetailOp] servicesTable not available in AfterViewInit');
+        return;
+      }
+      console.log('[ReservationDetailOp] subscribing to servicesTable.editRequested');
+      this.childSub = this.servicesTable.editRequested.subscribe((row) => {
+        console.log('[ReservationDetailOp] child subscription caught row:', row);
+        // forward to existing handler
+        this.onEditReservationService(row);
+      });
+    }, 0);
+  }
+
+  ngOnInit(): void {
+    // subscribe to facade selection channel
+    this.facadeSub = this.facade.selectedReservationService$.subscribe((row) => {
+      console.log('[ReservationDetailOp] facade selection caught row:', row);
+      this.onEditReservationService(row);
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.childSub) this.childSub.unsubscribe();
+    if (this.facadeSub) this.facadeSub.unsubscribe();
   }
 
   formatDate(dateString?: string): string {
@@ -111,8 +153,42 @@ export class ReservationDetailOp {
   }
 
   onEditReservationService(row: ReservationServiceModel) {
+    // Debug log to ensure the event carries the row
+    console.log('[ReservationDetailOp] edit requested row:', row);
+    // store selected row and enable edit mode so the template will render the form
     this.editingService = row;
     this.editingServices = true;
     this.editingChanged.emit(true);
+
+    // Ensure the accordion panel with id `collapseTwo` is open so the form is visible.
+    // Prefer to use the Bootstrap Collapse instance if available; otherwise toggle classes
+    // without requiring a global `bootstrap` symbol (avoids TS errors at build time).
+    const collapseEl = document.getElementById('collapseTwo');
+    if (collapseEl) {
+      // If Bootstrap 5 Collapse instance is exposed on the element, call 'show'
+      // (Bootstrap stores instances on element via Element["bsCollapse"] in some builds,
+      // but we can't rely on that. Use classList and attributes as fallback.)
+      const isShown = collapseEl.classList.contains('show');
+      if (!isShown) {
+        // Add classes expected by Bootstrap to show the collapse
+        collapseEl.classList.add('show');
+        collapseEl.setAttribute('aria-expanded', 'true');
+        // The collapse container parent button usually has aria-controls and aria-expanded attributes.
+        // Try to find the controlling button and update it too.
+        try {
+          const controller = document.querySelector(
+            '[data-bs-target="#collapseTwo"], [data-bs-toggle][data-bs-target="#collapseTwo"]'
+          ) as HTMLElement | null;
+          if (controller) {
+            controller.setAttribute('aria-expanded', 'true');
+          }
+        } catch {}
+        // After making it visible, refresh the inner table so columns size correctly
+        setTimeout(() => this.servicesTable?.onContainerShown(), 0);
+      } else {
+        // already visible; still refresh
+        setTimeout(() => this.servicesTable?.onContainerShown(), 0);
+      }
+    }
   }
 }

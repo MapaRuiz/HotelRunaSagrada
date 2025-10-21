@@ -1,5 +1,5 @@
 import { Component, Injectable, inject } from '@angular/core';
-import { forkJoin, map, of, switchMap } from 'rxjs';
+import { forkJoin, map, of, switchMap, Subject } from 'rxjs';
 import { Reservation } from '../../../model/reservation';
 import { ReservationServiceApi } from '../../../services/reservation-service';
 import { ReservationService as ReservationServiceModel } from '../../../model/reservation-service';
@@ -87,5 +87,13 @@ export class ReservationFacade {
   // Load reservation services for a reservation
   getReservationServices(reservationId: number) {
     return this.resServicesApi.listByReservation(reservationId);
+  }
+
+  // Cross-component selection channel for a ReservationService row
+  private selectedReservationServiceSubject = new Subject<ReservationServiceModel>();
+  selectedReservationService$ = this.selectedReservationServiceSubject.asObservable();
+
+  selectReservationService(row: ReservationServiceModel) {
+    this.selectedReservationServiceSubject.next(row);
   }
 }

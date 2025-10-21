@@ -1,8 +1,27 @@
-<div class="action-buttons" (mousedown)="$event.stopPropagation()" (click)="$event.stopPropagation()" (dblclick)="$event.stopPropagation()">
-  <button *ngIf="params.onEdit" type="button" class="btn btn-edit" (click)="onEdit(); $event.stopPropagation()" (mousedown)="$event.stopPropagation()" (dblclick)="$event.stopPropagation()">
+<div
+  class="action-buttons"
+  (mousedown)="$event.stopPropagation()"
+  (click)="$event.stopPropagation()"
+  (dblclick)="$event.stopPropagation()"
+>
+  <button
+    *ngIf="params.onEdit"
+    type="button"
+    class="btn btn-edit"
+    (click)="onEditDebug(); $event.stopPropagation()"
+    (mousedown)="$event.stopPropagation()"
+    (dblclick)="$event.stopPropagation()"
+  >
     {{ params.editLabel || 'Editar' }}
   </button>
-  <button *ngIf="params.onDelete" type="button" class="btn btn-delete" (click)="onDelete(); $event.stopPropagation()" (mousedown)="$event.stopPropagation()" (dblclick)="$event.stopPropagation()">
+  <button
+    *ngIf="params.onDelete"
+    type="button"
+    class="btn btn-delete"
+    (click)="onDeleteDebug(); $event.stopPropagation()"
+    (mousedown)="$event.stopPropagation()"
+    (dblclick)="$event.stopPropagation()"
+  >
     {{ params.deleteLabel || 'Eliminar' }}
   </button>
   <button

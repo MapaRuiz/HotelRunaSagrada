@@ -1,4 +1,13 @@
-import { Component, EventEmitter, Input, Output, OnInit, inject } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  OnChanges,
+  OnInit,
+  SimpleChanges,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Reservation } from '../../../../model/reservation';
@@ -21,7 +30,7 @@ import {
   templateUrl: './services-add-form.html',
   styleUrl: './services-add-form.css',
 })
-export class ServicesAddForm implements OnInit {
+export class ServicesAddForm implements OnInit, OnChanges {
   @Input() reservation?: Reservation;
   @Input() edit?: ReservationServiceModel | null;
   @Output() saved = new EventEmitter<void>();
@@ -46,6 +55,17 @@ export class ServicesAddForm implements OnInit {
   private resServiceApi = inject(ReservationServiceApi);
 
   ngOnInit(): void {
+    this.loadOfferingsAndPrefill();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // If the `edit` input changes while the component is rendered, re-run prefill
+    if (changes['edit'] && !changes['edit'].firstChange) {
+      this.loadOfferingsAndPrefill();
+    }
+  }
+
+  private loadOfferingsAndPrefill() {
     if (!this.reservation) return;
     const hotelId = Number(this.reservation.hotel_id);
     this.loading = true;
