@@ -2,15 +2,18 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { ReservationService as ReservationServiceModel, res_service_status } from '../model/reservation-service';
+import {
+  ReservationService as ReservationServiceModel,
+  res_service_status,
+} from '../model/reservation-service';
 
 // Matches ReservationServiceController.ReservationServiceRequest (camelCase payload)
 export interface ReservationServiceRequest {
-  reservationId: number;    // required
-  serviceId: number;        // required
+  reservationId: number; // required
+  serviceId: number; // required
   scheduleId?: number | null;
-  qty: number;              // required
-  unitPrice: number;        // required
+  qty: number; // required
+  unitPrice: number; // required
   status?: res_service_status;
 }
 
@@ -24,6 +27,11 @@ export class ReservationServiceApi {
     return this.http.get<ReservationServiceModel[]>(this.resource);
   }
 
+  // GET /api/reservservice/reservation/{id}
+  listByReservation(id: number): Observable<ReservationServiceModel[]> {
+    return this.http.get<ReservationServiceModel[]>(`${this.resource}/reservation/${id}`);
+  }
+
   // GET /api/reservservice/{id}
   get(id: number): Observable<ReservationServiceModel> {
     return this.http.get<ReservationServiceModel>(`${this.resource}/${id}`);
@@ -35,7 +43,10 @@ export class ReservationServiceApi {
   }
 
   // PUT /api/reservservice/update/{id}
-  update(id: number, body: Partial<ReservationServiceRequest>): Observable<ReservationServiceModel> {
+  update(
+    id: number,
+    body: Partial<ReservationServiceRequest>
+  ): Observable<ReservationServiceModel> {
     return this.http.put<ReservationServiceModel>(`${this.resource}/update/${id}`, body);
   }
 
@@ -59,4 +70,3 @@ export class ReservationServiceApi {
 
 // Backward-compatible alias if other code imports `{ ReservationService }` from this path
 export { ReservationServiceApi as ReservationService };
-

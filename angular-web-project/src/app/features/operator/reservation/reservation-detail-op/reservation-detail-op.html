@@ -134,6 +134,7 @@
           class="collapse"
           aria-labelledby="reservationServices"
           data-bs-parent="#accordion"
+          (shown.bs.collapse)="onServicesCollapseShown()"
         >
           <div class="d-flex gap-2">
             +
@@ -153,23 +154,12 @@
             </ng-template>
           </div>
           <div class="card-body">
-            <!-- Servicios Adicionales -->
+            <!-- Servicios Adicionales (Tabla) -->
             <div class="col-12" *ngIf="!editingServices">
-              <ng-container
-                *ngIf="current.services && current.services.length > 0; else noServices"
-              >
-                <label class="form-label">Servicios Adicionales</label>
-                <div class="row g-2">
-                  <div class="col-auto" *ngFor="let service of current.services">
-                    <span class="badge text-bg-info">
-                      {{ service.service?.name || 'Servicio ' + service.service_id }}
-                    </span>
-                  </div>
-                </div>
-              </ng-container>
-              <ng-template #noServices>
-                <div class="text-muted fst-italic">No hay servicios adicionales.</div>
-              </ng-template>
+              <label class="form-label d-block mb-2">Servicios Adicionales</label>
+              <app-reservation-services-table
+                [reservationId]="current.reservation_id"
+              ></app-reservation-services-table>
             </div>
           </div>
         </div>

@@ -17,19 +17,13 @@ import {
   ModuleRegistry,
 } from 'ag-grid-community';
 import { ReservationService } from '../../../../services/reservation';
-import { AuthService } from '../../../../services/auth';
-import { StaffMemberService } from '../../../../services/staff-member';
-import { StaffMember } from '../../../../model/staff-member';
-import { finalize, switchMap } from 'rxjs';
+import { finalize } from 'rxjs';
 import { MultiSelectFilterComponent } from '../../../admin/filters/multi-select-filter/multi-select-filter';
 import { Reservation } from '../../../../model/reservation';
 import { ActionButtonsComponent } from '../../../admin/action-buttons-cell/action-buttons-cell';
 import { ActionButtonsParams } from '../../../admin/action-buttons-cell/action-buttons-param';
-import { HotelsService } from '../../../../services/hotels';
-import { UsersService } from '../../../../services/users';
-import { RoomService } from '../../../../services/room';
-import { forkJoin, map, of } from 'rxjs';
 import { getStatusBadge, getStatusText } from '../reservation';
+import { ReservationFacade } from '../reservation';
 
 @Component({
   selector: 'app-reservation-table',
@@ -53,16 +47,8 @@ export class ReservationTableOperatorComponent implements OnInit {
   private gridApi?: GridApi<Reservation>;
   readonly gridTheme: typeof sharedGridTheme = sharedGridTheme;
   private currentOpId?: number;
-  private staffInfo?: StaffMember;
-  private auth = inject(AuthService);
 
-  constructor(
-    private service: ReservationService,
-    private staffService: StaffMemberService,
-    private hotelsService: HotelsService,
-    private usersService: UsersService,
-    private roomService: RoomService
-  ) {
+  constructor(private service: ReservationService, private facade: ReservationFacade) {
     this.isBrowser = isPlatformBrowser(this.platformId);
     if (this.isBrowser) {
       ModuleRegistry.registerModules([AllCommunityModule]);
@@ -77,43 +63,9 @@ export class ReservationTableOperatorComponent implements OnInit {
 
   loadData() {
     this.loading = true;
-    const uid = this.auth.userSnapshot()?.user_id;
-    if (!uid) {
-      this.loading = false;
-      return;
-    }
-
-    this.staffService
-      .getByUser(uid)
-      .pipe(
-        switchMap((staff) => {
-          this.staffInfo = staff;
-          return forkJoin({
-            reservations: this.service.getAllByHotel(staff.hotel_id),
-            hotel: this.hotelsService.get(Number(staff.hotel_id)),
-            rooms: this.roomService.listByHotel(Number(staff.hotel_id)),
-          });
-        }),
-        switchMap(({ reservations, hotel, rooms }) => {
-          const userIds = Array.from(new Set(reservations.map((r) => r.user_id)));
-          const userRequests = userIds.length
-            ? forkJoin(userIds.map((id) => this.usersService.getById(id)))
-            : of([]);
-          return userRequests.pipe(map((users) => ({ reservations, hotel, rooms, users })));
-        }),
-        map(({ reservations, hotel, rooms, users }) => {
-          const usersById = new Map(users.map((u) => [u.user_id, u] as const));
-          const roomsById = new Map(rooms.map((r) => [r.room_id, r] as const));
-          const enriched = reservations.map((r) => ({
-            ...r,
-            hotel,
-            user: usersById.get(r.user_id),
-            room: roomsById.get(r.room_id),
-          }));
-          return enriched;
-        }),
-        finalize(() => (this.loading = false))
-      )
+    this.facade
+      .getHotelReservationsForOperator()
+      .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (enriched) => {
           this.reservations = enriched;

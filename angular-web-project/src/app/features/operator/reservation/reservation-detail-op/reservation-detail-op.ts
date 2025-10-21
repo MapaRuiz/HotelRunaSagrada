@@ -1,15 +1,16 @@
-import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, SimpleChanges, ViewChild, inject } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Reservation } from '../../../../model/reservation';
 import { ReservationService } from '../../../../services/reservation';
 import { ServicesAddForm } from '../services-add-form/services-add-form';
-import { getStatusBadge, getStatusText } from '../reservation';
+import { ReservationServicesTable } from '../reservation-services-table/reservation-services-table';
+import { ReservationFacade, getStatusBadge, getStatusText } from '../reservation';
 import { UserDetailComponent } from '../../../admin/users/user-detail/user-detail';
 
 @Component({
   selector: 'app-reservation-detail-op',
   standalone: true,
-  imports: [CommonModule, ServicesAddForm, UserDetailComponent],
+  imports: [CommonModule, ServicesAddForm, UserDetailComponent, ReservationServicesTable],
   templateUrl: './reservation-detail-op.html',
   styleUrls: [
     './reservation-detail-op.css',
@@ -19,6 +20,7 @@ import { UserDetailComponent } from '../../../admin/users/user-detail/user-detai
 })
 export class ReservationDetailOp {
   @Input() reservation?: Reservation;
+  @ViewChild(ReservationServicesTable) servicesTable?: ReservationServicesTable;
 
   @Output() servicesModified = new EventEmitter<ReservationService[]>();
   @Output() addServicesRequested = new EventEmitter<Reservation>();
@@ -30,8 +32,24 @@ export class ReservationDetailOp {
   badge = getStatusBadge;
   text = getStatusText;
 
+  private facade = inject(ReservationFacade);
+
   ngOnChanges(changes: SimpleChanges): void {
-    // No hay imágenes en reservations, pero mantenemos la estructura
+    if (changes['reservation'] && this.reservation?.reservation_id) {
+      // Load services via facade to keep data fresh
+      const rid = this.reservation.reservation_id;
+      this.facade.getReservationServices(rid).subscribe({
+        next: (svcs) => {
+          if (this.reservation) {
+            // attach fetched services into the current reservation for template reuse
+            (this.reservation as any).services = svcs;
+          }
+        },
+        error: () => {
+          // ignore errors here; UI will show empty services
+        },
+      });
+    }
   }
 
   formatDate(dateString?: string): string {
@@ -80,5 +98,10 @@ export class ReservationDetailOp {
     } catch {
       return 0;
     }
+  }
+
+  // Triggered when the collapse containing the services table is shown
+  onServicesCollapseShown() {
+    this.servicesTable?.onContainerShown();
   }
 }

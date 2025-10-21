@@ -1,1 +1,20 @@
-<p>reservation-services-table works!</p>
+<div class="reservations-grid-wrap">
+  <div *ngIf="loading" class="text-center p-3">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <ag-grid-angular
+    *ngIf="isBrowser && !loading"
+    [theme]="gridTheme"
+    [gridOptions]="gridOptions"
+    [rowData]="services"
+    [pagination]="true"
+    style="width: 100%; height: 320px"
+  >
+    <div *ngIf="!loading && services.length === 0" class="text-center p-4">
+      <p class="text-muted">No hay servicios para esta reserva.</p>
+    </div>
+  </ag-grid-angular>
+</div>
