@@ -24,10 +24,7 @@
         </div>
       </div>
 
-      <!-- Modo edición de servicios -->
-      <div class="col-12" *ngIf="editingServices">
-        <app-services-add-form></app-services-add-form>
-      </div>
+      <!-- Modo edición de servicios (movido dentro del acordeón) -->
     </div>
 
     <div id="accordion">
@@ -136,7 +133,7 @@
           data-bs-parent="#accordion"
           (shown.bs.collapse)="onServicesCollapseShown()"
         >
-          <div class="d-flex gap-2">
+          <div class="d-flex gap-2 align-items-center px-3 pt-3">
             +
             <ng-container *ngIf="!editingServices; else editBtns">
               <button type="button" class="btn btn-olive btn-sm" (click)="addServices()">
@@ -154,6 +151,15 @@
             </ng-template>
           </div>
           <div class="card-body">
+            <!-- Formulario de agregar/editar servicios dentro del acordeón -->
+            <div class="col-12" *ngIf="editingServices">
+              <app-services-add-form
+                [reservation]="current"
+                (saved)="closeServices()"
+                (canceled)="closeServices()"
+              ></app-services-add-form>
+            </div>
+
             <!-- Servicios Adicionales (Tabla) -->
             <div class="col-12" *ngIf="!editingServices">
               <label class="form-label d-block mb-2">Servicios Adicionales</label>

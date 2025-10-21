@@ -1,1 +1,81 @@
-<p>services-add-form works!</p>
+<form (ngSubmit)="onSubmit()" class="card card-elev p-3">
+  <div class="row g-3">
+    <div class="col-12" *ngIf="errorMsg">
+      <div class="alert alert-danger py-2">{{ errorMsg }}</div>
+    </div>
+
+    <!-- Service selector -->
+    <div class="col-12 col-md-6">
+      <label class="form-label">Servicio</label>
+      <select
+        class="form-select"
+        [(ngModel)]="service_id"
+        name="service_id"
+        (ngModelChange)="onServiceChange()"
+      >
+        <option [ngValue]="undefined" disabled>Seleccione un servicio…</option>
+        <option *ngFor="let s of services" [ngValue]="s.id">
+          {{ s.name }} — {{ s.base_price | currency : 'COP' : 'symbol' : '1.0-0' }}
+        </option>
+      </select>
+      <small class="text-muted d-block mt-1" *ngIf="selectedService as svc">
+        {{ svc.name }} · Precio base: {{ svc.base_price | currency : 'COP' : 'symbol' : '1.0-0' }}
+      </small>
+    </div>
+
+    <!-- Schedule selector -->
+    <div class="col-12 col-md-6">
+      <label class="form-label">Horario</label>
+      <select
+        class="form-select"
+        [(ngModel)]="schedule_id"
+        name="schedule_id"
+        (ngModelChange)="onScheduleChange()"
+      >
+        <option [ngValue]="undefined">Sin horario</option>
+        <option *ngFor="let sch of schedules" [ngValue]="sch.id">
+          {{ sch.days_of_week.join(', ') }} — {{ sch.start_time }} - {{ sch.end_time }}
+        </option>
+      </select>
+      <small class="text-muted d-block mt-1" *ngIf="selectedSchedule as sch">
+        {{ sch.days_of_week.join(', ') }} · {{ sch.start_time }} - {{ sch.end_time }}
+      </small>
+    </div>
+
+    <!-- Quantity -->
+    <div class="col-6 col-md-3">
+      <label class="form-label">Cantidad</label>
+      <input type="number" class="form-control" [(ngModel)]="qty" name="qty" min="1" />
+    </div>
+
+    <!-- Unit Price -->
+    <div class="col-6 col-md-3">
+      <label class="form-label">Precio unitario</label>
+      <input
+        type="number"
+        class="form-control"
+        [(ngModel)]="unit_price"
+        name="unit_price"
+        step="0.01"
+      />
+    </div>
+
+    <!-- Status -->
+    <div class="col-12 col-md-6">
+      <label class="form-label">Estado</label>
+      <select class="form-select" [(ngModel)]="status" name="status">
+        <option [ngValue]="'ORDERED'">ORDERED</option>
+        <option [ngValue]="'DELIVERED'">DELIVERED</option>
+        <option [ngValue]="'CANCELED'">CANCELED</option>
+      </select>
+      <small class="text-muted d-block mt-1">{{ status }}</small>
+    </div>
+
+    <div class="col-12 d-flex gap-2 justify-content-end">
+      <button type="button" class="btn btn-outline-secondary" (click)="onCancel()">Cancelar</button>
+      <button type="submit" class="btn btn-olive" [disabled]="loading">
+        {{ edit ? 'Actualizar' : 'Agregar' }} servicio
+      </button>
+    </div>
+  </div>
+</form>

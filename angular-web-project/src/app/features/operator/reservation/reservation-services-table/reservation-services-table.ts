@@ -129,17 +129,17 @@ export class ReservationServicesTable implements OnChanges {
     onGridPreDestroyed: () => (this.gridApi = undefined),
     columnDefs: [
       {
-        headerName: 'Service Name',
+        headerName: 'Nombre',
         valueGetter: (p) => p.data?.service?.name || `Service ${p.data?.service_id ?? ''}`,
         minWidth: 160,
       },
       {
-        headerName: 'Schedule days of week',
+        headerName: 'Disponibilidad',
         valueGetter: (p) => (p.data?.schedule?.days_of_week || []).join(', '),
         minWidth: 220,
       },
       {
-        headerName: 'Schedule time (start - end)',
+        headerName: 'Horario',
         valueGetter: (p) => {
           const s = p.data?.schedule?.start_time;
           const e = p.data?.schedule?.end_time;
@@ -148,12 +148,12 @@ export class ReservationServicesTable implements OnChanges {
         minWidth: 220,
       },
       {
-        headerName: 'Quantity',
+        headerName: 'Cantidad',
         field: 'qty',
         maxWidth: 120,
       },
       {
-        headerName: 'unit price',
+        headerName: 'Precio unitario',
         valueGetter: (p) => p.data?.unit_price ?? 0,
         valueFormatter: (p) =>
           typeof p.value === 'number'
@@ -162,12 +162,12 @@ export class ReservationServicesTable implements OnChanges {
         maxWidth: 160,
       },
       {
-        headerName: 'status',
+        headerName: 'Estatus',
         field: 'status',
         maxWidth: 140,
       },
       {
-        headerName: 'total',
+        headerName: 'Total',
         valueGetter: (p) => (p.data?.qty ?? 0) * (p.data?.unit_price ?? 0),
         valueFormatter: (p) =>
           typeof p.value === 'number'
