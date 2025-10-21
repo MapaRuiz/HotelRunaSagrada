@@ -67,6 +67,64 @@ public class ReservationServiceServiceImpl implements ReservationServiceService 
         reservationService.setService(targetService);
         reservationService.setSchedule(targetSchedule);
 
+        // Before saving, check if there's an existing reservation service for the same
+        // reservation + service + schedule. If so, merge quantities into the existing
+        // row and avoid creating a duplicate.
+        Long rid = targetReservation.getReservationId() != null
+                ? targetReservation.getReservationId().longValue()
+                : null;
+
+        if (rid != null) {
+            List<ReservationService> existingList = reservationServiceRepository
+                    .findByReservationReservationId(rid);
+
+            ReservationService duplicate = null;
+            for (ReservationService rs : existingList) {
+                Long sid = rs.getService() != null ? rs.getService().getId() : null;
+                Long targetSid = targetService != null ? targetService.getId() : null;
+                Long schedId = rs.getSchedule() != null ? rs.getSchedule().getId() : null;
+                Long targetSchedId = targetSchedule != null ? targetSchedule.getId() : null;
+
+                if (sid != null && sid.equals(targetSid)) {
+                    if (schedId == null && targetSchedId == null) {
+                        duplicate = rs;
+                        break;
+                    }
+                    if (schedId != null && targetSchedId != null && schedId.equals(targetSchedId)) {
+                        duplicate = rs;
+                        break;
+                    }
+                }
+            }
+
+            if (duplicate != null) {
+                // If duplicate is the same row (update in place), just update values below
+                if (reservationService.getId() == null || !duplicate.getId().equals(reservationService.getId())) {
+                    // Merge: sum quantities and update unit price/status to the incoming values
+                    int incomingQty = reservationService.getQty();
+                    duplicate.setQty(duplicate.getQty() + incomingQty);
+                    if (reservationService.getUnitPrice() != null)
+                        duplicate.setUnitPrice(reservationService.getUnitPrice());
+                    if (reservationService.getStatus() != null)
+                        duplicate.setStatus(reservationService.getStatus());
+
+                    helper.resyncIdentity("reservation_services", "res_service_id");
+                    ReservationService saved = reservationServiceRepository.save(duplicate);
+
+                    // If we were updating a different existing row, remove it
+                    if (reservationService.getId() != null && !duplicate.getId().equals(reservationService.getId())) {
+                        try {
+                            reservationServiceRepository.deleteById(reservationService.getId());
+                        } catch (Exception ex) {
+                            // ignore deletion errors, we've already merged
+                        }
+                    }
+                    return saved;
+                }
+                // else duplicate is the same entity being saved; continue to update below
+            }
+        }
+
         helper.resyncIdentity("reservation_services", "res_service_id");
         return reservationServiceRepository.save(reservationService);
     }

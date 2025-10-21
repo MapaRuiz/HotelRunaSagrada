@@ -63,9 +63,9 @@ public class ReservationService {
     @Column(name = "qty", nullable = false)
     private int qty;
 
-    @Column(name = "unit_price", nullable = false)
+    @Column(name = "unit_price", nullable = true)
     @Schema(name = "unit_price")
-    private double unitPrice;
+    private Double unitPrice;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)

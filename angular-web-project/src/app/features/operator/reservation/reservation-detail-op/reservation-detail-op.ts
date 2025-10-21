@@ -71,12 +71,9 @@ export class ReservationDetailOp {
     // Subscribe to child's editRequested as an additional check
     setTimeout(() => {
       if (!this.servicesTable) {
-        console.log('[ReservationDetailOp] servicesTable not available in AfterViewInit');
         return;
       }
-      console.log('[ReservationDetailOp] subscribing to servicesTable.editRequested');
       this.childSub = this.servicesTable.editRequested.subscribe((row) => {
-        console.log('[ReservationDetailOp] child subscription caught row:', row);
         // forward to existing handler
         this.onEditReservationService(row);
       });
@@ -86,7 +83,6 @@ export class ReservationDetailOp {
   ngOnInit(): void {
     // subscribe to facade selection channel
     this.facadeSub = this.facade.selectedReservationService$.subscribe((row) => {
-      console.log('[ReservationDetailOp] facade selection caught row:', row);
       this.onEditReservationService(row);
     });
   }
@@ -153,8 +149,6 @@ export class ReservationDetailOp {
   }
 
   onEditReservationService(row: ReservationServiceModel) {
-    // Debug log to ensure the event carries the row
-    console.log('[ReservationDetailOp] edit requested row:', row);
     // store selected row and enable edit mode so the template will render the form
     this.editingService = row;
     this.editingServices = true;

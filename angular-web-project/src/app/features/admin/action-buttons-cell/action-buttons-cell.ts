@@ -28,12 +28,10 @@ export class ActionButtonsComponent<T> implements ICellRendererAngularComp {
   }
 
   onEditDebug() {
-    console.log('[ActionButtonsComponent] Edit clicked for', this.params?.data);
     this.onEdit();
   }
 
   onDeleteDebug() {
-    console.log('[ActionButtonsComponent] Delete clicked for', this.params?.data);
     this.onDelete();
   }
 

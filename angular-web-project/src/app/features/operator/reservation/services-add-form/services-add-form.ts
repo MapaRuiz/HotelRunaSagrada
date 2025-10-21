@@ -103,13 +103,22 @@ export class ServicesAddForm implements OnInit, OnChanges {
     // When service changes, set suggested unit price from service base_price
     const sel = this.services.find((s) => s.id === this.service_id);
     this.selectedService = sel;
-    if (sel && !this.edit) {
-      this.unit_price = sel.base_price ?? this.unit_price;
+
+    // If we're editing, only overwrite dependent fields if the service has changed
+    const originalServiceId = this.edit?.service_id ?? this.edit?.service?.id;
+    const changedService = originalServiceId != null ? originalServiceId !== this.service_id : true;
+
+    if (sel) {
+      if (!this.edit || changedService) {
+        this.unit_price = sel.base_price ?? this.unit_price;
+      }
     }
+
     this.offeringApi.getSchedules(this.service_id).subscribe({
       next: (sch) => {
         this.schedules = sch || [];
-        if (!this.edit) {
+        if (!this.edit || changedService) {
+          // If it's a new selection (or creating), pick the first schedule by default
           this.schedule_id = this.schedules[0]?.id;
         }
         this.onScheduleChange();
