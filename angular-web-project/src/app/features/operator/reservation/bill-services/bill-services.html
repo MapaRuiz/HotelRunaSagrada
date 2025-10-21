@@ -1,0 +1,38 @@
+<div class="summary-section" *ngIf="reservationId">
+  <div class="summary-card">
+    <h3 class="summary-title">Resumen del Pedido</h3>
+
+    <div class="summary-content">
+      <div class="summary-row" *ngIf="items?.length">
+        <span class="label">Servicios contratados</span>
+      </div>
+      <div class="summary-items" *ngIf="items?.length; else noItems"></div>
+      <ng-template #noItems>
+        <div class="summary-row"><small class="text-muted">No hay servicios.</small></div>
+        <div class="summary-divider"></div>
+      </ng-template>
+      <div class="summary-row">
+        <span class="label">Reserva</span>
+        <span class="value">#{{ reservationId }}</span>
+      </div>
+      <div class="summary-row" *ngIf="currentUser as u">
+        <span class="label">Cliente</span>
+        <span class="value">{{ u.full_name }}</span>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-row">
+        <span class="label">Subtotal</span>
+        <span class="value">{{ formatCurrency(subtotal) }}</span>
+      </div>
+      <div class="summary-row">
+        <span class="label">Impuestos (19%)</span>
+        <span class="value">{{ formatCurrency(taxes) }}</span>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-row total">
+        <span class="label">Total a Pagar</span>
+        <span class="value">{{ formatCurrency(total) }}</span>
+      </div>
+    </div>
+  </div>
+</div>

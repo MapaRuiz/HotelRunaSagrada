@@ -1,0 +1,18 @@
+.summary-section { margin-top: 1rem; }
+.summary-card { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.06); }
+.summary-title { margin: 0 0 12px; font-size: 1.1rem; }
+.summary-content { display: grid; gap: 8px; }
+.summary-items { display: grid; gap: 6px; }
+.item { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+.item-main { display: grid; }
+.item-name { font-weight: 600; }
+.item-meta { color: #666; }
+.item-price { display: grid; grid-auto-flow: column; gap: 12px; align-items: end; }
+.item-price .qty { min-width: 40px; text-align: right; color: #666; }
+.item-price .unit { min-width: 100px; text-align: right; color: #444; }
+.item-price .line { min-width: 120px; text-align: right; font-weight: 600; }
+.summary-row { display: flex; justify-content: space-between; align-items: center; }
+.summary-row.total { font-weight: 700; }
+.summary-divider { height: 1px; background: rgba(0,0,0,0.1); margin: 6px 0; }
+.label { color: #555; }
+.value { color: #111; }

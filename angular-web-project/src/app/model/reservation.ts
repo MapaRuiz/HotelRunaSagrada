@@ -11,7 +11,7 @@ export interface Reservation {
   room_id: number;
   check_in: string;   // ISO (yyyy-mm-dd)
   check_out: string;
-  status: 'PENDING' | 'CONFIRMED';
+  status: 'PENDING' | 'CONFIRMED' | 'FINISHED';
   created_at?: string;
 
   // Relaciones opcionales si el back expande objetos

@@ -181,7 +181,7 @@
               aria-expanded="false"
               aria-controls="collapseThree"
             >
-              Pagos
+              Pago Servicios Contratados
             </button>
           </h5>
         </div>
@@ -192,44 +192,55 @@
           data-bs-parent="#accordion"
         >
           <div class="card-body">
-            <!-- Pagos -->
-            <div
-              class="col-12"
-              *ngIf="!editingServices && current.payments && current.payments.length > 0"
-            >
-              <label class="form-label">Historial de Pagos</label>
-              <div class="table-responsive">
-                <table class="table table-sm">
-                  <thead>
-                    <tr>
-                      <th>Monto</th>
-                      <th>Método</th>
-                      <th>Estado</th>
-                      <th>Referencia</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let payment of current.payments">
-                      <td>{{ payment.amount | currency : 'USD' : 'symbol' : '1.2-2' }}</td>
-                      <td>{{ payment.payment_method?.type || fallbackText }}</td>
-                      <td>
-                        <span
-                          class="badge"
-                          [class]="
-                            payment.status === 'PAID'
-                              ? 'text-bg-success'
-                              : payment.status === 'PENDING'
-                              ? 'text-bg-warning'
-                              : 'text-bg-danger'
-                          "
-                        >
-                          {{ payment.status }}
-                        </span>
-                      </td>
-                      <td>{{ payment.tx_reference || '-' }}</td>
-                    </tr>
-                  </tbody>
-                </table>
+            <div class="col-12 mb-3" *ngIf="!editingServices">
+              <app-bill-services
+                [reservationId]="current.reservation_id"
+                (totalsChanged)="onBillTotalsChanged($event)"
+                (userChanged)="onBillUserChanged($event)"
+              ></app-bill-services>
+              <div class="d-flex align-items-center gap-2 mt-2">
+                <button
+                  type="button"
+                  class="btn btn-olive btn-sm"
+                  (click)="togglePayment()"
+                  [disabled]="billTotal <= 0 || current.status === 'FINISHED'"
+                >
+                  Pagar total
+                </button>
+                <small class="text-muted" *ngIf="billTotal <= 0">No hay monto pendiente.</small>
+                <small class="text-muted" *ngIf="current.status === 'FINISHED'">La reserva está finalizada.</small>
+              </div>
+              <div class="mt-2" *ngIf="showingPayment">
+                <!-- Métodos guardados -->
+                <div *ngIf="(paymentMethods?.length ?? 0) > 0" class="payment-methods-list">
+                  <label *ngFor="let method of paymentMethods; trackBy: trackMethod"
+                         class="payment-method-item"
+                         [class.selected]="selectedPaymentMethodId === toNumber(method.method_id)"
+                         [attr.for]="'method-' + method.method_id">
+                    <input
+                      type="radio"
+                      [id]="'method-' + method.method_id"
+                      name="paymentMethod"
+                      [value]="toNumber(method.method_id)"
+                      [(ngModel)]="selectedPaymentMethodId" />
+                    <span class="method-label">
+                      <span class="method-icon">{{ getPaymentTypeIcon(method.type) }}</span>
+                      <span class="method-info">
+                        <span class="method-type">{{ getPaymentTypeName(method.type) }}</span>
+                        <span class="method-details" *ngIf="method.last4">•••• {{ method.last4 }}</span>
+                        <span class="method-holder" *ngIf="method.holder_name">{{ method.holder_name }}</span>
+                      </span>
+                    </span>
+                  </label>
+                </div>
+                <div *ngIf="(paymentMethods?.length ?? 0) === 0" class="text-muted">
+                  No hay métodos guardados para este cliente.
+                </div>
+                <div class="mt-2">
+                  <button type="button" class="btn btn-primary btn-sm" (click)="confirmPayTotal()" [disabled]="!selectedPaymentMethodId">
+                    Confirmar pago de {{ billTotal | currency:'COP':'symbol':'1.0-0' }}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

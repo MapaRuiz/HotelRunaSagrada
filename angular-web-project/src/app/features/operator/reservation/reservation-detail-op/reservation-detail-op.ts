@@ -11,18 +11,30 @@ import {
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { CommonModule, CurrencyPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Reservation } from '../../../../model/reservation';
 import { ReservationService } from '../../../../services/reservation';
 import { ServicesAddForm } from '../services-add-form/services-add-form';
 import { ReservationServicesTable } from '../reservation-services-table/reservation-services-table';
 import { ReservationFacade, getStatusBadge, getStatusText } from '../reservation';
+import { BillServicesComponent } from '../bill-services/bill-services';
 import { ReservationService as ReservationServiceModel } from '../../../../model/reservation-service';
+import { PaymentMethodService } from '../../../../services/payment-method';
+import { PaymentService } from '../../../../services/payment';
+import { PaymentMethod } from '../../../../model/payment-method';
 import { UserDetailComponent } from '../../../admin/users/user-detail/user-detail';
 
 @Component({
   selector: 'app-reservation-detail-op',
   standalone: true,
-  imports: [CommonModule, ServicesAddForm, UserDetailComponent, ReservationServicesTable],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ServicesAddForm,
+    UserDetailComponent,
+    ReservationServicesTable,
+    BillServicesComponent,
+  ],
   templateUrl: './reservation-detail-op.html',
   styleUrls: [
     './reservation-detail-op.css',
@@ -33,6 +45,7 @@ import { UserDetailComponent } from '../../../admin/users/user-detail/user-detai
 export class ReservationDetailOp {
   @Input() reservation?: Reservation;
   @ViewChild(ReservationServicesTable) servicesTable?: ReservationServicesTable;
+  @ViewChild(BillServicesComponent) billComp?: BillServicesComponent;
 
   @Output() servicesModified = new EventEmitter<ReservationService[]>();
   @Output() addServicesRequested = new EventEmitter<Reservation>();
@@ -46,8 +59,19 @@ export class ReservationDetailOp {
   text = getStatusText;
 
   private facade = inject(ReservationFacade);
+  private paymentMethodSvc = inject(PaymentMethodService);
+  private paymentSvc = inject(PaymentService);
   private childSub?: Subscription;
   private facadeSub?: Subscription;
+
+  // Billing state provided by bill component
+  billSubtotal = 0;
+  billTaxes = 0;
+  billTotal = 0;
+  // Payment selection state
+  paymentMethods: PaymentMethod[] = [];
+  selectedPaymentMethodId: number | null = null;
+  showingPayment = false;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['reservation'] && this.reservation?.reservation_id) {
@@ -64,6 +88,17 @@ export class ReservationDetailOp {
           // ignore errors here; UI will show empty services
         },
       });
+
+      // Ensure we have the reservation user and load payment methods via facade
+      const uid = this.reservation.user?.user_id ?? this.reservation.user_id;
+      if (uid) {
+        this.facade.getUserById(uid).subscribe({
+          next: (u) => this.onBillUserChanged(u as any),
+          error: () => this.onBillUserChanged(undefined),
+        });
+      } else {
+        this.onBillUserChanged(undefined);
+      }
     }
   }
 
@@ -123,6 +158,7 @@ export class ReservationDetailOp {
     this.editingChanged.emit(false);
     // refresh table after closing form (save/cancel)
     this.servicesTable?.onContainerShown();
+    this.billComp?.reload();
   }
 
   closeDetail() {
@@ -184,5 +220,74 @@ export class ReservationDetailOp {
         setTimeout(() => this.servicesTable?.onContainerShown(), 0);
       }
     }
+  }
+
+  // Receive totals/user from bill component
+  onBillTotalsChanged(ev: { subtotal: number; taxes: number; total: number }) {
+    this.billSubtotal = ev.subtotal;
+    this.billTaxes = ev.taxes;
+    this.billTotal = ev.total;
+  }
+
+  onBillUserChanged(user?: { user_id?: number }) {
+    if (!user?.user_id) {
+      this.paymentMethods = [];
+      this.selectedPaymentMethodId = null;
+      console.debug('No user or user_id provided; cleared payment methods.');
+      return;
+    }
+    this.paymentMethodSvc.getMy(user.user_id).subscribe({
+      next: (methods) => {
+        this.paymentMethods = methods ?? [];
+        const firstId =
+          (this.paymentMethods[0] as any)?.method_id ??
+          (this.paymentMethods[0] as any)?.id ??
+          (this.paymentMethods[0] as any)?.payment_method_id;
+        this.selectedPaymentMethodId = this.toNumber(firstId);
+      },
+      error: () => {
+        this.paymentMethods = [];
+        this.selectedPaymentMethodId = null;
+      },
+    });
+  }
+
+  // Pay total
+  togglePayment() {
+    if (this.billTotal <= 0) return;
+    this.showingPayment = !this.showingPayment;
+  }
+
+  confirmPayTotal() {
+    if (!this.reservation?.reservation_id || !this.selectedPaymentMethodId) return;
+    const payload = {
+      reservation_id: this.reservation.reservation_id,
+      payment_method_id: this.selectedPaymentMethodId,
+      amount: this.billTotal,
+      status: 'PAID' as const,
+    };
+    this.paymentSvc.create(payload).subscribe({
+      next: () => {
+        alert('Pago registrado');
+        this.showingPayment = false;
+        this.billComp?.reload();
+      },
+      error: () => alert('No se pudo registrar el pago'),
+    });
+  }
+
+  // helpers for payment methods UI
+  toNumber(v: any): number | null {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+  trackMethod = (_: number, m: any) => m?.method_id ?? m?.id ?? m?.payment_method_id ?? _;
+  getPaymentTypeIcon(type: string) {
+    const map: any = { TARJETA: '💳', PAYPAL: '🅿️', EFECTIVO: '💵' };
+    return map[type] ?? '💳';
+  }
+  getPaymentTypeName(type: string) {
+    const map: any = { TARJETA: 'Tarjeta', PAYPAL: 'PayPal', EFECTIVO: 'Efectivo' };
+    return map[type] ?? type;
   }
 }

@@ -89,6 +89,11 @@ export class ReservationFacade {
     return this.resServicesApi.listByReservation(reservationId);
   }
 
+  // Load a user by id (for payment methods, etc.)
+  getUserById(userId: number) {
+    return this.usersService.getById(userId);
+  }
+
   // Cross-component selection channel for a ReservationService row
   private selectedReservationServiceSubject = new Subject<ReservationServiceModel>();
   selectedReservationService$ = this.selectedReservationServiceSubject.asObservable();

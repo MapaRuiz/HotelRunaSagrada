@@ -45,6 +45,6 @@ public class Reservation {
     private Timestamp createdAt = Timestamp.from(Instant.now());
 
     public enum Status {
-        PENDING, CONFIRMED, CHECKIN, FINISHED
+        PENDING, CONFIRMED, CHECKIN, FINISHED, INACTIVE
     }
 }

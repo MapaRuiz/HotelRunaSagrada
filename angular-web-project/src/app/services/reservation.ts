@@ -76,4 +76,8 @@ export class ReservationService {
   updateStatus(id: number, status: string): Observable<Reservation> {
     return this.http.put<Reservation>(`${this.resource}/${id}/status/${status}`, null);
   }
+
+  lumpSum(reservationId: number): Observable<number> {
+    return this.http.get<number>(`${this.resource}/lumpsum/${reservationId}`);
+  }
 }

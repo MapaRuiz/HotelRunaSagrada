@@ -40,9 +40,8 @@ public class DatabaseInit implements CommandLineRunner {
         private final StaffMemberRepository staffMemberRepo;
         private final TaskRepository taskRepo;
 
-        // Repositorios para Payment y PaymentMethod
+        // Repositorios para PaymentMethod
         private final PaymentMethodRepository paymentMethodRepo;
-        private final PaymentRepository paymentRepo;
 
         @Override
         public void run(String... args) {
@@ -1622,121 +1621,49 @@ public class DatabaseInit implements CommandLineRunner {
                 taskRepo.save(task);
         }
 
+        /**
+         * Create and persist a PaymentMethod for the given user.
+         * Returns the saved entity.
+         */
+        private PaymentMethod createPaymentMethodForUser(User user, String type, String lastfour,
+                        String holderName, String billingAddress) {
+                PaymentMethod pm = new PaymentMethod();
+                pm.setUserId(user);
+                pm.setType(type);
+                pm.setLastfour(lastfour);
+                pm.setHolderName(holderName);
+                pm.setBillingAddress(billingAddress);
+                return paymentMethodRepo.save(pm);
+        }
+
         private void seedPaymentMethodsAndPayments() {
                 if (paymentMethodRepo.count() > 0)
                         return; // No duplicar
 
-                // Obtener algunos clientes
+                // Obtener todos los clientes
                 List<User> clients = userRepo.findAll().stream()
                                 .filter(u -> u.getRoles().stream().anyMatch(r -> r.getName().equals("CLIENT")))
-                                .limit(3)
                                 .toList();
 
                 if (clients.isEmpty())
                         return;
 
-                // Crear 3 métodos de pago
-                PaymentMethod pm1 = new PaymentMethod();
-                pm1.setUserId(clients.get(0));
-                pm1.setType("TARJETA");
-                pm1.setLastfour("4532");
-                pm1.setHolderName(clients.get(0).getFullName());
-                pm1.setBillingAddress("Calle 123 #45-67, Bogotá");
-                paymentMethodRepo.save(pm1);
+                // Crear un método de pago para cada cliente (mock simple)
+                List<PaymentMethod> createdMethods = new ArrayList<>();
+                for (int i = 0; i < clients.size(); i++) {
+                        User c = clients.get(i);
+                        String last4 = String.format("%04d", 4000 + i);
+                        String address = switch (i % 3) {
+                                case 1 -> "Carrera 10 #20-30, Medellín";
+                                case 2 -> "Avenida 5 #12-34, Cali";
+                                default -> "Calle 123 #45-67, Bogotá";
+                        };
+                        PaymentMethod pm = createPaymentMethodForUser(c, "TARJETA", last4, c.getFullName(), address);
+                        createdMethods.add(pm);
+                }
 
-                PaymentMethod pm2 = new PaymentMethod();
-                pm2.setUserId(clients.get(1 % clients.size()));
-                pm2.setType("TARJETA");
-                pm2.setLastfour("8765");
-                pm2.setHolderName(clients.get(1 % clients.size()).getFullName());
-                pm2.setBillingAddress("Carrera 10 #20-30, Medellín");
-                paymentMethodRepo.save(pm2);
-
-                PaymentMethod pm3 = new PaymentMethod();
-                pm3.setUserId(clients.get(2 % clients.size()));
-                pm3.setType("TARJETA");
-                pm3.setLastfour("9012");
-                pm3.setHolderName(clients.get(2 % clients.size()).getFullName());
-                pm3.setBillingAddress("Avenida 5 #12-34, Cali");
-                paymentMethodRepo.save(pm3);
-
-                // Obtener algunas reservaciones
-                List<Reservation> reservations = reservationRepo.findAll().stream()
-                                .limit(10)
-                                .toList();
-
-                if (reservations.isEmpty())
-                        return;
-
-                // Crear 10 pagos con diferentes estados
-                Payment payment1 = new Payment();
-                payment1.setReservationId(reservations.get(0));
-                payment1.setPaymentMethodId(pm1);
-                payment1.setAmount(450000.00);
-                payment1.setStatus("COMPLETED");
-                paymentRepo.save(payment1);
-
-                Payment payment2 = new Payment();
-                payment2.setReservationId(reservations.get(1 % reservations.size()));
-                payment2.setPaymentMethodId(pm2);
-                payment2.setAmount(680000.00);
-                payment2.setStatus("PENDING");
-                paymentRepo.save(payment2);
-
-                Payment payment3 = new Payment();
-                payment3.setReservationId(reservations.get(2 % reservations.size()));
-                payment3.setPaymentMethodId(pm3);
-                payment3.setAmount(320000.00);
-                payment3.setStatus("COMPLETED");
-                paymentRepo.save(payment3);
-
-                Payment payment4 = new Payment();
-                payment4.setReservationId(reservations.get(3 % reservations.size()));
-                payment4.setPaymentMethodId(pm1);
-                payment4.setAmount(550000.00);
-                payment4.setStatus("FAILED");
-                paymentRepo.save(payment4);
-
-                Payment payment5 = new Payment();
-                payment5.setReservationId(reservations.get(4 % reservations.size()));
-                payment5.setPaymentMethodId(pm2);
-                payment5.setAmount(890000.00);
-                payment5.setStatus("COMPLETED");
-                paymentRepo.save(payment5);
-
-                Payment payment6 = new Payment();
-                payment6.setReservationId(reservations.get(5 % reservations.size()));
-                payment6.setPaymentMethodId(pm3);
-                payment6.setAmount(420000.00);
-                payment6.setStatus("PENDING");
-                paymentRepo.save(payment6);
-
-                Payment payment7 = new Payment();
-                payment7.setReservationId(reservations.get(6 % reservations.size()));
-                payment7.setPaymentMethodId(pm1);
-                payment7.setAmount(760000.00);
-                payment7.setStatus("COMPLETED");
-                paymentRepo.save(payment7);
-
-                Payment payment8 = new Payment();
-                payment8.setReservationId(reservations.get(7 % reservations.size()));
-                payment8.setPaymentMethodId(pm2);
-                payment8.setAmount(290000.00);
-                payment8.setStatus("REFUNDED");
-                paymentRepo.save(payment8);
-
-                Payment payment9 = new Payment();
-                payment9.setReservationId(reservations.get(8 % reservations.size()));
-                payment9.setPaymentMethodId(pm3);
-                payment9.setAmount(1250000.00);
-                payment9.setStatus("COMPLETED");
-                paymentRepo.save(payment9);
-
-                Payment payment10 = new Payment();
-                payment10.setReservationId(reservations.get(9 % reservations.size()));
-                payment10.setPaymentMethodId(pm1);
-                payment10.setAmount(510000.00);
-                payment10.setStatus("PENDING");
-                paymentRepo.save(payment10);
+                // We only create one PaymentMethod per client for dev convenience.
+                // Do not create any Payment entities here.
+                // createdMethods already contains one PaymentMethod per client.
         }
 }
