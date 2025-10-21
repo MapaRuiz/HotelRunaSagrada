@@ -5,8 +5,14 @@ import { Reservation } from '../../../../model/reservation';
 import { ServiceOffering } from '../../../../model/service-offering';
 import { ServiceSchedule } from '../../../../model/service-schedule';
 import { ServiceOfferingService } from '../../../../services/service-offering-service';
-import { ReservationServiceApi, ReservationServiceRequest } from '../../../../services/reservation-service';
-import { ReservationService as ReservationServiceModel, res_service_status } from '../../../../model/reservation-service';
+import {
+  ReservationServiceApi,
+  ReservationServiceRequest,
+} from '../../../../services/reservation-service';
+import {
+  ReservationService as ReservationServiceModel,
+  res_service_status,
+} from '../../../../model/reservation-service';
 
 @Component({
   selector: 'app-services-add-form',
@@ -105,11 +111,11 @@ export class ServicesAddForm implements OnInit {
       return;
     }
     const body: ReservationServiceRequest = {
-      reservationId: Number(this.reservation.reservation_id),
-      serviceId: Number(this.service_id),
-      scheduleId: this.schedule_id ?? undefined,
+      reservation_id: Number(this.reservation.reservation_id),
+      service_id: Number(this.service_id),
+      schedule_id: this.schedule_id ?? undefined,
       qty: Number(this.qty),
-      unitPrice: Number(this.unit_price),
+      unit_price: Number(this.unit_price),
       status: this.status,
     };
 
@@ -134,7 +140,10 @@ export class ServicesAddForm implements OnInit {
         },
         error: (e) => {
           this.loading = false;
-          this.errorMsg = e?.status === 409 ? 'El servicio ya existe para esta reserva.' : 'No se pudo agregar el servicio.';
+          this.errorMsg =
+            e?.status === 409
+              ? 'El servicio ya existe para esta reserva.'
+              : 'No se pudo agregar el servicio.';
         },
       });
     }

@@ -7,13 +7,13 @@ import {
   res_service_status,
 } from '../model/reservation-service';
 
-// Matches ReservationServiceController.ReservationServiceRequest (camelCase payload)
+// Backend uses snake_case fields
 export interface ReservationServiceRequest {
-  reservationId: number; // required
-  serviceId: number; // required
-  scheduleId?: number | null;
+  reservation_id: number; // required
+  service_id: number; // required
+  schedule_id?: number | null;
   qty: number; // required
-  unitPrice: number; // required
+  unit_price: number; // required
   status?: res_service_status;
 }
 
@@ -58,11 +58,11 @@ export class ReservationServiceApi {
   // Helper: build request from app model (snake_case -> camelCase)
   static toRequest(model: Partial<ReservationServiceModel>): Partial<ReservationServiceRequest> {
     return {
-      reservationId: model.reservation_id ?? (model.reservation as any)?.reservation_id,
-      serviceId: model.service_id ?? (model.service as any)?.id,
-      scheduleId: model.schedule_id ?? (model.schedule as any)?.id,
+      reservation_id: model.reservation_id ?? (model.reservation as any)?.reservation_id,
+      service_id: model.service_id ?? (model.service as any)?.id,
+      schedule_id: model.schedule_id ?? (model.schedule as any)?.id,
       qty: model.qty,
-      unitPrice: model.unit_price,
+      unit_price: model.unit_price,
       status: model.status as res_service_status | undefined,
     } as Partial<ReservationServiceRequest>;
   }

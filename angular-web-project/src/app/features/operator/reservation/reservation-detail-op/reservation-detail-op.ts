@@ -5,6 +5,7 @@ import { ReservationService } from '../../../../services/reservation';
 import { ServicesAddForm } from '../services-add-form/services-add-form';
 import { ReservationServicesTable } from '../reservation-services-table/reservation-services-table';
 import { ReservationFacade, getStatusBadge, getStatusText } from '../reservation';
+import { ReservationService as ReservationServiceModel } from '../../../../model/reservation-service';
 import { UserDetailComponent } from '../../../admin/users/user-detail/user-detail';
 
 @Component({
@@ -28,6 +29,7 @@ export class ReservationDetailOp {
   @Output() closeRequested = new EventEmitter<void>();
 
   editingServices = false;
+  editingService: ReservationServiceModel | null = null;
 
   badge = getStatusBadge;
   text = getStatusText;
@@ -74,12 +76,15 @@ export class ReservationDetailOp {
       this.addServicesRequested.emit(this.reservation);
     }
     this.editingServices = true;
+    this.editingService = null;
     this.editingChanged.emit(true);
   }
 
   closeServices() {
     this.editingServices = false;
     this.editingChanged.emit(false);
+    // refresh table after closing form (save/cancel)
+    this.servicesTable?.onContainerShown();
   }
 
   closeDetail() {
@@ -103,5 +108,11 @@ export class ReservationDetailOp {
   // Triggered when the collapse containing the services table is shown
   onServicesCollapseShown() {
     this.servicesTable?.onContainerShown();
+  }
+
+  onEditReservationService(row: ReservationServiceModel) {
+    this.editingService = row;
+    this.editingServices = true;
+    this.editingChanged.emit(true);
   }
 }

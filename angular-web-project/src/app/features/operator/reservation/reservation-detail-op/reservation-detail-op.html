@@ -155,6 +155,7 @@
             <div class="col-12" *ngIf="editingServices">
               <app-services-add-form
                 [reservation]="current"
+                [edit]="editingService"
                 (saved)="closeServices()"
                 (canceled)="closeServices()"
               ></app-services-add-form>
@@ -165,6 +166,7 @@
               <label class="form-label d-block mb-2">Servicios Adicionales</label>
               <app-reservation-services-table
                 [reservationId]="current.reservation_id"
+                (editRequested)="onEditReservationService($event)"
               ></app-reservation-services-table>
             </div>
           </div>

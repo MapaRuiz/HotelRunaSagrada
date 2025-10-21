@@ -21,6 +21,8 @@ import com.runasagrada.hotelapi.model.ReservationService;
 import com.runasagrada.hotelapi.service.ReservationServiceService;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -160,7 +162,10 @@ public class ReservationServiceController {
 
     @Data
     @AllArgsConstructor
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class ReservationServiceDTO {
+        // Explicit identifier for row mapping on the frontend
+        private Long resServiceId;
         @Schema(name = "reservation_id")
         private Long reservationId;
         @Schema(name = "service_id")
@@ -174,6 +179,7 @@ public class ReservationServiceController {
 
         public static ReservationServiceDTO from(ReservationService rService) {
             return new ReservationServiceDTO(
+                    rService.getId(),
                     rService.getReservation().getReservationId().longValue(),
                     rService.getService().getId(),
                     rService.getSchedule() != null ? rService.getSchedule().getId() : null,

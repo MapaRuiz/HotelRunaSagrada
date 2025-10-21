@@ -16,16 +16,20 @@ import {
   ServiceOfferingDetailResponse,
 } from '../../../../services/service-offering-service';
 import { forkJoin } from 'rxjs';
+import { Output, EventEmitter } from '@angular/core';
+import { ActionButtonsComponent } from '../../../admin/action-buttons-cell/action-buttons-cell';
+import { ReservationServiceApi } from '../../../../services/reservation-service';
 
 @Component({
   selector: 'app-reservation-services-table',
   standalone: true,
-  imports: [CommonModule, AgGridAngular],
+  imports: [CommonModule, AgGridAngular, ActionButtonsComponent],
   templateUrl: './reservation-services-table.html',
   styleUrl: './reservation-services-table.css',
 })
 export class ReservationServicesTable implements OnChanges {
   @Input() reservationId?: number;
+  @Output() editRequested = new EventEmitter<ReservationServiceModel>();
 
   services: ReservationServiceModel[] = [];
   loading = false;
@@ -36,6 +40,7 @@ export class ReservationServicesTable implements OnChanges {
 
   private facade = inject(ReservationFacade);
   private serviceOffering = inject(ServiceOfferingService);
+  private resServicesApi = inject(ReservationServiceApi);
 
   constructor() {
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -119,7 +124,14 @@ export class ReservationServicesTable implements OnChanges {
     localeText: AG_GRID_LOCALE,
     rowSelection: 'single',
     suppressDragLeaveHidesColumns: true,
-    getRowId: (p) => (p.data?.res_service_id != null ? String(p.data.res_service_id) : ''),
+    getRowId: (p) => {
+      const id = (p.data as any)?.res_service_id;
+      if (id != null) return String(id);
+      const r = (p.data as any)?.reservation_id ?? 'r';
+      const s = (p.data as any)?.service_id ?? 's';
+      const sch = (p.data as any)?.schedule_id ?? 'null';
+      return `${r}-${s}-${sch}-${Math.random().toString(36).slice(2,7)}`;
+    },
     onGridReady: (params) => {
       this.gridApi = params.api;
       params.api.setGridOption('rowData', this.services);
@@ -175,6 +187,42 @@ export class ReservationServicesTable implements OnChanges {
             : p.value,
         maxWidth: 160,
       },
+      {
+        headerName: 'Acciones',
+        filter: false,
+        minWidth: 200,
+        cellRenderer: ActionButtonsComponent<ReservationServiceModel>,
+        cellRendererParams: (p: { data: ReservationServiceModel }) => ({
+          editLabel: 'Editar',
+          deleteLabel: 'Eliminar',
+          onEdit: (row: ReservationServiceModel) => this.onEditRow(row),
+          onDelete: (row: ReservationServiceModel) => this.onDeleteRow(row),
+        }),
+      } as ColDef<ReservationServiceModel>,
     ] as ColDef<ReservationServiceModel>[],
   };
+
+  private onEditRow(row: ReservationServiceModel) {
+    this.editRequested.emit(row);
+  }
+
+  private onDeleteRow(row: ReservationServiceModel) {
+    if (!row.res_service_id) {
+      alert('No se puede eliminar: falta el ID del servicio de reserva.');
+      return;
+    }
+    if (!confirm('¿Eliminar este servicio contratado?')) return;
+    this.loading = true;
+    this.resServicesApi.delete(row.res_service_id).subscribe({
+      next: () => {
+        // reload list
+        if (this.reservationId) this.fetchServices(this.reservationId);
+        else this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+        alert('No se pudo eliminar el servicio.');
+      },
+    });
+  }
 }
