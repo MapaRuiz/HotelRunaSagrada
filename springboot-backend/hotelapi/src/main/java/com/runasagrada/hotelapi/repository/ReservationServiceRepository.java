@@ -5,10 +5,10 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.runasagrada.hotelapi.model.ReservationService;
+import com.runasagrada.hotelapi.model.ReservationServiceEntity;
 
 @Repository
-public interface ReservationServiceRepository extends JpaRepository<ReservationService, Long> {
+public interface ReservationServiceRepository extends JpaRepository<ReservationServiceEntity, Long> {
 
-    List<ReservationService> findByReservationReservationId(Long id);
+    List<ReservationServiceEntity> findByReservationReservationId(Long id);
 }

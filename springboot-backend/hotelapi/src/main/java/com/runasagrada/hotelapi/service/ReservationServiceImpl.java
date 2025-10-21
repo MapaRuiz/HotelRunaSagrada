@@ -7,11 +7,15 @@ import com.runasagrada.hotelapi.model.RoomLock;
 import com.runasagrada.hotelapi.model.User;
 import com.runasagrada.hotelapi.repository.HotelRepository;
 import com.runasagrada.hotelapi.repository.ReservationRepository;
+import com.runasagrada.hotelapi.model.ReservationServiceEntity;
+import com.runasagrada.hotelapi.repository.ReservationServiceRepository;
 import com.runasagrada.hotelapi.repository.RoomLockRepository;
 import com.runasagrada.hotelapi.repository.RoomRepository;
 import com.runasagrada.hotelapi.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,11 +29,18 @@ import java.util.stream.Collectors;
 @Transactional
 public class ReservationServiceImpl implements ReservationService {
 
-    private final ReservationRepository reservationRepo;
-    private final UserRepository userRepo;
-    private final HotelRepository hotelRepo;
-    private final RoomRepository roomRepo;
-    private final RoomLockRepository lockRepo;
+    @Autowired
+    private ReservationRepository reservationRepo;
+    @Autowired
+    private ReservationServiceRepository reservationServiceRepo;
+    @Autowired
+    private UserRepository userRepo;
+    @Autowired
+    private HotelRepository hotelRepo;
+    @Autowired
+    private RoomRepository roomRepo;
+    @Autowired
+    private RoomLockRepository lockRepo;
 
     @Override
     public Reservation create(Integer userId, Long hotelId, Integer roomId,
@@ -209,6 +220,15 @@ public class ReservationServiceImpl implements ReservationService {
         Reservation.Status newStatus = Reservation.Status.valueOf(status.toUpperCase());
         res.setStatus(newStatus);
         return reservationRepo.save(res);
+    }
+
+    @Override
+    public Double findLumpSumById(Long id) {
+        List<ReservationServiceEntity> reservationService = reservationServiceRepo.findByReservationReservationId(id);
+        if (reservationService == null || reservationService.isEmpty()) {
+            return null;
+        }
+        return reservationService.stream().mapToDouble(rs -> rs.getUnitPrice() * rs.getQty()).sum();
     }
 
 }

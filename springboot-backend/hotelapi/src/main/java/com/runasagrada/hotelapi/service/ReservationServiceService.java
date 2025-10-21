@@ -2,18 +2,20 @@ package com.runasagrada.hotelapi.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-import com.runasagrada.hotelapi.model.ReservationService;
+import com.runasagrada.hotelapi.model.ReservationServiceEntity;
 
 public interface ReservationServiceService {
-    Optional<ReservationService> searchById(Long id);
+    Optional<ReservationServiceEntity> searchById(Long id);
 
-    List<ReservationService> getAll();
+    List<ReservationServiceEntity> getAll();
 
-    ReservationService save(ReservationService reservationService, Long reservationId, Long serviceId,
+    ReservationServiceEntity save(ReservationServiceEntity reservationService, Long reservationId, Long serviceId,
             Long scheduleId);
 
     void delete(Long id);
 
-    List<ReservationService> findByReservation(Long id);
+    List<ReservationServiceEntity> findByReservation(Long id);
+
 }

@@ -29,7 +29,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReservationService {
+public class ReservationServiceEntity {
 
     public enum Status {
         ORDERED,

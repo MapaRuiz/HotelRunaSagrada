@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.runasagrada.hotelapi.model.Reservation;
-import com.runasagrada.hotelapi.model.ReservationService;
+import com.runasagrada.hotelapi.model.ReservationServiceEntity;
 import com.runasagrada.hotelapi.model.ServiceOffering;
 import com.runasagrada.hotelapi.model.ServiceSchedule;
 import com.runasagrada.hotelapi.repository.ReservationRepository;
@@ -36,17 +36,18 @@ public class ReservationServiceServiceImpl implements ReservationServiceService 
     private ServiceHelper helper;
 
     @Override
-    public Optional<ReservationService> searchById(Long id) {
+    public Optional<ReservationServiceEntity> searchById(Long id) {
         return reservationServiceRepository.findById(id);
     }
 
     @Override
-    public List<ReservationService> getAll() {
+    public List<ReservationServiceEntity> getAll() {
         return reservationServiceRepository.findAll();
     }
 
     @Override
-    public ReservationService save(ReservationService reservationService, Long reservationId, Long serviceId,
+    public ReservationServiceEntity save(ReservationServiceEntity reservationService, Long reservationId,
+            Long serviceId,
             Long scheduleId) {
         Reservation targetReservation = reservationRepository
                 .findById(resolveReservationId(reservationService, reservationId))
@@ -75,11 +76,11 @@ public class ReservationServiceServiceImpl implements ReservationServiceService 
                 : null;
 
         if (rid != null) {
-            List<ReservationService> existingList = reservationServiceRepository
+            List<ReservationServiceEntity> existingList = reservationServiceRepository
                     .findByReservationReservationId(rid);
 
-            ReservationService duplicate = null;
-            for (ReservationService rs : existingList) {
+            ReservationServiceEntity duplicate = null;
+            for (ReservationServiceEntity rs : existingList) {
                 Long sid = rs.getService() != null ? rs.getService().getId() : null;
                 Long targetSid = targetService != null ? targetService.getId() : null;
                 Long schedId = rs.getSchedule() != null ? rs.getSchedule().getId() : null;
@@ -109,7 +110,7 @@ public class ReservationServiceServiceImpl implements ReservationServiceService 
                         duplicate.setStatus(reservationService.getStatus());
 
                     helper.resyncIdentity("reservation_services", "res_service_id");
-                    ReservationService saved = reservationServiceRepository.save(duplicate);
+                    ReservationServiceEntity saved = reservationServiceRepository.save(duplicate);
 
                     // If we were updating a different existing row, remove it
                     if (reservationService.getId() != null && !duplicate.getId().equals(reservationService.getId())) {
@@ -135,7 +136,7 @@ public class ReservationServiceServiceImpl implements ReservationServiceService 
         reservationServiceRepository.deleteById(id);
     }
 
-    private Integer resolveReservationId(ReservationService reservationService, Long reservationId) {
+    private Integer resolveReservationId(ReservationServiceEntity reservationService, Long reservationId) {
         if (reservationId != null) {
             return reservationId.intValue();
         }
@@ -146,7 +147,7 @@ public class ReservationServiceServiceImpl implements ReservationServiceService 
         throw new EntityNotFoundException("Reservation identifier is required");
     }
 
-    private Long resolveServiceId(ReservationService reservationService, Long serviceId) {
+    private Long resolveServiceId(ReservationServiceEntity reservationService, Long serviceId) {
         if (serviceId != null) {
             return serviceId;
         }
@@ -157,7 +158,7 @@ public class ReservationServiceServiceImpl implements ReservationServiceService 
         throw new EntityNotFoundException("Service offering identifier is required");
     }
 
-    private Long resolveScheduleId(ReservationService reservationService, Long scheduleId) {
+    private Long resolveScheduleId(ReservationServiceEntity reservationService, Long scheduleId) {
         if (scheduleId != null) {
             return scheduleId;
         }
@@ -169,7 +170,7 @@ public class ReservationServiceServiceImpl implements ReservationServiceService 
     }
 
     @Override
-    public List<ReservationService> findByReservation(Long id) {
+    public List<ReservationServiceEntity> findByReservation(Long id) {
         return reservationServiceRepository.findByReservationReservationId(id);
     }
 

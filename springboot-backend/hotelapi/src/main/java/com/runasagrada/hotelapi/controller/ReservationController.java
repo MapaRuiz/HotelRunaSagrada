@@ -15,11 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -82,6 +77,15 @@ public class ReservationController {
 
         Reservation created = service.create(userId, hotelId, roomId, checkIn, checkOut, status);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @GetMapping("/lumpsum/{id}")
+    public ResponseEntity<Double> getLumpSumById(@PathVariable Long id) {
+        Double lumpSum = service.findLumpSumById(id);
+        if (lumpSum == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(lumpSum);
     }
 
     @PutMapping("/{id}")

@@ -34,7 +34,7 @@ public class ServiceRating {
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "res_service_id", nullable = false, unique = true)
     @JsonIgnore
-    private ReservationService reservationService;
+    private ReservationServiceEntity reservationService;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)

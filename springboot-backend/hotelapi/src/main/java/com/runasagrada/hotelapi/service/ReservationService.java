@@ -38,4 +38,6 @@ public interface ReservationService {
 
         Reservation updateStatus(Integer id, String status);
 
+        Double findLumpSumById(Long id);
+
 }

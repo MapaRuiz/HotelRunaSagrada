@@ -51,7 +51,7 @@ public class Task {
 	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "res_service_id")
-	private ReservationService reservationService;
+	private ReservationServiceEntity reservationService;
 
 	// Enums
 	public enum TaskType {

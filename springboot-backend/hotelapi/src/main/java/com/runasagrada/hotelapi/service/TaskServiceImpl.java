@@ -7,7 +7,7 @@ import com.runasagrada.hotelapi.repository.TaskRepository;
 import com.runasagrada.hotelapi.repository.StaffMemberRepository;
 import com.runasagrada.hotelapi.repository.RoomRepository;
 import com.runasagrada.hotelapi.repository.ReservationServiceRepository;
-import com.runasagrada.hotelapi.model.ReservationService;
+import com.runasagrada.hotelapi.model.ReservationServiceEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -50,7 +50,7 @@ public class TaskServiceImpl implements TaskService {
 	@Override
 	public Task create(Task task, Long resServiceId) {
 		if (resServiceId != null) {
-			ReservationService reservationService = reservationServices.findById(resServiceId)
+			ReservationServiceEntity reservationService = reservationServices.findById(resServiceId)
 					.orElseThrow(
 							() -> new NoSuchElementException("ReservationService not found with id: " + resServiceId));
 			task.setReservationService(reservationService);
@@ -73,7 +73,7 @@ public class TaskServiceImpl implements TaskService {
 			db.setRoomId(partial.getRoomId());
 
 		if (resServiceId != null) {
-			ReservationService reservationService = reservationServices.findById(resServiceId)
+			ReservationServiceEntity reservationService = reservationServices.findById(resServiceId)
 					.orElseThrow(
 							() -> new NoSuchElementException("ReservationService not found with id: " + resServiceId));
 			db.setReservationService(reservationService);
