@@ -211,7 +211,7 @@ export class PaymentComponent implements OnInit {
 					status: 'PENDING'
 				})
 			);
-			
+
 			// Actualizar el estado de la reserva a confirmado
 			await firstValueFrom(
 				this.reservationSvc.updateStatus(this.reservationId!, 'CONFIRMED')
@@ -224,7 +224,7 @@ export class PaymentComponent implements OnInit {
 
 			setTimeout(() => {
 				this.router.navigate(['/reservation-confirmation'], {
-					queryParams: { 
+					queryParams: {
 						reservationId: this.reservationId,
 						paymentId: payment.payment_id
 					}
@@ -278,6 +278,12 @@ export class PaymentComponent implements OnInit {
 		if (this.isProcessing) return false;
 		if (this.showNewPaymentForm) return true;
 		return this.selectedPaymentMethodId != null && !Number.isNaN(this.selectedPaymentMethodId);
+	}
+
+	getMethodId(m: any): number | null {
+		const raw = m?.method_id ?? m?.id ?? m?.payment_method_id;
+		const n = Number(raw);
+		return Number.isFinite(n) ? n : null;
 	}
 
 	private isBrowser(): boolean {
