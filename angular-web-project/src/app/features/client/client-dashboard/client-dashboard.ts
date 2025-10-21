@@ -19,6 +19,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { UsersService } from '../../../services/users';
 import { Router } from '@angular/router';
+import * as bootstrap from 'bootstrap';
 
 export interface Reservation {
   reservationId: number;
@@ -50,6 +51,11 @@ export type ChartOptions = {
   styleUrls: ['./client-dashboard.css']
 })
 export class ClientDashboardComponent implements OnInit {
+
+
+  selectedReservation: any = null;
+  invoiceModal: any;
+
   private api = inject(UsersService);
   private router = inject(Router);
   me: any = null;
@@ -172,6 +178,13 @@ export class ClientDashboardComponent implements OnInit {
     return typeof r.room === 'string' ? r.room : (r.room && (r.room as any).name) || '';
   }
 
+  isActiveReservation(r: Reservation) {
+    if (!r) return false;
+    if (!r.checkOut) return true;
+    const co = new Date(r.checkOut);
+    return co >= new Date();
+  }
+
   private normalizeReservation(r: any): Reservation {
     if (!r) return {} as Reservation;
     const reservationId = r.reservationId ?? r.id ?? r._id ?? null;
@@ -231,4 +244,32 @@ export class ClientDashboardComponent implements OnInit {
   ngAfterViewInit() {
     
   }
+ //ACA SE SIMULA LO DEL VALOR SIMON
+ openInvoice(r: any) {
+  if (typeof document === 'undefined') return; 
+
+  if (!r.amount) {
+    r.amount = this.calculateAmount(r);
+  }
+  this.selectedReservation = r;
+
+  const modalElement = document.getElementById('invoiceModal');
+  if (modalElement) {
+    import('bootstrap').then(bs => {
+      this.invoiceModal = new bs.Modal(modalElement);
+      this.invoiceModal.show();
+    });
+  }
 }
+
+
+  private calculateAmount(r: any): number {
+    //  calcula días * tarifa fija
+    const checkIn = new Date(r.checkIn);
+    const checkOut = new Date(r.checkOut);
+    const days = Math.max(1, (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+    const rate = 150; // valor por noche
+    return days * rate;
+  }
+}
+

@@ -87,11 +87,12 @@
     </div>
   </div>
 
-  <!-- Tarjetas -->
+  <!-- Tarjetas de reservas -->
   <ng-container *ngIf="!loading">
     <div *ngIf="reservations.length; else noCards" class="row g-3">
       <div class="col-12 col-sm-6 col-md-4" *ngFor="let r of reservations">
-        <div class="card h-100 border-0 shadow-sm">
+        <div class="card h-100 border-0 shadow-sm hover-pointer"
+             (click)="openInvoice(r)">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-start">
               <div>
@@ -100,7 +101,12 @@
                 <div class="small text-secondary">Habitación: {{ roomName(r) }}</div>
               </div>
               <div class="text-end">
-                <span class="badge bg-info text-dark">{{ r.status }}</span>
+                <ng-container *ngIf="isActiveReservation(r); else normalStatus">
+                  <span class="badge bg-primary text-white">En proceso</span>
+                </ng-container>
+                <ng-template #normalStatus>
+                  <span class="badge bg-info text-dark">{{ r.status }}</span>
+                </ng-template>
               </div>
             </div>
             <div class="mt-3 small">
@@ -120,5 +126,32 @@
   </ng-container>
 </div>
 
+<!-- Modal de factura -->
+<div class="modal fade" id="invoiceModal" tabindex="-1" aria-labelledby="invoiceModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="invoiceModalLabel">Factura de la Reserva #{{ selectedReservation?.reservationId }}</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
 
+      <div class="modal-body">
+        <p><strong>Hotel:</strong> {{ selectedReservation?.hotel?.name }}</p>
+        <p><strong>Habitación:</strong> {{ selectedReservation?.room?.name }}</p>
+        <p><strong>Check-in:</strong> {{ selectedReservation?.checkIn }}</p>
+        <p><strong>Check-out:</strong> {{ selectedReservation?.checkOut }}</p>
+        <hr>
+        <h5 class="text-end">Total a pagar: 
+          <span class="text-success fw-bold">
+            {{ selectedReservation?.amount | currency:'USD':'symbol':'1.0-0' }}
+          </span>
+        </h5>
+      </div>
 
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button class="btn btn-success">Pagar ahora</button>
+      </div>
+    </div>
+  </div>
+</div>

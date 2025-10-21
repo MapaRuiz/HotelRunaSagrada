@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 import { PaymentMethod } from '../model/payment-method';
 
 export interface PaymentMethodRequest {
+	
 	user_id: number;
 	type: 'TARJETA' | 'PAYPAL' | 'EFECTIVO';
 	last4?: string;
