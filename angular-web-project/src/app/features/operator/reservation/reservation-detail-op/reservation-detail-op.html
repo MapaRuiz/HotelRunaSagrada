@@ -13,18 +13,6 @@
       <!--Client data-->
       <app-user-detail [user]="current.user" [operatorView]="true" [showEdit]="false">
       </app-user-detail>
-
-      <!-- Información adicional -->
-      <div
-        class="col-12"
-        *ngIf="!editingServices && !current.services?.length && !current.payments?.length"
-      >
-        <div class="text-muted fst-italic">
-          No hay servicios adicionales ni pagos registrados para esta reserva.
-        </div>
-      </div>
-
-      <!-- Modo edición de servicios (movido dentro del acordeón) -->
     </div>
 
     <div id="accordion">
@@ -216,27 +204,36 @@
                   Pagar total
                 </button>
                 <small class="text-muted" *ngIf="billTotal <= 0">No hay monto pendiente.</small>
-                <small class="text-muted" *ngIf="current.status === 'FINISHED'">La reserva está finalizada.</small>
+                <small class="text-muted" *ngIf="current.status === 'FINISHED'"
+                  >La reserva está finalizada.</small
+                >
               </div>
               <div class="mt-2" *ngIf="showingPayment">
                 <!-- Métodos guardados -->
                 <div *ngIf="(paymentMethods?.length ?? 0) > 0" class="payment-methods-list">
-                  <label *ngFor="let method of paymentMethods; trackBy: trackMethod"
-                         class="payment-method-item"
-                         [class.selected]="selectedPaymentMethodId === toNumber(method.method_id)"
-                         [attr.for]="'method-' + method.method_id">
+                  <label
+                    *ngFor="let method of paymentMethods; trackBy: trackMethod"
+                    class="payment-method-item"
+                    [class.selected]="selectedPaymentMethodId === toNumber(method.method_id)"
+                    [attr.for]="'method-' + method.method_id"
+                  >
                     <input
                       type="radio"
                       [id]="'method-' + method.method_id"
                       name="paymentMethod"
                       [value]="toNumber(method.method_id)"
-                      [(ngModel)]="selectedPaymentMethodId" />
+                      [(ngModel)]="selectedPaymentMethodId"
+                    />
                     <span class="method-label">
                       <span class="method-icon">{{ getPaymentTypeIcon(method.type) }}</span>
                       <span class="method-info">
                         <span class="method-type">{{ getPaymentTypeName(method.type) }}</span>
-                        <span class="method-details" *ngIf="method.last4">•••• {{ method.last4 }}</span>
-                        <span class="method-holder" *ngIf="method.holder_name">{{ method.holder_name }}</span>
+                        <span class="method-details" *ngIf="method.last4"
+                          >•••• {{ method.last4 }}</span
+                        >
+                        <span class="method-holder" *ngIf="method.holder_name">{{
+                          method.holder_name
+                        }}</span>
                       </span>
                     </span>
                   </label>
@@ -245,8 +242,13 @@
                   No hay métodos guardados para este cliente.
                 </div>
                 <div class="mt-2">
-                  <button type="button" class="btn btn-primary btn-sm" (click)="confirmPayTotal()" [disabled]="!selectedPaymentMethodId">
-                    Confirmar pago de {{ billTotal | currency:'COP':'symbol':'1.0-0' }}
+                  <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    (click)="confirmPayTotal()"
+                    [disabled]="!selectedPaymentMethodId"
+                  >
+                    Confirmar pago de {{ billTotal | currency : 'COP' : 'symbol' : '1.0-0' }}
                   </button>
                 </div>
               </div>

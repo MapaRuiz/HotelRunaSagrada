@@ -9,7 +9,7 @@ import {
   OnDestroy,
   inject,
 } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, switchMap } from 'rxjs';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Reservation } from '../../../../model/reservation';
@@ -59,6 +59,7 @@ export class ReservationDetailOp {
   text = getStatusText;
 
   private facade = inject(ReservationFacade);
+  private service = inject(ReservationService);
   private paymentMethodSvc = inject(PaymentMethodService);
   private paymentSvc = inject(PaymentService);
   private childSub?: Subscription;
@@ -258,20 +259,34 @@ export class ReservationDetailOp {
 
   confirmPayTotal() {
     if (!this.reservation?.reservation_id || !this.selectedPaymentMethodId) return;
+    const reservationId = this.reservation.reservation_id;
     const payload = {
-      reservation_id: this.reservation.reservation_id,
+      reservation_id: reservationId,
       payment_method_id: this.selectedPaymentMethodId,
       amount: this.billTotal,
       status: 'PAID' as const,
     };
-    this.paymentSvc.create(payload).subscribe({
-      next: () => {
-        alert('Pago registrado');
-        this.showingPayment = false;
-        this.billComp?.reload();
-      },
-      error: () => alert('No se pudo registrar el pago'),
-    });
+    this.paymentSvc
+      .create(payload)
+      .pipe(
+        switchMap(() => this.service.deactivate(reservationId)),
+        switchMap(() => this.service.getById(reservationId))
+      )
+      .subscribe({
+        next: (updated) => {
+          alert('Pago registrado');
+          this.showingPayment = false;
+          this.billComp?.reload();
+          this.reservation = {
+            ...(this.reservation ?? {}),
+            ...updated,
+          } as Reservation;
+        },
+        error: (err) => {
+          console.error('Error confirmando pago de reserva', err);
+          alert('No se pudo completar el pago');
+        },
+      });
   }
 
   // helpers for payment methods UI

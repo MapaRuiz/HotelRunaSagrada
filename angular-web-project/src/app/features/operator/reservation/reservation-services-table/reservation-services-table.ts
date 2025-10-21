@@ -1,4 +1,12 @@
-import { Component, Input, OnChanges, PLATFORM_ID, SimpleChanges, inject } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  Input,
+  OnChanges,
+  PLATFORM_ID,
+  SimpleChanges,
+  inject,
+} from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ReservationService as ReservationServiceModel } from '../../../../model/reservation-service';
 import { ReservationFacade } from '../reservation';
@@ -53,6 +61,10 @@ export class ReservationServicesTable implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['reservationId'] && this.reservationId) {
       this.fetchServices(this.reservationId);
+    }
+    // Recompute columns when status changes (affects actions availability)
+    if (changes['reservationStatus'] && this.isBrowser) {
+      this.updateResponsiveColumns();
     }
   }
 
@@ -116,10 +128,13 @@ export class ReservationServicesTable implements OnChanges {
     }
     setTimeout(() => {
       try {
-        this.gridApi?.sizeColumnsToFit();
+        this.updateResponsiveColumns();
       } catch {}
     }, 0);
   }
+
+  private readonly compactRowHeight = 40;
+  private readonly compactHeaderHeight = 44;
 
   gridOptions: GridOptions<ReservationServiceModel> = {
     localeText: AG_GRID_LOCALE,
@@ -136,75 +151,162 @@ export class ReservationServicesTable implements OnChanges {
     onGridReady: (params) => {
       this.gridApi = params.api;
       params.api.setGridOption('rowData', this.services);
+      // Initialize responsive columns on ready
+      this.updateResponsiveColumns();
+      this.applyCompactLayout();
       // Avoid sizing here; container might be hidden in a collapsed panel
     },
-    onFirstDataRendered: () => setTimeout(() => this.gridApi?.sizeColumnsToFit(), 0),
+    onFirstDataRendered: () =>
+      setTimeout(() => {
+        this.updateResponsiveColumns();
+        this.applyCompactLayout();
+      }, 0),
     onGridPreDestroyed: () => (this.gridApi = undefined),
-    columnDefs: [
+    rowHeight: 40,
+    headerHeight: 44,
+    defaultColDef: {
+      sortable: true,
+      resizable: true,
+      cellClass: 'ag-compact-cell',
+      headerClass: 'ag-compact-header',
+    },
+    // Initial placeholder; real columns are built responsively
+    columnDefs: [] as ColDef<ReservationServiceModel>[],
+  };
+
+  // Build base columns then apply responsive visibility
+  private buildBaseColumnDefs(): ColDef<ReservationServiceModel>[] {
+    const priceFormatter = (p: any) =>
+      typeof p.value === 'number'
+        ? new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'COP' }).format(p.value)
+        : p.value;
+
+    const defs: ColDef<ReservationServiceModel>[] = [
       {
+        colId: 'name',
         headerName: 'Nombre',
         valueGetter: (p) => p.data?.service?.name || `Service ${p.data?.service_id ?? ''}`,
         minWidth: 160,
       },
       {
+        colId: 'availability',
         headerName: 'Disponibilidad',
         valueGetter: (p) => (p.data?.schedule?.days_of_week || []).join(', '),
         minWidth: 220,
       },
       {
+        colId: 'schedule',
         headerName: 'Horario',
         valueGetter: (p) => {
           const s = p.data?.schedule?.start_time;
           const e = p.data?.schedule?.end_time;
           return s && e ? `${s} - ${e}` : '';
         },
-        minWidth: 220,
+        minWidth: 160,
       },
       {
+        colId: 'qty',
         headerName: 'Cantidad',
         field: 'qty',
         maxWidth: 120,
       },
       {
+        colId: 'unit_price',
         headerName: 'Precio unitario',
         valueGetter: (p) => p.data?.unit_price ?? 0,
-        valueFormatter: (p) =>
-          typeof p.value === 'number'
-            ? new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'COP' }).format(p.value)
-            : p.value,
+        valueFormatter: priceFormatter,
         maxWidth: 160,
       },
       {
+        colId: 'status',
         headerName: 'Estatus',
         field: 'status',
         maxWidth: 140,
       },
       {
+        colId: 'total',
         headerName: 'Total',
         valueGetter: (p) => (p.data?.qty ?? 0) * (p.data?.unit_price ?? 0),
-        valueFormatter: (p) =>
-          typeof p.value === 'number'
-            ? new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'COP' }).format(p.value)
-            : p.value,
+        valueFormatter: priceFormatter,
         maxWidth: 160,
       },
-      {
-        headerName: 'Acciones',
-        filter: false,
-        minWidth: 200,
-        cellRenderer: ActionButtonsComponent<ReservationServiceModel>,
-        cellRendererParams: (p: { data: ReservationServiceModel }) => {
-          const allowChanges = this.reservationStatus !== 'FINISHED';
-          return {
-            editLabel: 'Editar',
-            deleteLabel: 'Eliminar',
-            onEdit: allowChanges ? (row: ReservationServiceModel) => this.onEditRow(row) : undefined,
-            onDelete: allowChanges ? (row: ReservationServiceModel) => this.onDeleteRow(row) : undefined,
-          };
-        },
-      } as ColDef<ReservationServiceModel>,
-    ] as ColDef<ReservationServiceModel>[],
-  };
+      this.getActionsColDef(),
+    ];
+    return defs;
+  }
+
+  private getActionsColDef(): ColDef<ReservationServiceModel> {
+    return {
+      colId: 'actions',
+      headerName: 'Acciones',
+      filter: false,
+      minWidth: 200,
+      cellRenderer: ActionButtonsComponent<ReservationServiceModel>,
+      cellRendererParams: () => {
+        const allowChanges = this.reservationStatus !== 'FINISHED';
+        return {
+          editLabel: 'Editar',
+          deleteLabel: 'Eliminar',
+          onEdit: allowChanges ? (row: ReservationServiceModel) => this.onEditRow(row) : undefined,
+          onDelete: allowChanges
+            ? (row: ReservationServiceModel) => this.onDeleteRow(row)
+            : undefined,
+        };
+      },
+    } as ColDef<ReservationServiceModel>;
+  }
+
+  private computeResponsiveDefs(width: number): ColDef<ReservationServiceModel>[] {
+    const defs = this.buildBaseColumnDefs().map((d) => ({ ...d }));
+    // Breakpoints: <576: xs, <992: md, otherwise: full
+    if (width < 576) {
+      // keep: name, qty, total, actions
+      for (const d of defs) {
+        if (!['name', 'qty', 'total', 'actions'].includes(String(d.colId))) {
+          (d as any).hide = true;
+        }
+      }
+    } else if (width < 992) {
+      // hide availability and unit price to save space
+      for (const d of defs) {
+        if (['availability', 'unit_price'].includes(String(d.colId))) {
+          (d as any).hide = true;
+        }
+      }
+    }
+    return defs;
+  }
+
+  private updateResponsiveColumns(): void {
+    if (!this.isBrowser) return;
+    const width = window.innerWidth || 1024;
+    const defs = this.computeResponsiveDefs(width);
+    // update grid options for any future re-init
+    this.gridOptions = { ...this.gridOptions, columnDefs: defs };
+    if (this.gridApi) {
+      try {
+        this.gridApi.setGridOption('columnDefs', defs as any);
+        // After updating columns, resize to fit
+        setTimeout(() => this.gridApi?.sizeColumnsToFit(), 0);
+      } catch {}
+    }
+    this.applyCompactLayout();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize() {
+    this.updateResponsiveColumns();
+  }
+
+  private applyCompactLayout(): void {
+    if (!this.gridApi) return;
+    try {
+      this.gridApi.setGridOption('rowHeight', this.compactRowHeight);
+      this.gridApi.setGridOption('headerHeight', this.compactHeaderHeight);
+      this.gridApi.refreshHeader();
+      setTimeout(() => this.gridApi?.resetRowHeights(), 0);
+    } catch {}
+  }
 
   private onEditRow(row: ReservationServiceModel) {
     // publish selection via facade as a reliable channel
