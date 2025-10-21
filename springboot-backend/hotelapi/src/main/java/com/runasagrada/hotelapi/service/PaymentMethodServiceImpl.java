@@ -79,11 +79,12 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
 		return paymentMethods.save(db);
 	}
 
-	@Override
-	public void delete(Integer id) {
-		PaymentMethod pm = paymentMethods.findById(id)
-				.orElseThrow(() -> new NoSuchElementException("Payment method not found"));
-		paymentMethods.delete(pm);
-		helper.resyncIdentity("payment_method", "method_id");
-	}
+@Override
+public void delete(Integer id) {
+    PaymentMethod pm = paymentMethods.findById(id)
+            .orElseThrow(() -> new NoSuchElementException("Payment method not found"));
+    pm.setActive(false);
+    paymentMethods.save(pm);
+}
+
 }
