@@ -15,11 +15,11 @@
       >
         <option [ngValue]="undefined" disabled>Seleccione un servicio…</option>
         <option *ngFor="let s of services" [ngValue]="s.id">
-          {{ s.name }} — {{ s.base_price | currency : 'COP' : 'symbol' : '1.0-0' }}
+          {{ s.name }} — {{ formatCurrency(s.base_price) }}
         </option>
       </select>
       <small class="text-muted d-block mt-1" *ngIf="selectedService as svc">
-        {{ svc.name }} · Precio base: {{ svc.base_price | currency : 'COP' : 'symbol' : '1.0-0' }}
+        {{ svc.name }} · Precio base: {{ formatCurrency(svc.base_price) }}
       </small>
     </div>
 
@@ -31,8 +31,10 @@
         [(ngModel)]="schedule_id"
         name="schedule_id"
         (ngModelChange)="onScheduleChange()"
+        [disabled]="!schedules.length"
+        required
       >
-        <option [ngValue]="undefined">Sin horario</option>
+        <option [ngValue]="undefined" disabled>Seleccione un horario…</option>
         <option *ngFor="let sch of schedules" [ngValue]="sch.id">
           {{ sch.days_of_week.join(', ') }} — {{ sch.start_time }} - {{ sch.end_time }}
         </option>
@@ -40,6 +42,9 @@
       <small class="text-muted d-block mt-1" *ngIf="selectedSchedule as sch">
         {{ sch.days_of_week.join(', ') }} · {{ sch.start_time }} - {{ sch.end_time }}
       </small>
+      <small class="text-danger d-block mt-1" *ngIf="service_id && !schedules.length"
+        >No hay horarios disponibles para este servicio.</small
+      >
     </div>
 
     <!-- Cantidad (min 1) -->
@@ -59,13 +64,19 @@
     <!-- Precio unitario (solo lectura) -->
     <div class="col-12 col-md-6">
       <label class="form-label">Precio unitario</label>
-      <input type="number" class="form-control" [value]="unit_price" readonly tabindex="-1" />
+      <input
+        type="text"
+        class="form-control"
+        [value]="formatCurrency(unit_price)"
+        readonly
+        tabindex="-1"
+      />
       <small class="text-muted">Precio definido por el servicio.</small>
     </div>
 
     <div class="col-12 d-flex gap-2 justify-content-end">
       <button type="button" class="btn btn-outline-secondary" (click)="onCancel()">Cancelar</button>
-      <button type="submit" class="btn btn-olive" [disabled]="loading">
+      <button type="submit" class="btn btn-olive" [disabled]="loading || schedule_id == null">
         {{ edit ? 'Actualizar' : 'Agregar' }} servicio
       </button>
     </div>

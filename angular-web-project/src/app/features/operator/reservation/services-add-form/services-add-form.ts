@@ -80,8 +80,8 @@ export class ServicesAddForm implements OnInit, OnChanges {
           this.unit_price = this.edit.unit_price;
           this.status = this.edit.status as res_service_status;
           if (this.service_id) {
-            this.onServiceChange();
-            this.schedule_id = this.edit.schedule_id ?? this.edit.schedule?.id ?? undefined;
+            const desiredScheduleId = this.edit.schedule_id ?? this.edit.schedule?.id ?? null;
+            this.onServiceChange(desiredScheduleId);
           }
         }
       },
@@ -92,7 +92,8 @@ export class ServicesAddForm implements OnInit, OnChanges {
     });
   }
 
-  onServiceChange() {
+  onServiceChange(preferredScheduleId?: number | null) {
+    this.errorMsg = '';
     if (!this.service_id) {
       this.schedules = [];
       this.schedule_id = undefined;
@@ -114,14 +115,36 @@ export class ServicesAddForm implements OnInit, OnChanges {
       }
     }
 
+    this.schedule_id = preferredScheduleId ?? null;
+    this.selectedSchedule = undefined;
+
     this.offeringApi.getSchedules(this.service_id).subscribe({
       next: (sch) => {
         this.schedules = sch || [];
-        if (!this.edit || changedService) {
-          // If it's a new selection (or creating), pick the first schedule by default
-          this.schedule_id = this.schedules[0]?.id;
+        if (!this.schedules.length) {
+          this.schedule_id = undefined;
+          this.selectedSchedule = undefined;
+          this.errorMsg = 'El servicio seleccionado no tiene horarios disponibles.';
+          return;
         }
+
+        const desiredId = preferredScheduleId ?? this.schedule_id;
+        const matching = desiredId ? this.schedules.find((s) => s.id === desiredId) : undefined;
+
+        if (!matching) {
+          // Pick first schedule available when none selected or previous not found
+          this.schedule_id = this.schedules[0]?.id;
+        } else {
+          this.schedule_id = matching.id;
+        }
+
         this.onScheduleChange();
+      },
+      error: () => {
+        this.schedules = [];
+        this.schedule_id = undefined;
+        this.selectedSchedule = undefined;
+        this.errorMsg = 'No se pudieron cargar los horarios del servicio.';
       },
     });
   }
@@ -131,7 +154,18 @@ export class ServicesAddForm implements OnInit, OnChanges {
       this.selectedSchedule = undefined;
       return;
     }
-    this.selectedSchedule = this.schedules.find((s) => s.id === this.schedule_id);
+
+    const found = this.schedules.find((s) => s.id === this.schedule_id);
+    if (!found) {
+      this.selectedSchedule = undefined;
+      this.errorMsg = 'Seleccione un horario válido para el servicio.';
+      return;
+    }
+    this.selectedSchedule = found;
+    if (this.errorMsg === 'Seleccione un horario válido para el servicio.' ||
+        this.errorMsg === 'Debe seleccionar un horario para el servicio.') {
+      this.errorMsg = '';
+    }
   }
 
   onSubmit() {
@@ -142,10 +176,15 @@ export class ServicesAddForm implements OnInit, OnChanges {
       this.errorMsg = 'Complete los campos requeridos.';
       return;
     }
+
+    if (this.schedule_id == null) {
+      this.errorMsg = 'Debe seleccionar un horario para el servicio.';
+      return;
+    }
     const body: ReservationServiceRequest = {
       reservation_id: Number(this.reservation.reservation_id),
       service_id: Number(this.service_id),
-      schedule_id: this.schedule_id ?? undefined,
+      schedule_id: Number(this.schedule_id),
       qty: Number(this.qty),
       unit_price: Number(this.unit_price),
       status: this.status,
@@ -188,5 +227,15 @@ export class ServicesAddForm implements OnInit, OnChanges {
   onQtyChange(value: any) {
     const n = Number(value);
     this.qty = !isNaN(n) && n >= 1 ? n : 1;
+  }
+
+  formatCurrency(amount?: number | null): string {
+    if (amount == null) {
+      return 'COP 0';
+    }
+    return `COP ${new Intl.NumberFormat('es-CO', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount)}`;
   }
 }
