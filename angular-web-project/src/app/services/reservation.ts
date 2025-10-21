@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Reservation } from '../model/reservation';
 
-export type ReservationStatus = 'PENDING' | 'CONFIRMED' | 'FINISHED';
+export type ReservationStatus = 'PENDING' | 'CONFIRMED' | 'CHECKIN' | 'FINISHED';
 
 type ReservationRequest = {
   userId: number;
@@ -66,9 +66,17 @@ export class ReservationService {
   }
 
   activate(reservation_id: number): Observable<Reservation> {
-    const status: string = 'CONFIRMED';
+    const status: string = 'CHECKIN';
     return this.http.put<Reservation>(
       `${this.resource}/activate/${reservation_id}?status=${status}`,
+      null
+    );
+  }
+
+  deactivate(reservation_id: number): Observable<Reservation> {
+    const status: string = 'FINISHED';
+    return this.http.put<Reservation>(
+      `${this.resource}/deactivate/${reservation_id}?status=${status}`,
       null
     );
   }

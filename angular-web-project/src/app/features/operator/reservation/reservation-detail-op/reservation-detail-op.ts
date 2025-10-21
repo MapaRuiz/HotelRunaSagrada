@@ -230,10 +230,8 @@ export class ReservationDetailOp {
   }
 
   onBillUserChanged(user?: { user_id?: number }) {
+    // Ignore undefined while child is still loading; keep current list
     if (!user?.user_id) {
-      this.paymentMethods = [];
-      this.selectedPaymentMethodId = null;
-      console.debug('No user or user_id provided; cleared payment methods.');
       return;
     }
     this.paymentMethodSvc.getMy(user.user_id).subscribe({

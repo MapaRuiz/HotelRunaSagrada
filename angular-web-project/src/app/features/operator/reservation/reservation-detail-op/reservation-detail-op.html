@@ -133,11 +133,18 @@
           (shown.bs.collapse)="onServicesCollapseShown()"
         >
           <div class="d-flex gap-2 align-items-center px-3 pt-3">
-            <ng-container *ngIf="!editingServices; else editBtns">
-              <button type="button" class="btn btn-olive btn-sm" (click)="addServices()">
-                Agregar servicios
-              </button>
-            </ng-container>
+            <!-- Ocultar el botón de agregar si la reserva está finalizada -->
+            <button
+              *ngIf="!editingServices && current.status !== 'FINISHED'"
+              type="button"
+              class="btn btn-olive btn-sm"
+              (click)="addServices()"
+            >
+              Agregar servicios
+            </button>
+            <small *ngIf="current.status === 'FINISHED'" class="text-muted">
+              La reserva está finalizada. No se pueden agregar servicios.
+            </small>
             <ng-template #editBtns>
               <button
                 type="button"
@@ -164,6 +171,7 @@
               <label class="form-label d-block mb-2">Servicios Adicionales</label>
               <app-reservation-services-table
                 [reservationId]="current.reservation_id"
+                [reservationStatus]="current.status"
                 (editRequested)="onEditReservationService($event)"
               ></app-reservation-services-table>
             </div>

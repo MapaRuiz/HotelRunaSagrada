@@ -1,6 +1,8 @@
 package com.runasagrada.hotelapi.controller;
 
 import com.runasagrada.hotelapi.model.Reservation;
+import com.runasagrada.hotelapi.model.Payment;
+import com.runasagrada.hotelapi.service.PaymentService;
 import com.runasagrada.hotelapi.service.ReservationService;
 
 import lombok.AllArgsConstructor;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 public class ReservationController {
 
     private final ReservationService service;
+    private final PaymentService paymentService;
 
     @GetMapping
     public List<Reservation> all(@RequestParam(required = false) Integer userId) {
@@ -47,6 +50,27 @@ public class ReservationController {
         return service.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Proxy endpoints for payments related to a reservation
+    @GetMapping("/{id}/payments")
+    public List<Payment> paymentsForReservation(@PathVariable Integer id) {
+        return paymentService.getByReservationId(id);
+    }
+
+    @GetMapping("/{id}/payments/all-paid")
+    public Map<String, Object> paymentsAllPaid(@PathVariable Integer id) {
+        List<Payment> list = paymentService.getByReservationId(id);
+        long paid = list.stream()
+                .filter(p -> p.getStatus() != null && p.getStatus().equalsIgnoreCase("PAID"))
+                .count();
+        boolean allPaid = list.isEmpty() || paid == list.size();
+        return Map.of(
+                "reservationId", id,
+                "total", list.size(),
+                "paid", (int) paid,
+                "allPaid", allPaid
+        );
     }
 
     // ---------- Helpers para leer el payload a pelo ----------

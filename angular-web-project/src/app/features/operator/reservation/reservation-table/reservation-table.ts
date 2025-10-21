@@ -17,6 +17,7 @@ import {
   ModuleRegistry,
 } from 'ag-grid-community';
 import { ReservationService } from '../../../../services/reservation';
+import { PaymentService } from '../../../../services/payment';
 import { finalize } from 'rxjs';
 import { MultiSelectFilterComponent } from '../../../admin/filters/multi-select-filter/multi-select-filter';
 import { Reservation } from '../../../../model/reservation';
@@ -49,7 +50,11 @@ export class ReservationTableOperatorComponent implements OnInit {
   private currentOpId?: number;
   private platformId = inject(PLATFORM_ID);
 
-  constructor(private service: ReservationService, private facade: ReservationFacade) {
+  constructor(
+    private service: ReservationService,
+    private facade: ReservationFacade,
+    private payments: PaymentService
+  ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
     if (this.isBrowser) {
       ModuleRegistry.registerModules([AllCommunityModule]);
@@ -174,26 +179,28 @@ export class ReservationTableOperatorComponent implements OnInit {
         cellRendererParams: (p: { data: Reservation }) => {
           const row = p.data as Reservation;
           const status = row?.status;
-          const canEditDelete = status === 'PENDING' || status === 'CONFIRMED';
+          const canEditDelete =
+            status === 'PENDING' || status === 'CONFIRMED' || status === 'CHECKIN';
 
+          // Extra action button depending on status
           const extraButton =
-            status === 'PENDING'
+            status === 'CONFIRMED'
               ? {
                   label: 'Activar',
                   class: 'btn-details',
                   action: (r: Reservation) => this.activateReservation(r),
                 }
-              : status === 'CONFIRMED'
+              : status === 'CHECKIN'
               ? {
                   label: 'Desactivar',
-                  class: 'btn-details',
-                  action: (r: Reservation) => this.payReservation(r),
+                  class: 'btn-delete',
+                  action: (r: Reservation) => this.deactivateReservation(r),
                 }
               : status === 'FINISHED'
               ? {
                   label: 'Detalles',
                   class: 'btn-edit',
-                  action: (r: Reservation) => (console.log('Detalles'), this.openEditForRow(r)),
+                  action: (r: Reservation) => this.openEditForRow(r),
                 }
               : undefined;
 
@@ -225,6 +232,24 @@ export class ReservationTableOperatorComponent implements OnInit {
       error: () => {
         alert('Error activating reservation');
       },
+    });
+  }
+
+  deactivateReservation(reservation: Reservation): void {
+    const id = reservation.reservation_id;
+    if (!id) return;
+    this.payments.allPaid(id).subscribe({
+      next: (sum) => {
+        if (!sum?.allPaid) {
+          alert('No se puede finalizar: hay pagos pendientes.');
+          return;
+        }
+        this.service.deactivate(id).subscribe({
+          next: () => this.loadData(),
+          error: () => alert('Error desactivando la reserva'),
+        });
+      },
+      error: () => alert('No se pudo verificar el estado de los pagos de la reserva'),
     });
   }
 

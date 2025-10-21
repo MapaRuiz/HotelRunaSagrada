@@ -9,7 +9,6 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReservationService } from '../../../../services/reservation';
-import { UsersService } from '../../../../services/users';
 import { forkJoin, of, switchMap } from 'rxjs';
 import { ReservationServiceApi } from '../../../../services/reservation-service';
 import { ReservationService as ReservationServiceModel } from '../../../../model/reservation-service';
@@ -18,6 +17,7 @@ import {
   ServiceOfferingDetailResponse,
 } from '../../../../services/service-offering-service';
 import { User } from '../../../../model/user';
+import { ReservationFacade } from '../reservation';
 
 @Component({
   selector: 'app-bill-services',
@@ -36,7 +36,7 @@ export class BillServicesComponent implements OnChanges {
   items: ReservationServiceModel[] = [];
 
   private reservations = inject(ReservationService);
-  private users = inject(UsersService);
+  private facade = inject(ReservationFacade);
   private resServices = inject(ReservationServiceApi);
   private offerings = inject(ServiceOfferingService);
 
@@ -58,8 +58,8 @@ export class BillServicesComponent implements OnChanges {
         switchMap((reservation) =>
           forkJoin({
             subtotal: this.reservations.lumpSum(id),
-            user: reservation?.user_id ? this.users.getById(reservation.user_id) : of(undefined),
-            items: this.resServices.listByReservation(id),
+            user: reservation?.user_id ? this.facade.getUserById(reservation.user_id) : of(undefined),
+            items: this.facade.getReservationServices(id),
           })
         )
       )

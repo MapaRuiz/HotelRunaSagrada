@@ -29,6 +29,7 @@ import { ReservationServiceApi } from '../../../../services/reservation-service'
 })
 export class ReservationServicesTable implements OnChanges {
   @Input() reservationId?: number;
+  @Input() reservationStatus?: string;
   @Output() editRequested = new EventEmitter<ReservationServiceModel>();
 
   services: ReservationServiceModel[] = [];
@@ -192,12 +193,15 @@ export class ReservationServicesTable implements OnChanges {
         filter: false,
         minWidth: 200,
         cellRenderer: ActionButtonsComponent<ReservationServiceModel>,
-        cellRendererParams: (p: { data: ReservationServiceModel }) => ({
-          editLabel: 'Editar',
-          deleteLabel: 'Eliminar',
-          onEdit: (row: ReservationServiceModel) => this.onEditRow(row),
-          onDelete: (row: ReservationServiceModel) => this.onDeleteRow(row),
-        }),
+        cellRendererParams: (p: { data: ReservationServiceModel }) => {
+          const allowChanges = this.reservationStatus !== 'FINISHED';
+          return {
+            editLabel: 'Editar',
+            deleteLabel: 'Eliminar',
+            onEdit: allowChanges ? (row: ReservationServiceModel) => this.onEditRow(row) : undefined,
+            onDelete: allowChanges ? (row: ReservationServiceModel) => this.onDeleteRow(row) : undefined,
+          };
+        },
       } as ColDef<ReservationServiceModel>,
     ] as ColDef<ReservationServiceModel>[],
   };

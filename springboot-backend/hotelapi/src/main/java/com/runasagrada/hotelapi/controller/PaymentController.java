@@ -19,6 +19,7 @@ public class PaymentController {
 	@Autowired
 	private PaymentService service;
 
+
 	@GetMapping("/payments")
 	public List<Payment> list() {
 		return service.list();
@@ -32,6 +33,23 @@ public class PaymentController {
 	@GetMapping("/payments/reservation/{reservationId}")
 	public List<Payment> getByReservationId(@PathVariable Integer reservationId) {
 		return service.getByReservationId(reservationId);
+	}
+
+
+
+	@GetMapping("/payments/reservation/{reservationId}/all-paid")
+	public ResponseEntity<PaymentStatusSummary> allPaidForReservation(@PathVariable Integer reservationId) {
+		List<Payment> list = service.getByReservationId(reservationId);
+		int paidCount = (int) list.stream()
+				.filter(p -> p.getStatus() != null && p.getStatus().equalsIgnoreCase("PAID"))
+				.count();
+		boolean allPaid = list.isEmpty() || paidCount == list.size();
+		PaymentStatusSummary dto = new PaymentStatusSummary(
+				reservationId,
+				list.size(),
+				paidCount,
+				allPaid);
+		return ResponseEntity.ok(dto);
 	}
 
 	@GetMapping("/payments/payment-method/{paymentMethodId}")
@@ -90,5 +108,13 @@ public class PaymentController {
 		private Integer paymentMethodId;
 		private double amount;
 		private String status;
+	}
+
+	@Data
+	public static class PaymentStatusSummary {
+		private final Integer reservationId;
+		private final int total;
+		private final int paid;
+		private final boolean allPaid;
 	}
 }

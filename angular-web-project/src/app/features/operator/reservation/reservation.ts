@@ -18,17 +18,19 @@ import { AuthService } from '../../../services/auth';
 })
 export class ReservationComponent {}
 
-export type ReservationStatus = 'PENDING' | 'CONFIRMED' | 'FINISHED';
+export type ReservationStatus = 'PENDING' | 'CONFIRMED' | 'CHECKIN' | 'FINISHED';
 
 const BADGE: Record<ReservationStatus, string> = {
   PENDING: 'text-bg-warning',
-  CONFIRMED: 'text-bg-success',
+  CONFIRMED: 'text-bg-warning',
+  CHECKIN: 'text-bg-info',
   FINISHED: 'text-bg-success',
 };
 
 const TEXT: Record<ReservationStatus, string> = {
   PENDING: 'Pendiente',
   CONFIRMED: 'Confirmada',
+  CHECKIN: 'Check-in',
   FINISHED: 'Finalizada',
 };
 
