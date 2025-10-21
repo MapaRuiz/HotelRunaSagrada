@@ -47,16 +47,14 @@ export class ReservationTableOperatorComponent implements OnInit {
   private gridApi?: GridApi<Reservation>;
   readonly gridTheme: typeof sharedGridTheme = sharedGridTheme;
   private currentOpId?: number;
+  private platformId = inject(PLATFORM_ID);
 
   constructor(private service: ReservationService, private facade: ReservationFacade) {
     this.isBrowser = isPlatformBrowser(this.platformId);
     if (this.isBrowser) {
       ModuleRegistry.registerModules([AllCommunityModule]);
     }
-    }
   }
-
-  private platformId = inject(PLATFORM_ID);
 
   ngOnInit(): void {
     this.loadData();
@@ -93,13 +91,11 @@ export class ReservationTableOperatorComponent implements OnInit {
     },
     columnDefs: [
       {
-      {
         headerName: 'ID',
         field: 'reservation_id',
         minWidth: 60,
         maxWidth: 80,
       },
-      {
       {
         headerName: 'Cliente',
         filter: MultiSelectFilterComponent,
@@ -120,7 +116,6 @@ export class ReservationTableOperatorComponent implements OnInit {
         maxWidth: 160,
       },
       {
-      {
         headerName: 'Hotel',
         filter: MultiSelectFilterComponent,
         filterParams: {
@@ -133,7 +128,6 @@ export class ReservationTableOperatorComponent implements OnInit {
         maxWidth: 200,
       },
       {
-      {
         headerName: 'Habitación',
         valueGetter: (params) =>
           params.data?.room?.number || `Habitación ${params.data?.room_id || 'N/A'}`,
@@ -142,7 +136,6 @@ export class ReservationTableOperatorComponent implements OnInit {
         maxWidth: 140,
       },
       {
-      {
         headerName: 'Check-in',
         field: 'check_in',
         filter: 'agDateColumnFilter',
@@ -150,14 +143,12 @@ export class ReservationTableOperatorComponent implements OnInit {
         maxWidth: 140,
       },
       {
-      {
         headerName: 'Check-out',
         field: 'check_out',
         filter: 'agDateColumnFilter',
         filterParams: DATE_FILTER_CONFIG,
         maxWidth: 140,
       },
-      {
       {
         headerName: 'Estado',
         field: 'status',
@@ -245,7 +236,6 @@ export class ReservationTableOperatorComponent implements OnInit {
     if (!reservation.reservation_id) return;
     if (!confirm('¿Cancelar (eliminar) esta reserva?')) return;
 
-
     this.service.delete(reservation.reservation_id).subscribe({
       next: () => {
         this.reservations = this.reservations.filter(
@@ -257,7 +247,6 @@ export class ReservationTableOperatorComponent implements OnInit {
           api.applyTransaction({ remove: [reservation] });
           api.deselectAll();
         });
-
 
         // Limpiar selección para volver a la tabla
         this.selected = undefined;
