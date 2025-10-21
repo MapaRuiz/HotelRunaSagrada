@@ -76,11 +76,9 @@ export class ReservationConfirmationComponent implements OnInit {
           this.roomSvc.getById(reservation.room.room_id).subscribe({
             next: (room) => {
               this.room = room;
-              console.log('room_type_id:', room.room_type_id);
               if (room.room_type_id !== undefined) {
                 this.roomTypeSvc.getById(room.room_type_id).subscribe({
                   next: (roomType) => {
-                    console.log('roomType cargado:', roomType);
                     this.roomType = roomType;
                     this.isLoading = false;
                   },
@@ -116,34 +114,6 @@ export class ReservationConfirmationComponent implements OnInit {
       }
     });
   }
-
-  private loadRoom(roomId: number): void {
-    this.roomSvc.getById(roomId).subscribe({
-      next: (room) => {
-        this.room = room;
-        console.log('Room:', this.room);
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Error loading room:', err);
-        this.isLoading = false;
-      }
-    });
-  }
-
-  private loadRoomType(roomTypeId: number): void {
-    this.roomTypeSvc.getById(roomTypeId).subscribe({
-      next: (roomType) => {
-        this.roomType = roomType;
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Error loading room type:', err);
-        this.isLoading = false;
-      }
-    });
-  }
-
   private loadPayment(): void {
     this.paymentSvc.getById(this.paymentId!).subscribe({
       next: (payment) => {
