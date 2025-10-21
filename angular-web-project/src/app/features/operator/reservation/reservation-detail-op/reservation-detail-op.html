@@ -210,7 +210,7 @@
               </div>
               <div class="mt-2" *ngIf="showingPayment">
                 <!-- Métodos guardados -->
-                <div *ngIf="(paymentMethods?.length ?? 0) > 0" class="payment-methods-list">
+                <div *ngIf="(paymentMethods?.length ?? 0) > 0" class="card card-body mt-4">
                   <label
                     *ngFor="let method of paymentMethods; trackBy: trackMethod"
                     class="payment-method-item"

@@ -39,6 +39,8 @@ import {
 export class SearchResultTable implements OnChanges {
   @Input() reservations: Reservation[] = [];
   @Output() openDetail = new EventEmitter<Reservation>();
+  @Output() activateReservation = new EventEmitter<Reservation>();
+  @Output() deactivateReservation = new EventEmitter<Reservation>();
 
   isBrowser = false;
   readonly gridTheme: typeof sharedGridTheme = sharedGridTheme;
@@ -142,20 +144,62 @@ export class SearchResultTable implements OnChanges {
         filter: false,
         minWidth: 180,
         cellRenderer: ActionButtonsComponent<Reservation>,
-        cellRendererParams: (p: { data: Reservation }) => ({
-          additionalButtons: [
-            {
-              label: 'Ver detalles',
-              class: 'btn-details',
-              action: (r: Reservation) => this.viewDetails(r),
-            },
-          ],
-        }),
+        cellRendererParams: (p: { data: Reservation }) => {
+          const row = p.data as Reservation;
+          const status = row?.status;
+
+          const extraButton =
+            status === 'CONFIRMED'
+              ? {
+                  label: 'Activar',
+                  class: 'btn-details',
+                  action: (r: Reservation) => this.onActivate(r),
+                }
+              : status === 'CHECKIN'
+              ? {
+                  label: 'Desactivar',
+                  class: 'btn-delete',
+                  action: (r: Reservation) => this.onDeactivate(r),
+                }
+              : status === 'FINISHED'
+              ? {
+                  label: 'Detalles',
+                  class: 'btn-edit',
+                  action: (r: Reservation) => this.viewDetails(r),
+                }
+              : undefined;
+
+          const detailButton = {
+            label: 'Ver detalles',
+            class: 'btn-details',
+            action: (r: Reservation) => this.viewDetails(r),
+          };
+
+          const buttons = [];
+          if (extraButton) {
+            buttons.push(extraButton);
+          }
+          if (!extraButton || status !== 'FINISHED') {
+            buttons.push(detailButton);
+          }
+
+          return {
+            additionalButtons: buttons,
+          };
+        },
       } as ColDef<Reservation>,
     ],
   };
 
   private viewDetails(r: Reservation) {
     this.openDetail.emit(r);
+  }
+
+  private onActivate(row: Reservation) {
+    this.activateReservation.emit(row);
+  }
+
+  private onDeactivate(row: Reservation) {
+    this.deactivateReservation.emit(row);
   }
 }

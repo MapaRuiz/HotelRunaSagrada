@@ -16,6 +16,8 @@
   <app-search-result-table
     [reservations]="reservations"
     (openDetail)="onOpenDetail($event)"
+    (activateReservation)="activateReservation($event)"
+    (deactivateReservation)="deactivateReservation($event)"
   ></app-search-result-table>
 </div>
 
