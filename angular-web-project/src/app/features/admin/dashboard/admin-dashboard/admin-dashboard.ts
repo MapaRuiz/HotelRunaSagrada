@@ -9,6 +9,7 @@ import { AmenitiesService } from '../../../../services/amenities';
 import { Hotel } from '../../../../model/hotel';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef } from 'ag-grid-community';
+import { PaymentService } from '../../../../services/payment';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
@@ -33,22 +34,20 @@ export class AdminDashboardComponent implements OnInit {
   private hotelsApi = inject(HotelsService);
   private amenitiesApi = inject(AmenitiesService);
   readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private paymentApi = inject(PaymentService);
 
   hotels: Hotel[] = [];
   amenitiesCount = 0;
 
-  cards = [
-    { label:'Ingresos',   value:'$99.560', delta: 2.4,  icon:'bi-currency-dollar text-info' },
-    { label:'Reservas',   value:'35',      delta:-1.2,  icon:'bi-bag-check text-warning' },
-    { label:'Visitantes', value:'45.600',  delta:-0.8,  icon:'bi-people text-primary' },
-    { label:'Utilidad',   value:'$60.450', delta: 3.2,  icon:'bi-graph-up text-success' },
-  ];
+  incomeLoading = true;
+  incomeValue = '$0';
+  incomeDelta = 0;
 
   @ViewChild('chart') chart!: ChartComponent;
   public chartOptions: ChartOptions = {
     series: [{ name: 'Reservas', data: [12, 18, 15, 22, 28, 31, 27] }],
     chart: { type: 'bar', height: 300, toolbar: { show: false } },
-    xaxis: { categories: ['1','8','15','22','29','5','12'] },
+    xaxis: { categories: ['1', '8', '15', '22', '29', '5', '12'] },
     dataLabels: { enabled: false },
     stroke: { show: true, width: 2 },
     grid: { borderColor: '#e6e8e1' },
@@ -68,5 +67,16 @@ export class AdminDashboardComponent implements OnInit {
   ngOnInit() {
     this.hotelsApi.list().subscribe(h => this.hotels = h);
     this.amenitiesApi.list().subscribe(a => this.amenitiesCount = a.length);
+
+    this.calcIncome();
+  }
+
+  calcIncome() {
+    this.incomeLoading = true;
+    this.paymentApi.calculateIncome().subscribe(p => {
+      this.incomeValue = `$${p[0]}`;
+      this.incomeDelta = p[1];
+      this.incomeLoading = false;
+    });
   }
 }

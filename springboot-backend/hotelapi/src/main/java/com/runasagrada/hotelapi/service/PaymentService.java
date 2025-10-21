@@ -20,4 +20,6 @@ public interface PaymentService {
 	Payment update(Integer id, Payment partial);
 
 	void delete(Integer id);
+
+	double[] calculateIncome();
 }

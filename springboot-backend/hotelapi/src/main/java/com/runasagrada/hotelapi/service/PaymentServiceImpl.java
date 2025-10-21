@@ -11,6 +11,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -113,4 +115,46 @@ public class PaymentServiceImpl implements PaymentService {
 		payments.delete(payment);
 		helper.resyncIdentity("payment", "payment_id");
 	}
+
+	@Override
+	public double[] calculateIncome() {
+		List<Payment> payments = this.payments.findAll();
+
+		LocalDateTime now = LocalDateTime.now();
+		YearMonth currentMonth = YearMonth.from(now);
+		YearMonth previousMonth = currentMonth.minusMonths(1);
+
+		double currentIncome = 0.0;
+		double previousIncome = 0.0;
+
+		for (Payment p : payments) {
+			if (p == null || p.getStatus() == null || p.getCreatedAt() == null)
+				continue;
+			String status = p.getStatus().trim().toLowerCase();
+
+			if (!status.equals("paid"))
+				continue;
+
+			LocalDateTime created = p.getCreatedAt().toLocalDateTime();
+			YearMonth paymentMonth = YearMonth.from(created);
+
+			if (paymentMonth.equals(currentMonth)) {
+				currentIncome += p.getAmount();
+			} else if (paymentMonth.equals(previousMonth)) {
+				previousIncome += p.getAmount();
+			}
+		}
+
+		double delta = 0.0;
+		if (previousIncome > 0) {
+			delta = ((currentIncome - previousIncome) / previousIncome) * 100.0;
+		} else if (currentIncome > 0) {
+			delta = 100.0;
+		}
+
+		delta = Math.round(delta * 10.0) / 10.0;
+
+		return new double[] { currentIncome, delta };
+	}
+
 }

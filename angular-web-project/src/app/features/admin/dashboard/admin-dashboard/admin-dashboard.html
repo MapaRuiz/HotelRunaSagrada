@@ -1,24 +1,86 @@
 <!-- Cards KPI -->
 <div class="row g-3">
-  <div class="col-md-3" *ngFor="let c of cards">
+
+  <!-- Card: Ingresos -->
+  <div class="col-md-3">
     <div class="card-elev p-3 h-100">
       <div class="d-flex justify-content-between align-items-center">
         <div>
-          <div class="text-secondary small">{{ c.label }}</div>
-          <div class="fs-4 fw-bold">{{ c.value }}</div>
-          <div class="small" [class.text-success]="c.delta >= 0" [class.text-danger]="c.delta < 0">
-            <i
-              class="bi"
-              [ngClass]="{ 'bi-arrow-up-right': c.delta >= 0, 'bi-arrow-down-right': c.delta < 0 }"
-            ></i>
-            {{ c.delta | number : '1.0-1' }}%
+          <div class="text-secondary small">Ingresos</div>
+
+          <div class="fs-4 fw-bold">
+            <ng-container *ngIf="!incomeLoading; else loadingIngresos">
+              {{ incomeValue }}
+            </ng-container>
+            <ng-template #loadingIngresos>Calculando…</ng-template>
+          </div>
+
+          <div class="small"
+               [class.text-success]="incomeDelta >= 0"
+               [class.text-danger]="incomeDelta < 0">
+            <i class="bi"
+               [ngClass]="{ 'bi-arrow-up-right': incomeDelta >= 0, 'bi-arrow-down-right': incomeDelta < 0 }"></i>
+            {{ incomeDelta | number:'1.0-1' }}%
           </div>
         </div>
-        <i class="bi fs-2" [ngClass]="c.icon"></i>
+        <i class="bi fs-2 bi-currency-dollar text-info"></i>
       </div>
     </div>
   </div>
+
+  <!-- Card: Reservas (coloca tu lógica propia aquí) -->
+  <div class="col-md-3">
+    <div class="card-elev p-3 h-100">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-secondary small">Reservas</div>
+          <div class="fs-4 fw-bold"> 10 </div>
+          <div class="small text-danger">
+            <i class="bi bi-arrow-down-right"></i>
+            1%
+          </div>
+        </div>
+        <i class="bi fs-2 bi-bag-check text-warning"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card: Visitantes (lógica propia) -->
+  <div class="col-md-3">
+    <div class="card-elev p-3 h-100">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-secondary small">Visitantes</div>
+          <div class="fs-4 fw-bold">20</div>
+          <div class="small text-danger">
+            <i class="bi bi-arrow-down-right"></i>
+            20%
+          </div>
+        </div>
+        <i class="bi fs-2 bi-people text-primary"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card: Utilidad (lógica propia) -->
+  <div class="col-md-3">
+    <div class="card-elev p-3 h-100">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-secondary small">Utilidad</div>
+          <div class="fs-4 fw-bold">100</div>
+          <div class="small text-success">
+            <i class="bi bi-arrow-up-right"></i>
+            100%
+          </div>
+        </div>
+        <i class="bi fs-2 bi-graph-up text-success"></i>
+      </div>
+    </div>
+  </div>
+
 </div>
+
 
 <!-- Chart + resumen -->
 <div class="row g-3 mt-1">

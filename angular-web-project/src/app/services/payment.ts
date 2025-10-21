@@ -42,4 +42,7 @@ export class PaymentService {
 		return this.http.delete<void>(`${this.resource}/${id}`);
 	}
 
+	calculateIncome(): Observable<[number, number]> {
+		return this.http.get<[number, number]>(`${this.resource}/income`);
+	}
 }

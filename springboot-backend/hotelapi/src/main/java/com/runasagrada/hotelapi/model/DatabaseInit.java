@@ -1673,7 +1673,7 @@ public class DatabaseInit implements CommandLineRunner {
                 payment1.setReservationId(reservations.get(0));
                 payment1.setPaymentMethodId(pm1);
                 payment1.setAmount(450000.00);
-                payment1.setStatus("COMPLETED");
+                payment1.setStatus("PAID");
                 paymentRepo.save(payment1);
 
                 Payment payment2 = new Payment();
@@ -1687,7 +1687,7 @@ public class DatabaseInit implements CommandLineRunner {
                 payment3.setReservationId(reservations.get(2 % reservations.size()));
                 payment3.setPaymentMethodId(pm3);
                 payment3.setAmount(320000.00);
-                payment3.setStatus("COMPLETED");
+                payment3.setStatus("PAID");
                 paymentRepo.save(payment3);
 
                 Payment payment4 = new Payment();
@@ -1701,7 +1701,7 @@ public class DatabaseInit implements CommandLineRunner {
                 payment5.setReservationId(reservations.get(4 % reservations.size()));
                 payment5.setPaymentMethodId(pm2);
                 payment5.setAmount(890000.00);
-                payment5.setStatus("COMPLETED");
+                payment5.setStatus("PAID");
                 paymentRepo.save(payment5);
 
                 Payment payment6 = new Payment();
@@ -1715,7 +1715,7 @@ public class DatabaseInit implements CommandLineRunner {
                 payment7.setReservationId(reservations.get(6 % reservations.size()));
                 payment7.setPaymentMethodId(pm1);
                 payment7.setAmount(760000.00);
-                payment7.setStatus("COMPLETED");
+                payment7.setStatus("PAID");
                 paymentRepo.save(payment7);
 
                 Payment payment8 = new Payment();
@@ -1729,7 +1729,7 @@ public class DatabaseInit implements CommandLineRunner {
                 payment9.setReservationId(reservations.get(8 % reservations.size()));
                 payment9.setPaymentMethodId(pm3);
                 payment9.setAmount(1250000.00);
-                payment9.setStatus("COMPLETED");
+                payment9.setStatus("PAID");
                 paymentRepo.save(payment9);
 
                 Payment payment10 = new Payment();
