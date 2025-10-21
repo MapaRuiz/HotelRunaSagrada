@@ -106,7 +106,10 @@ export class ServicesAddForm implements OnInit {
   }
 
   onSubmit() {
-    if (!this.reservation || !this.service_id || !this.qty || !this.unit_price) {
+    // Clamp cantidad mínima
+    this.qty = Math.max(1, Number(this.qty) || 1);
+
+    if (!this.reservation || !this.service_id || !this.unit_price) {
       this.errorMsg = 'Complete los campos requeridos.';
       return;
     }
@@ -151,5 +154,10 @@ export class ServicesAddForm implements OnInit {
 
   onCancel() {
     this.canceled.emit();
+  }
+
+  onQtyChange(value: any) {
+    const n = Number(value);
+    this.qty = !isNaN(n) && n >= 1 ? n : 1;
   }
 }

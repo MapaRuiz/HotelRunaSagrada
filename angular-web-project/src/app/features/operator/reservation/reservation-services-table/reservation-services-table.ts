@@ -23,7 +23,7 @@ import { ReservationServiceApi } from '../../../../services/reservation-service'
 @Component({
   selector: 'app-reservation-services-table',
   standalone: true,
-  imports: [CommonModule, AgGridAngular, ActionButtonsComponent],
+  imports: [CommonModule, AgGridAngular],
   templateUrl: './reservation-services-table.html',
   styleUrl: './reservation-services-table.css',
 })
@@ -130,7 +130,7 @@ export class ReservationServicesTable implements OnChanges {
       const r = (p.data as any)?.reservation_id ?? 'r';
       const s = (p.data as any)?.service_id ?? 's';
       const sch = (p.data as any)?.schedule_id ?? 'null';
-      return `${r}-${s}-${sch}-${Math.random().toString(36).slice(2,7)}`;
+      return `${r}-${s}-${sch}-${Math.random().toString(36).slice(2, 7)}`;
     },
     onGridReady: (params) => {
       this.gridApi = params.api;
