@@ -175,19 +175,25 @@ export class ClientProfileComponent implements OnInit {
     });
   }
 
-  deletePayment(p: PaymentMethod) {
-    if (!p.method_id) {
-      alert('No se puede eliminar: el método de pago no tiene un ID válido.');
-      return;
-    }
-
-    if (!confirm('¿Eliminar este método de pago?')) return;
-    this.paymentApi.delete(p.method_id).subscribe({
-      next: () => {
-        alert('Método eliminado');
-        this.paymentMethods = this.paymentMethods.filter(x => x.method_id !== p.method_id);
-      },
-      error: (err) => alert(err?.error?.message || 'Error al eliminar método'),
-    });
+deletePayment(p: PaymentMethod) {
+  if (!p.method_id) {
+    alert('No se puede eliminar: el método de pago no tiene un ID válido.');
+    return;
   }
+
+  if (!confirm('¿Eliminar este método de pago?')) return;
+
+  this.paymentApi.delete(p.method_id).subscribe({
+    next: () => {
+      alert('Método eliminado');
+      // 🔄 Forzamos la actualización del array
+      this.paymentMethods = this.paymentMethods.filter(
+        (x) => x.method_id !== p.method_id
+      );
+      this.paymentMethods = [...this.paymentMethods]; 
+    },
+    error: (err) => alert(err?.error?.message || 'Error al eliminar método'),
+  });
+}
+
 }

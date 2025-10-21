@@ -33,4 +33,6 @@ public class PaymentMethod {
 
     @JsonProperty("billing_address")
     private String billingAddress;
+
+	private Boolean active = true;
 }

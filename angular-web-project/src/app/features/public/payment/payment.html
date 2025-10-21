@@ -60,23 +60,24 @@
             <!-- Métodos guardados -->
             <div *ngIf="(paymentMethods?.length ?? 0) > 0" class="payment-methods-list">
               <label *ngFor="let method of paymentMethods; trackBy: trackMethod"
-                     class="payment-method-item"
-                     [class.selected]="selectedPaymentMethodId === toNumber(method.method_id)"
-                     [attr.for]="'method-' + method.method_id">
-                <input
-                  type="radio"
-                  [id]="'method-' + method.method_id"
-                  name="paymentMethod"
-                  [value]="toNumber(method.method_id)"
-                  [(ngModel)]="selectedPaymentMethodId" />
-                <span class="method-label">
-                  <span class="method-icon">{{ getPaymentTypeIcon(method.type) }}</span>
-                  <span class="method-info">
-                    <span class="method-type">{{ getPaymentTypeName(method.type) }}</span>
-                    <span class="method-details" *ngIf="method.last4">•••• {{ method.last4 }}</span>
-                    <span class="method-holder" *ngIf="method.holder_name">{{ method.holder_name }}</span>
-                  </span>
+                  class="payment-method-item"
+                  [class.selected]="selectedPaymentMethodId === getMethodId(method)"
+                  [class.disabled]="getMethodId(method) === null">
+              <input
+                type="radio"
+                [id]="'method-' + (getMethodId(method) ?? 'x')"
+                name="paymentMethod"
+                [value]="getMethodId(method)"
+                [(ngModel)]="selectedPaymentMethodId"
+                [disabled]="getMethodId(method) === null" />
+              <span class="method-label">
+                <span class="method-icon">{{ getPaymentTypeIcon(method.type) }}</span>
+                <span class="method-info">
+                  <span class="method-type">{{ getPaymentTypeName(method.type) }}</span>
+                  <span class="method-details" *ngIf="method.last4">•••• {{ method.last4 }}</span>
+                  <span class="method-holder" *ngIf="method.holder_name">{{ method.holder_name }}</span>
                 </span>
+              </span>
               </label>
             </div>
 
