@@ -27,18 +27,6 @@
       <!-- Modo edición de servicios (movido dentro del acordeón) -->
     </div>
 
-    <!-- Mostrar el formulario arriba también para evitar depender del estado del collapse -->
-    <div class="card mt-3" *ngIf="editingServices">
-      <div class="card-body">
-        <app-services-add-form
-          [reservation]="current"
-          [edit]="editingService"
-          (saved)="closeServices()"
-          (canceled)="closeServices()"
-        ></app-services-add-form>
-      </div>
-    </div>
-
     <div id="accordion">
       <div class="card rounded-0">
         <div class="card-header" id="aboutReservation">
@@ -145,7 +133,6 @@
           (shown.bs.collapse)="onServicesCollapseShown()"
         >
           <div class="d-flex gap-2 align-items-center px-3 pt-3">
-            +
             <ng-container *ngIf="!editingServices; else editBtns">
               <button type="button" class="btn btn-olive btn-sm" (click)="addServices()">
                 Agregar servicios
