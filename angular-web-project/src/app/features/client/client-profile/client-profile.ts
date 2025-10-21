@@ -190,7 +190,7 @@ deletePayment(p: PaymentMethod) {
       this.paymentMethods = this.paymentMethods.filter(
         (x) => x.method_id !== p.method_id
       );
-      this.paymentMethods = [...this.paymentMethods]; // 👈 fuerza refresco en Angular
+      this.paymentMethods = [...this.paymentMethods]; 
     },
     error: (err) => alert(err?.error?.message || 'Error al eliminar método'),
   });
