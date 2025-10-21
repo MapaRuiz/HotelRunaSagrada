@@ -208,7 +208,7 @@ export class PaymentComponent implements OnInit {
 					reservation_id: this.reservationId!,
 					payment_method_id: paymentMethodId,
 					amount: this.total,
-					status: 'PENDING'
+					status: 'PAID'
 				})
 			);
 

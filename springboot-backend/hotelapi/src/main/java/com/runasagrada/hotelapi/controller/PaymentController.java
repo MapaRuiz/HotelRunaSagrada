@@ -102,6 +102,11 @@ public class PaymentController {
 		return ResponseEntity.noContent().build();
 	}
 
+	@GetMapping("/payments/income")
+	public double[] getIncome() {
+		return service.calculateIncome();
+	}
+
 	@Data
 	public static class PaymentRequest {
 		private Integer reservationId;

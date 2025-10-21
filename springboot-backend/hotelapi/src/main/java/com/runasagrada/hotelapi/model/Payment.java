@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.sql.Timestamp;
+import java.time.Instant;
 
 @Entity
 @Data
@@ -25,6 +27,8 @@ public class Payment {
 	@JoinColumn(name = "payment_method_id", nullable = false)
 	@JsonIgnore
 	private PaymentMethod paymentMethodId;
+
+	private Timestamp createdAt = Timestamp.from(Instant.now());
 
 	private double amount;
 
