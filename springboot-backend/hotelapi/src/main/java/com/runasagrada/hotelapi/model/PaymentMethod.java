@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Data
@@ -11,20 +13,24 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PaymentMethod {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer paymentMethodId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty("method_id") 
+    private Integer paymentMethodId;
 
-	@OneToOne
-	@JoinColumn(name = "user_id", nullable = false)
-	private User userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
+    private User userId;
 
-	private String type;
+    private String type;
 
-	private Integer lastfour;
+    @JsonProperty("last4")
+    private String lastfour;
 
-	private String holderName;
+    @JsonProperty("holder_name")
+    private String holderName;
 
-	private String billingAddress;
-
+    @JsonProperty("billing_address")
+    private String billingAddress;
 }

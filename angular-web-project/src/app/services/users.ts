@@ -8,18 +8,20 @@ export class UsersService {
   private http = inject(HttpClient);
   private base = environment.apiBaseUrl;
 
-  getAll() { return this.http.get<User[]>(`${this.base}/users`); }
-
-  getMe() { 
-    return this.http.get<User>(`${this.base}/users/me`); 
+  getAll() {
+    return this.http.get<User[]>(`${this.base}/users`);
   }
 
-  // ✔ Admin crea usuarios reutilizando /auth/register con ?role=
+  getMe() {
+    return this.http.get<User>(`${this.base}/users/me`);
+  }
+
   create(body: Partial<User> & { role?: string; roles?: string[] }) {
     const role = body.role ?? (Array.isArray(body.roles) ? body.roles[0] : undefined);
-    // No mandes 'role/roles' en el payload JSON; va en query param
     const { role: _r, roles: _rs, ...payload } = body;
-    const url = role ? `${this.base}/auth/register?role=${encodeURIComponent(role)}` : `${this.base}/auth/register`;
+    const url = role
+      ? `${this.base}/auth/register?role=${encodeURIComponent(role)}`
+      : `${this.base}/auth/register`;
     return this.http.post<User>(url, payload);
   }
 
@@ -31,20 +33,25 @@ export class UsersService {
     return this.http.put<User>(`${this.base}/users/me`, body);
   }
 
-    // services/users.ts
+  // services/users.ts
   delete(id: number, cascade = false) {
     return this.http.delete<void>(`${this.base}/users/${id}`, { params: { cascade } });
   }
 
-  deleteMe(cascade = false) { return this.http.delete<void>(`${this.base}/users/me`, { params: { cascade } }); }
+  deleteMe(cascade = false) {
+    return this.http.delete<void>(`${this.base}/users/me`, { params: { cascade } });
+  }
 
-  
   getCurrentReservations(userId: number) {
-    return this.http.get<any[]>(`${this.base}/reservations/current`, { params: { userId: String(userId) } });
+    return this.http.get<any[]>(`${this.base}/reservations/current`, {
+      params: { userId: String(userId) },
+    });
   }
 
   getHistoryReservations(userId: number) {
-    return this.http.get<any[]>(`${this.base}/reservations/history`, { params: { userId: String(userId) } });
+    return this.http.get<any[]>(`${this.base}/reservations/history`, {
+      params: { userId: String(userId) },
+    });
   }
 
   existsByEmail(email: string) {
@@ -52,7 +59,9 @@ export class UsersService {
   }
 
   existsByNationalId(nationalId: string) {
-    return this.http.get<boolean>(`${this.base}/users/nationalId/${encodeURIComponent(nationalId)}`);
+    return this.http.get<boolean>(
+      `${this.base}/users/nationalId/${encodeURIComponent(nationalId)}`
+    );
   }
 
   // Backend endpoint is GET /api/user/id/{userId}

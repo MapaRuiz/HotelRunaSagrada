@@ -52,13 +52,13 @@ export class RoomFormComponent {
   availableCount = 0;
 
   // Estados UI
-  showForm = true; // visible por defecto (como en tu captura)
+  showForm = true;
   isSubmitting = false;
   submitError = '';
   minCheckIn = todayISO();
   minCheckOut = todayISO();
 
-  // Base price (para estimados si lo necesitas)
+  // Base price 
   basePrice: number | null = null;
 
   ngOnInit() {
@@ -119,8 +119,16 @@ export class RoomFormComponent {
         const p = safeSessionGet('pendingReservation');
         if (p && p.hotelId === this.hotelId && p.typeId === this.typeId) {
           this.showForm = true;
-          this.reserveForm.patchValue({ checkIn: todayISO(), checkOut: addDaysISO(1) }, { emitEvent: false });
+          // Restaurar las fechas guardadas si existen
+          const checkIn = p.checkIn || todayISO();
+          const checkOut = p.checkOut || addDaysISO(1);
+          this.reserveForm.patchValue({ checkIn, checkOut }, { emitEvent: true });
           safeSessionRemove('pendingReservation');
+
+          // Disparar automáticamente la reserva después de login
+          setTimeout(() => {
+            this.reserve();
+          }, 500);
         }
       },
       error: (error) => {
@@ -185,10 +193,13 @@ export class RoomFormComponent {
     const isClient = (info.roles ?? []).some(r => String(r).toUpperCase() === 'CLIENT');
     if (info.id != null && isClient) return Number(info.id);
 
-    // Guarda intención y manda al login
+    // Guarda intención con las fechas seleccionadas y manda al login
+    const { checkIn, checkOut } = this.reserveForm.value;
     safeSessionSet('pendingReservation', {
       hotelId: this.hotelId,
       typeId: this.typeId,
+      checkIn: checkIn,
+      checkOut: checkOut,
     });
     this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
     return null;

@@ -1,5 +1,6 @@
 package com.runasagrada.hotelapi.controller;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.runasagrada.hotelapi.model.PaymentMethod;
 import com.runasagrada.hotelapi.model.User;
 import com.runasagrada.hotelapi.service.PaymentMethodService;
@@ -38,7 +39,7 @@ public class PaymentMethodController {
 		PaymentMethod pm = new PaymentMethod();
 		User user = new User();
 		user.setUserId(body.getUserId());
-		pm.setUser(user);
+		pm.setUserId(user);
 		pm.setType(body.getType());
 		pm.setLastfour(body.getLastfour());
 		pm.setHolderName(body.getHolderName());
@@ -62,12 +63,19 @@ public class PaymentMethodController {
 		return ResponseEntity.noContent().build();
 	}
 
-	@Data
-	public static class PaymentMethodRequest {
-		private Integer userId;
-		private String type;
-		private Integer lastfour;
-		private String holderName;
-		private String billingAddress;
-	}
+@Data
+public static class PaymentMethodRequest {
+    private Integer userId;
+    private String type;
+
+    @JsonProperty("last4")
+    private String lastfour;
+
+    @JsonProperty("holder_name")
+    private String holderName;
+
+    @JsonProperty("billing_address")
+    private String billingAddress;
+}
+
 }

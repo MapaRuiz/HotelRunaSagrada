@@ -35,4 +35,7 @@ public interface ReservationService {
         Reservation activate(Integer id, String status);
 
         Reservation deactivate(Integer id);
+
+        Reservation updateStatus(Integer id, String status);
+
 }

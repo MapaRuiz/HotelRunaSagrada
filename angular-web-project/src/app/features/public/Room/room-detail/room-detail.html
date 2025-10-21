@@ -137,18 +137,5 @@
       [src]="'https://my.matterport.com/show/?m=dTDqi6RDy29&play=1&guides=1&brand=0'"
     >
     </app-room-rv>
-
-    <!-- Modal -->
-    <app-room-modal
-      [open]="showModal"
-      [reservationId]="lastReservationId"
-      [reservationCode]="reservationCode"
-      [hotelId]="modalHotelId"
-      [typeId]="modalTypeId"
-      [roomId]="modalRoomId"
-      [checkIn]="modalCheckIn"
-      [checkOut]="modalCheckOut"
-      (closed)="closeModalGoHome()"
-    ></app-room-modal>
   </div>
 </section>

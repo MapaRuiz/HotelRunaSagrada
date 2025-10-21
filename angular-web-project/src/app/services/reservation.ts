@@ -72,4 +72,8 @@ export class ReservationService {
       null
     );
   }
+
+  updateStatus(id: number, status: string): Observable<Reservation> {
+    return this.http.put<Reservation>(`${this.resource}/${id}/status/${status}`, null);
+  }
 }

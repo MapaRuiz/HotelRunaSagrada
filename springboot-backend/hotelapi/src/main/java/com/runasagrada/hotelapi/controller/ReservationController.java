@@ -110,6 +110,12 @@ public class ReservationController {
         return ResponseEntity.ok(updated);
     }
 
+    @PutMapping("/{id}/status/{status}")
+    public ResponseEntity<Reservation> updateStatus(@PathVariable Integer id, @PathVariable String status) {
+        Reservation updated = service.updateStatus(id, status);
+        return ResponseEntity.ok(updated);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         service.delete(id);
