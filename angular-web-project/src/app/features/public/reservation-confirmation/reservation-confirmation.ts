@@ -165,28 +165,6 @@ export class ReservationConfirmationComponent implements OnInit {
     this.confirmationCode = code;
   }
 
-  getPaymentTypeIcon(type: string | undefined): string {
-    if (!type) return '💳';
-
-    const icons: { [key: string]: string } = {
-      'TARJETA': '💳',
-      'PAYPAL': '🅿️',
-      'EFECTIVO': '💵'
-    };
-    return icons[type] || '💳';
-  }
-
-  getPaymentTypeName(type: string | undefined): string {
-    if (!type) return 'Tarjeta';
-
-    const names: { [key: string]: string } = {
-      'TARJETA': 'Tarjeta de Crédito/Débito',
-      'PAYPAL': 'PayPal',
-      'EFECTIVO': 'Efectivo'
-    };
-    return names[type] || type;
-  }
-
   goToHome(): void {
     this.router.navigate(['/']);
   }
