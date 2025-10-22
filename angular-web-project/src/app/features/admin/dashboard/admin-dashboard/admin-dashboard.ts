@@ -64,6 +64,18 @@ export class AdminDashboardComponent implements OnInit {
     colors: ['#778E69']
   };
 
+  public amenitiesChart: ChartOptions = {
+    series: [{ name: 'Amenities', data: [] }],
+    chart: { type: 'bar', height: 300, toolbar: { show: false } },
+    xaxis: { categories: [] },
+    dataLabels: { enabled: false },
+    stroke: { show: true, width: 2 },
+    grid: { borderColor: '#e6e8e1' },
+    legend: { show: false },
+    fill: { opacity: .9 },
+    colors: ['#5C7CFA']
+  };
+
   colDefs: ColDef[] = [
     { headerName: 'ID', field: 'hotel_id', width: 90 },
     { headerName: 'Hotel', field: 'name', flex: 1 },
@@ -81,6 +93,7 @@ export class AdminDashboardComponent implements OnInit {
     this.calcUsers();
 
     this.loadReservationsByRoomType();
+    this.loadAmenitiesByHotel();
 
   }
 
@@ -127,6 +140,34 @@ export class AdminDashboardComponent implements OnInit {
           ...this.chartOptions,
           xaxis: { ...this.chartOptions.xaxis, categories: ['—'] },
           series: [{ name: 'Reservas', data: [0] }]
+        };
+      }
+    });
+  }
+
+  private loadAmenitiesByHotel() {
+    this.hotelsApi.amenitiesSummary().subscribe({
+      next: (map) => {
+        const entries = Object.entries(map).sort((a, b) => b[1] - a[1]);
+
+        const categories = entries.map(([hotelName]) => {
+          if (!hotelName) return 'N/D';
+          return hotelName.replace(/^Runa Sagrada\s*/i, '').trim();
+        });
+        const data = entries.map(([, count]) => count ?? 0);
+
+        this.amenitiesChart = {
+          ...this.amenitiesChart,
+          xaxis: { ...this.amenitiesChart.xaxis, categories },
+          series: [{ name: 'Amenities', data }]
+        };
+      },
+      error: (err) => {
+        console.error('Error cargando amenities por hotel', err);
+        this.amenitiesChart = {
+          ...this.amenitiesChart,
+          xaxis: { ...this.amenitiesChart.xaxis, categories: ['—'] },
+          series: [{ name: 'Amenities', data: [0] }]
         };
       }
     });

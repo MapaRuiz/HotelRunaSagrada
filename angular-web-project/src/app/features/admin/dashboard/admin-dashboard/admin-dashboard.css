@@ -8,8 +8,8 @@
 .soft-grid {
   --ag-foreground-color: var(--c-ink);
   --ag-background-color: var(--c-ivory);
-  --ag-header-background-color: var(--c-ink);
-  --ag-header-foreground-color: #fff;
+  --ag-header-background-color: #F3F5EF;
+  --ag-header-foreground-color: #2F3B2F;
   --ag-odd-row-background-color: rgba(119, 142, 105, 0.06);
   --ag-row-border-color: rgba(21, 21, 19, 0.08);
   --ag-border-color: rgba(21, 21, 19, 0.1);

@@ -17,4 +17,6 @@ public interface HotelService {
     void delete(Long id);
 
     Map<Long, String> getHotelsIdName();
+
+    Map<String, Long> amenitiesCountByHotel();
 }

@@ -90,8 +90,9 @@
 
 <!-- Chart + resumen -->
 <div class="row g-3 mt-1">
-  <div class="col-lg-8">
-    <div class="card-elev p-3">
+  <!-- Gráfico: Reservas por tipo -->
+  <div class="col-lg-6 col-md-12">
+    <div class="card-elev p-3 h-100">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <div class="fw-semibold">Reservas por tipo de habitación</div>
         <div class="small text-secondary">Este mes</div>
@@ -107,16 +108,28 @@
         [legend]="chartOptions.legend"
         [fill]="chartOptions.fill"
         [colors]="chartOptions.colors || []"
-      >
-      </apx-chart>
+      ></apx-chart>
     </div>
   </div>
-  <div class="col-lg-4">
-    <div class="card-elev p-3 h-100 d-flex">
-      <div class="fw-semibold mb-2">Resumen</div>
-      <div class="small text-secondary">Hoteles: {{ hotels.length }}</div>
-      <div class="small text-secondary">Amenities: {{ amenitiesCount }}</div>
-      <div class="mt-auto small text-muted">*Datos de demo para gráfico</div>
+
+  <!-- Gráfico: Amenities por hotel -->
+  <div class="col-lg-6 col-md-12">
+    <div class="card-elev p-3 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="fw-semibold">Amenities por hotel</div>
+        <div class="small text-secondary">Totales</div>
+      </div>
+      <apx-chart
+        [series]="amenitiesChart.series"
+        [chart]="amenitiesChart.chart"
+        [xaxis]="amenitiesChart.xaxis"
+        [dataLabels]="amenitiesChart.dataLabels"
+        [stroke]="amenitiesChart.stroke"
+        [grid]="amenitiesChart.grid"
+        [legend]="amenitiesChart.legend"
+        [fill]="amenitiesChart.fill"
+        [colors]="amenitiesChart.colors || []"
+      ></apx-chart>
     </div>
   </div>
 </div>
