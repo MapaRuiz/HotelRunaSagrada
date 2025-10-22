@@ -146,6 +146,7 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        paymentService.deleteByReservationId(id);
         service.delete(id);
         return ResponseEntity.noContent().build();
     }

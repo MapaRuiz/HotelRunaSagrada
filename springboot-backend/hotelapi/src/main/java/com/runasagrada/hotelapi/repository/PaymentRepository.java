@@ -12,4 +12,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer> {
 	List<Payment> findByPaymentMethodId_PaymentMethodId(Integer paymentMethodId);
 
 	List<Payment> findByStatus(String status);
+
+	void deleteByReservationId_ReservationId(Integer reservationId);
 }

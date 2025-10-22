@@ -22,4 +22,6 @@ public interface PaymentService {
 	void delete(Integer id);
 
 	double[] calculateIncome();
+
+	void deleteByReservationId(Integer reservationId);
 }

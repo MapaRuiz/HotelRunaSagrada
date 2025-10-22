@@ -129,6 +129,19 @@ public class PaymentServiceImpl implements PaymentService {
 	}
 
 	@Override
+	public void deleteByReservationId(Integer reservationId) {
+		if (reservationId == null) {
+			return;
+		}
+		List<Payment> toDelete = payments.findByReservationId_ReservationId(reservationId);
+		if (toDelete.isEmpty()) {
+			return;
+		}
+		payments.deleteAll(toDelete);
+		helper.resyncIdentity("payment", "payment_id");
+	}
+
+	@Override
 	public double[] calculateIncome() {
 		List<Payment> payments = this.payments.findAll();
 
