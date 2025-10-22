@@ -52,4 +52,8 @@ export class UsersService {
   existsByNationalId(nationalId: string) {
     return this.http.get<boolean>(`${this.base}/users/nationalId/${encodeURIComponent(nationalId)}`);
   }
+
+  summary() {
+    return this.http.get<[number, number]>(`${this.base}/users/summary`);
+  }
 }

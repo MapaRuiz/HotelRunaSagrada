@@ -98,6 +98,11 @@ public class UserController {
         return service.existsByNationalId(nationalId);
     }
 
+    @GetMapping("/users/summary")
+    public double[] summary() {
+        return service.usersSummary();
+    }
+
     @Data
     static class AdminUpdateUserRequest {
         private String email;

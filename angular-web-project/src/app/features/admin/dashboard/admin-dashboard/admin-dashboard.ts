@@ -11,6 +11,7 @@ import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef } from 'ag-grid-community';
 import { PaymentService } from '../../../../services/payment';
 import { ReservationService } from '../../../../services/reservation';
+import { UsersService } from '../../../../services/users';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
@@ -37,6 +38,7 @@ export class AdminDashboardComponent implements OnInit {
   readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private paymentApi = inject(PaymentService);
   private reservationApi = inject(ReservationService);
+  private userService = inject(UsersService);
 
   hotels: Hotel[] = [];
   amenitiesCount = 0;
@@ -46,6 +48,8 @@ export class AdminDashboardComponent implements OnInit {
   incomeDelta = 0;
   reservationValue = 0;
   reservationDelta = 0;
+  usersValue = 0;
+  usersDelta = 0;
 
   @ViewChild('chart') chart!: ChartComponent;
   public chartOptions: ChartOptions = {
@@ -73,10 +77,9 @@ export class AdminDashboardComponent implements OnInit {
     this.amenitiesApi.list().subscribe(a => this.amenitiesCount = a.length);
 
     this.calcIncome();
-    this.reservationApi.summary().subscribe(p => {
-      this.reservationValue = p[0];
-      this.reservationDelta = p[1];
-    });
+    this.calcReservations();
+    this.calcUsers();
+
   }
 
   calcIncome() {
@@ -85,6 +88,21 @@ export class AdminDashboardComponent implements OnInit {
       this.incomeValue = `$${p[0]}`;
       this.incomeDelta = p[1];
       this.incomeLoading = false;
+    });
+  }
+
+  calcReservations() {
+    this.reservationApi.summary().subscribe(p => {
+      this.reservationValue = p[0];
+      this.reservationDelta = p[1];
+    });
+  }
+
+  calcUsers() {
+    this.userService.summary().subscribe(p => {
+      this.usersValue = p[0];
+      this.usersDelta = p[1];
+      console.log(p);
     });
   }
 }

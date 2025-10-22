@@ -54,10 +54,13 @@
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <div class="text-secondary small">Visitantes</div>
-          <div class="fs-4 fw-bold">20</div>
-          <div class="small text-danger">
-            <i class="bi bi-arrow-down-right"></i>
-            20%
+          <div class="fs-4 fw-bold"> {{ usersValue }} </div>
+          <div class="small"
+               [class.text-success]="usersValue >= 0"
+               [class.text-danger]="usersDelta < 0">
+            <i class="bi"
+               [ngClass]="{ 'bi-arrow-up-right': usersDelta >= 0, 'bi-arrow-down-right': usersDelta < 0 }"></i>
+            {{ usersDelta | number:'1.0-1' }}%
           </div>
         </div>
         <i class="bi fs-2 bi-people text-primary"></i>
