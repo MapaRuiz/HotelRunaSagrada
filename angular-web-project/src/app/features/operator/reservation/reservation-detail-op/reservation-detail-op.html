@@ -130,10 +130,7 @@
             >
               Agregar servicios
             </button>
-            <small
-              *ngIf="current.status !== 'CHECKIN'"
-              class="text-muted"
-            >
+            <small *ngIf="current.status !== 'CHECKIN'" class="text-muted">
               Solo se pueden agregar servicios cuando la reserva está en Check-in.
             </small>
             <ng-template #editBtns>
@@ -211,7 +208,7 @@
                   >Solo puedes pagar cuando la reserva está en Check-in.</small
                 >
               </div>
-              <div class="mt-2" *ngIf="showingPayment">
+              <div class="mt-2 card border-0" *ngIf="showingPayment">
                 <!-- Métodos guardados -->
                 <div *ngIf="(paymentMethods?.length ?? 0) > 0" class="card card-body mt-4">
                   <label
@@ -227,18 +224,22 @@
                       [value]="toNumber(method.method_id)"
                       [(ngModel)]="selectedPaymentMethodId"
                     />
-                    <span class="method-label">
-                      <span class="method-icon">{{ getPaymentTypeIcon(method.type) }}</span>
-                      <span class="method-info">
-                        <span class="method-type">{{ getPaymentTypeName(method.type) }}</span>
-                        <span class="method-details" *ngIf="method.last4"
-                          >•••• {{ method.last4 }}</span
-                        >
-                        <span class="method-holder" *ngIf="method.holder_name">{{
-                          method.holder_name
-                        }}</span>
-                      </span>
-                    </span>
+                    <div class="method-info-container mt-2">
+                      <div class="method-label">
+                        <div class="method-header">
+                          <span class="method-icon">{{ getPaymentTypeIcon(method.type) }}</span>
+                          <span class="method-type">{{ getPaymentTypeName(method.type) }}</span>
+                        </div>
+                        <div class="method-body">
+                          <span class="method-details" *ngIf="method.last4">
+                            •••• {{ method.last4 }}
+                          </span>
+                          <span class="method-holder" *ngIf="method.holder_name">
+                            {{ method.holder_name }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </label>
                 </div>
                 <div *ngIf="(paymentMethods?.length ?? 0) === 0" class="text-muted">

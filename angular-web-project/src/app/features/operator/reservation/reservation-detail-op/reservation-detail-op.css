@@ -17,3 +17,45 @@
 #accordion .card-header {
   padding: 0;
 }
+
+.payment-method-item {
+  display: flex;
+  align-items: stretch;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.payment-method-item .method-info-container {
+  flex: 1;
+}
+
+.payment-method-item .method-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.payment-method-item .method-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+.payment-method-item .method-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.payment-method-item .method-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  color: #6c757d;
+  font-size: 0.875rem;
+}
+
+.payment-method-item .method-details {
+  font-family: 'Courier New', monospace;
+}

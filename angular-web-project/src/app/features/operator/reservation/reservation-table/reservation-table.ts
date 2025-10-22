@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
 import { ReservationDetailOp } from '../reservation-detail-op/reservation-detail-op';
 import { AgGridAngular } from 'ag-grid-angular';
 import { FormsModule } from '@angular/forms';
@@ -14,6 +14,7 @@ import {
   ColDef,
   GridApi,
   GridOptions,
+  ISizeAllColumnsToContentParams,
   ModuleRegistry,
 } from 'ag-grid-community';
 import { ReservationService } from '../../../../services/reservation';
@@ -32,7 +33,7 @@ import { ReservationFacade } from '../reservation';
   templateUrl: './reservation-table.html',
   styleUrl: './reservation-table.css',
 })
-export class ReservationTableOperatorComponent implements OnInit {
+export class ReservationTableOperatorComponent implements OnInit, OnDestroy {
   isBrowser: boolean = false;
   loading: boolean = true;
 
@@ -49,6 +50,14 @@ export class ReservationTableOperatorComponent implements OnInit {
   readonly gridTheme: typeof sharedGridTheme = sharedGridTheme;
   private currentOpId?: number;
   private platformId = inject(PLATFORM_ID);
+  private readonly autoSizeParams: ISizeAllColumnsToContentParams = {
+    defaultMinWidth: 120,
+  };
+  compactLayout = false;
+  private readonly handleResize = () => {
+    this.updateLayoutMode();
+    this.autoSizeColumns();
+  };
 
   constructor(
     private service: ReservationService,
@@ -62,6 +71,10 @@ export class ReservationTableOperatorComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (this.isBrowser) {
+      this.updateLayoutMode();
+      window.addEventListener('resize', this.handleResize);
+    }
     this.loadData();
   }
 
@@ -77,19 +90,34 @@ export class ReservationTableOperatorComponent implements OnInit {
           if (this.search) {
             this.withGridApi((api) => api.setGridOption('quickFilterText', this.search));
           }
+          this.autoSizeColumns();
         },
         error: (err) => console.error('Error loading reservations:', err),
       });
   }
 
+  ngOnDestroy(): void {
+    if (this.isBrowser) {
+      window.removeEventListener('resize', this.handleResize);
+    }
+  }
+
   gridOptions: GridOptions<Reservation> = {
     localeText: AG_GRID_LOCALE,
     rowSelection: 'single',
+    defaultColDef: {
+      resizable: true,
+      wrapText: true,
+      autoHeight: true,
+    },
     getRowId: (params) => params.data.reservation_id?.toString() || '',
     onGridReady: (params) => {
       this.gridApi = params.api;
-      params.api.sizeColumnsToFit();
+      this.updateLayoutMode();
+      this.autoSizeColumns();
     },
+    onGridSizeChanged: () => this.handleResize(),
+    onFirstDataRendered: () => this.autoSizeColumns(),
     onGridPreDestroyed: () => {
       this.gridApi = undefined;
     },
@@ -102,7 +130,6 @@ export class ReservationTableOperatorComponent implements OnInit {
         headerName: 'ID',
         field: 'reservation_id',
         minWidth: 60,
-        maxWidth: 80,
       },
       {
         headerName: 'Cliente',
@@ -114,14 +141,13 @@ export class ReservationTableOperatorComponent implements OnInit {
         valueGetter: (params) =>
           params.data?.user?.full_name || `Usuario ${params.data?.user_id || 'N/A'}`,
         minWidth: 150,
-        maxWidth: 200,
       },
       {
         headerName: 'Identificador',
         valueGetter: (params) => params.data?.user?.national_id || '',
         filter: 'agTextColumnFilter',
         filterParams: TEXT_FILTER_CONFIG,
-        maxWidth: 160,
+        minWidth: 160,
       },
       {
         headerName: 'Hotel',
@@ -133,7 +159,6 @@ export class ReservationTableOperatorComponent implements OnInit {
         valueGetter: (params) =>
           params.data?.hotel?.name || `Hotel ${params.data?.hotel_id || 'N/A'}`,
         minWidth: 150,
-        maxWidth: 200,
       },
       {
         headerName: 'Habitación',
@@ -141,21 +166,21 @@ export class ReservationTableOperatorComponent implements OnInit {
           params.data?.room?.number || `Habitación ${params.data?.room_id || 'N/A'}`,
         filter: 'agTextColumnFilter',
         filterParams: TEXT_FILTER_CONFIG,
-        maxWidth: 140,
+        minWidth: 140,
       },
       {
         headerName: 'Check-in',
         field: 'check_in',
         filter: 'agDateColumnFilter',
         filterParams: DATE_FILTER_CONFIG,
-        maxWidth: 140,
+        minWidth: 140,
       },
       {
         headerName: 'Check-out',
         field: 'check_out',
         filter: 'agDateColumnFilter',
         filterParams: DATE_FILTER_CONFIG,
-        maxWidth: 140,
+        minWidth: 140,
       },
       {
         headerName: 'Estado',
@@ -172,7 +197,7 @@ export class ReservationTableOperatorComponent implements OnInit {
           el.textContent = getStatusText(s);
           return el;
         },
-        maxWidth: 140,
+        minWidth: 140,
       },
       {
         headerName: 'Acciones',
@@ -304,6 +329,25 @@ export class ReservationTableOperatorComponent implements OnInit {
       return;
     }
     action(api);
+  }
+
+  private updateLayoutMode(): void {
+    if (!this.isBrowser) return;
+    const isCompact = window.innerWidth < 1366 || window.innerHeight < 768;
+    if (this.compactLayout !== isCompact) {
+      this.compactLayout = isCompact;
+      this.withGridApi((api) => {
+        api.refreshCells({ force: true });
+        api.resetRowHeights();
+      });
+    }
+  }
+
+  private autoSizeColumns(): void {
+    this.withGridApi((api) => {
+      api.autoSizeAllColumns(this.autoSizeParams);
+      api.resetRowHeights();
+    });
   }
 
   // editingChanged is handled in template to set detailEditing

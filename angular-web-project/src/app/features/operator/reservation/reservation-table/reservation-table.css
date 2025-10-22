@@ -1,0 +1,39 @@
+/* Allow the grid to overflow horizontally on small screens */
+.reservations-grid-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.reservations-grid-wrap ag-grid-angular {
+  display: block;
+  min-width: 720px;
+}
+
+@media (max-width: 1366px) {
+  :host ::ng-deep ag-grid-angular.compact-grid {
+    --ag-font-size: 12px;
+    --ag-grid-size: 3px;
+    --ag-row-height: 34px;
+  }
+
+  :host ::ng-deep ag-grid-angular.compact-grid .ag-cell {
+    padding-block: 4px;
+  }
+
+  :host ::ng-deep ag-grid-angular.compact-grid .badge {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.4rem;
+  }
+
+  :host ::ng-deep ag-grid-angular.compact-grid .btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .reservations-grid-wrap ag-grid-angular {
+    min-width: 600px;
+  }
+}
