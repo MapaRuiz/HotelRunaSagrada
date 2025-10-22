@@ -2,8 +2,20 @@
 <form (ngSubmit)="submit()" #form="ngForm" class="card mt-4 services-form">
   <div class="card-body row g-3">
     <div class="col-md-6">
-      <label class="form-label">Dias de la semana</label>
-      <input class="form-control input-soft" [(ngModel)]="draft.days_of_week" name="days_of_week" required />
+      <label class="form-label">Días de la semana</label>
+      <div class="d-flex flex-wrap gap-2">
+        <label class="form-check form-check-inline" *ngFor="let option of dayOptions">
+          <input
+            type="checkbox"
+            class="form-check-input"
+            [name]="'day-' + option.value"
+            [ngModel]="selectedDays.includes(option.value)"
+            (ngModelChange)="onToggleDay(option.value, $event)"
+          />
+          <span class="form-check-label">{{ option.label }}</span>
+        </label>
+      </div>
+      <input type="hidden" name="days_of_week" [(ngModel)]="daysOfWeekString" required />
     </div>
 
     <div class="col-md-6">
@@ -22,20 +34,41 @@
           <input
             type="text"
             class="form-control input-soft"
-            [(ngModel)]="draft.start_time"
-            name="latitude"
+            [(ngModel)]="startTime"
+            name="start_time"
+            pattern="^([01]\d|2[0-3]):[0-5]\d$"
+            placeholder="Hora de inicio (HH:mm)"
             required
+            #startCtrl="ngModel"
           />
+          <div
+            class="invalid-feedback d-block"
+            *ngIf="startCtrl.invalid && (startCtrl.dirty || startCtrl.touched)"
+          >
+            Ingresa un horario válido en formato HH:mm.
+          </div>
         </div>
         <div class="col-6">
           <input
             type="text"
             class="form-control input-soft"
-            [(ngModel)]="draft.end_time"
-            name="longitude"
+            [(ngModel)]="endTime"
+            name="end_time"
+            pattern="^([01]\d|2[0-3]):[0-5]\d$"
+            placeholder="Hora de fin (HH:mm)"
             required
+            #endCtrl="ngModel"
           />
+          <div
+            class="invalid-feedback d-block"
+            *ngIf="endCtrl.invalid && (endCtrl.dirty || endCtrl.touched)"
+          >
+            Ingresa un horario válido en formato HH:mm.
+          </div>
         </div>
+      </div>
+      <div class="text-danger small mt-2" *ngIf="!isTimeRangeValid">
+        La hora de inicio debe ser menor que la hora de fin (HH:mm).
       </div>
     </div>
     <div class="col-12 text-end">
