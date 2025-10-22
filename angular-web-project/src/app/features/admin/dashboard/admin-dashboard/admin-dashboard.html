@@ -34,10 +34,13 @@
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <div class="text-secondary small">Reservas</div>
-          <div class="fs-4 fw-bold"> 10 </div>
-          <div class="small text-danger">
-            <i class="bi bi-arrow-down-right"></i>
-            1%
+          <div class="fs-4 fw-bold"> {{ reservationValue }} </div>
+          <div class="small"
+               [class.text-success]="reservationDelta >= 0"
+               [class.text-danger]="reservationDelta < 0">
+            <i class="bi"
+               [ngClass]="{ 'bi-arrow-up-right': reservationDelta >= 0, 'bi-arrow-down-right': reservationDelta < 0 }"></i>
+            {{ reservationDelta | number:'1.0-1' }}%
           </div>
         </div>
         <i class="bi fs-2 bi-bag-check text-warning"></i>

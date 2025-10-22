@@ -132,6 +132,11 @@ public class ReservationController {
         return service.findForToday();
     }
 
+    @GetMapping("/summary")
+    public double[] summary() {
+        return service.summary();
+    }
+
     @Data
     @AllArgsConstructor
     static class ReservationDTO {

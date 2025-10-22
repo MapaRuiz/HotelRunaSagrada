@@ -10,6 +10,7 @@ import { Hotel } from '../../../../model/hotel';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef } from 'ag-grid-community';
 import { PaymentService } from '../../../../services/payment';
+import { ReservationService } from '../../../../services/reservation';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
@@ -35,6 +36,7 @@ export class AdminDashboardComponent implements OnInit {
   private amenitiesApi = inject(AmenitiesService);
   readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private paymentApi = inject(PaymentService);
+  private reservationApi = inject(ReservationService);
 
   hotels: Hotel[] = [];
   amenitiesCount = 0;
@@ -42,6 +44,8 @@ export class AdminDashboardComponent implements OnInit {
   incomeLoading = true;
   incomeValue = '$0';
   incomeDelta = 0;
+  reservationValue = 0;
+  reservationDelta = 0;
 
   @ViewChild('chart') chart!: ChartComponent;
   public chartOptions: ChartOptions = {
@@ -69,6 +73,10 @@ export class AdminDashboardComponent implements OnInit {
     this.amenitiesApi.list().subscribe(a => this.amenitiesCount = a.length);
 
     this.calcIncome();
+    this.reservationApi.summary().subscribe(p => {
+      this.reservationValue = p[0];
+      this.reservationDelta = p[1];
+    });
   }
 
   calcIncome() {
