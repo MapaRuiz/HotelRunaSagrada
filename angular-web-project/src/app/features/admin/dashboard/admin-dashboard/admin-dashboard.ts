@@ -53,9 +53,9 @@ export class AdminDashboardComponent implements OnInit {
 
   @ViewChild('chart') chart!: ChartComponent;
   public chartOptions: ChartOptions = {
-    series: [{ name: 'Reservas', data: [12, 18, 15, 22, 28, 31, 27] }],
+    series: [{ name: 'Reservas', data: [] }],
     chart: { type: 'bar', height: 300, toolbar: { show: false } },
-    xaxis: { categories: ['1', '8', '15', '22', '29', '5', '12'] },
+    xaxis: { categories: [] },
     dataLabels: { enabled: false },
     stroke: { show: true, width: 2 },
     grid: { borderColor: '#e6e8e1' },
@@ -80,6 +80,8 @@ export class AdminDashboardComponent implements OnInit {
     this.calcReservations();
     this.calcUsers();
 
+    this.loadReservationsByRoomType();
+
   }
 
   calcIncome() {
@@ -92,7 +94,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   calcReservations() {
-    this.reservationApi.summary().subscribe(p => {
+    this.reservationApi.count().subscribe(p => {
       this.reservationValue = p[0];
       this.reservationDelta = p[1];
     });
@@ -102,7 +104,31 @@ export class AdminDashboardComponent implements OnInit {
     this.userService.summary().subscribe(p => {
       this.usersValue = p[0];
       this.usersDelta = p[1];
-      console.log(p);
+    });
+  }
+
+  private loadReservationsByRoomType() {
+    this.reservationApi.countByRoomType().subscribe({
+      next: (map) => {
+        const entries = Object.entries(map).sort((a, b) => b[1] - a[1]);
+
+        const categories = entries.map(([roomType]) => roomType ?? 'N/D');
+        const data = entries.map(([, count]) => count ?? 0);
+
+        this.chartOptions = {
+          ...this.chartOptions,
+          xaxis: { ...this.chartOptions.xaxis, categories },
+          series: [{ name: 'Reservas', data }]
+        };
+      },
+      error: (err: any) => {
+        console.error('Error cargando reservas por tipo', err);
+        this.chartOptions = {
+          ...this.chartOptions,
+          xaxis: { ...this.chartOptions.xaxis, categories: ['—'] },
+          series: [{ name: 'Reservas', data: [0] }]
+        };
+      }
     });
   }
 }

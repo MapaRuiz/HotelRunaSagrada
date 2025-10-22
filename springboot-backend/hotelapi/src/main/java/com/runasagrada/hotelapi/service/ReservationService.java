@@ -5,6 +5,7 @@ import com.runasagrada.hotelapi.model.Reservation;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
 
 public interface ReservationService {
         List<Reservation> findAll();
@@ -34,5 +35,7 @@ public interface ReservationService {
 
         Reservation updateStatus(Integer id, String status);
 
-        double[] summary();
+        double[] count();
+
+        Map<String, Long> countByRoomType();
 }

@@ -5,14 +5,6 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Reservation } from '../model/reservation';
 
-type ReservationRequest = {
-  userId: number;
-  hotelId: number;
-  roomId: number;
-  checkIn: string;   // 'yyyy-MM-dd'
-  checkOut: string;  // 'yyyy-MM-dd'
-};
-
 @Injectable({ providedIn: 'root' })
 export class ReservationService {
   private readonly resource = `${environment.apiBaseUrl}/reservations`;
@@ -67,7 +59,11 @@ export class ReservationService {
     return this.http.put<Reservation>(`${this.resource}/${id}/status/${status}`, null);
   }
 
-  summary(): Observable<number[]> {
-    return this.http.get<number[]>(`${this.resource}/summary`);
+  count(): Observable<number[]> {
+    return this.http.get<number[]>(`${this.resource}/summary/count`);
+  }
+
+  countByRoomType(): Observable<Map<string, number>> {
+    return this.http.get<Map<string, number>>(`${this.resource}/summary/by-room-type`);
   }
 }

@@ -19,7 +19,9 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -199,7 +201,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public double[] summary() {
+    public double[] count() {
         LocalDateTime now = LocalDateTime.now();
         YearMonth current = YearMonth.from(now);
         YearMonth previous = current.minusMonths(1);
@@ -232,4 +234,19 @@ public class ReservationServiceImpl implements ReservationService {
         return new double[] { currentConfirmed, delta };
     }
 
+    @Override
+    public Map<String, Long> countByRoomType() {
+        List<Object[]> rows = reservationRepo.countByRoomType();
+
+        return rows.stream()
+                .map(r -> Map.entry(
+                        (String) r[0],
+                        (r[1] instanceof Number n) ? n.longValue() : 0L))
+                .sorted((a, b) -> Long.compare(b.getValue(), a.getValue()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (a, b) -> a,
+                        LinkedHashMap::new));
+    }
 }
