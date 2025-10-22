@@ -192,7 +192,7 @@ export class ReservationConfirmationComponent implements OnInit {
   }
 
   goToReservations(): void {
-    this.router.navigate(['/client/reservations']);
+    this.router.navigate(['/client']);
   }
 
   printConfirmation(): void {

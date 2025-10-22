@@ -4,7 +4,9 @@ import com.runasagrada.hotelapi.model.User;
 import com.runasagrada.hotelapi.service.UserService;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,11 +42,13 @@ public class AuthController {
     }
 
     Integer getUserId(String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer "))
-            throw new SecurityException("no token");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "no token");
+        }
         Integer uid = sessions.get(authHeader.substring(7));
-        if (uid == null)
-            throw new SecurityException("invalid token");
+        if (uid == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid token");
+        }
         return uid;
     }
 

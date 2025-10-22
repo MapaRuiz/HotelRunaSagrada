@@ -22,7 +22,7 @@ public class UserController {
     private AuthController auth; // para leer el userId del token (simple)
 
     @GetMapping("/users/me")
-    public User getMe(@RequestHeader("Authorization") String authHeader) {
+    public User getMe(@RequestHeader(value = "Authorization", required = false) String authHeader) {
         Integer uid = auth.getUserId(authHeader);
         return service.me(uid);
     }
