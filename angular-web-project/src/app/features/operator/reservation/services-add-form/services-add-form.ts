@@ -22,6 +22,7 @@ import {
   ReservationService as ReservationServiceModel,
   res_service_status,
 } from '../../../../model/reservation-service';
+import { formatDaysLabel } from '../../../admin/services-offering-component/service-schedule-form/service-schedule-form';
 
 @Component({
   selector: 'app-services-add-form',
@@ -53,6 +54,7 @@ export class ServicesAddForm implements OnInit, OnChanges {
 
   private offeringApi = inject(ServiceOfferingService);
   private resServiceApi = inject(ReservationServiceApi);
+  readonly formatDaysLabel = formatDaysLabel;
 
   ngOnInit(): void {
     this.loadOfferingsAndPrefill();

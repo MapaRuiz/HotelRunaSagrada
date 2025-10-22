@@ -5,6 +5,7 @@ import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, GridApi, GridOptions, ModuleRegistry, AllCommunityModule, PaginationModule } from 'ag-grid-community';
 
 import { ServiceSchedule } from '../../../../model/service-schedule';
+import { formatDaysLabel } from '../service-schedule-form/service-schedule-form';
 import { AG_GRID_LOCALE, gridTheme as sharedGridTheme } from '../../sharedTable';
 import { ActionButtonsComponent } from '../../action-buttons-cell/action-buttons-cell';
 import { ActionButtonsParams } from '../../action-buttons-cell/action-buttons-param';
@@ -84,7 +85,7 @@ export class ServicesScheduleTable implements OnChanges {
       {
         headerName: 'Días',
         field: 'days_of_week',
-        valueGetter: params => params.data?.days_of_week?.join(', ') ?? '',
+        valueGetter: params => formatDaysLabel(params.data?.days_of_week),
         filter: 'agTextColumnFilter'
       },
       {

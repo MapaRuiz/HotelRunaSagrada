@@ -27,6 +27,7 @@ import { forkJoin } from 'rxjs';
 import { Output, EventEmitter } from '@angular/core';
 import { ActionButtonsComponent } from '../../../admin/action-buttons-cell/action-buttons-cell';
 import { ReservationServiceApi } from '../../../../services/reservation-service';
+import { formatDaysLabel } from '../../../admin/services-offering-component/service-schedule-form/service-schedule-form';
 
 @Component({
   selector: 'app-reservation-services-table',
@@ -191,7 +192,7 @@ export class ReservationServicesTable implements OnChanges {
       {
         colId: 'availability',
         headerName: 'Disponibilidad',
-        valueGetter: (p) => (p.data?.schedule?.days_of_week || []).join(', '),
+        valueGetter: (p) => formatDaysLabel(p.data?.schedule?.days_of_week),
         minWidth: 220,
       },
       {

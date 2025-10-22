@@ -36,11 +36,11 @@
       >
         <option [ngValue]="undefined" disabled>Seleccione un horario…</option>
         <option *ngFor="let sch of schedules" [ngValue]="sch.id">
-          {{ sch.days_of_week.join(', ') }} — {{ sch.start_time }} - {{ sch.end_time }}
+          {{ formatDaysLabel(sch.days_of_week) }} — {{ sch.start_time }} - {{ sch.end_time }}
         </option>
       </select>
       <small class="text-muted d-block mt-1" *ngIf="selectedSchedule as sch">
-        {{ sch.days_of_week.join(', ') }} · {{ sch.start_time }} - {{ sch.end_time }}
+        {{ formatDaysLabel(sch.days_of_week) }} · {{ sch.start_time }} - {{ sch.end_time }}
       </small>
       <small class="text-danger d-block mt-1" *ngIf="service_id && !schedules.length"
         >No hay horarios disponibles para este servicio.</small

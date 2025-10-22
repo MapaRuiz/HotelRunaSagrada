@@ -12,7 +12,7 @@
             [ngModel]="selectedDays.includes(option.value)"
             (ngModelChange)="onToggleDay(option.value, $event)"
           />
-          <span class="form-check-label">{{ option.label }}</span>
+          <span class="form-check-label">{{ getDayLabel(option.value) }}</span>
         </label>
       </div>
       <input type="hidden" name="days_of_week" [(ngModel)]="daysOfWeekString" required />
