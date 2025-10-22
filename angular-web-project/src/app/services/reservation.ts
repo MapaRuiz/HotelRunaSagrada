@@ -7,19 +7,11 @@ import { Reservation } from '../model/reservation';
 
 export type ReservationStatus = 'PENDING' | 'CONFIRMED' | 'CHECKIN' | 'FINISHED';
 
-type ReservationRequest = {
-  userId: number;
-  hotelId: number;
-  roomId: number;
-  checkIn: string; // 'yyyy-MM-dd'
-  checkOut: string; // 'yyyy-MM-dd'
-};
-
 @Injectable({ providedIn: 'root' })
 export class ReservationService {
   private readonly resource = `${environment.apiBaseUrl}/reservations`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getAll(): Observable<Reservation[]> {
     return this.http.get<Reservation[]>(this.resource);
@@ -87,5 +79,13 @@ export class ReservationService {
 
   lumpSum(reservationId: number): Observable<number> {
     return this.http.get<number>(`${this.resource}/lumpsum/${reservationId}`);
+  }
+
+  count(): Observable<number[]> {
+    return this.http.get<number[]>(`${this.resource}/summary/count`);
+  }
+
+  countByRoomType(): Observable<Map<string, number>> {
+    return this.http.get<Map<string, number>>(`${this.resource}/summary/by-room-type`);
   }
 }

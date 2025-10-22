@@ -100,14 +100,6 @@
             <span class="detail-label">Total:</span>
             <span class="detail-value">{{ total | currency:'USD' }}</span>
           </div>
-          <div class="detail-row" *ngIf="paymentMethod">
-            <span class="detail-label">Método de pago:</span>
-            <span class="detail-value">
-              <span class="method-icon">{{ getPaymentTypeIcon(paymentMethod.type) }}</span>
-              {{ getPaymentTypeName(paymentMethod.type) }}
-              <span *ngIf="paymentMethod.last4"> •••• {{ paymentMethod.last4 }}</span>
-            </span>
-          </div>
         </div>
       </div>
 

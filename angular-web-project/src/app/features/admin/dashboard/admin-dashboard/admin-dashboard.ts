@@ -10,6 +10,8 @@ import { Hotel } from '../../../../model/hotel';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef } from 'ag-grid-community';
 import { PaymentService } from '../../../../services/payment';
+import { ReservationService } from '../../../../services/reservation';
+import { UsersService } from '../../../../services/users';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
@@ -35,6 +37,8 @@ export class AdminDashboardComponent implements OnInit {
   private amenitiesApi = inject(AmenitiesService);
   readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private paymentApi = inject(PaymentService);
+  private reservationApi = inject(ReservationService);
+  private userService = inject(UsersService);
 
   hotels: Hotel[] = [];
   amenitiesCount = 0;
@@ -42,18 +46,34 @@ export class AdminDashboardComponent implements OnInit {
   incomeLoading = true;
   incomeValue = '$0';
   incomeDelta = 0;
+  reservationValue = 0;
+  reservationDelta = 0;
+  usersValue = 0;
+  usersDelta = 0;
 
   @ViewChild('chart') chart!: ChartComponent;
   public chartOptions: ChartOptions = {
-    series: [{ name: 'Reservas', data: [12, 18, 15, 22, 28, 31, 27] }],
+    series: [{ name: 'Reservas', data: [] }],
     chart: { type: 'bar', height: 300, toolbar: { show: false } },
-    xaxis: { categories: ['1', '8', '15', '22', '29', '5', '12'] },
+    xaxis: { categories: [] },
     dataLabels: { enabled: false },
     stroke: { show: true, width: 2 },
     grid: { borderColor: '#e6e8e1' },
     legend: { show: false },
     fill: { opacity: .9 },
     colors: ['#778E69']
+  };
+
+  public amenitiesChart: ChartOptions = {
+    series: [{ name: 'Amenities', data: [] }],
+    chart: { type: 'bar', height: 300, toolbar: { show: false } },
+    xaxis: { categories: [] },
+    dataLabels: { enabled: false },
+    stroke: { show: true, width: 2 },
+    grid: { borderColor: '#e6e8e1' },
+    legend: { show: false },
+    fill: { opacity: .9 },
+    colors: ['#5C7CFA']
   };
 
   colDefs: ColDef[] = [
@@ -69,6 +89,12 @@ export class AdminDashboardComponent implements OnInit {
     this.amenitiesApi.list().subscribe(a => this.amenitiesCount = a.length);
 
     this.calcIncome();
+    this.calcReservations();
+    this.calcUsers();
+
+    this.loadReservationsByRoomType();
+    this.loadAmenitiesByHotel();
+
   }
 
   calcIncome() {
@@ -77,6 +103,73 @@ export class AdminDashboardComponent implements OnInit {
       this.incomeValue = `$${p[0]}`;
       this.incomeDelta = p[1];
       this.incomeLoading = false;
+    });
+  }
+
+  calcReservations() {
+    this.reservationApi.count().subscribe(p => {
+      this.reservationValue = p[0];
+      this.reservationDelta = p[1];
+    });
+  }
+
+  calcUsers() {
+    this.userService.summary().subscribe(p => {
+      this.usersValue = p[0];
+      this.usersDelta = p[1];
+    });
+  }
+
+  private loadReservationsByRoomType() {
+    this.reservationApi.countByRoomType().subscribe({
+      next: (map) => {
+        const entries = Object.entries(map).sort((a, b) => b[1] - a[1]);
+
+        const categories = entries.map(([roomType]) => roomType ?? 'N/D');
+        const data = entries.map(([, count]) => count ?? 0);
+
+        this.chartOptions = {
+          ...this.chartOptions,
+          xaxis: { ...this.chartOptions.xaxis, categories },
+          series: [{ name: 'Reservas', data }]
+        };
+      },
+      error: (err: any) => {
+        console.error('Error cargando reservas por tipo', err);
+        this.chartOptions = {
+          ...this.chartOptions,
+          xaxis: { ...this.chartOptions.xaxis, categories: ['—'] },
+          series: [{ name: 'Reservas', data: [0] }]
+        };
+      }
+    });
+  }
+
+  private loadAmenitiesByHotel() {
+    this.hotelsApi.amenitiesSummary().subscribe({
+      next: (map) => {
+        const entries = Object.entries(map).sort((a, b) => b[1] - a[1]);
+
+        const categories = entries.map(([hotelName]) => {
+          if (!hotelName) return 'N/D';
+          return hotelName.replace(/^Runa Sagrada\s*/i, '').trim();
+        });
+        const data = entries.map(([, count]) => count ?? 0);
+
+        this.amenitiesChart = {
+          ...this.amenitiesChart,
+          xaxis: { ...this.amenitiesChart.xaxis, categories },
+          series: [{ name: 'Amenities', data }]
+        };
+      },
+      error: (err) => {
+        console.error('Error cargando amenities por hotel', err);
+        this.amenitiesChart = {
+          ...this.amenitiesChart,
+          xaxis: { ...this.amenitiesChart.xaxis, categories: ['—'] },
+          series: [{ name: 'Amenities', data: [0] }]
+        };
+      }
     });
   }
 }

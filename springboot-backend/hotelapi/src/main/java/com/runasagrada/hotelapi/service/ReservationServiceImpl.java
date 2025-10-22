@@ -19,8 +19,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -231,4 +236,53 @@ public class ReservationServiceImpl implements ReservationService {
         return reservationService.stream().mapToDouble(rs -> rs.getUnitPrice() * rs.getQty()).sum();
     }
 
+    @Override
+    public double[] count() {
+        LocalDateTime now = LocalDateTime.now();
+        YearMonth current = YearMonth.from(now);
+        YearMonth previous = current.minusMonths(1);
+
+        LocalDateTime curStart = current.atDay(1).atStartOfDay();
+        LocalDateTime curEnd = current.atEndOfMonth().atTime(23, 59, 59, 999_000_000);
+
+        LocalDateTime prevStart = previous.atDay(1).atStartOfDay();
+        LocalDateTime prevEnd = previous.atEndOfMonth().atTime(23, 59, 59, 999_000_000);
+
+        Timestamp tCurStart = Timestamp.valueOf(curStart);
+        Timestamp tCurEnd = Timestamp.valueOf(curEnd);
+        Timestamp tPrevStart = Timestamp.valueOf(prevStart);
+        Timestamp tPrevEnd = Timestamp.valueOf(prevEnd);
+
+        long currentConfirmed = reservationRepo.countByStatusAndCreatedAtBetween(
+                Reservation.Status.CONFIRMED, tCurStart, tCurEnd);
+        long previousConfirmed = reservationRepo.countByStatusAndCreatedAtBetween(
+                Reservation.Status.CONFIRMED, tPrevStart, tPrevEnd);
+
+        double delta;
+        if (previousConfirmed == 0) {
+            delta = currentConfirmed > 0 ? 100.0 : 0.0;
+        } else {
+            delta = ((currentConfirmed - (double) previousConfirmed) / previousConfirmed) * 100.0;
+        }
+
+        delta = Math.round(delta * 10.0) / 10.0;
+
+        return new double[] { currentConfirmed, delta };
+    }
+
+    @Override
+    public Map<String, Long> countByRoomType() {
+        List<Object[]> rows = reservationRepo.countByRoomType();
+
+        return rows.stream()
+                .map(r -> Map.entry(
+                        (String) r[0],
+                        (r[1] instanceof Number n) ? n.longValue() : 0L))
+                .sorted((a, b) -> Long.compare(b.getValue(), a.getValue()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (a, b) -> a,
+                        LinkedHashMap::new));
+    }
 }

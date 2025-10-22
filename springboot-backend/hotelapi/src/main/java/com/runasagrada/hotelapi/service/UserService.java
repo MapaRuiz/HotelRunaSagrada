@@ -25,4 +25,6 @@ public interface UserService {
     boolean existsByNationalId(String nationalId);
 
     User findById(Integer userId);
+
+    double[] usersSummary();
 }

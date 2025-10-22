@@ -178,6 +178,16 @@ public class ReservationController {
         return service.findForToday();
     }
 
+    @GetMapping("/summary/count")
+    public double[] count() {
+        return service.count();
+    }
+
+    @GetMapping("/summary/by-room-type")
+    public Map<String, Long> countRoomType() {
+        return service.countByRoomType();
+    }
+
     @Data
     @AllArgsConstructor
     public static class ReservationDTO {

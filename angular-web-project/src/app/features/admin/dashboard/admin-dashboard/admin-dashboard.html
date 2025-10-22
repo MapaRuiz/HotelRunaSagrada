@@ -34,10 +34,13 @@
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <div class="text-secondary small">Reservas</div>
-          <div class="fs-4 fw-bold"> 10 </div>
-          <div class="small text-danger">
-            <i class="bi bi-arrow-down-right"></i>
-            1%
+          <div class="fs-4 fw-bold"> {{ reservationValue }} </div>
+          <div class="small"
+               [class.text-success]="reservationDelta >= 0"
+               [class.text-danger]="reservationDelta < 0">
+            <i class="bi"
+               [ngClass]="{ 'bi-arrow-up-right': reservationDelta >= 0, 'bi-arrow-down-right': reservationDelta < 0 }"></i>
+            {{ reservationDelta | number:'1.0-1' }}%
           </div>
         </div>
         <i class="bi fs-2 bi-bag-check text-warning"></i>
@@ -51,10 +54,13 @@
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <div class="text-secondary small">Visitantes</div>
-          <div class="fs-4 fw-bold">20</div>
-          <div class="small text-danger">
-            <i class="bi bi-arrow-down-right"></i>
-            20%
+          <div class="fs-4 fw-bold"> {{ usersValue }} </div>
+          <div class="small"
+               [class.text-success]="usersValue >= 0"
+               [class.text-danger]="usersDelta < 0">
+            <i class="bi"
+               [ngClass]="{ 'bi-arrow-up-right': usersDelta >= 0, 'bi-arrow-down-right': usersDelta < 0 }"></i>
+            {{ usersDelta | number:'1.0-1' }}%
           </div>
         </div>
         <i class="bi fs-2 bi-people text-primary"></i>
@@ -84,10 +90,11 @@
 
 <!-- Chart + resumen -->
 <div class="row g-3 mt-1">
-  <div class="col-lg-8">
-    <div class="card-elev p-3">
+  <!-- Gráfico: Reservas por tipo -->
+  <div class="col-lg-6 col-md-12">
+    <div class="card-elev p-3 h-100">
       <div class="d-flex justify-content-between align-items-center mb-2">
-        <div class="fw-semibold">Reservas (demo)</div>
+        <div class="fw-semibold">Reservas por tipo de habitación</div>
         <div class="small text-secondary">Este mes</div>
       </div>
       <apx-chart
@@ -101,16 +108,28 @@
         [legend]="chartOptions.legend"
         [fill]="chartOptions.fill"
         [colors]="chartOptions.colors || []"
-      >
-      </apx-chart>
+      ></apx-chart>
     </div>
   </div>
-  <div class="col-lg-4">
-    <div class="card-elev p-3 h-100 d-flex">
-      <div class="fw-semibold mb-2">Resumen</div>
-      <div class="small text-secondary">Hoteles: {{ hotels.length }}</div>
-      <div class="small text-secondary">Amenities: {{ amenitiesCount }}</div>
-      <div class="mt-auto small text-muted">*Datos de demo para gráfico</div>
+
+  <!-- Gráfico: Amenities por hotel -->
+  <div class="col-lg-6 col-md-12">
+    <div class="card-elev p-3 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="fw-semibold">Amenities por hotel</div>
+        <div class="small text-secondary">Totales</div>
+      </div>
+      <apx-chart
+        [series]="amenitiesChart.series"
+        [chart]="amenitiesChart.chart"
+        [xaxis]="amenitiesChart.xaxis"
+        [dataLabels]="amenitiesChart.dataLabels"
+        [stroke]="amenitiesChart.stroke"
+        [grid]="amenitiesChart.grid"
+        [legend]="amenitiesChart.legend"
+        [fill]="amenitiesChart.fill"
+        [colors]="amenitiesChart.colors || []"
+      ></apx-chart>
     </div>
   </div>
 </div>

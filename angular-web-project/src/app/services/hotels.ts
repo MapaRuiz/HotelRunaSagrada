@@ -22,4 +22,8 @@ export class HotelsService {
     return this.http.put<Hotel>(`${this.base}/hotels/${id}`, body);
   }
   delete(id: number) { return this.http.delete<void>(`${this.base}/hotels/${id}`); }
+
+  amenitiesSummary(): Observable<Record<string, number>> {
+    return this.http.get<Record<string, number>>(`${this.base}/summary/amenities`);
+  }
 }

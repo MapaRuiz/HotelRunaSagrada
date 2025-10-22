@@ -5,6 +5,7 @@ import com.runasagrada.hotelapi.model.Reservation;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
 
 public interface ReservationService {
         List<Reservation> findAll();
@@ -40,4 +41,7 @@ public interface ReservationService {
 
         Double findLumpSumById(Long id);
 
+        double[] count();
+
+        Map<String, Long> countByRoomType();
 }

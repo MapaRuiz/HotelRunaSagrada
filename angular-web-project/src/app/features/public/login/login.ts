@@ -53,7 +53,7 @@ export class Login {
 
   private dashboardBy(rolesIn?: any[]) {
     const roles = roleNames(rolesIn);
-    if (roles.includes('ADMIN')) return '/admin/users';
+    if (roles.includes('ADMIN')) return '/admin';
     if (roles.includes('OPERATOR')) return '/operator/profile';
     return '/client/profile';
   }

@@ -10,6 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -136,5 +140,33 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findById(Integer userId) {
         return users.findById(userId).orElseThrow();
+    }
+
+    @Override
+    public double[] usersSummary() {
+        ZoneId zone = ZoneId.systemDefault();
+
+        YearMonth current = YearMonth.from(LocalDate.now(zone));
+        YearMonth previous = current.minusMonths(1);
+
+        Instant curStart = current.atDay(1).atStartOfDay(zone).toInstant();
+        Instant curEnd = current.atEndOfMonth().atTime(23, 59, 59, 999_000_000).atZone(zone).toInstant();
+
+        Instant prevStart = previous.atDay(1).atStartOfDay(zone).toInstant();
+        Instant prevEnd = previous.atEndOfMonth().atTime(23, 59, 59, 999_000_000).atZone(zone).toInstant();
+
+        long currentUsers = users.countByCreatedAtBetween(curStart, curEnd);
+        long previousUsers = users.countByCreatedAtBetween(prevStart, prevEnd);
+
+        double delta;
+        if (previousUsers == 0) {
+            delta = currentUsers > 0 ? 100.0 : 0.0;
+        } else {
+            delta = ((currentUsers - (double) previousUsers) / previousUsers) * 100.0;
+        }
+
+        delta = Math.round(delta * 10.0) / 10.0;
+
+        return new double[] { currentUsers, delta };
     }
 }

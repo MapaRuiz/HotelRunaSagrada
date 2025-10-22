@@ -68,4 +68,8 @@ export class UsersService {
   getById(userId: number) {
     return this.http.get<User>(`${this.base}/user/id/${userId}`);
   }
+
+  summary() {
+    return this.http.get<[number, number]>(`${this.base}/users/summary`);
+  }
 }

@@ -111,4 +111,17 @@ public class HotelServiceImpl implements HotelService {
         return hotels.stream().map(h -> Map.entry(h.getHotelId(), h.getName()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
+
+    @Override
+    public Map<String, Long> amenitiesCountByHotel() {
+        List<Object[]> rows = hotels.countAmenitiesByHotel();
+
+        Map<String, Long> out = new LinkedHashMap<>();
+        for (Object[] r : rows) {
+            String hotelName = (String) r[0];
+            Long count = (r[1] instanceof Number n) ? n.longValue() : 0L;
+            out.put(hotelName, count);
+        }
+        return out;
+    }
 }
