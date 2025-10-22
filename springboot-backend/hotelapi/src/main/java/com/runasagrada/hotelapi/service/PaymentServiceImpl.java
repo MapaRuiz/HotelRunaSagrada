@@ -84,8 +84,18 @@ public class PaymentServiceImpl implements PaymentService {
 				.orElseThrow(() -> new NoSuchElementException("Payment method not found"));
 		payment.setPaymentMethodId(paymentMethod);
 
+		if (payment.getTxReference() == null || payment.getTxReference().isBlank()) {
+			payment.setTxReference("pendiente");
+		}
+
 		helper.resyncIdentity("payment", "payment_id");
-		return payments.save(payment);
+		Payment saved = payments.save(payment);
+		if (saved.getTxReference() == null || saved.getTxReference().isBlank()
+				|| "pendiente".equalsIgnoreCase(saved.getTxReference())) {
+			saved.setTxReference("Cobro#" + saved.getPaymentId());
+			saved = payments.save(saved);
+		}
+		return saved;
 	}
 
 	@Override
@@ -97,6 +107,8 @@ public class PaymentServiceImpl implements PaymentService {
 			db.setAmount(partial.getAmount());
 		if (partial.getStatus() != null && !partial.getStatus().isBlank())
 			db.setStatus(partial.getStatus());
+		if (partial.getTxReference() != null && !partial.getTxReference().isBlank())
+			db.setTxReference(partial.getTxReference());
 
 		// Permitir actualizar método de pago
 		if (partial.getPaymentMethodId() != null && partial.getPaymentMethodId().getPaymentMethodId() != null) {

@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReservationService } from '../../../../services/reservation';
-import { forkJoin, of, switchMap } from 'rxjs';
+import { forkJoin, of, switchMap, catchError } from 'rxjs';
 import { ReservationServiceApi } from '../../../../services/reservation-service';
 import { ReservationService as ReservationServiceModel } from '../../../../model/reservation-service';
 import {
@@ -18,6 +18,8 @@ import {
 } from '../../../../services/service-offering-service';
 import { User } from '../../../../model/user';
 import { ReservationFacade } from '../reservation';
+import { PaymentService } from '../../../../services/payment';
+import { Payment } from '../../../../model/payment';
 
 @Component({
   selector: 'app-bill-services',
@@ -29,19 +31,34 @@ import { ReservationFacade } from '../reservation';
 export class BillServicesComponent implements OnChanges {
   @Input() reservationId?: number;
 
-  subtotal = 0;
-  taxes = 0;
-  total = 0;
+  subtotal = 0; // Raw sum of service line items (without taxes)
+  serviceSubtotal = 0; // Same as subtotal but kept before tax for clarity
+  otherSubtotal = 0; // Pending "Otros" charges (non-paid extra payments)
+  otherTotalAll = 0; // Sum of every "Otros" payment regardless of status
+  taxes = 0; // Calculated tax amount for services
+  total = 0; // Service subtotal plus taxes
+  grandTotal = 0; // Amount due while reservation is active (services + pending extras)
+  finishedGrandTotal = 0; // Final total once reservation is finished (services + all extras)
   currentUser?: User;
   items: ReservationServiceModel[] = [];
+  otherPayments: Payment[] = [];
+  pendingOtherPayments: Payment[] = [];
+  reservationStatus?: string;
 
   private reservations = inject(ReservationService);
   private facade = inject(ReservationFacade);
   private resServices = inject(ReservationServiceApi);
   private offerings = inject(ServiceOfferingService);
+  private payments = inject(PaymentService);
 
   // Notify parent when totals/user resolved
-  @Output() totalsChanged = new EventEmitter<{ subtotal: number; taxes: number; total: number }>();
+  @Output() totalsChanged = new EventEmitter<{
+    subtotal: number;
+    taxes: number;
+    total: number;
+    otherSubtotal: number;
+    grandTotal: number;
+  }>();
   @Output() userChanged = new EventEmitter<User | undefined>();
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -55,26 +72,55 @@ export class BillServicesComponent implements OnChanges {
     this.reservations
       .getById(id)
       .pipe(
-        switchMap((reservation) =>
-          forkJoin({
-            subtotal: this.reservations.lumpSum(id),
-            user: reservation?.user_id ? this.facade.getUserById(reservation.user_id) : of(undefined),
-            items: this.facade.getReservationServices(id),
-          })
-        )
+        switchMap((reservation) => {
+          const status = (reservation?.status ?? '').toString().trim().toUpperCase();
+          this.reservationStatus = status || undefined;
+          return forkJoin({
+            subtotal: this.reservations.lumpSum(id).pipe(catchError(() => of(0))),
+            user: reservation?.user_id
+              ? this.facade.getUserById(reservation.user_id).pipe(catchError(() => of(undefined)))
+              : of(undefined),
+            items: this.facade.getReservationServices(id).pipe(catchError(() => of([]))),
+            payments: this.payments.getByReservation(id).pipe(catchError(() => of([]))),
+          });
+        })
       )
       .subscribe({
-        next: ({ subtotal, user, items }) => {
+        next: ({ subtotal, user, items, payments }) => {
           // summary numbers
-          const sub = Number(subtotal) || 0;
-          this.subtotal = sub;
-          this.taxes = +(sub * 0.19).toFixed(2);
-          this.total = +(sub + this.taxes).toFixed(2);
+          const serviceSub = Number(subtotal) || 0;
+          this.serviceSubtotal = serviceSub;
+          const allPayments = payments ?? [];
+          const serviceRef = 'SERVICIOS RESERVA';
+          this.otherPayments = allPayments.filter((p) => {
+            const ref = (p.tx_reference ?? '').toString().trim().toUpperCase();
+            return !ref.includes(serviceRef);
+          });
+          this.otherTotalAll = this.otherPayments.reduce(
+            (acc, pay) => acc + Number(pay.amount || 0),
+            0
+          );
+          this.pendingOtherPayments = this.otherPayments.filter((p) => {
+            const status = (p.status ?? '').toString().trim().toUpperCase();
+            return status !== 'PAID' && status !== 'REFUNDED';
+          });
+          this.otherSubtotal = this.pendingOtherPayments.reduce(
+            (acc, pay) => acc + Number(pay.amount || 0),
+            0
+          );
+
+          this.subtotal = +serviceSub.toFixed(2);
+          this.taxes = +(this.serviceSubtotal * 0.19).toFixed(2);
+          this.total = +(this.serviceSubtotal + this.taxes).toFixed(2);
           this.currentUser = user as User | undefined;
+          this.grandTotal = +(this.total + this.otherSubtotal).toFixed(2);
+          this.finishedGrandTotal = +(this.total + this.otherTotalAll).toFixed(2);
           this.totalsChanged.emit({
             subtotal: this.subtotal,
             taxes: this.taxes,
             total: this.total,
+            otherSubtotal: this.otherSubtotal,
+            grandTotal: this.grandTotal,
           });
           this.userChanged.emit(this.currentUser);
 
@@ -111,12 +157,26 @@ export class BillServicesComponent implements OnChanges {
         },
         error: () => {
           this.subtotal = 0;
+          this.serviceSubtotal = 0;
+          this.otherSubtotal = 0;
+          this.otherTotalAll = 0;
           this.taxes = 0;
           this.total = 0;
+          this.grandTotal = 0;
+          this.finishedGrandTotal = 0;
           this.currentUser = undefined;
-          this.totalsChanged.emit({ subtotal: 0, taxes: 0, total: 0 });
+          this.reservationStatus = undefined;
+          this.totalsChanged.emit({
+            subtotal: 0,
+            taxes: 0,
+            total: 0,
+            otherSubtotal: 0,
+            grandTotal: 0,
+          });
           this.userChanged.emit(undefined);
           this.items = [];
+          this.otherPayments = [];
+          this.pendingOtherPayments = [];
         },
       });
   }
@@ -128,6 +188,12 @@ export class BillServicesComponent implements OnChanges {
     } catch {
       return v.toFixed(2);
     }
+  }
+
+  getItemSubtotal(item: ReservationServiceModel): number {
+    const qty = Number(item?.qty ?? 0);
+    const unit = Number(item?.unit_price ?? 0);
+    return qty * unit;
   }
 
   // Allow parent to force a reload

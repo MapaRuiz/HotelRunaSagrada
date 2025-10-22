@@ -9,7 +9,8 @@ import {
   OnDestroy,
   inject,
 } from '@angular/core';
-import { Subscription, switchMap } from 'rxjs';
+import { Observable, Subscription, forkJoin, of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Reservation } from '../../../../model/reservation';
@@ -69,6 +70,8 @@ export class ReservationDetailOp {
   billSubtotal = 0;
   billTaxes = 0;
   billTotal = 0;
+  billOtherSubtotal = 0;
+  billDueTotal = 0;
   // Payment selection state
   paymentMethods: PaymentMethod[] = [];
   selectedPaymentMethodId: number | null = null;
@@ -145,7 +148,18 @@ export class ReservationDetailOp {
 
   readonly fallbackText = 'Sin información';
 
+  private isCheckIn(): boolean {
+    return (this.reservation?.status ?? '')
+      .toString()
+      .trim()
+      .toUpperCase() === 'CHECKIN';
+  }
+
   addServices() {
+    if (!this.isCheckIn()) {
+      alert('Solo puedes agregar servicios cuando la reserva está en Check-in.');
+      return;
+    }
     if (this.reservation) {
       this.addServicesRequested.emit(this.reservation);
     }
@@ -186,19 +200,20 @@ export class ReservationDetailOp {
   }
 
   onEditReservationService(row: ReservationServiceModel) {
+    if (!this.isCheckIn()) {
+      alert('No puedes editar servicios cuando la reserva no está en Check-in.');
+      return;
+    }
     // store selected row and enable edit mode so the template will render the form
     this.editingService = row;
     this.editingServices = true;
     this.editingChanged.emit(true);
 
     // Ensure the accordion panel with id `collapseTwo` is open so the form is visible.
-    // Prefer to use the Bootstrap Collapse instance if available; otherwise toggle classes
-    // without requiring a global `bootstrap` symbol (avoids TS errors at build time).
     const collapseEl = document.getElementById('collapseTwo');
     if (collapseEl) {
       // If Bootstrap 5 Collapse instance is exposed on the element, call 'show'
       // (Bootstrap stores instances on element via Element["bsCollapse"] in some builds,
-      // but we can't rely on that. Use classList and attributes as fallback.)
       const isShown = collapseEl.classList.contains('show');
       if (!isShown) {
         // Add classes expected by Bootstrap to show the collapse
@@ -224,10 +239,18 @@ export class ReservationDetailOp {
   }
 
   // Receive totals/user from bill component
-  onBillTotalsChanged(ev: { subtotal: number; taxes: number; total: number }) {
+  onBillTotalsChanged(ev: {
+    subtotal: number;
+    taxes: number;
+    total: number;
+    otherSubtotal: number;
+    grandTotal: number;
+  }) {
     this.billSubtotal = ev.subtotal;
     this.billTaxes = ev.taxes;
     this.billTotal = ev.total;
+    this.billOtherSubtotal = ev.otherSubtotal ?? 0;
+    this.billDueTotal = ev.grandTotal ?? +(this.billTotal + this.billOtherSubtotal).toFixed(2);
   }
 
   onBillUserChanged(user?: { user_id?: number }) {
@@ -253,22 +276,53 @@ export class ReservationDetailOp {
 
   // Pay total
   togglePayment() {
-    if (this.billTotal <= 0) return;
+    if (!this.isCheckIn()) {
+      alert('Solo puedes pagar cuando la reserva está en Check-in.');
+      return;
+    }
+    if (this.billDueTotal <= 0) return;
     this.showingPayment = !this.showingPayment;
   }
 
   confirmPayTotal() {
+    if (!this.isCheckIn()) {
+      alert('Solo puedes pagar cuando la reserva está en Check-in.');
+      return;
+    }
     if (!this.reservation?.reservation_id || !this.selectedPaymentMethodId) return;
     const reservationId = this.reservation.reservation_id;
-    const payload = {
-      reservation_id: reservationId,
-      payment_method_id: this.selectedPaymentMethodId,
-      amount: this.billTotal,
-      status: 'PAID' as const,
-    };
-    this.paymentSvc
-      .create(payload)
+    // Payload encargado de registrar el cobro de los servicios contratados (si es que existen)
+    const payload =
+      this.billTotal > 0
+        ? {
+            reservation_id: reservationId,
+            payment_method_id: this.selectedPaymentMethodId,
+            amount: this.billTotal,
+            status: 'PAID' as const,
+            tx_reference: 'Servicios Reserva',
+          }
+        : null;
+    const pendingOthers = this.billComp?.pendingOtherPayments ?? [];
+    if (!payload && pendingOthers.length === 0) {
+      alert('No hay cargos pendientes por pagar.');
+      return;
+    }
+    const settleOther$ = pendingOthers.length
+      ? forkJoin(
+          pendingOthers.map((p) =>
+            this.paymentSvc.update(p.payment_id, {
+              status: 'PAID',
+            })
+          )
+        )
+      : of([]);
+    // Observable que dispara la creación del pago de servicios o completa de inmediato si no aplica
+    const createService$ = (
+      payload ? this.paymentSvc.create(payload) : of(null)
+    ) as Observable<unknown>;
+    createService$
       .pipe(
+        switchMap(() => settleOther$),
         switchMap(() => this.service.deactivate(reservationId)),
         switchMap(() => this.service.getById(reservationId))
       )

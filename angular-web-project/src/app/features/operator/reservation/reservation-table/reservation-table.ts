@@ -74,6 +74,9 @@ export class ReservationTableOperatorComponent implements OnInit {
         next: (enriched) => {
           this.reservations = enriched;
           this.rowData = enriched;
+          if (this.search) {
+            this.withGridApi((api) => api.setGridOption('quickFilterText', this.search));
+          }
         },
         error: (err) => console.error('Error loading reservations:', err),
       });
@@ -307,5 +310,6 @@ export class ReservationTableOperatorComponent implements OnInit {
   onCloseDetail() {
     this.selected = undefined;
     this.detailEditing = false;
+    this.loadData();
   }
 }

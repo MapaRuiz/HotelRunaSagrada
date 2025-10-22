@@ -1,6 +1,7 @@
 package com.runasagrada.hotelapi.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,5 +34,9 @@ public class Payment {
 	private double amount;
 
 	private String status;
+
+	@JsonProperty("tx_reference")
+	@Column(name = "tx_reference", nullable = false)
+	private String txReference;
 
 }

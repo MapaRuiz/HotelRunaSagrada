@@ -123,15 +123,18 @@
           <div class="d-flex gap-2 align-items-center px-3 pt-3">
             <!-- Ocultar el botón de agregar si la reserva está finalizada -->
             <button
-              *ngIf="!editingServices && current.status !== 'FINISHED'"
+              *ngIf="!editingServices && current.status === 'CHECKIN'"
               type="button"
               class="btn btn-olive btn-sm"
               (click)="addServices()"
             >
               Agregar servicios
             </button>
-            <small *ngIf="current.status === 'FINISHED'" class="text-muted">
-              La reserva está finalizada. No se pueden agregar servicios.
+            <small
+              *ngIf="current.status !== 'CHECKIN'"
+              class="text-muted"
+            >
+              Solo se pueden agregar servicios cuando la reserva está en Check-in.
             </small>
             <ng-template #editBtns>
               <button
@@ -199,13 +202,13 @@
                   type="button"
                   class="btn btn-olive btn-sm"
                   (click)="togglePayment()"
-                  [disabled]="billTotal <= 0 || current.status === 'FINISHED'"
+                  [disabled]="billDueTotal <= 0 || current.status !== 'CHECKIN'"
                 >
                   Pagar total
                 </button>
-                <small class="text-muted" *ngIf="billTotal <= 0">No hay monto pendiente.</small>
-                <small class="text-muted" *ngIf="current.status === 'FINISHED'"
-                  >La reserva está finalizada.</small
+                <small class="text-muted" *ngIf="billDueTotal <= 0">No hay monto pendiente.</small>
+                <small class="text-muted" *ngIf="current.status !== 'CHECKIN'"
+                  >Solo puedes pagar cuando la reserva está en Check-in.</small
                 >
               </div>
               <div class="mt-2" *ngIf="showingPayment">
@@ -248,7 +251,7 @@
                     (click)="confirmPayTotal()"
                     [disabled]="!selectedPaymentMethodId"
                   >
-                    Confirmar pago de {{ billTotal | currency : 'COP' : 'symbol' : '1.0-0' }}
+                    Confirmar pago de COP {{ billDueTotal | number : '1.0-0' }}
                   </button>
                 </div>
               </div>

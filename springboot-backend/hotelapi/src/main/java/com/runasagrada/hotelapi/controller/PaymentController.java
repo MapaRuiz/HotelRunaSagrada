@@ -1,5 +1,6 @@
 package com.runasagrada.hotelapi.controller;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.runasagrada.hotelapi.model.Payment;
 import com.runasagrada.hotelapi.model.PaymentMethod;
 import com.runasagrada.hotelapi.model.Reservation;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Locale;
 
 @RestController
 @RequestMapping("/api")
@@ -39,18 +41,24 @@ public class PaymentController {
 
 	@GetMapping("/payments/reservation/{reservationId}/all-paid")
 	public ResponseEntity<PaymentStatusSummary> allPaidForReservation(@PathVariable Integer reservationId) {
-		List<Payment> list = service.getByReservationId(reservationId);
-		int paidCount = (int) list.stream()
-				.filter(p -> p.getStatus() != null && p.getStatus().equalsIgnoreCase("PAID"))
-				.count();
-		boolean allPaid = list.isEmpty() || paidCount == list.size();
-		PaymentStatusSummary dto = new PaymentStatusSummary(
-				reservationId,
-				list.size(),
-				paidCount,
-				allPaid);
-		return ResponseEntity.ok(dto);
-	}
+	List<Payment> list = service.getByReservationId(reservationId);
+	int settledCount = (int) list.stream()
+		.filter(p -> {
+			String status = p.getStatus();
+			if (status == null)
+				return false;
+			status = status.trim().toUpperCase(Locale.ROOT);
+			return "PAID".equals(status) || "REFUNDED".equals(status);
+		})
+		.count();
+	boolean allPaid = list.isEmpty() || settledCount == list.size();
+	PaymentStatusSummary dto = new PaymentStatusSummary(
+		reservationId,
+		list.size(),
+		settledCount,
+		allPaid);
+	return ResponseEntity.ok(dto);
+}
 
 	@GetMapping("/payments/payment-method/{paymentMethodId}")
 	public List<Payment> getByPaymentMethodId(@PathVariable Integer paymentMethodId) {
@@ -76,6 +84,7 @@ public class PaymentController {
 
 		payment.setAmount(body.getAmount());
 		payment.setStatus(body.getStatus());
+		payment.setTxReference(body.getTxReference());
 
 		return ResponseEntity.ok(service.create(payment));
 	}
@@ -92,6 +101,7 @@ public class PaymentController {
 
 		partial.setAmount(body.getAmount());
 		partial.setStatus(body.getStatus());
+		partial.setTxReference(body.getTxReference());
 
 		return ResponseEntity.ok(service.update(id, partial));
 	}
@@ -113,6 +123,8 @@ public class PaymentController {
 		private Integer paymentMethodId;
 		private double amount;
 		private String status;
+		@JsonProperty("tx_reference")
+		private String txReference;
 	}
 
 	@Data

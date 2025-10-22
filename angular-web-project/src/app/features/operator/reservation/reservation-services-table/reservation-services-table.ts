@@ -243,7 +243,8 @@ export class ReservationServicesTable implements OnChanges {
       minWidth: 200,
       cellRenderer: ActionButtonsComponent<ReservationServiceModel>,
       cellRendererParams: () => {
-        const allowChanges = this.reservationStatus !== 'FINISHED';
+        const allowChanges =
+          (this.reservationStatus ?? '').toString().trim().toUpperCase() === 'CHECKIN';
         return {
           editLabel: 'Editar',
           deleteLabel: 'Eliminar',
