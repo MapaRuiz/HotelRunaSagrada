@@ -215,24 +215,35 @@ export class ServicesAddForm implements OnInit, OnChanges {
         next: (resService) => {
           const selectedService = this.services.find(s => s.id === this.service_id);
           console.log(this.reservation);
-          if (selectedService && selectedService.category.toLowerCase() === 'gastronomía') {
+          if (selectedService) {
             const currentUser = this.authService.userSnapshot();
-            this.taskService.create({
-              type: 'DELIVERY',
-              status: 'PENDING',
-              res_service_id: resService?.res_service_id,
-              room_id: this.reservation?.room_id ?? undefined,
-              staff_id: currentUser?.user_id
-            }).subscribe({
-              next: () => {
-                this.loading = false;
-                this.saved.emit();
-              },
-              error: () => {
-                this.loading = false;
-                this.errorMsg = 'No se pudo crear la tarea de delivery.';
-              }
-            });
+            const category = selectedService.category.toLowerCase();
+            let type: 'DELIVERY' | 'GUIDING' | 'TO_DO' | undefined;
+            if (category === 'gastronomía') type = 'DELIVERY';
+            else if (category === 'tours') type = 'GUIDING';
+            else if (category === 'cultural') type = 'TO_DO';
+
+            if (type) {
+              this.taskService.create({
+                type,
+                status: 'PENDING',
+                res_service_id: resService?.res_service_id,
+                room_id: this.reservation?.room_id ?? undefined,
+                staff_id: currentUser?.user_id
+              }).subscribe({
+                next: () => {
+                  this.loading = false;
+                  this.saved.emit();
+                },
+                error: () => {
+                  this.loading = false;
+                  this.errorMsg = 'No se pudo crear la tarea.';
+                }
+              });
+            } else {
+              this.loading = false;
+              this.saved.emit();
+            }
           } else {
             this.loading = false;
             this.saved.emit();
