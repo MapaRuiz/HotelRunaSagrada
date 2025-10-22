@@ -42,6 +42,30 @@ export function getStatusText(status: string): string {
   return TEXT[status as ReservationStatus] ?? (status || 'N/A');
 }
 
+type PaymentStatus = 'PENDING' | 'PAID' | 'REFUNDED' | 'FAILED';
+
+const PAYMENT_BADGE: Record<PaymentStatus, string> = {
+  PENDING: 'text-bg-warning',
+  PAID: 'text-bg-success',
+  REFUNDED: 'text-bg-info',
+  FAILED: 'text-bg-danger',
+};
+
+const PAYMENT_TEXT: Record<PaymentStatus, string> = {
+  PENDING: 'Pendiente',
+  PAID: 'Pagado',
+  REFUNDED: 'Reembolsado',
+  FAILED: 'Fallido',
+};
+
+export function getPaymentStatusBadge(status: string): string {
+  return PAYMENT_BADGE[status as PaymentStatus] ?? 'text-bg-secondary';
+}
+
+export function getPaymentStatusText(status: string): string {
+  return PAYMENT_TEXT[status as PaymentStatus] ?? (status || 'N/A');
+}
+
 // Facade/Orchestrator for reservation-related API logic used by operator features
 @Injectable({ providedIn: 'root' })
 export class ReservationFacade {

@@ -17,7 +17,11 @@ import {
   ServiceOfferingDetailResponse,
 } from '../../../../services/service-offering-service';
 import { User } from '../../../../model/user';
-import { ReservationFacade } from '../reservation';
+import {
+  ReservationFacade,
+  getPaymentStatusBadge,
+  getPaymentStatusText,
+} from '../reservation';
 import { PaymentService } from '../../../../services/payment';
 import { Payment } from '../../../../model/payment';
 
@@ -30,6 +34,9 @@ import { Payment } from '../../../../model/payment';
 })
 export class BillServicesComponent implements OnChanges {
   @Input() reservationId?: number;
+
+  getPaymentStatusBadge = getPaymentStatusBadge;
+  getPaymentStatusText = getPaymentStatusText;
 
   subtotal = 0; // Raw sum of service line items (without taxes)
   serviceSubtotal = 0; // Same as subtotal but kept before tax for clarity

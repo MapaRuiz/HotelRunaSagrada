@@ -30,7 +30,13 @@
       <div class="summary-items" *ngIf="otherPayments?.length">
         <div class="summary-row" *ngFor="let pay of otherPayments">
           <span class="label">
-            {{ pay.tx_reference || 'Pago #' + pay.payment_id }} · {{ pay.status || 'PENDIENTE' }}
+            {{ pay.tx_reference || 'Pago #' + pay.payment_id }}
+            <span
+              class="badge ms-2"
+              [ngClass]="getPaymentStatusBadge(pay.status || '')"
+            >
+              {{ getPaymentStatusText(pay.status || '') }}
+            </span>
           </span>
           <span class="value">{{ formatCurrency(pay.amount) }}</span>
         </div>
@@ -89,7 +95,13 @@
         <div class="summary-items" *ngIf="otherPayments?.length">
           <div class="summary-row" *ngFor="let pay of otherPayments">
             <span class="label">
-              Pago #{{ pay.payment_id }} · {{ pay.status || 'PENDIENTE' }}
+              {{ pay.tx_reference || ('Pago #' + pay.payment_id) }}
+              <span
+                class="badge ms-2"
+                [ngClass]="getPaymentStatusBadge(pay.status || '')"
+              >
+                {{ getPaymentStatusText(pay.status || '') }}
+              </span>
             </span>
             <span class="value">{{ formatCurrency(pay.amount) }}</span>
           </div>
