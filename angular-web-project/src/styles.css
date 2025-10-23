@@ -175,3 +175,75 @@ h4, input[type="search"] {
   font-family: var(--font-title);
   font-weight: 600;
 }
+
+/* === Responsive tables === */
+.table-modern {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: transparent;
+}
+
+.table-modern thead th {
+  background: rgba(21, 21, 19, 0.04);
+  font-weight: 600;
+  color: var(--c-ink);
+  border: none;
+  padding: 0.75rem 1rem;
+}
+
+.table-modern tbody tr td {
+  border-bottom: 1px solid rgba(21, 21, 19, 0.08);
+  background: #fff;
+}
+
+.table-modern tbody tr:last-child td {
+  border-bottom: none;
+}
+
+@media (max-width: 768px) {
+  .table-modern {
+    border-spacing: 0;
+  }
+
+  .table-modern thead {
+    display: none;
+  }
+
+  .table-modern tbody tr {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(21, 21, 19, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 12px 24px rgba(21, 21, 19, 0.08);
+    overflow: hidden;
+  }
+
+  .table-modern tbody tr td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: none;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(21, 21, 19, 0.06);
+  }
+
+  .table-modern tbody tr td:last-child {
+    border-bottom: none;
+  }
+
+  .table-modern tbody tr td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--c-ink);
+    margin-right: 1rem;
+  }
+
+  .table-modern tbody tr.edit-row td {
+    display: block;
+  }
+
+  .table-modern tbody tr.edit-row td form {
+    display: block;
+  }
+}

@@ -21,8 +21,8 @@
           Aún no tienes reservas registradas.
         </div>
 
-        <div class="table-responsive" *ngIf="reservations.length">
-          <table class="table table-hover align-middle">
+        <div class="table-responsive modern-table-wrapper" *ngIf="reservations.length">
+          <table class="table table-hover align-middle table-modern">
             <thead class="table-light">
               <tr>
                 <th>#</th>
@@ -40,19 +40,23 @@
                   (click)="select(reservation)"
                   [class.table-active]="selected?.reservation_id === reservation.reservation_id"
                 >
-                  <td class="fw-semibold">#{{ reservation.reservation_id }}</td>
-                  <td>{{ reservation.hotel?.name || 'Hotel ' + (reservation.hotel_id || '') }}</td>
-                  <td>
+                  <td class="fw-semibold" data-label="Reserva">
+                    #{{ reservation.reservation_id }}
+                  </td>
+                  <td data-label="Hotel">
+                    {{ reservation.hotel?.name || 'Hotel ' + (reservation.hotel_id || '') }}
+                  </td>
+                  <td data-label="Habitación">
                     {{ reservation.room?.number || 'Habitación ' + (reservation.room_id || '') }}
                   </td>
-                  <td>{{ formatDate(reservation.check_in) }}</td>
-                  <td>{{ formatDate(reservation.check_out) }}</td>
-                  <td>
+                  <td data-label="Check-in">{{ formatDate(reservation.check_in) }}</td>
+                  <td data-label="Check-out">{{ formatDate(reservation.check_out) }}</td>
+                  <td data-label="Estado">
                     <span class="badge" [class]="badgeClass(reservation.status)">
                       {{ formatStatus(reservation.status) }}
                     </span>
                   </td>
-                  <td class="text-end">
+                  <td class="text-end" data-label="Acciones">
                     <button
                       type="button"
                       class="btn btn-sm btn-outline-secondary me-2"
@@ -82,9 +86,9 @@
                   </td>
                 </tr>
                 <tr *ngIf="isEditing(reservation)" class="edit-row">
-                  <td colspan="7">
-                    <form class="row g-3">
-                      <div class="col-sm-6 col-lg-3">
+                  <td colspan="7" data-label="Editar">
+                    <form class="row g-3 align-items-end">
+                      <div class="col-12 col-md-6">
                         <label class="form-label">Check-in</label>
                         <input
                           type="date"
@@ -93,7 +97,7 @@
                           [(ngModel)]="draft.check_in"
                         />
                       </div>
-                      <div class="col-sm-6 col-lg-3">
+                      <div class="col-12 col-md-6">
                         <label class="form-label">Check-out</label>
                         <input
                           type="date"
@@ -103,7 +107,7 @@
                         />
                       </div>
                       <div
-                        class="col-sm-12 col-lg-3 d-flex align-items-end justify-content-end gap-2"
+                        class="col-12 d-flex flex-wrap justify-content-end gap-2"
                       >
                         <button
                           type="button"

@@ -36,13 +36,6 @@ export class ClientReservationComponent implements OnInit {
   editing?: Reservation;
   draft: Partial<Reservation> = this.emptyDraft();
 
-  statusOptions: Reservation['status'][] = [
-    'PENDING',
-    'CONFIRMED',
-    'CHECKIN',
-    'FINISHED',
-  ];
-
   alert: { kind: AlertKind; message: string } | null = null;
   private meId?: number;
 
