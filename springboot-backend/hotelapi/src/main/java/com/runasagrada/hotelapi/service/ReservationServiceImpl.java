@@ -217,6 +217,7 @@ public class ReservationServiceImpl implements ReservationService {
     public Reservation deactivate(Integer id) {
         Reservation res = reservationRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Reservation not found: " + id));
+        lockRepo.deleteByReservationReservationId(id);
         res.setStatus(Reservation.Status.FINISHED);
         return reservationRepo.save(res);
     }
