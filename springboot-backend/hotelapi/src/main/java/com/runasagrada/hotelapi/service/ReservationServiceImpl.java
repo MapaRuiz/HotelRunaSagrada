@@ -285,4 +285,54 @@ public class ReservationServiceImpl implements ReservationService {
                         (a, b) -> a,
                         LinkedHashMap::new));
     }
+
+    @Override
+    public double[] countByHotel(Long hotelId) {
+        LocalDateTime now = LocalDateTime.now();
+        YearMonth current = YearMonth.from(now);
+        YearMonth previous = current.minusMonths(1);
+
+        LocalDateTime curStart = current.atDay(1).atStartOfDay();
+        LocalDateTime curEnd = current.atEndOfMonth().atTime(23, 59, 59, 999_000_000);
+
+        LocalDateTime prevStart = previous.atDay(1).atStartOfDay();
+        LocalDateTime prevEnd = previous.atEndOfMonth().atTime(23, 59, 59, 999_000_000);
+
+        Timestamp tCurStart = Timestamp.valueOf(curStart);
+        Timestamp tCurEnd = Timestamp.valueOf(curEnd);
+        Timestamp tPrevStart = Timestamp.valueOf(prevStart);
+        Timestamp tPrevEnd = Timestamp.valueOf(prevEnd);
+
+        long currentConfirmed = reservationRepo.countByHotelHotelIdAndStatusAndCreatedAtBetween(hotelId,
+                Reservation.Status.CONFIRMED, tCurStart, tCurEnd);
+        long previousConfirmed = reservationRepo.countByHotelHotelIdAndStatusAndCreatedAtBetween(hotelId,
+                Reservation.Status.CONFIRMED, tPrevStart, tPrevEnd);
+
+        double delta;
+        if (previousConfirmed == 0) {
+            delta = currentConfirmed > 0 ? 100.0 : 0.0;
+        } else {
+            delta = ((currentConfirmed - (double) previousConfirmed) / previousConfirmed) * 100.0;
+        }
+
+        delta = Math.round(delta * 10.0) / 10.0;
+
+        return new double[] { currentConfirmed, delta };
+    }
+
+    @Override
+    public Map<String, Long> countByRoomTypeAndHotel(Long hotelId) {
+        List<Object[]> rows = reservationRepo.countByRoomTypeAndHotel(hotelId);
+
+        return rows.stream()
+                .map(r -> Map.entry(
+                        (String) r[0],
+                        (r[1] instanceof Number n) ? n.longValue() : 0L))
+                .sorted((a, b) -> Long.compare(b.getValue(), a.getValue()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (a, b) -> a,
+                        LinkedHashMap::new));
+    }
 }

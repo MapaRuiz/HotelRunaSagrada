@@ -44,4 +44,8 @@ public interface ReservationService {
         double[] count();
 
         Map<String, Long> countByRoomType();
+
+        double[] countByHotel(Long hotelId);
+
+        Map<String, Long> countByRoomTypeAndHotel(Long hotelId);
 }
