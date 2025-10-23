@@ -21,6 +21,7 @@ import { environment } from '../../../../environments/environment';
 import { UsersService } from '../../../services/users';
 import { Router } from '@angular/router';
 import * as bootstrap from 'bootstrap';
+import { BillServicesComponent } from '../../operator/reservation/bill-services/bill-services';
 
 export interface Reservation {
   reservationId: number;
@@ -47,7 +48,7 @@ export type ChartOptions = {
   standalone: true,
   selector: 'app-client-dashboard',
 
-  imports: [CommonModule, HttpClientModule, NgApexchartsModule],
+  imports: [CommonModule, HttpClientModule, NgApexchartsModule, BillServicesComponent],
   templateUrl: './client-dashboard.html',
   styleUrls: ['./client-dashboard.css']
 })
@@ -219,7 +220,11 @@ export class ClientDashboardComponent implements OnInit {
 
   private normalizeReservation(r: any): Reservation {
     if (!r) return {} as Reservation;
-    const reservationId = r.reservationId ?? r.id ?? r._id ?? null;
+    const reservationIdRaw = r.reservationId ?? r.reservation_id ?? r.id ?? r._id ?? null;
+    const reservationId =
+      reservationIdRaw != null && reservationIdRaw !== ''
+        ? Number(reservationIdRaw)
+        : null;
     const hotelRaw = r.hotel ?? r.hotelName ?? r.hotel_name ?? '';
     const roomRaw = r.room ?? r.roomName ?? r.room_name ?? '';
     const hotel = typeof hotelRaw === 'string' ? { name: hotelRaw } : hotelRaw || { name: '' };
@@ -307,4 +312,3 @@ export class ClientDashboardComponent implements OnInit {
     return days * rate;
   }
 }
-
