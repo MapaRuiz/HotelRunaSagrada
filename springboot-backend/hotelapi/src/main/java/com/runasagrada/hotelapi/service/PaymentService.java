@@ -23,5 +23,7 @@ public interface PaymentService {
 
 	double[] calculateIncome();
 
+	double[] calculateIncome(Long hotelId);
+
 	void deleteByReservationId(Integer reservationId);
 }

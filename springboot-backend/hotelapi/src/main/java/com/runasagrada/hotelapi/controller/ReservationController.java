@@ -69,8 +69,7 @@ public class ReservationController {
                 "reservationId", id,
                 "total", list.size(),
                 "paid", (int) paid,
-                "allPaid", allPaid
-        );
+                "allPaid", allPaid);
     }
 
     // ---------- Helpers para leer el payload a pelo ----------
@@ -186,6 +185,16 @@ public class ReservationController {
     @GetMapping("/summary/by-room-type")
     public Map<String, Long> countRoomType() {
         return service.countByRoomType();
+    }
+
+    @GetMapping("/summary/count/hotel/{hotelId}")
+    public double[] countByHotel(@PathVariable Long hotelId) {
+        return service.countByHotel(hotelId);
+    }
+
+    @GetMapping("/summary/by-room-type/hotel/{hotelId}")
+    public Map<String, Long> countByRoomTypeAndHotel(@PathVariable Long hotelId) {
+        return service.countByRoomTypeAndHotel(hotelId);
     }
 
     @Data

@@ -22,4 +22,16 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
             GROUP BY r.room.roomType.name
             """)
     List<Object[]> countByRoomType();
+
+    // Count confirmed reservations for a hotel within a time range
+    long countByHotelHotelIdAndStatusAndCreatedAtBetween(Long hotelId, Reservation.Status status, Timestamp start,
+            Timestamp end);
+
+    @Query("""
+            SELECT r.room.roomType.name AS roomTypeName, COUNT(r) AS cnt
+            FROM Reservation r
+            WHERE r.hotel.hotelId = :hotelId
+            GROUP BY r.room.roomType.name
+            """)
+    List<Object[]> countByRoomTypeAndHotel(Long hotelId);
 }

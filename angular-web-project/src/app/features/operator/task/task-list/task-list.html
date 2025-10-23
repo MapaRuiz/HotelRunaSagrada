@@ -4,9 +4,6 @@
       <i class="fas fa-tasks me-2"></i>
       {{ staffId ? 'Tareas del Staff' : 'Todas las Tareas' }}
     </h4>
-    <button *ngIf="staffId" class="btn btn-outline-secondary" (click)="goBack()">
-      <i class="fas fa-arrow-left me-2"></i>Volver
-    </button>
   </div>
 
   <div *ngIf="error" class="alert alert-danger" role="alert">

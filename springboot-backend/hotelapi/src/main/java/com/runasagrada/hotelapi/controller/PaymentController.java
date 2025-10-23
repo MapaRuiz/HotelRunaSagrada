@@ -21,7 +21,6 @@ public class PaymentController {
 	@Autowired
 	private PaymentService service;
 
-
 	@GetMapping("/payments")
 	public List<Payment> list() {
 		return service.list();
@@ -37,28 +36,26 @@ public class PaymentController {
 		return service.getByReservationId(reservationId);
 	}
 
-
-
 	@GetMapping("/payments/reservation/{reservationId}/all-paid")
 	public ResponseEntity<PaymentStatusSummary> allPaidForReservation(@PathVariable Integer reservationId) {
-	List<Payment> list = service.getByReservationId(reservationId);
-	int settledCount = (int) list.stream()
-		.filter(p -> {
-			String status = p.getStatus();
-			if (status == null)
-				return false;
-			status = status.trim().toUpperCase(Locale.ROOT);
-			return "PAID".equals(status) || "REFUNDED".equals(status);
-		})
-		.count();
-	boolean allPaid = list.isEmpty() || settledCount == list.size();
-	PaymentStatusSummary dto = new PaymentStatusSummary(
-		reservationId,
-		list.size(),
-		settledCount,
-		allPaid);
-	return ResponseEntity.ok(dto);
-}
+		List<Payment> list = service.getByReservationId(reservationId);
+		int settledCount = (int) list.stream()
+				.filter(p -> {
+					String status = p.getStatus();
+					if (status == null)
+						return false;
+					status = status.trim().toUpperCase(Locale.ROOT);
+					return "PAID".equals(status) || "REFUNDED".equals(status);
+				})
+				.count();
+		boolean allPaid = list.isEmpty() || settledCount == list.size();
+		PaymentStatusSummary dto = new PaymentStatusSummary(
+				reservationId,
+				list.size(),
+				settledCount,
+				allPaid);
+		return ResponseEntity.ok(dto);
+	}
 
 	@GetMapping("/payments/payment-method/{paymentMethodId}")
 	public List<Payment> getByPaymentMethodId(@PathVariable Integer paymentMethodId) {
@@ -115,6 +112,11 @@ public class PaymentController {
 	@GetMapping("/payments/income")
 	public double[] getIncome() {
 		return service.calculateIncome();
+	}
+
+	@GetMapping("/payments/income/{hotelId}")
+	public double[] getIncomeForHotel(@PathVariable Long hotelId) {
+		return service.calculateIncome(hotelId);
 	}
 
 	@Data

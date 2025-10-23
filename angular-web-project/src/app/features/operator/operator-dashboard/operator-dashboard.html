@@ -1,30 +1,82 @@
-<!-- KPI -->
+<!-- Cards KPI -->
 <div class="row g-3">
-  <div class="col-md-3" *ngFor="let c of cards">
+
+  <!-- Card: Ingresos del Hotel -->
+  <div class="col-md-4">
     <div class="card-elev p-3 h-100">
       <div class="d-flex justify-content-between align-items-center">
         <div>
-          <div class="text-secondary small">{{ c.label }}</div>
-          <div class="fs-4 fw-bold">{{ c.value }}</div>
-          <div class="small" [class.text-success]="c.delta >= 0" [class.text-danger]="c.delta < 0">
-            <i
-              class="bi"
-              [ngClass]="{ 'bi-arrow-up-right': c.delta >= 0, 'bi-arrow-down-right': c.delta < 0 }"
-            ></i>
-            {{ c.delta | number : '1.0-1' }}%
+          <div class="text-secondary small">Ingresos del Hotel</div>
+
+          <div class="fs-4 fw-bold">
+            <ng-container *ngIf="!incomeLoading; else loadingIngresos">
+              {{ incomeValue }}
+            </ng-container>
+            <ng-template #loadingIngresos>Calculando…</ng-template>
+          </div>
+
+          <div class="small"
+               [class.text-success]="incomeDelta >= 0"
+               [class.text-danger]="incomeDelta < 0">
+            <i class="bi"
+               [ngClass]="{ 'bi-arrow-up-right': incomeDelta >= 0, 'bi-arrow-down-right': incomeDelta < 0 }"></i>
+            {{ incomeDelta | number:'1.0-1' }}%
           </div>
         </div>
-        <i class="bi fs-2" [ngClass]="c.icon"></i>
+        <i class="bi fs-2 bi-currency-dollar text-info"></i>
       </div>
     </div>
   </div>
+
+  <!-- Card: Reservas del Hotel -->
+  <div class="col-md-4">
+    <div class="card-elev p-3 h-100">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-secondary small">Reservas del Hotel</div>
+          <div class="fs-4 fw-bold"> {{ reservationValue }} </div>
+          <div class="small"
+               [class.text-success]="reservationDelta >= 0"
+               [class.text-danger]="reservationDelta < 0">
+            <i class="bi"
+               [ngClass]="{ 'bi-arrow-up-right': reservationDelta >= 0, 'bi-arrow-down-right': reservationDelta < 0 }"></i>
+            {{ reservationDelta | number:'1.0-1' }}%
+          </div>
+        </div>
+        <i class="bi fs-2 bi-bag-check text-warning"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card: Hotel -->
+  <div class="col-md-4">
+    <div class="card-elev p-3 h-100">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-secondary small">Hotel</div>
+          <div class="fs-4 fw-bold">{{ currentHotel?.name || 'Cargando...' }}</div>
+          <div class="small text-secondary">
+            <i class="bi bi-geo-alt"></i>
+            {{ currentHotel?.latitude || 'N/D' }}, {{ currentHotel?.longitude || 'N/D' }}
+          </div>
+        </div>
+        <i class="bi fs-2 bi-building text-primary"></i>
+      </div>
+    </div>
+  </div>
+
 </div>
 
-<!-- Chart -->
+
+<!-- Chart + resumen -->
 <div class="row g-3 mt-1">
-  <div class="col-lg-8">
-    <div class="card-elev p-3">
-      <div class="fw-semibold mb-2">Servicios por día</div>
+  <!-- Gráfico: Reservas por tipo -->
+  <div class="col-lg-8 col-md-12">
+    <div class="card-elev p-3 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="fw-semibold">Reservas por tipo de habitación</div>
+        <div class="small text-secondary">Este mes</div>
+      </div>
       <apx-chart
         #chart
         [series]="chartOptions.series"
@@ -39,24 +91,65 @@
       ></apx-chart>
     </div>
   </div>
-  <div class="col-lg-4">
-    <div class="card-elev p-3 h-100 d-flex">
-      <div class="fw-semibold mb-2">Resumen rápido</div>
-      <div class="small text-secondary">Activos: 5</div>
-      <div class="small text-secondary">Pendientes: 3</div>
-      <div class="small text-secondary">Completados: 18</div>
-      <div class="mt-auto small text-muted">Datos de ejemplo</div>
+
+  <!-- Resumen -->
+  <div class="col-lg-4 col-md-12">
+    <div class="card-elev p-3 h-100">
+      <div class="fw-semibold mb-3">Resumen del Hotel</div>
+      
+      <div class="mb-2">
+        <div class="small text-secondary">Nombre:</div>
+        <div>{{ currentHotel?.name || 'Cargando...' }}</div>
+      </div>
+      
+      <div class="mb-2">
+        <div class="small text-secondary">Dirección:</div>
+        <div>{{ currentHotel?.latitude || 'N/D' }}, {{ currentHotel?.longitude || 'N/D' }}</div>
+      </div>
+      
+      <div class="mb-2">
+        <div class="small text-secondary">Check-in / Check-out:</div>
+        <div>{{ currentHotel?.check_in_after || '—' }} / {{ currentHotel?.check_out_before || '—' }}</div>
+      </div>
+      
+      <div class="mb-2">
+        <div class="small text-secondary">Teléfono:</div>
+        <div>{{ '601-123-4567' }}</div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Tabla -->
+<!-- Tabla de Reservaciones -->
 <div class="card-elev p-3 mt-3">
-  <div class="fw-semibold mb-2">Servicios recientes</div>
+  <div class="fw-semibold mb-2">Reservaciones del Hotel</div>
+  <!-- Reservation cards (mobile / quick view) -->
+  <div class="reservation-cards" *ngIf="reservations?.length">
+    <div class="reservation-card" *ngFor="let r of reservations">
+      <div class="card-head">
+        <div class="id">#{{ r.reservation_id }}</div>
+        <div class="status badge" [ngClass]="{
+          'bg-success text-white': r.status === 'CONFIRMED' || r.status === 'CHECKIN' || r.status === 'FINISHED',
+          'bg-warning text-dark': r.status === 'PENDING'
+        }">{{ r.status }}</div>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-8">
+            <div class="line"><strong>Cliente:</strong> {{ r.user?.full_name || r.user_id || 'N/D' }}</div>
+            <div class="line"><strong>Habitación:</strong> {{ r.room?.number || r.room_id || 'N/D' }}</div>
+            <div class="line small"><strong>Fechas:</strong> {{ r.check_in }} → {{ r.check_out }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full grid view (desktop) -->
   <ag-grid-angular
-    class="ag-theme-quartz soft-grid"
+    class="ag-theme-quartz soft-grid mt-3"
     style="width: 100%; height: 360px"
-    [rowData]="services"
+    [rowData]="reservations"
     [columnDefs]="colDefs"
     [rowHeight]="46"
     *ngIf="isBrowser"

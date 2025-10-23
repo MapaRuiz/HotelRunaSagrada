@@ -24,7 +24,7 @@ export interface PaymentStatusSummary {
 export class PaymentService {
   private readonly resource = `${environment.apiBaseUrl}/payments`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getAll(): Observable<Payment[]> {
     return this.http.get<Payment[]>(this.resource);
@@ -76,5 +76,9 @@ export class PaymentService {
   }
   calculateIncome(): Observable<[number, number]> {
     return this.http.get<[number, number]>(`${this.resource}/income`);
+  }
+
+  calculateIncomeByHotel(hotelId: number): Observable<[number, number]> {
+    return this.http.get<[number, number]>(`${this.resource}/income/${hotelId}`);
   }
 }

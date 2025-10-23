@@ -23,6 +23,9 @@ import {
   res_service_status,
 } from '../../../../model/reservation-service';
 import { formatDaysLabel } from '../../../admin/services-offering-component/service-schedule-form/service-schedule-form';
+import { TaskService } from '../../../../services/task';
+import { AuthService } from '../../../../services/auth';
+import { Task } from '../../../../model/task';
 
 @Component({
   selector: 'app-services-add-form',
@@ -54,6 +57,8 @@ export class ServicesAddForm implements OnInit, OnChanges {
 
   private offeringApi = inject(ServiceOfferingService);
   private resServiceApi = inject(ReservationServiceApi);
+  private taskService = inject(TaskService);
+  private authService = inject(AuthService);
   readonly formatDaysLabel = formatDaysLabel;
 
   ngOnInit(): void {
@@ -165,7 +170,7 @@ export class ServicesAddForm implements OnInit, OnChanges {
     }
     this.selectedSchedule = found;
     if (this.errorMsg === 'Seleccione un horario válido para el servicio.' ||
-        this.errorMsg === 'Debe seleccionar un horario para el servicio.') {
+      this.errorMsg === 'Debe seleccionar un horario para el servicio.') {
       this.errorMsg = '';
     }
   }
@@ -207,9 +212,41 @@ export class ServicesAddForm implements OnInit, OnChanges {
       });
     } else {
       this.resServiceApi.add(body).subscribe({
-        next: () => {
-          this.loading = false;
-          this.saved.emit();
+        next: (resService) => {
+          const selectedService = this.services.find(s => s.id === this.service_id);
+          console.log(this.reservation);
+          if (selectedService) {
+            const currentUser = this.authService.userSnapshot();
+            const category = selectedService.category.toLowerCase();
+            let type: 'DELIVERY' | 'GUIDING' | 'TO_DO' | undefined;
+            if (category === 'gastronomía') type = 'DELIVERY';
+            else if (category === 'tours') type = 'GUIDING';
+            else if (category === 'cultural') type = 'TO_DO';
+
+            if (type) {
+              this.taskService.create({
+                type,
+                status: 'PENDING',
+                res_service_id: resService?.res_service_id,
+                room_id: this.reservation?.room_id ?? undefined,
+              }).subscribe({
+                next: () => {
+                  this.loading = false;
+                  this.saved.emit();
+                },
+                error: () => {
+                  this.loading = false;
+                  this.errorMsg = 'No se pudo crear la tarea.';
+                }
+              });
+            } else {
+              this.loading = false;
+              this.saved.emit();
+            }
+          } else {
+            this.loading = false;
+            this.saved.emit();
+          }
         },
         error: (e) => {
           this.loading = false;

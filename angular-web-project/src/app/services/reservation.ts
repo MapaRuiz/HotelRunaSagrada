@@ -88,4 +88,12 @@ export class ReservationService {
   countByRoomType(): Observable<Map<string, number>> {
     return this.http.get<Map<string, number>>(`${this.resource}/summary/by-room-type`);
   }
+  
+  countByHotel(hotelId: number): Observable<number[]> {
+    return this.http.get<number[]>(`${this.resource}/summary/count/hotel/${hotelId}`);
+  }
+  
+  countByRoomTypeAndHotel(hotelId: number): Observable<Map<string, number>> {
+    return this.http.get<Map<string, number>>(`${this.resource}/summary/by-room-type/hotel/${hotelId}`);
+  }
 }

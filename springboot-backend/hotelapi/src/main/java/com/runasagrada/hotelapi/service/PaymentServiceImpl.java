@@ -182,4 +182,54 @@ public class PaymentServiceImpl implements PaymentService {
 		return new double[] { currentIncome, delta };
 	}
 
+	@Override
+	public double[] calculateIncome(Long hotelId) {
+		List<Payment> payments = this.payments.findAll();
+
+		LocalDateTime now = LocalDateTime.now();
+		YearMonth currentMonth = YearMonth.from(now);
+		YearMonth previousMonth = currentMonth.minusMonths(1);
+
+		double currentIncome = 0.0;
+		double previousIncome = 0.0;
+
+		for (Payment p : payments) {
+			if (p == null || p.getStatus() == null || p.getCreatedAt() == null || p.getReservationId() == null
+					|| p.getReservationId().getHotel() == null)
+				continue;
+			// If hotelId provided, filter payments by reservation.hotel.hotelId
+			if (hotelId != null) {
+				Long payHotelId = p.getReservationId().getHotel().getHotelId();
+				if (payHotelId == null || !hotelId.equals(payHotelId)) {
+					continue;
+				}
+			}
+
+			String status = p.getStatus().trim().toLowerCase();
+
+			if (!status.equals("paid"))
+				continue;
+
+			LocalDateTime created = p.getCreatedAt().toLocalDateTime();
+			YearMonth paymentMonth = YearMonth.from(created);
+
+			if (paymentMonth.equals(currentMonth)) {
+				currentIncome += p.getAmount();
+			} else if (paymentMonth.equals(previousMonth)) {
+				previousIncome += p.getAmount();
+			}
+		}
+
+		double delta = 0.0;
+		if (previousIncome > 0) {
+			delta = ((currentIncome - previousIncome) / previousIncome) * 100.0;
+		} else if (currentIncome > 0) {
+			delta = 100.0;
+		}
+
+		delta = Math.round(delta * 10.0) / 10.0;
+
+		return new double[] { currentIncome, delta };
+	}
+
 }

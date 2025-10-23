@@ -15,6 +15,14 @@ import {
 } from 'ng-apexcharts';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef } from 'ag-grid-community';
+import { PaymentService } from '../../../services/payment';
+import { ReservationService } from '../../../services/reservation';
+import { AuthService } from '../../../services/auth';
+import { Hotel } from '../../../model/hotel';
+import { HotelsService } from '../../../services/hotels';
+import { StaffMemberService } from '../../../services/staff-member';
+import { filter, take } from 'rxjs/operators';
+import { of, switchMap } from 'rxjs';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
@@ -37,22 +45,32 @@ export type ChartOptions = {
 })
 export class OperatorDashboardComponent implements OnInit {
   readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
-  cards = [
-    { label: 'Servicios activos', value: '5', delta: 2.1, icon: 'bi-hammer text-info' },
-    { label: 'Pendientes', value: '3', delta: -1.0, icon: 'bi-hourglass-split text-warning' },
-    { label: 'Completados', value: '18', delta: 0.5, icon: 'bi-check2-circle text-success' },
-    { label: 'Calificación promedio', value: '4.7', delta: 0.2, icon: 'bi-star text-primary' },
-  ];
+  private paymentApi = inject(PaymentService);
+  private reservationApi = inject(ReservationService);
+  private authService = inject(AuthService);
+  private hotelsApi = inject(HotelsService);
+  private staffApi = inject(StaffMemberService);
+
+  currentHotelId: number | null = null;
+  currentHotel: Hotel | null = null;
+
+  incomeLoading = true;
+  incomeValue = '$0';
+  incomeDelta = 0;
+  reservationValue = 0;
+  reservationDelta = 0;
+
+  reservations: any[] = [];
 
   @ViewChild('chart') chart!: ChartComponent;
   public chartOptions: ChartOptions = {
-    series: [{ name: 'Servicios', data: [2, 3, 1, 4, 5, 3, 2] }],
+    series: [{ name: 'Reservas', data: [] }],
     chart: {
       type: 'bar' as ChartType,
       height: 300,
       toolbar: { show: false }
     },
-    xaxis: { categories: ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'] },
+    xaxis: { categories: [] },
     dataLabels: { enabled: false },
     stroke: { show: true, width: 2 },
     grid: { borderColor: '#e6e8e1' },
@@ -62,17 +80,108 @@ export class OperatorDashboardComponent implements OnInit {
   };
 
   colDefs: ColDef[] = [
-    { headerName: 'Servicio', field: 'id', width: 90 },
-    { headerName: 'Hotel', field: 'hotel', flex: 1 },
-    { headerName: 'Estado', field: 'status', width: 150 },
-    { headerName: 'Fecha', field: 'date', width: 150 },
+    { headerName: 'ID', field: 'reservationId', width: 90 },
+    { headerName: 'Cliente', field: 'clientName', flex: 1 },
+    { headerName: 'Habitación', field: 'roomNumber', width: 120 },
+    { headerName: 'Check-in', field: 'checkInDate', width: 120 },
+    { headerName: 'Check-out', field: 'checkOutDate', width: 120 },
+    { headerName: 'Estado', field: 'status', width: 120 }
   ];
 
-  services = [
-    { id: 101, hotel: 'Hotel Andes', status: 'Activo', date: '2025-09-22' },
-    { id: 102, hotel: 'Hotel Pacífico', status: 'Pendiente', date: '2025-09-23' },
-    { id: 103, hotel: 'Hotel Sierra', status: 'Completado', date: '2025-09-20' }
-  ];
+  ngOnInit() {
+    if (!this.isBrowser) return;
 
-  ngOnInit() {}
+    const snap = this.authService.userSnapshot();
+
+    if (snap) {
+      this.resolveHotelFromUser(snap.user_id).subscribe({
+        next: (hotelId: any) => hotelId ? this.loadForHotel(hotelId) : console.error('No se pudo resolver hotelId'),
+        error: (e: any) => console.error('Error resolviendo hotelId desde snapshot', e)
+      });
+      return;
+    }
+  }
+
+  /** Dado un userId, intenta obtener el hotelId usando StaffMember */
+  private resolveHotelFromUser(userId: number) {
+    // getByUserId debe devolver StaffMember (o null si no existe)
+    return this.staffApi.getByUser(userId).pipe(
+      take(1),
+      switchMap(sm => of(sm?.hotel_id ?? null))
+    );
+  }
+
+  /** Carga todo el dashboard para el hotel dado */
+  private loadForHotel(hotelId: number) {
+    this.currentHotelId = hotelId;
+
+    // Cargar información del hotel
+    this.hotelsApi.get(this.currentHotelId).subscribe({
+      next: hotel => {
+        this.currentHotel = hotel;
+
+        // Cargar datos específicos del hotel
+        this.calcIncome();
+        this.calcReservations();
+        this.loadReservationsByRoomType();
+        this.loadReservationsForHotel();
+      },
+      error: err => console.error('Error cargando hotel', err)
+    });
+  }
+
+  calcIncome() {
+    this.incomeLoading = true;
+    this.paymentApi.calculateIncomeByHotel(this.currentHotelId!).subscribe(p => {
+      this.incomeValue = `$${p[0]}`;
+      this.incomeDelta = p[1];
+      this.incomeLoading = false;
+      console.log('Income:', p);
+    });
+  }
+
+  calcReservations() {
+    this.reservationApi.countByHotel(this.currentHotelId!).subscribe(p => {
+      this.reservationValue = p[0];
+      this.reservationDelta = p[1];
+    });
+  }
+
+  private loadReservationsByRoomType() {
+    this.reservationApi.countByRoomTypeAndHotel(this.currentHotelId!).subscribe({
+      next: (map) => {
+        const entries = Object.entries(map).sort((a, b) => b[1] - a[1]);
+
+        const categories = entries.map(([roomType]) => roomType ?? 'N/D');
+        const data = entries.map(([, count]) => count ?? 0);
+
+        this.chartOptions = {
+          ...this.chartOptions,
+          xaxis: { ...this.chartOptions.xaxis, categories },
+          series: [{ name: 'Reservas', data }]
+        };
+      },
+      error: (err: any) => {
+        console.error('Error cargando reservas por tipo', err);
+        this.chartOptions = {
+          ...this.chartOptions,
+          xaxis: { ...this.chartOptions.xaxis, categories: ['—'] },
+          series: [{ name: 'Reservas', data: [0] }]
+        };
+      }
+    });
+  }
+
+  private loadReservationsForHotel() {
+    this.reservationApi.getAllByHotel(this.currentHotelId!).subscribe({
+      next: (reservations) => {
+        this.reservations = reservations;
+      },
+      error: (err) => {
+        console.error('Error cargando reservas del hotel', err);
+        this.reservations = [];
+      }
+    });
+  }
+
 }

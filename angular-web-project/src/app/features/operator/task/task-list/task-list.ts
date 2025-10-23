@@ -34,19 +34,19 @@ export class TaskList implements OnInit {
   @Input() staffId?: number;
   @Input() showAllTasks = false;
   @Output() backToParent = new EventEmitter<void>();
-  
+
   isBrowser: boolean = false;
   loading = false;
   error: string | null = null;
-  
+
   // Fuente de datos
   tasks: Task[] = [];
   rowData: Task[] = [];
-  
+
   // ag-grid
   private gridApi?: GridApi<Task>;
   readonly gridTheme: typeof sharedGridTheme = sharedGridTheme;
-  
+
   // Search functionality
   search = '';
 
@@ -61,7 +61,7 @@ export class TaskList implements OnInit {
     localeText: AG_GRID_LOCALE,
     rowSelection: 'single',
     getRowId: params => params.data.task_id?.toString() || '',
-    onGridReady: params => { 
+    onGridReady: params => {
       this.gridApi = params.api;
       setTimeout(() => {
         params.api.sizeColumnsToFit();
@@ -71,13 +71,13 @@ export class TaskList implements OnInit {
       this.gridApi = undefined;
     },
     columnDefs: [
-      { 
+      {
         headerName: 'ID',
         field: 'task_id',
         minWidth: 60,
         maxWidth: 80
       },
-      { 
+      {
         headerName: 'Tipo',
         filter: MultiSelectFilterComponent,
         filterParams: {
@@ -94,7 +94,7 @@ export class TaskList implements OnInit {
         minWidth: 120,
         maxWidth: 150
       },
-      { 
+      {
         headerName: 'Estado',
         filter: MultiSelectFilterComponent,
         filterParams: {
@@ -111,7 +111,7 @@ export class TaskList implements OnInit {
         minWidth: 120,
         maxWidth: 150
       },
-      { 
+      {
         headerName: 'Staff',
         valueGetter: params => {
           const staffName = params.data?.staff?.user?.full_name;
@@ -123,7 +123,7 @@ export class TaskList implements OnInit {
         minWidth: 150,
         flex: 1
       },
-      { 
+      {
         headerName: 'Habitación',
         valueGetter: params => params.data?.room?.number ? `Hab. ${params.data.room.number}` : '-',
         filter: 'agTextColumnFilter',
@@ -131,7 +131,7 @@ export class TaskList implements OnInit {
         minWidth: 120,
         maxWidth: 150
       },
-      { 
+      {
         headerName: 'Servicio',
         valueGetter: params => params.data?.res_service_id ? `Serv. ${params.data.res_service_id}` : '-',
         filter: 'agTextColumnFilter',
@@ -139,7 +139,7 @@ export class TaskList implements OnInit {
         minWidth: 120,
         maxWidth: 150
       },
-      { 
+      {
         headerName: 'Creada',
         valueGetter: params => this.formatDate(params.data?.created_at || ''),
         filter: 'agDateColumnFilter',
@@ -150,39 +150,39 @@ export class TaskList implements OnInit {
         headerName: 'Acciones',
         filter: false,
         minWidth: 200,
-        cellRenderer: (params: any) => {
-          const task = params.data;
-          const container = document.createElement('div');
-          container.className = 'd-flex gap-1';
-          
-          if (task.status === 'PENDING') {
-            const startBtn = document.createElement('button');
-            startBtn.className = 'btn btn-sm btn-outline-primary';
-            startBtn.innerHTML = 'Iniciar';
-            startBtn.title = 'Iniciar tarea';
-            startBtn.onclick = () => this.startTask(task.task_id);
-            container.appendChild(startBtn);
+        // Use the Angular cell renderer component used elsewhere in the app.
+        cellRenderer: ActionButtonsComponent,
+        cellRendererParams: (params: any) => {
+          const task: Task = params.data;
+          const additionalButtons: AdditionalButton<Task>[] = [];
+
+          if (task?.status === 'PENDING') {
+            additionalButtons.push({
+              label: 'Iniciar',
+              class: 'btn btn-sm btn-outline-primary',
+              action: (row: Task) => this.startTask(row.task_id)
+            });
           }
-          
-          if (task.status === 'IN_PROGRESS') {
-            const completeBtn = document.createElement('button');
-            completeBtn.className = 'btn btn-sm btn-outline-success';
-            completeBtn.innerHTML = 'Completar';
-            completeBtn.title = 'Completar tarea';
-            completeBtn.onclick = () => this.completeTask(task.task_id);
-            container.appendChild(completeBtn);
+
+          if (task?.status === 'IN_PROGRESS') {
+            additionalButtons.push({
+              label: 'Completar',
+              class: 'btn btn-sm btn-outline-success',
+              action: (row: Task) => this.completeTask(row.task_id)
+            });
           }
-          
-          if (task.status !== 'CANCELED' && task.status !== 'DONE') {
-            const cancelBtn = document.createElement('button');
-            cancelBtn.className = 'btn btn-sm btn-outline-danger';
-            cancelBtn.innerHTML = 'Cancelar';
-            cancelBtn.title = 'Cancelar tarea';
-            cancelBtn.onclick = () => this.cancelTask(task.task_id);
-            container.appendChild(cancelBtn);
+
+          if (task && task.status !== 'CANCELED' && task.status !== 'DONE') {
+            additionalButtons.push({
+              label: 'Cancelar',
+              class: 'btn btn-sm btn-outline-danger',
+              action: (row: Task) => this.cancelTask(row.task_id)
+            });
           }
-          
-          return container;
+
+          return {
+            additionalButtons
+          };
         },
         sortable: false
       }
@@ -196,8 +196,8 @@ export class TaskList implements OnInit {
   loadTasks() {
     this.loading = true;
     this.error = null;
-    
-    const request = this.staffId 
+
+    const request = this.staffId
       ? this.taskService.getByStaffMember(this.staffId)
       : this.taskService.list();
 
@@ -228,7 +228,7 @@ export class TaskList implements OnInit {
       return;
     }
 
-    const roomRequests = roomIds.map(roomId => 
+    const roomRequests = roomIds.map(roomId =>
       this.roomService.getById(roomId)
     );
 
