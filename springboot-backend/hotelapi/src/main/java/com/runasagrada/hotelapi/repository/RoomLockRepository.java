@@ -21,4 +21,6 @@ public interface RoomLockRepository extends JpaRepository<RoomLock, RoomLockId> 
 
     @Query("select distinct rl.reservation from RoomLock rl where rl.roomId = :roomId and rl.reservation is not null")
     List<Reservation> findReservationsByRoomId(@Param("roomId") Integer roomId);
+
+    void deleteByRoomId(Integer roomId);
 }

@@ -1,5 +1,6 @@
 package com.runasagrada.hotelapi.service;
 
+import com.runasagrada.hotelapi.model.Room;
 import com.runasagrada.hotelapi.model.RoomType;
 import com.runasagrada.hotelapi.repository.RoomTypeRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -16,6 +17,7 @@ import java.util.Optional;
 public class RoomTypeServiceImpl implements RoomTypeService {
 
     private final RoomTypeRepository roomTypeRepository;
+    private final RoomService roomService;
 
     @Override
     public List<RoomType> findAll() {
@@ -48,8 +50,15 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     public void delete(Integer id) {
         RoomType rt = roomTypeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("RoomType not found: " + id));
-        // Gracias a cascade = REMOVE + orphanRemoval en RoomType.rooms,
-        // las Rooms asociadas se eliminan automáticamente.
+        if (rt.getRooms() != null && !rt.getRooms().isEmpty()) {
+            for (Room room : List.copyOf(rt.getRooms())) {
+                Integer roomId = room != null ? room.getRoomId() : null;
+                if (roomId != null) {
+                    roomService.delete(roomId);
+                }
+            }
+            rt.getRooms().clear();
+        }
         roomTypeRepository.delete(rt);
     }
 }

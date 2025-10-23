@@ -64,25 +64,27 @@
                     >
                       Ver detalles
                     </button>
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-outline-primary me-2"
-                      (click)="beginEdit(reservation); $event.stopPropagation()"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-outline-danger"
-                      [disabled]="deletingId === reservation.reservation_id"
-                      (click)="deleteReservation(reservation); $event.stopPropagation()"
-                    >
-                      <span
-                        *ngIf="deletingId === reservation.reservation_id"
-                        class="spinner-border spinner-border-sm me-1"
-                      ></span>
-                      Cancelar
-                    </button>
+                    <ng-container *ngIf="reservation.status !== 'FINISHED'">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-primary me-2"
+                        (click)="beginEdit(reservation); $event.stopPropagation()"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        [disabled]="deletingId === reservation.reservation_id"
+                        (click)="deleteReservation(reservation); $event.stopPropagation()"
+                      >
+                        <span
+                          *ngIf="deletingId === reservation.reservation_id"
+                          class="spinner-border spinner-border-sm me-1"
+                        ></span>
+                        Cancelar
+                      </button>
+                    </ng-container>
                   </td>
                 </tr>
                 <tr *ngIf="isEditing(reservation)" class="edit-row">

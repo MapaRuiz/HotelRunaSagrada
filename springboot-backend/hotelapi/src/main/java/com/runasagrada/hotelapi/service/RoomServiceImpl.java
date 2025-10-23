@@ -6,6 +6,7 @@ import com.runasagrada.hotelapi.model.Room;
 import com.runasagrada.hotelapi.model.RoomLock;
 import com.runasagrada.hotelapi.model.RoomType;
 import com.runasagrada.hotelapi.repository.HotelRepository;
+import com.runasagrada.hotelapi.repository.ReservationRepository;
 import com.runasagrada.hotelapi.repository.RoomLockRepository;
 import com.runasagrada.hotelapi.repository.RoomRepository;
 import com.runasagrada.hotelapi.repository.RoomTypeRepository;
@@ -29,6 +30,9 @@ public class RoomServiceImpl implements RoomService {
     private final HotelRepository hotelRepository;
     private final RoomTypeRepository roomTypeRepository;
     private final RoomLockRepository roomLockRepository;
+    private final ReservationRepository reservationRepository;
+    private final ReservationService reservationService;
+    private final PaymentService paymentService;
 
     @Override
     public List<Room> findAll() {
@@ -124,7 +128,20 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public void delete(Integer id) {
-        roomRepository.deleteById(id);
+        Room room = roomRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Room not found: " + id));
+
+        List<Reservation> reservations = reservationRepository.findByRoomRoomId(id);
+        for (Reservation reservation : reservations) {
+            Integer reservationId = reservation.getReservationId();
+            if (reservationId != null) {
+                paymentService.deleteByReservationId(reservationId);
+                reservationService.delete(reservationId);
+            }
+        }
+
+        roomLockRepository.deleteByRoomId(id);
+        roomRepository.delete(room);
     }
 
     @Override
