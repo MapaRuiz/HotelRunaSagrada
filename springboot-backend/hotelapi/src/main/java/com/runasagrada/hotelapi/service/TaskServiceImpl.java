@@ -56,6 +56,31 @@ public class TaskServiceImpl implements TaskService {
 			task.setReservationService(reservationService);
 		}
 
+		if (task.getStaffId() == null) {
+			List<com.runasagrada.hotelapi.model.StaffMember> candidates = null;
+			if (task.getType() == TaskType.TO_DO) {
+				// Limpieza o Mantenimiento
+				candidates = staffMembers.findByDepartmentNames(List.of("limpieza", "mantenimiento"));
+			} else if (task.getType() == TaskType.GUIDING) {
+				// Recepción o Servicio al cliente
+				candidates = staffMembers.findByDepartmentNames(List.of("recepción", "servicio al cliente",
+						"servicio_cliente", "servicioalcliente"));
+			} else if (task.getType() == TaskType.DELIVERY) {
+				// Cocina
+				candidates = staffMembers.findByDepartmentNames(List.of("cocina"));
+			}
+
+			if (candidates == null || candidates.isEmpty()) {
+				// Fallback: any operator
+				candidates = staffMembers.findByUserRole("OPERATOR");
+			}
+
+			if (candidates != null && !candidates.isEmpty()) {
+				int idx = (int) (Math.random() * candidates.size());
+				task.setStaffId(candidates.get(idx).getStaffId());
+			}
+		}
+
 		validate(task);
 		if (task.getTaskId() != null)
 			task.setTaskId(null);

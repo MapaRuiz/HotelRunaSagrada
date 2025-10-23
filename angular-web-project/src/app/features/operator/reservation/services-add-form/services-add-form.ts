@@ -229,7 +229,6 @@ export class ServicesAddForm implements OnInit, OnChanges {
                 status: 'PENDING',
                 res_service_id: resService?.res_service_id,
                 room_id: this.reservation?.room_id ?? undefined,
-                staff_id: currentUser?.user_id
               }).subscribe({
                 next: () => {
                   this.loading = false;
