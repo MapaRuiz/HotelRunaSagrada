@@ -148,26 +148,25 @@ export class SearchResultTable implements OnChanges {
           const row = p.data as Reservation;
           const status = row?.status;
 
-          const extraButton =
-            status === 'CONFIRMED'
-              ? {
-                  label: 'Activar',
-                  class: 'btn-details',
-                  action: (r: Reservation) => this.onActivate(r),
-                }
-              : status === 'CHECKIN'
-              ? {
-                  label: 'Desactivar',
-                  class: 'btn-delete',
-                  action: (r: Reservation) => this.onDeactivate(r),
-                }
-              : status === 'FINISHED'
-              ? {
-                  label: 'Detalles',
-                  class: 'btn-edit',
-                  action: (r: Reservation) => this.viewDetails(r),
-                }
-              : undefined;
+          const extraButton = ['CONFIRMED', 'PENDING'].includes(status)
+            ? {
+                label: 'Activar',
+                class: 'btn-details',
+                action: (r: Reservation) => this.onActivate(r),
+              }
+            : status === 'CHECKIN'
+            ? {
+                label: 'Desactivar',
+                class: 'btn-delete',
+                action: (r: Reservation) => this.onDeactivate(r),
+              }
+            : status === 'FINISHED'
+            ? {
+                label: 'Detalles',
+                class: 'btn-edit',
+                action: (r: Reservation) => this.viewDetails(r),
+              }
+            : undefined;
 
           const detailButton = {
             label: 'Ver detalles',

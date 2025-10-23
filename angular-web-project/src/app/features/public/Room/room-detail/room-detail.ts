@@ -74,8 +74,11 @@ export class RoomDetailComponent {
     const selectedStart = new Date(this.selectedCheckIn);
     const selectedEnd = new Date(this.selectedCheckOut);
 
-    return this.allReservations.some(reservation => {
-      if (reservation.room?.room_id !== roomId || reservation.status !== 'CONFIRMED') {
+    return this.allReservations.some((reservation) => {
+      if (
+        reservation.room?.room_id !== roomId ||
+        !['CONFIRMED', 'CHECKIN', 'PENDING'].includes((reservation.status || '').toUpperCase())
+      ) {
         return false;
       }
 
@@ -124,14 +127,16 @@ export class RoomDetailComponent {
 
   // Update room counts based on current date selection
   updateRoomCounts(): void {
-    this.availableCount = this.rooms.filter(r => this.isAvailable(r)).length;
-    this.bookedCount = this.rooms.filter(r => this.isBooked(r)).length;
-    this.maintenanceCount = this.rooms.filter(r => this.isMaintenance(r)).length;
+    this.availableCount = this.rooms.filter((r) => this.isAvailable(r)).length;
+    this.bookedCount = this.rooms.filter((r) => this.isBooked(r)).length;
+    this.maintenanceCount = this.rooms.filter((r) => this.isMaintenance(r)).length;
   }
 
   ngOnInit() {
     // Siempre desde el top
-    if (isBrowser()) { window.scrollTo({ top: 0, left: 0, behavior: 'auto' }); }
+    if (isBrowser()) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    }
 
     // Params
     this.typeId = Number(this.route.snapshot.paramMap.get('typeId'));
@@ -148,7 +153,7 @@ export class RoomDetailComponent {
     forkJoin({
       roomType: this.typeSvc.getById(this.typeId),
       hotelRooms: this.roomSvc.listByHotel(this.hotelId),
-      allReservations: this.reservationSvc.getAll()
+      allReservations: this.reservationSvc.getAll(),
     }).subscribe(({ roomType, hotelRooms, allReservations }) => {
       // Load all reservations for date-based status checking
       this.allReservations = allReservations;
@@ -159,7 +164,9 @@ export class RoomDetailComponent {
         this.capacity = toNumber((roomType as any).capacity);
         this.basePrice = toNumber((roomType as any).base_price ?? (roomType as any).basePrice);
         const defImg =
-          (roomType as any).default_image ?? (roomType as any).image ?? (roomType as any).defaultImage;
+          (roomType as any).default_image ??
+          (roomType as any).image ??
+          (roomType as any).defaultImage;
         if (defImg && !this.heroImg) this.heroImg = String(defImg);
       }
 
@@ -178,7 +185,9 @@ export class RoomDetailComponent {
       this.updateRoomCounts();
 
       // Tema
-      const themes = this.rooms.map((r: any) => r.theme_name ?? r.themeName).filter(Boolean) as string[];
+      const themes = this.rooms
+        .map((r: any) => r.theme_name ?? r.themeName)
+        .filter(Boolean) as string[];
       this.themeName = mostCommon(themes) ?? this.themeName;
 
       // Hero slides
@@ -224,12 +233,14 @@ export class RoomDetailComponent {
   // ======= Acciones UI existentes =======
   beginReservation(room?: any) {
     safeSessionSet('pendingReservation', {
-      hotelId: this.hotelId, typeId: this.typeId, roomId: room?.room_id ?? null,
+      hotelId: this.hotelId,
+      typeId: this.typeId,
+      roomId: room?.room_id ?? null,
     });
     this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
   }
 
-  onDatesChanged(dates: { checkIn: string, checkOut: string }): void {
+  onDatesChanged(dates: { checkIn: string; checkOut: string }): void {
     setTimeout(() => {
       this.selectedCheckIn = dates.checkIn;
       this.selectedCheckOut = dates.checkOut;
@@ -238,14 +249,19 @@ export class RoomDetailComponent {
   }
 
   onReservationCreated(e: {
-    reservationId: number; reservationCode: string; hotelId: number; typeId: number; roomId: number;
-    checkIn: string; checkOut: string;
+    reservationId: number;
+    reservationCode: string;
+    hotelId: number;
+    typeId: number;
+    roomId: number;
+    checkIn: string;
+    checkOut: string;
   }) {
     // Redirigir a la página de resumen de reserva
     this.router.navigate(['/reservation-summary'], {
       queryParams: {
-        reservationId: e.reservationId
-      }
+        reservationId: e.reservationId,
+      },
     });
   }
 
@@ -253,14 +269,30 @@ export class RoomDetailComponent {
   trackByRoom = (i: number, r: any) => r?.room_id ?? r?.number ?? i;
 }
 
-function toNumber(v: any): number | null { if (v == null) return null; const n = Number(v); return Number.isFinite(n) ? n : null; }
+function toNumber(v: any): number | null {
+  if (v == null) return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
 function mostCommon(arr: string[]): string | undefined {
   if (!arr.length) return undefined;
   const m = new Map<string, number>();
   for (const s of arr) m.set(s, (m.get(s) ?? 0) + 1);
-  let best: string | undefined; let max = -1;
-  for (const [k, c] of m) if (c > max) { max = c; best = k; }
+  let best: string | undefined;
+  let max = -1;
+  for (const [k, c] of m)
+    if (c > max) {
+      max = c;
+      best = k;
+    }
   return best;
 }
-function isBrowser(): boolean { return typeof window !== 'undefined'; }
-function safeSessionSet(key: string, val: any): void { if (!isBrowser()) return; try { sessionStorage.setItem(key, JSON.stringify(val)); } catch { } }
+function isBrowser(): boolean {
+  return typeof window !== 'undefined';
+}
+function safeSessionSet(key: string, val: any): void {
+  if (!isBrowser()) return;
+  try {
+    sessionStorage.setItem(key, JSON.stringify(val));
+  } catch {}
+}

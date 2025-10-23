@@ -230,26 +230,25 @@ export class ReservationTableOperatorComponent implements OnInit, OnDestroy {
             status === 'PENDING' || status === 'CONFIRMED' || status === 'CHECKIN';
 
           // Extra action button depending on status
-          const extraButton =
-            status === 'CONFIRMED'
-              ? {
-                  label: 'Activar',
-                  class: 'btn-details',
-                  action: (r: Reservation) => this.activateReservation(r),
-                }
-              : status === 'CHECKIN'
-              ? {
-                  label: 'Desactivar',
-                  class: 'btn-delete',
-                  action: (r: Reservation) => this.deactivateReservation(r),
-                }
-              : status === 'FINISHED'
-              ? {
-                  label: 'Detalles',
-                  class: 'btn-edit',
-                  action: (r: Reservation) => this.openEditForRow(r),
-                }
-              : undefined;
+          const extraButton = ['CONFIRMED', 'PENDING'].includes(status)
+            ? {
+                label: 'Activar',
+                class: 'btn-details',
+                action: (r: Reservation) => this.activateReservation(r),
+              }
+            : status === 'CHECKIN'
+            ? {
+                label: 'Desactivar',
+                class: 'btn-delete',
+                action: (r: Reservation) => this.deactivateReservation(r),
+              }
+            : status === 'FINISHED'
+            ? {
+                label: 'Detalles',
+                class: 'btn-edit',
+                action: (r: Reservation) => this.openEditForRow(r),
+              }
+            : undefined;
 
           return {
             onEdit: canEditDelete ? (r: Reservation) => this.beginEdit(r) : undefined,
