@@ -19,6 +19,7 @@ import {
   ModuleRegistry,
 } from 'ag-grid-community';
 import { AG_GRID_LOCALE, gridTheme as sharedGridTheme } from '../../../sharedTableConfig';
+import { updateResponsiveColumns as setResponsiveColumnsVisibility } from '../../../admin/sharedTable';
 import {
   ServiceOfferingService,
   ServiceOfferingDetailResponse,
@@ -47,6 +48,8 @@ export class ReservationServicesTable implements OnChanges {
   readonly gridTheme: typeof sharedGridTheme = sharedGridTheme;
   private platformId = inject(PLATFORM_ID);
   private gridApi?: GridApi<ReservationServiceModel>;
+  private readonly compactColumns = ['status', 'total'];
+  private compactColumnsHidden = false;
 
   private facade = inject(ReservationFacade);
   private serviceOffering = inject(ServiceOfferingService);
@@ -291,6 +294,11 @@ export class ReservationServicesTable implements OnChanges {
         // After updating columns, resize to fit
         setTimeout(() => this.gridApi?.sizeColumnsToFit(), 0);
       } catch {}
+      const shouldHideCompactColumns = width < 768;
+      if (shouldHideCompactColumns !== this.compactColumnsHidden) {
+        setResponsiveColumnsVisibility(this.gridApi, this.compactColumns, shouldHideCompactColumns);
+        this.compactColumnsHidden = shouldHideCompactColumns;
+      }
     }
     this.applyCompactLayout();
   }

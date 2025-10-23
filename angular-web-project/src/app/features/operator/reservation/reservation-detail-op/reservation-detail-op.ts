@@ -18,6 +18,7 @@ import { ReservationService } from '../../../../services/reservation';
 import { ServicesAddForm } from '../services-add-form/services-add-form';
 import { ReservationServicesTable } from '../reservation-services-table/reservation-services-table';
 import { ReservationFacade, getStatusBadge, getStatusText } from '../reservation';
+import { formatDisplayDate } from '../../../admin/sharedTable';
 import { BillServicesComponent } from '../bill-services/bill-services';
 import { ReservationService as ReservationServiceModel } from '../../../../model/reservation-service';
 import { PaymentMethodService } from '../../../../services/payment-method';
@@ -132,18 +133,7 @@ export class ReservationDetailOp {
   }
 
   formatDate(dateString?: string): string {
-    if (!dateString) return this.fallbackText;
-
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('es-ES', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-    } catch {
-      return dateString;
-    }
+    return formatDisplayDate(dateString, this.fallbackText);
   }
 
   readonly fallbackText = 'Sin información';

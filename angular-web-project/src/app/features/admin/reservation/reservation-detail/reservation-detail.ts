@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Reservation } from '../../../../model/reservation';
+import { formatDisplayDate } from '../../sharedTable';
 
 @Component({
   selector: 'app-reservation-detail',
@@ -42,18 +43,7 @@ export class ReservationDetail implements OnChanges {
   }
 
   formatDate(dateString?: string): string {
-    if (!dateString) return this.fallbackText;
-    
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('es-ES', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    } catch {
-      return dateString;
-    }
+    return formatDisplayDate(dateString, this.fallbackText);
   }
 
   formatDateTime(dateString?: string): string {

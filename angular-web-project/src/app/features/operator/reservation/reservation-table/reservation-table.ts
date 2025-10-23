@@ -9,11 +9,13 @@ import {
   gridTheme as sharedGridTheme,
   TEXT_FILTER_CONFIG,
 } from '../../../sharedTableConfig';
+import { updateResponsiveColumns as setResponsiveColumnsVisibility } from '../../../admin/sharedTable';
 import {
   AllCommunityModule,
   ColDef,
   GridApi,
   GridOptions,
+  GridSizeChangedEvent,
   ISizeAllColumnsToContentParams,
   ModuleRegistry,
 } from 'ag-grid-community';
@@ -53,9 +55,19 @@ export class ReservationTableOperatorComponent implements OnInit, OnDestroy {
   private readonly autoSizeParams: ISizeAllColumnsToContentParams = {
     defaultMinWidth: 120,
   };
+  private readonly responsiveHiddenColumns = ['reservationId', 'clientName', 'hotelName'];
+  private columnsHiddenForCompact = false;
   compactLayout = false;
-  private readonly handleResize = () => {
+  private readonly handleResize = (event?: GridSizeChangedEvent | Event) => {
+    const width =
+      (event && 'clientWidth' in event ? event.clientWidth ?? undefined : undefined) ??
+      (this.isBrowser ? window.innerWidth : undefined);
+    const height =
+      (event && 'clientHeight' in event ? event.clientHeight ?? undefined : undefined) ??
+      (this.isBrowser ? window.innerHeight : undefined);
+
     this.updateLayoutMode();
+    this.updateResponsiveColumns(width, height);
     this.autoSizeColumns();
   };
 
@@ -90,6 +102,7 @@ export class ReservationTableOperatorComponent implements OnInit, OnDestroy {
           if (this.search) {
             this.withGridApi((api) => api.setGridOption('quickFilterText', this.search));
           }
+          this.updateResponsiveColumns();
           this.autoSizeColumns();
         },
         error: (err) => console.error('Error loading reservations:', err),
@@ -109,14 +122,17 @@ export class ReservationTableOperatorComponent implements OnInit, OnDestroy {
       resizable: true,
       wrapText: true,
       autoHeight: true,
+      flex: 0,
+      minWidth: 90,
     },
     getRowId: (params) => params.data.reservation_id?.toString() || '',
     onGridReady: (params) => {
       this.gridApi = params.api;
       this.updateLayoutMode();
+      this.updateResponsiveColumns();
       this.autoSizeColumns();
     },
-    onGridSizeChanged: () => this.handleResize(),
+    onGridSizeChanged: (event) => this.handleResize(event),
     onFirstDataRendered: () => this.autoSizeColumns(),
     onGridPreDestroyed: () => {
       this.gridApi = undefined;
@@ -129,10 +145,12 @@ export class ReservationTableOperatorComponent implements OnInit, OnDestroy {
       {
         headerName: 'ID',
         field: 'reservation_id',
+        colId: 'reservationId',
         minWidth: 60,
       },
       {
         headerName: 'Cliente',
+        colId: 'clientName',
         filter: MultiSelectFilterComponent,
         filterParams: {
           valueGetter: (row: Reservation) => row.user?.full_name || `Usuario ${row.user_id}`,
@@ -151,6 +169,7 @@ export class ReservationTableOperatorComponent implements OnInit, OnDestroy {
       },
       {
         headerName: 'Hotel',
+        colId: 'hotelName',
         filter: MultiSelectFilterComponent,
         filterParams: {
           valueGetter: (row: Reservation) => row.hotel?.name || `Hotel ${row.hotel_id}`,
@@ -341,6 +360,26 @@ export class ReservationTableOperatorComponent implements OnInit, OnDestroy {
         api.resetRowHeights();
       });
     }
+  }
+
+  private updateResponsiveColumns(width?: number, height?: number): void {
+    if (!this.isBrowser) return;
+
+    const effectiveWidth = width ?? window.innerWidth;
+    const effectiveHeight = height ?? window.innerHeight;
+
+    const shouldHide = effectiveWidth <= 1024;
+
+    if (shouldHide === this.columnsHiddenForCompact) {
+      return;
+    }
+
+    this.columnsHiddenForCompact = shouldHide;
+
+    this.withGridApi((api) => {
+      setResponsiveColumnsVisibility(api, this.responsiveHiddenColumns, shouldHide);
+      api.sizeColumnsToFit();
+    });
   }
 
   private autoSizeColumns(): void {
