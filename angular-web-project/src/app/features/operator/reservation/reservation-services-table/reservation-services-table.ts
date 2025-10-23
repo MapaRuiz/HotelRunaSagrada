@@ -3,6 +3,8 @@ import {
   HostListener,
   Input,
   OnChanges,
+  OnDestroy,
+  OnInit,
   PLATFORM_ID,
   SimpleChanges,
   inject,
@@ -16,6 +18,7 @@ import {
   ColDef,
   GridApi,
   GridOptions,
+  GridSizeChangedEvent,
   ModuleRegistry,
 } from 'ag-grid-community';
 import { AG_GRID_LOCALE, gridTheme as sharedGridTheme } from '../../../sharedTableConfig';
@@ -37,7 +40,7 @@ import { formatDaysLabel } from '../../../admin/services-offering-component/serv
   templateUrl: './reservation-services-table.html',
   styleUrl: './reservation-services-table.css',
 })
-export class ReservationServicesTable implements OnChanges {
+export class ReservationServicesTable implements OnInit, OnDestroy, OnChanges {
   @Input() reservationId?: number;
   @Input() reservationStatus?: string;
   @Output() editRequested = new EventEmitter<ReservationServiceModel>();
@@ -48,8 +51,59 @@ export class ReservationServicesTable implements OnChanges {
   readonly gridTheme: typeof sharedGridTheme = sharedGridTheme;
   private platformId = inject(PLATFORM_ID);
   private gridApi?: GridApi<ReservationServiceModel>;
-  private readonly compactColumns = ['status', 'total'];
-  private compactColumnsHidden = false;
+  private readonly responsiveHiddenColumns = ['status', 'total'];
+  private columnsHiddenForCompact = false;
+  private readonly columnDefs: ColDef<ReservationServiceModel>[] = this.buildColumnDefs();
+  private readonly handleResize = (event?: GridSizeChangedEvent | Event) => {
+    const width =
+      event && 'clientWidth' in event ? (event.clientWidth as number | undefined) : undefined;
+    const height =
+      event && 'clientHeight' in event ? (event.clientHeight as number | undefined) : undefined;
+
+    this.updateResponsiveColumns(width, height);
+    this.autoSizeColumns();
+  };
+
+  gridOptions: GridOptions<ReservationServiceModel> = {
+    localeText: AG_GRID_LOCALE,
+    rowSelection: 'single',
+    suppressDragLeaveHidesColumns: true,
+    getRowId: (p) => {
+      const id = (p.data as any)?.res_service_id;
+      if (id != null) return String(id);
+      const r = (p.data as any)?.reservation_id ?? 'r';
+      const s = (p.data as any)?.service_id ?? 's';
+      const sch = (p.data as any)?.schedule_id ?? 'null';
+      return `${r}-${s}-${sch}-${Math.random().toString(36).slice(2, 7)}`;
+    },
+    onGridReady: (params) => {
+      this.gridApi = params.api;
+      params.api.setGridOption('rowData', this.services);
+      this.handleResize();
+      this.applyCompactLayout();
+    },
+    onFirstDataRendered: () =>
+      setTimeout(() => {
+        this.handleResize();
+        this.applyCompactLayout();
+      }, 0),
+    onGridSizeChanged: (event) => {
+      this.gridApi = event.api;
+      this.handleResize(event);
+    },
+    onGridPreDestroyed: () => (this.gridApi = undefined),
+    rowHeight: 40,
+    headerHeight: 44,
+    defaultColDef: {
+      sortable: true,
+      resizable: true,
+      cellClass: 'ag-compact-cell',
+      headerClass: 'ag-compact-header',
+      flex: 1,
+      minWidth: 110,
+    },
+    columnDefs: this.columnDefs,
+  };
 
   private facade = inject(ReservationFacade);
   private serviceOffering = inject(ServiceOfferingService);
@@ -59,6 +113,19 @@ export class ReservationServicesTable implements OnChanges {
     this.isBrowser = isPlatformBrowser(this.platformId);
     if (this.isBrowser) {
       ModuleRegistry.registerModules([AllCommunityModule]);
+      window.addEventListener('resize', this.handleResize);
+    }
+  }
+
+  ngOnInit(): void {
+    if (this.isBrowser) {
+      this.handleResize();
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.isBrowser) {
+      window.removeEventListener('resize', this.handleResize);
     }
   }
 
@@ -83,10 +150,8 @@ export class ReservationServicesTable implements OnChanges {
         if (serviceIds.length === 0) {
           this.services = base;
           this.loading = false;
-          if (this.gridApi) {
-            this.gridApi.setGridOption('rowData', this.services);
-            this.gridApi.sizeColumnsToFit();
-          }
+          this.withGridApi((api) => api.setGridOption('rowData', this.services));
+          this.handleResize();
           return;
         }
 
@@ -107,10 +172,8 @@ export class ReservationServicesTable implements OnChanges {
             });
             this.services = enriched;
             this.loading = false;
-            if (this.gridApi) {
-              this.gridApi.setGridOption('rowData', this.services);
-              this.gridApi.sizeColumnsToFit();
-            }
+            this.withGridApi((api) => api.setGridOption('rowData', this.services));
+            this.handleResize();
           },
           error: () => {
             this.services = base;
@@ -132,54 +195,15 @@ export class ReservationServicesTable implements OnChanges {
     }
     setTimeout(() => {
       try {
-        this.updateResponsiveColumns();
+        this.handleResize();
       } catch {}
     }, 0);
   }
 
   private readonly compactRowHeight = 40;
   private readonly compactHeaderHeight = 44;
-
-  gridOptions: GridOptions<ReservationServiceModel> = {
-    localeText: AG_GRID_LOCALE,
-    rowSelection: 'single',
-    suppressDragLeaveHidesColumns: true,
-    getRowId: (p) => {
-      const id = (p.data as any)?.res_service_id;
-      if (id != null) return String(id);
-      const r = (p.data as any)?.reservation_id ?? 'r';
-      const s = (p.data as any)?.service_id ?? 's';
-      const sch = (p.data as any)?.schedule_id ?? 'null';
-      return `${r}-${s}-${sch}-${Math.random().toString(36).slice(2, 7)}`;
-    },
-    onGridReady: (params) => {
-      this.gridApi = params.api;
-      params.api.setGridOption('rowData', this.services);
-      // Initialize responsive columns on ready
-      this.updateResponsiveColumns();
-      this.applyCompactLayout();
-      // Avoid sizing here; container might be hidden in a collapsed panel
-    },
-    onFirstDataRendered: () =>
-      setTimeout(() => {
-        this.updateResponsiveColumns();
-        this.applyCompactLayout();
-      }, 0),
-    onGridPreDestroyed: () => (this.gridApi = undefined),
-    rowHeight: 40,
-    headerHeight: 44,
-    defaultColDef: {
-      sortable: true,
-      resizable: true,
-      cellClass: 'ag-compact-cell',
-      headerClass: 'ag-compact-header',
-    },
-    // Initial placeholder; real columns are built responsively
-    columnDefs: [] as ColDef<ReservationServiceModel>[],
-  };
-
-  // Build base columns then apply responsive visibility
-  private buildBaseColumnDefs(): ColDef<ReservationServiceModel>[] {
+  // Build base columns
+  private buildColumnDefs(): ColDef<ReservationServiceModel>[] {
     const priceFormatter = (p: any) =>
       typeof p.value === 'number'
         ? new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'COP' }).format(p.value)
@@ -261,61 +285,60 @@ export class ReservationServicesTable implements OnChanges {
     } as ColDef<ReservationServiceModel>;
   }
 
-  private computeResponsiveDefs(width: number): ColDef<ReservationServiceModel>[] {
-    const defs = this.buildBaseColumnDefs().map((d) => ({ ...d }));
-    // Breakpoints: <576: xs, <992: md, otherwise: full
-    if (width < 576) {
-      // keep: name, qty, total, actions
-      for (const d of defs) {
-        if (!['name', 'qty', 'total', 'actions'].includes(String(d.colId))) {
-          (d as any).hide = true;
-        }
-      }
-    } else if (width < 992) {
-      // hide availability and unit price to save space
-      for (const d of defs) {
-        if (['availability', 'unit_price'].includes(String(d.colId))) {
-          (d as any).hide = true;
-        }
-      }
-    }
-    return defs;
-  }
-
-  private updateResponsiveColumns(): void {
+  private updateResponsiveColumns(width?: number, height?: number): void {
     if (!this.isBrowser) return;
-    const width = window.innerWidth || 1024;
-    const defs = this.computeResponsiveDefs(width);
-    // update grid options for any future re-init
-    this.gridOptions = { ...this.gridOptions, columnDefs: defs };
-    if (this.gridApi) {
-      try {
-        this.gridApi.setGridOption('columnDefs', defs as any);
-        // After updating columns, resize to fit
-        setTimeout(() => this.gridApi?.sizeColumnsToFit(), 0);
-      } catch {}
-      const shouldHideCompactColumns = width < 768;
-      if (shouldHideCompactColumns !== this.compactColumnsHidden) {
-        setResponsiveColumnsVisibility(this.gridApi, this.compactColumns, shouldHideCompactColumns);
-        this.compactColumnsHidden = shouldHideCompactColumns;
-      }
+
+    const effectiveWidth = width ?? window.innerWidth;
+    const effectiveHeight = height ?? window.innerHeight;
+
+    if (!effectiveWidth && !effectiveHeight) return;
+
+    const shouldHide = effectiveWidth <= 1024;
+    if (shouldHide === this.columnsHiddenForCompact) {
+      return;
     }
-    this.applyCompactLayout();
+
+    this.columnsHiddenForCompact = shouldHide;
+    this.withGridApi((api) => {
+      setResponsiveColumnsVisibility(api, this.responsiveHiddenColumns, shouldHide);
+    });
   }
 
   @HostListener('window:resize')
   onWindowResize() {
-    this.updateResponsiveColumns();
+    this.handleResize();
+  }
+
+  private withGridApi(action: (api: GridApi<ReservationServiceModel>) => void): void {
+    const api = this.gridApi;
+    if (!api) return;
+
+    const maybeDestroyed = (api as GridApi<ReservationServiceModel> & { isDestroyed?: () => boolean })
+      .isDestroyed;
+    if (typeof maybeDestroyed === 'function' && maybeDestroyed.call(api)) {
+      return;
+    }
+
+    action(api);
+  }
+
+  private autoSizeColumns(): void {
+    this.withGridApi((api) => {
+      try {
+        api.sizeColumnsToFit();
+      } catch {}
+    });
   }
 
   private applyCompactLayout(): void {
-    if (!this.gridApi) return;
-    try {
-      this.gridApi.setGridOption('rowHeight', this.compactRowHeight);
-      this.gridApi.setGridOption('headerHeight', this.compactHeaderHeight);
-      this.gridApi.refreshHeader();
-      setTimeout(() => this.gridApi?.resetRowHeights(), 0);
-    } catch {}
+    this.withGridApi((api) => {
+      try {
+        api.setGridOption('rowHeight', this.compactRowHeight);
+        api.setGridOption('headerHeight', this.compactHeaderHeight);
+        api.refreshHeader();
+        setTimeout(() => this.gridApi?.resetRowHeights(), 0);
+      } catch {}
+    });
   }
 
   private onEditRow(row: ReservationServiceModel) {
