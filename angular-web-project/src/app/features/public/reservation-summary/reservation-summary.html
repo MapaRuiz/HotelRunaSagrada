@@ -18,7 +18,7 @@
     <!-- Header -->
     <div class="header">
       <div class="logo">
-        <img src="/angular-web-project/public/logo.png" alt="Logo">
+        <img src="/logo.png" alt="Logo" class="logo-img" />
       </div>
       <div class="contact-info">
         <span>📞 Para reservar 601 743 6620</span>
@@ -45,7 +45,6 @@
 
     <div class="main-content">
       <div class="form-section">
-
         <!-- Datos Personales -->
         <div class="section-card">
           <h3 class="card-title">Datos Personales</h3>
@@ -125,7 +124,9 @@
             </div>
             <div class="info-row">
               <span class="label">Capacidad</span>
-              <span class="value">{{ capacity ? (capacity + ' persona' + (capacity !== 1 ? 's' : '')) : 'N/A' }}</span>
+              <span class="value">{{
+                capacity ? capacity + ' persona' + (capacity !== 1 ? 's' : '') : 'N/A'
+              }}</span>
             </div>
             <div class="info-row">
               <span class="label">Precio/noche</span>
@@ -145,18 +146,17 @@
         <div class="section-card terms">
           <div class="card-content">
             <label class="checkbox-label">
-              <input type="checkbox" id="needInvoice" disabled>
+              <input type="checkbox" id="needInvoice" disabled />
               <span>Requiero factura</span>
             </label>
             <p class="terms-text">
-              Al continuar, acepto las <a href="#">políticas de reservación</a> y el <a href="#">aviso de privacidad</a>.
+              Al continuar, acepto las <a href="#">políticas de reservación</a> y el
+              <a href="#">aviso de privacidad</a>.
             </p>
           </div>
         </div>
 
-        <button class="btn-primary" (click)="continuarReserva()">
-          Continuar con el Pago
-        </button>
+        <button class="btn-primary" (click)="continuarReserva()">Continuar con el Pago</button>
       </div>
 
       <!-- Right Column - Summary Section -->
