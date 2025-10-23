@@ -41,6 +41,7 @@ export class AdminDashboardComponent implements OnInit {
   private userService = inject(UsersService);
 
   hotels: Hotel[] = [];
+  hotelsLoading = false;
   amenitiesCount = 0;
 
   incomeLoading = true;
@@ -85,7 +86,7 @@ export class AdminDashboardComponent implements OnInit {
   ];
 
   ngOnInit() {
-    this.hotelsApi.list().subscribe(h => this.hotels = h);
+    this.loadHotels();
     this.amenitiesApi.list().subscribe(a => this.amenitiesCount = a.length);
 
     this.calcIncome();
@@ -95,6 +96,24 @@ export class AdminDashboardComponent implements OnInit {
     this.loadReservationsByRoomType();
     this.loadAmenitiesByHotel();
 
+  }
+
+  private loadHotels(attempt = 1) {
+    this.hotelsLoading = true;
+    this.hotelsApi.list().subscribe({
+      next: (h) => {
+        this.hotels = h;
+        this.hotelsLoading = false;
+      },
+      error: (err) => {
+        console.error('Error cargando hoteles (intento', attempt, '):', err);
+        this.hotels = [];
+        this.hotelsLoading = false;
+        if (attempt < 3) {
+          setTimeout(() => this.loadHotels(attempt + 1), 500);
+        }
+      }
+    });
   }
 
   calcIncome() {

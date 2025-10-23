@@ -54,8 +54,8 @@ export class Login {
   private dashboardBy(rolesIn?: any[]) {
     const roles = roleNames(rolesIn);
     if (roles.includes('ADMIN')) return '/admin';
-    if (roles.includes('OPERATOR')) return '/operator/profile';
-    return '/client/profile';
+    if (roles.includes('OPERATOR')) return '/operator';
+    return '/client';
   }
 
   onSubmit(ev?: Event) {
@@ -84,7 +84,6 @@ export class Login {
           roles: res.user?.roles ?? [],
           token: res.access_token ?? null,
 
-          // 👉 Alias compatibles con componentes que esperan snake_case
           user_id: res.user?.user_id,
           full_name: res.user?.full_name
         }));
