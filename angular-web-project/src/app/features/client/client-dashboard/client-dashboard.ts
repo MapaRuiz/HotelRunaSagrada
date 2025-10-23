@@ -1,5 +1,6 @@
-import { Component, OnInit, inject, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, ViewChild, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { forkJoin } from 'rxjs';
 import {
   NgApexchartsModule,
   ChartComponent,
@@ -45,13 +46,14 @@ export type ChartOptions = {
 @Component({
   standalone: true,
   selector: 'app-client-dashboard',
- 
+
   imports: [CommonModule, HttpClientModule, NgApexchartsModule],
   templateUrl: './client-dashboard.html',
   styleUrls: ['./client-dashboard.css']
 })
 export class ClientDashboardComponent implements OnInit {
 
+  readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   selectedReservation: any = null;
   invoiceModal: any;
@@ -60,6 +62,8 @@ export class ClientDashboardComponent implements OnInit {
   private router = inject(Router);
   me: any = null;
   reservations: Reservation[] = [];
+  // Combined set of all reservations (current + history) used for charts and historial counts
+  allReservations: Reservation[] = [];
   showHistory = false;
   loading = false;
   private base = environment.apiBaseUrl;
@@ -73,7 +77,7 @@ export class ClientDashboardComponent implements OnInit {
   summaryFinished = 0;
 
   @ViewChild('chart') chart!: ChartComponent;
-  
+
   public chartOptions: ChartOptions = {
     series: [{ name: 'Reservas', data: [1, 2, 0, 3, 2, 1, 2] }],
     chart: {
@@ -103,13 +107,41 @@ export class ClientDashboardComponent implements OnInit {
     this.api.getMe().subscribe({
       next: (u) => {
         this.me = u;
+        this.loadAllReservations();
         this.loadCurrentReservations();
       },
       error: (err) => {
         if (err?.status === 401) {
-          localStorage.removeItem('user');
+          if (this.isBrowser) {
+            try { localStorage.removeItem('user'); } catch (e) { /* ignore */ }
+          }
           this.router.navigate(['/login'], { queryParams: { returnUrl: '/client/dashboard' } });
         }
+      }
+    });
+  }
+
+  private loadAllReservations() {
+    if (!this.me?.user_id) return;
+    const cur$ = this.api.getCurrentReservations(this.me.user_id);
+    const hist$ = this.api.getHistoryReservations(this.me.user_id);
+    forkJoin([cur$, hist$]).subscribe({
+      next: ([cur, hist]) => {
+        const normalizedCur = (cur || []).map((r: any) => this.normalizeReservation(r));
+        const normalizedHist = (hist || []).map((r: any) => this.normalizeReservation(r));
+
+        // Merge unique by reservationId (prefer current entries)
+        const map = new Map<number | null, Reservation>();
+        normalizedHist.forEach(r => map.set(r.reservationId ?? null, r));
+        normalizedCur.forEach(r => map.set(r.reservationId ?? null, r));
+        this.allReservations = Array.from(map.values());
+
+        // Update chart & summary now that we have the combined dataset
+        this.updateSummaryAndChart();
+      },
+      error: (err) => {
+        console.error('Error cargando reservas combinadas:', err);
+        // fallback: don't set allReservations, charts will use per-view reservations
       }
     });
   }
@@ -121,17 +153,17 @@ export class ClientDashboardComponent implements OnInit {
       next: (res) => {
         console.debug('loadCurrentReservations response sample:', res?.[0]);
         const normalized = (res || []).map((r: any) => this.normalizeReservation(r));
-       
+
         const today = new Date();
         const current = (normalized || []).filter((r: any) => {
           if (!r) return false;
-          if (!r.checkOut) return true; 
+          if (!r.checkOut) return true;
           const co = new Date(r.checkOut);
           return co >= today;
         });
         this.reservations = current;
         this.updateSummaryAndChart();
-        
+
         this.loading = false;
       },
       error: (err) => {
@@ -158,7 +190,7 @@ export class ClientDashboardComponent implements OnInit {
         this.reservations = past;
 
         this.updateSummaryAndChart();
-       
+
         this.loading = false;
       },
       error: (err) => {
@@ -194,7 +226,7 @@ export class ClientDashboardComponent implements OnInit {
     const room = typeof roomRaw === 'string' ? { name: roomRaw } : roomRaw || { name: '' };
     const checkIn = r.checkIn ?? r.check_in ?? r.startDate ?? '';
     const checkOut = r.checkOut ?? r.check_out ?? r.endDate ?? '';
-    const status = r.status ?? (r.state ?? '') ;
+    const status = r.status ?? (r.state ?? '');
     return {
       reservationId,
       hotel,
@@ -207,26 +239,30 @@ export class ClientDashboardComponent implements OnInit {
 
   private updateSummaryAndChart() {
     const today = new Date();
-    // Active reservations: checkOut >= today
-  const active = this.reservations.filter(r => r.checkOut && new Date(r.checkOut) >= today).length;
-  const finished = this.reservations.filter(r => r.checkOut && new Date(r.checkOut) < today).length;
-  const total = this.reservations.length;
-  this.cards[0].value = String(active);
-  this.cards[1].value = String(total);
-  this.summaryActive = active;
-  this.summaryFinished = finished;
-   
+    const active = this.reservations.filter(r => r.checkOut && new Date(r.checkOut) >= today).length;
+    const finished = this.reservations.filter(r => r.checkOut && new Date(r.checkOut) < today).length;
+    const total = this.reservations.length;
+    this.cards[0].value = String(active);
+    let historialCount = total;
+    if (this.allReservations && this.allReservations.length > 0) {
+      historialCount = this.allReservations.filter(r => r.checkOut && new Date(r.checkOut) < today).length;
+    }
+    this.cards[1].value = String(historialCount);
+    this.summaryActive = active;
+    this.summaryFinished = finished;
+
     this.cards[2].value = '$0';
 
-    
+
     const months: string[] = [];
     const counts: number[] = [];
     const now = new Date();
     for (let i = 11; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const key = `${d.getFullYear()}-${d.getMonth()+1}`;
+      const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
       months.push(d.toLocaleString(undefined, { month: 'short' }));
-      const cnt = this.reservations.filter(r => {
+      const source = (this.allReservations && this.allReservations.length > 0) ? this.allReservations : this.reservations;
+      const cnt = (source || []).filter(r => {
         if (!r.checkIn) return false;
         const ci = new Date(r.checkIn);
         return ci.getFullYear() === d.getFullYear() && ci.getMonth() === d.getMonth();
@@ -234,33 +270,32 @@ export class ClientDashboardComponent implements OnInit {
       counts.push(cnt);
     }
 
-    
+
     this.chartOptions.series = [{ name: 'Reservas', data: counts }];
     this.chartOptions.xaxis = { categories: months } as any;
-    
-    try { this.chart?.updateOptions?.({ xaxis: this.chartOptions.xaxis, series: this.chartOptions.series }); } catch {}
+
+    try { this.chart?.updateOptions?.({ xaxis: this.chartOptions.xaxis, series: this.chartOptions.series }); } catch { }
   }
 
   ngAfterViewInit() {
-    
-  }
- //ACA SE SIMULA LO DEL VALOR SIMON
- openInvoice(r: any) {
-  if (typeof document === 'undefined') return; 
 
-  if (!r.amount) {
-    r.amount = this.calculateAmount(r);
   }
-  this.selectedReservation = r;
+  openInvoice(r: any) {
+    if (typeof document === 'undefined') return;
 
-  const modalElement = document.getElementById('invoiceModal');
-  if (modalElement) {
-    import('bootstrap').then(bs => {
-      this.invoiceModal = new bs.Modal(modalElement);
-      this.invoiceModal.show();
-    });
+    if (!r.amount) {
+      r.amount = this.calculateAmount(r);
+    }
+    this.selectedReservation = r;
+
+    const modalElement = document.getElementById('invoiceModal');
+    if (modalElement) {
+      import('bootstrap').then(bs => {
+        this.invoiceModal = new bs.Modal(modalElement);
+        this.invoiceModal.show();
+      });
+    }
   }
-}
 
 
   private calculateAmount(r: any): number {
