@@ -1,5 +1,6 @@
 import {
   Component,
+  ElementRef,
   HostListener,
   Input,
   OnChanges,
@@ -7,6 +8,7 @@ import {
   OnInit,
   PLATFORM_ID,
   SimpleChanges,
+  ViewChild,
   inject,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
@@ -45,25 +47,37 @@ export class ReservationServicesTable implements OnInit, OnDestroy, OnChanges {
   @Input() reservationStatus?: string;
   @Output() editRequested = new EventEmitter<ReservationServiceModel>();
 
+  @ViewChild(AgGridAngular, { read: ElementRef }) private gridElement?: ElementRef<HTMLElement>;
+
   services: ReservationServiceModel[] = [];
   loading = false;
   isBrowser = false;
   readonly gridTheme: typeof sharedGridTheme = sharedGridTheme;
   private platformId = inject(PLATFORM_ID);
   private gridApi?: GridApi<ReservationServiceModel>;
+
+  // Columns to hide/show based on responsiveness
   private readonly responsiveHiddenColumns = ['status', 'total'];
   private columnsHiddenForCompact = false;
   private readonly columnDefs: ColDef<ReservationServiceModel>[] = this.buildColumnDefs();
+
+  // Auto-size columns
   private readonly handleResize = (event?: GridSizeChangedEvent | Event) => {
+    const host = this.gridElement?.nativeElement;
     const width =
-      event && 'clientWidth' in event ? (event.clientWidth as number | undefined) : undefined;
+      event && 'clientWidth' in event
+        ? (event.clientWidth as number | undefined)
+        : host?.offsetWidth;
     const height =
-      event && 'clientHeight' in event ? (event.clientHeight as number | undefined) : undefined;
+      event && 'clientHeight' in event
+        ? (event.clientHeight as number | undefined)
+        : host?.offsetHeight;
 
     this.updateResponsiveColumns(width, height);
     this.autoSizeColumns();
   };
 
+  // basic config for table
   gridOptions: GridOptions<ReservationServiceModel> = {
     localeText: AG_GRID_LOCALE,
     rowSelection: 'single',
@@ -105,6 +119,7 @@ export class ReservationServicesTable implements OnInit, OnDestroy, OnChanges {
     columnDefs: this.columnDefs,
   };
 
+  // Dependency injection
   private facade = inject(ReservationFacade);
   private serviceOffering = inject(ServiceOfferingService);
   private resServicesApi = inject(ReservationServiceApi);
@@ -139,6 +154,7 @@ export class ReservationServicesTable implements OnInit, OnDestroy, OnChanges {
     }
   }
 
+  // Fetch services for the given reservation ID
   private fetchServices(reservationId: number) {
     this.loading = true;
     this.facade.getReservationServices(reservationId).subscribe({
@@ -155,6 +171,7 @@ export class ReservationServicesTable implements OnInit, OnDestroy, OnChanges {
           return;
         }
 
+        // Fetch service details in parallel
         forkJoin(serviceIds.map((id) => this.serviceOffering.getDetail(id))).subscribe({
           next: (details: ServiceOfferingDetailResponse[]) => {
             const byServiceId = new Map(details.map((d) => [d.service.id, d] as const));
@@ -285,14 +302,21 @@ export class ReservationServicesTable implements OnInit, OnDestroy, OnChanges {
     } as ColDef<ReservationServiceModel>;
   }
 
+  // Update responsive columns visibility
   private updateResponsiveColumns(width?: number, height?: number): void {
     if (!this.isBrowser) return;
 
-    const effectiveWidth = width ?? window.innerWidth;
-    const effectiveHeight = height ?? window.innerHeight;
+    const hostEl = this.gridElement?.nativeElement as HTMLElement | undefined;
+    const effectiveWidth =
+      typeof width === 'number' && width > 0 ? width : hostEl?.offsetWidth || window.innerWidth;
+    const effectiveHeight =
+      typeof height === 'number' && height > 0
+        ? height
+        : hostEl?.offsetHeight || window.innerHeight;
 
     if (!effectiveWidth && !effectiveHeight) return;
 
+    // Example breakpoint at 1024px width
     const shouldHide = effectiveWidth <= 1024;
     if (shouldHide === this.columnsHiddenForCompact) {
       return;
@@ -304,6 +328,7 @@ export class ReservationServicesTable implements OnInit, OnDestroy, OnChanges {
     });
   }
 
+  // Handle window resize
   @HostListener('window:resize')
   onWindowResize() {
     this.handleResize();
@@ -313,8 +338,9 @@ export class ReservationServicesTable implements OnInit, OnDestroy, OnChanges {
     const api = this.gridApi;
     if (!api) return;
 
-    const maybeDestroyed = (api as GridApi<ReservationServiceModel> & { isDestroyed?: () => boolean })
-      .isDestroyed;
+    const maybeDestroyed = (
+      api as GridApi<ReservationServiceModel> & { isDestroyed?: () => boolean }
+    ).isDestroyed;
     if (typeof maybeDestroyed === 'function' && maybeDestroyed.call(api)) {
       return;
     }
@@ -348,6 +374,7 @@ export class ReservationServicesTable implements OnInit, OnDestroy, OnChanges {
     } catch (e) {}
     // Also emit via EventEmitter for backwards compatibility
     this.editRequested.emit(row);
+    this.handleResize();
   }
 
   private onDeleteRow(row: ReservationServiceModel) {
@@ -368,5 +395,6 @@ export class ReservationServicesTable implements OnInit, OnDestroy, OnChanges {
         alert('No se pudo eliminar el servicio.');
       },
     });
+    this.handleResize();
   }
 }

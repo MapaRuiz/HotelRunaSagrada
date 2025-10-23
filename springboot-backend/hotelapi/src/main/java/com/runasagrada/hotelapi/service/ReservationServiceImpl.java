@@ -121,10 +121,12 @@ public class ReservationServiceImpl implements ReservationService {
         return saved;
     }
 
+    // Delete reservation and associated locks and services
     @Override
     public void delete(Integer id) {
         Reservation res = reservationRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Reservation not found: " + id));
+        reservationServiceRepo.deleteByReservationReservationId(id);
         lockRepo.deleteByReservationReservationId(id);
         reservationRepo.delete(res);
     }

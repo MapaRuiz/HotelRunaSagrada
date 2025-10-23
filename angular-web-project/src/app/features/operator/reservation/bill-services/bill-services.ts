@@ -17,11 +17,7 @@ import {
   ServiceOfferingDetailResponse,
 } from '../../../../services/service-offering-service';
 import { User } from '../../../../model/user';
-import {
-  ReservationFacade,
-  getPaymentStatusBadge,
-  getPaymentStatusText,
-} from '../reservation';
+import { ReservationFacade, getPaymentStatusBadge, getPaymentStatusText } from '../reservation';
 import { PaymentService } from '../../../../services/payment';
 import { Payment } from '../../../../model/payment';
 
@@ -82,6 +78,7 @@ export class BillServicesComponent implements OnChanges {
         switchMap((reservation) => {
           const status = (reservation?.status ?? '').toString().trim().toUpperCase();
           this.reservationStatus = status || undefined;
+          // Fetch subtotal, user, items and payments in parallel
           return forkJoin({
             subtotal: this.reservations.lumpSum(id).pipe(catchError(() => of(0))),
             user: reservation?.user_id
@@ -99,6 +96,7 @@ export class BillServicesComponent implements OnChanges {
           this.serviceSubtotal = serviceSub;
           const allPayments = payments ?? [];
           const serviceRef = 'SERVICIOS RESERVA';
+          // Separate "Servicios Reserva" payments from "Otros" payments
           this.otherPayments = allPayments.filter((p) => {
             const ref = (p.tx_reference ?? '').toString().trim().toUpperCase();
             return !ref.includes(serviceRef);
@@ -143,6 +141,7 @@ export class BillServicesComponent implements OnChanges {
             this.items = base;
             return;
           }
+          // Fetch service offering details to get names/schedules
           forkJoin(serviceIds.map((sid) => this.offerings.getDetail(sid))).subscribe({
             next: (details: ServiceOfferingDetailResponse[]) => {
               const byServiceId = new Map(details.map((d) => [d.service.id, d] as const));

@@ -11,4 +11,6 @@ import com.runasagrada.hotelapi.model.ReservationServiceEntity;
 public interface ReservationServiceRepository extends JpaRepository<ReservationServiceEntity, Long> {
 
     List<ReservationServiceEntity> findByReservationReservationId(Long id);
+
+    void deleteByReservationReservationId(Integer reservationId);
 }
