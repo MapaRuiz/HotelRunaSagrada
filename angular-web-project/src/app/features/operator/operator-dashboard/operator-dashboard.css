@@ -26,17 +26,37 @@
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 12px;
 }
+
 .reservation-card {
   background: #fff;
   border-radius: 10px;
   padding: 12px;
-  border: 1px solid rgba(21,21,19,0.06);
-  box-shadow: 0 6px 18px rgba(21,21,19,0.04);
+  border: 1px solid rgba(21, 21, 19, 0.06);
+  box-shadow: 0 6px 18px rgba(21, 21, 19, 0.04);
 }
+
 .reservation-card .card-head {
-  display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
 }
-.reservation-card .id { font-weight:600; }
-.reservation-card .status.badge { padding:4px 8px; border-radius:8px; font-size:12px; }
-.reservation-card .card-body .line { margin-bottom:6px; }
-.reservation-card .small { color:var(--c-muted, #6b6b6b); font-size:12px }
+
+.reservation-card .id {
+  font-weight: 600;
+}
+
+.reservation-card .status.badge {
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.reservation-card .card-body .line {
+  margin-bottom: 6px;
+}
+
+.reservation-card .small {
+  color: var(--c-muted, #6b6b6b);
+  font-size: 12px
+}
