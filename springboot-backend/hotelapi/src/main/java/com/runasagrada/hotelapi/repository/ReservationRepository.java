@@ -10,6 +10,8 @@ import java.sql.Timestamp;
 public interface ReservationRepository extends JpaRepository<Reservation, Integer> {
     List<Reservation> findByUserUserId(Integer userId);
 
+    List<Reservation> findByUserUserIdOrderByCheckInDesc(Integer userId);
+
     List<Reservation> findByHotelHotelId(Long hotelId);
 
     boolean existsByUserUserId(Integer userId);

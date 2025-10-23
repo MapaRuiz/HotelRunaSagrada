@@ -165,7 +165,13 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     @Transactional(readOnly = true)
     public List<Reservation> findByUser(Integer userId) {
-        return reservationRepo.findByUserUserId(userId);
+        return findByUserOrdered(userId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Reservation> findByUserOrdered(Integer userId) {
+        return reservationRepo.findByUserUserIdOrderByCheckInDesc(userId);
     }
 
     @Override

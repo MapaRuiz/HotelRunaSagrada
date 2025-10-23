@@ -16,6 +16,8 @@ public interface ReservationService {
 
         List<Reservation> findByUser(Integer userId);
 
+        List<Reservation> findByUserOrdered(Integer userId);
+
         // Crear con status opcional (si es null, se usa default)
         Reservation create(Integer userId, Long hotelId, Integer roomId,
                         LocalDate checkIn, LocalDate checkOut, Reservation.Status status);

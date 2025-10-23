@@ -30,8 +30,13 @@ public class ReservationController {
     @GetMapping
     public List<Reservation> all(@RequestParam(required = false) Integer userId) {
         if (userId != null)
-            return service.findByUser(userId);
+            return service.findByUserOrdered(userId);
         return service.findAll();
+    }
+
+    @GetMapping("/user/{userId}")
+    public List<Reservation> allByUser(@PathVariable Integer userId) {
+        return service.findByUserOrdered(userId);
     }
 
     // Get all reservation by hotel
@@ -167,7 +172,7 @@ public class ReservationController {
     @GetMapping("/history")
     public List<Reservation> getHistory(@RequestParam(required = false) Integer userId) {
         if (userId != null) {
-            return service.findByUser(userId);
+            return service.findByUserOrdered(userId);
         }
         return service.findAll();
     }

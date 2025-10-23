@@ -126,6 +126,11 @@
   </ng-container>
 </div>
 
+<!-- Gestión avanzada de reservas -->
+<div class="mb-5">
+  <app-client-reservation (changes)="handleReservationsChanged()"></app-client-reservation>
+</div>
+
 <!-- Modal de factura -->
 <div class="modal fade" id="invoiceModal" tabindex="-1" aria-labelledby="invoiceModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">

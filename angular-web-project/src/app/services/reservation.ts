@@ -17,6 +17,10 @@ export class ReservationService {
     return this.http.get<Reservation[]>(this.resource);
   }
 
+  getByUser(userId: number): Observable<Reservation[]> {
+    return this.http.get<Reservation[]>(`${this.resource}/user/${userId}`);
+  }
+
   getAllByHotel(hotelId: number): Observable<Reservation[]> {
     return this.http.get<Reservation[]>(`${this.resource}/hotel/${hotelId}`);
   }

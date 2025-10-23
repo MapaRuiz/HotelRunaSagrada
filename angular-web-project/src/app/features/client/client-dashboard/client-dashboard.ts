@@ -22,6 +22,7 @@ import { UsersService } from '../../../services/users';
 import { Router } from '@angular/router';
 import * as bootstrap from 'bootstrap';
 import { BillServicesComponent } from '../../operator/reservation/bill-services/bill-services';
+import { ClientReservationComponent } from '../client-reservation/client-reservation';
 
 export interface Reservation {
   reservationId: number;
@@ -48,7 +49,7 @@ export type ChartOptions = {
   standalone: true,
   selector: 'app-client-dashboard',
 
-  imports: [CommonModule, HttpClientModule, NgApexchartsModule, BillServicesComponent],
+  imports: [CommonModule, HttpClientModule, NgApexchartsModule, BillServicesComponent, ClientReservationComponent],
   templateUrl: './client-dashboard.html',
   styleUrls: ['./client-dashboard.css']
 })
@@ -310,5 +311,14 @@ export class ClientDashboardComponent implements OnInit {
     const days = Math.max(1, (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
     const rate = 150; // valor por noche
     return days * rate;
+  }
+
+  handleReservationsChanged(): void {
+    this.loadAllReservations();
+    if (this.showHistory) {
+      this.loadHistoryReservations();
+    } else {
+      this.loadCurrentReservations();
+    }
   }
 }
