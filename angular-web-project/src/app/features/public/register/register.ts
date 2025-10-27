@@ -4,13 +4,12 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../services/auth';
 import { User } from '../../../model/user';
-import { BlindsBgComponent } from '../cppn-bg/cppn-bg';
 import { environment } from '../../../../environments/environment';
 
 @Component({
   standalone: true,
   selector: 'app-register',
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, BlindsBgComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './register.html',
   styleUrls: ['./register.css'],
 })

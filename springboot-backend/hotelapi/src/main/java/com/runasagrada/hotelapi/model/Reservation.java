@@ -21,17 +21,17 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer reservationId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler", "reservations" })
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "hotel_id", nullable = false)
     @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler", "reservations" })
     private Hotel hotel;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "room_id", nullable = false)
     @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler", "reservations" })
     private Room room;

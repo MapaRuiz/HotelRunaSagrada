@@ -29,10 +29,16 @@ public class AuthController {
 
     @PostMapping("/login")
     public Map<String, Object> login(@RequestBody LoginRequest body) {
-        User u = service.login(body.getEmail(), body.getPassword());
-        String token = "dev-" + UUID.randomUUID();
-        sessions.put(token, u.getUserId());
-        return Map.of("access_token", token, "user", u);
+        try {
+            User u = service.login(body.getEmail(), body.getPassword());
+            String token = "dev-" + UUID.randomUUID();
+            sessions.put(token, u.getUserId());
+            return Map.of("access_token", token, "user", u);
+        } catch (SecurityException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Login failed");
+        }
     }
 
     @GetMapping("/me")

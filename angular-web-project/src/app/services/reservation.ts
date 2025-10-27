@@ -100,4 +100,17 @@ export class ReservationService {
   countByRoomTypeAndHotel(hotelId: number): Observable<Map<string, number>> {
     return this.http.get<Map<string, number>>(`${this.resource}/summary/by-room-type/hotel/${hotelId}`);
   }
+
+  /**
+   * Request the backend to send a receipt email for the reservation.
+   * attachPdf controls whether the generated PDF should be attached.
+   */
+  sendReceipt(reservationId: number, attachPdf: boolean = true, confirmationCode?: string) {
+    const params = new URLSearchParams();
+    params.set('attachPdf', String(attachPdf));
+    if (confirmationCode) {
+      params.set('confirmationCode', confirmationCode);
+    }
+    return this.http.post<void>(`${this.resource}/${reservationId}/receipt?${params.toString()}`, null);
+  }
 }

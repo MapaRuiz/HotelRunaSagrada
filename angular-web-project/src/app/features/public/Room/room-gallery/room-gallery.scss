@@ -1,5 +1,9 @@
 :host {
     display: block;
+    --glass: rgba(255, 255, 255, 0.1);
+    --glass-2: rgba(255, 255, 255, 0.05);
+    --bd: rgba(255, 255, 255, 0.18);
+    --blur: 10px;
 }
 
 /* ===== fondo con hojas (full-bleed) + glass ===== */
@@ -119,7 +123,7 @@
 
 .gallery-display .postcard-transition {
     z-index: 1;
-    transition: all .2s;
+    transition: transform 0.2s ease-out;
 }
 
 .postcard {
@@ -132,9 +136,12 @@
         0 6.8px 15.4px rgba(0, 0, 0, .01);
     overflow: hidden;
     margin: auto;
-    transition: all .6s;
+    transition: transform 0.3s ease-out;
     position: relative;
     border-radius: 10px;
+    will-change: transform;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 }
 
 .postcard__front {

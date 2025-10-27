@@ -125,10 +125,10 @@ export class RoomFormComponent {
           this.reserveForm.patchValue({ checkIn, checkOut }, { emitEvent: true });
           safeSessionRemove('pendingReservation');
 
-          // Disparar automáticamente la reserva después de login
-          setTimeout(() => {
-            this.reserve();
-          }, 500);
+          // NO disparar automáticamente - usuario debe confirmar manualmente
+          // setTimeout(() => {
+          //   this.reserve();
+          // }, 500);
         }
       },
       error: (error) => {
@@ -191,18 +191,22 @@ export class RoomFormComponent {
   private ensureLoggedInClient(): number | null {
     const info = getFullUserNormalized();
     const isClient = (info.roles ?? []).some(r => String(r).toUpperCase() === 'CLIENT');
-    if (info.id != null && isClient) return Number(info.id);
+    
+    // Validar que realmente haya un ID válido
+    if (info.id == null || !isClient) {
+      // No hay usuario o no es cliente - redirigir a login
+      const { checkIn, checkOut } = this.reserveForm.value;
+      safeSessionSet('pendingReservation', {
+        hotelId: this.hotelId,
+        typeId: this.typeId,
+        checkIn: checkIn,
+        checkOut: checkOut,
+      });
+      this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+      return null;
+    }
 
-    // Guarda intención con las fechas seleccionadas y manda al login
-    const { checkIn, checkOut } = this.reserveForm.value;
-    safeSessionSet('pendingReservation', {
-      hotelId: this.hotelId,
-      typeId: this.typeId,
-      checkIn: checkIn,
-      checkOut: checkOut,
-    });
-    this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
-    return null;
+    return Number(info.id);
   }
 
   reserve() {
@@ -271,7 +275,32 @@ export class RoomFormComponent {
       },
       error: (err) => {
         this.isSubmitting = false;
-        this.submitError = readServerMessage(err) ?? 'No fue posible crear la reserva. Prueba con otras fechas o habitación.';
+        const errorMsg = readServerMessage(err);
+        
+        // Si el error es de usuario no encontrado o no autorizado, limpiar localStorage y redirigir
+        if (err.status === 401 || err.status === 403 || (errorMsg && errorMsg.includes('User not found'))) {
+          this.submitError = 'Tu sesión ha expirado. Por favor inicia sesión nuevamente.';
+          // Limpiar localStorage corrupto
+          if (isBrowser()) {
+            localStorage.removeItem('user');
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('auth');
+            localStorage.removeItem('token');
+          }
+          // Guardar intención y redirigir a login
+          const { checkIn, checkOut } = this.reserveForm.value;
+          safeSessionSet('pendingReservation', {
+            hotelId: this.hotelId,
+            typeId: this.typeId,
+            checkIn: checkIn,
+            checkOut: checkOut,
+          });
+          setTimeout(() => {
+            this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+          }, 2000);
+        } else {
+          this.submitError = errorMsg ?? 'No fue posible crear la reserva. Prueba con otras fechas o habitación.';
+        }
       }
     });
   }

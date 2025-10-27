@@ -56,7 +56,7 @@ export class RoomGalleryComponent implements OnInit, OnChanges {
     return t ? {
       width: `${w}px`,
       height: `${h}px`,
-      transform: `translateX(${t.col}px) translateY(${t.row}px) rotateZ(${t.rot}deg)`
+      transform: `translate3d(${t.col}px, ${t.row}px, 0) rotateZ(${t.rot}deg)`
     } : {};
   }
 

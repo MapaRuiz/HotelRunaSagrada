@@ -4,7 +4,9 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-body), 'Lato', sans-serif;
+  background-color: #f2f3ed;
+  min-height: 100vh;
 }
 
 .loading-state, .error-state {
@@ -19,9 +21,9 @@
 .spinner {
   width: 50px;
   height: 50px;
-  border: 5px solid rgba(0, 0, 0, 0.1);
+  border: 5px solid #e0d4be;
   border-radius: 50%;
-  border-top-color: #3498db;
+  border-top-color: #778e69;
   animation: spin 1s ease-in-out infinite;
   margin-bottom: 1rem;
 }
@@ -36,11 +38,11 @@
 }
 
 .error-icon {
-  color: #e74c3c;
+  color: #dc3545;
 }
 
 .success-icon {
-  color: #2ecc71;
+  color: #0a6847;
   font-size: 4rem;
 }
 
@@ -52,10 +54,12 @@
 
 .page-title {
   font-size: 2rem;
-  font-weight: 600;
-  color: #333;
+  font-weight: 800;
+  color: #151513;
   text-align: center;
   width: 100%;
+  font-family: var(--font-title), 'Quantico', sans-serif;
+  letter-spacing: 0.5px;
 }
 
 .progress-steps {
@@ -76,38 +80,40 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #e0e0e0;
+  background-color: #e0d4be;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
+  font-weight: 800;
   margin-bottom: 0.5rem;
+  font-family: var(--font-title), 'Quantico', sans-serif;
 }
 
 .step.active .step-circle {
-  background-color: #3498db;
+  background-color: #778e69;
   color: white;
 }
 
 .step.completed .step-circle {
-  background-color: #2ecc71;
+  background-color: #0a6847;
   color: white;
 }
 
 .step-line {
   height: 3px;
   width: 100px;
-  background-color: #e0e0e0;
+  background-color: #e0d4be;
   margin: 0 0.5rem;
 }
 
 .step.completed + .step-line {
-  background-color: #2ecc71;
+  background-color: #0a6847;
 }
 
 .step-label {
   font-size: 0.9rem;
-  color: #666;
+  color: #778e69;
+  font-family: var(--font-body), 'Lato', sans-serif;
 }
 
 .main-content {
@@ -118,8 +124,9 @@
 
 .confirmation-card {
   background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(21, 21, 19, 0.12);
+  border: 1px solid rgba(21, 21, 19, 0.06);
   padding: 2rem;
   text-align: center;
   margin-bottom: 1rem;
@@ -127,13 +134,15 @@
 
 .confirmation-message {
   font-size: 1.2rem;
-  color: #555;
+  color: #151513;
   margin-bottom: 2rem;
+  font-family: var(--font-body), 'Lato', sans-serif;
 }
 
 .confirmation-code-box {
-  background-color: #f8f9fa;
-  border-radius: 8px;
+  background-color: #f2f3ed;
+  border-radius: 12px;
+  border: 2px solid #bcc399;
   padding: 1.5rem;
   margin: 1.5rem 0;
   display: flex;
@@ -143,38 +152,46 @@
 
 .confirmation-label {
   font-size: 1rem;
-  color: #666;
+  color: #778e69;
   margin-bottom: 0.5rem;
+  font-family: var(--font-body), 'Lato', sans-serif;
+  font-weight: 700;
 }
 
 .confirmation-code {
   font-size: 2rem;
-  font-weight: bold;
+  font-weight: 800;
   letter-spacing: 2px;
-  color: #333;
+  color: #0a6847;
+  font-family: var(--font-title), 'Quantico', sans-serif;
 }
 
 .save-info {
   font-size: 0.9rem;
-  color: #666;
+  color: #778e69;
   font-style: italic;
+  font-family: var(--font-body), 'Lato', sans-serif;
 }
 
 .section-card {
   background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(21, 21, 19, 0.12);
+  border: 1px solid rgba(21, 21, 19, 0.06);
   overflow: hidden;
   margin-bottom: 1rem;
 }
 
 .card-title {
-  background-color: #f8f9fa;
+  background-color: #f2f3ed;
   padding: 1rem;
   margin: 0;
   font-size: 1.2rem;
-  color: #333;
-  border-bottom: 1px solid #eee;
+  color: #151513;
+  border-bottom: 1px solid rgba(21, 21, 19, 0.06);
+  font-family: var(--font-title), 'Quantico', sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.5px;
 }
 
 .card-content {
@@ -196,26 +213,30 @@
 }
 
 .detail-label {
-  font-weight: 500;
-  color: #666;
+  font-weight: 600;
+  color: #778e69;
+  font-family: var(--font-body), 'Lato', sans-serif;
 }
 
 .detail-value {
-  font-weight: 600;
-  color: #333;
+  font-weight: 700;
+  color: #151513;
+  font-family: var(--font-body), 'Lato', sans-serif;
 }
 
 .status-confirmed {
-  color: #2ecc71;
-  font-weight: bold;
+  color: #0a6847;
+  font-weight: 800;
+  font-family: var(--font-title), 'Quantico', sans-serif;
 }
 
 .total-row {
   font-size: 1.2rem;
-  font-weight: bold;
+  font-weight: 800;
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 2px solid #f0f0f0;
+  border-top: 2px solid #bcc399;
+  font-family: var(--font-title), 'Quantico', sans-serif;
 }
 
 .actions-container {
@@ -228,8 +249,8 @@
 
 .btn-primary, .btn-secondary, .btn-outline {
   padding: 0.8rem 1.5rem;
-  border-radius: 5px;
-  font-weight: 500;
+  border-radius: 12px;
+  font-weight: 800;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -237,36 +258,45 @@
   gap: 0.5rem;
   transition: all 0.3s ease;
   min-width: 180px;
+  font-family: var(--font-title), 'Quantico', sans-serif;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 .btn-primary {
-  background-color: #3498db;
+  background-color: #0a6847;
   color: white;
   border: none;
 }
 
 .btn-primary:hover {
-  background-color: #2980b9;
+  background-color: #778e69;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(10, 104, 71, 0.3);
 }
 
 .btn-secondary {
-  background-color: #2ecc71;
+  background-color: #778e69;
   color: white;
   border: none;
 }
 
 .btn-secondary:hover {
-  background-color: #27ae60;
+  background-color: #bcc399;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(119, 142, 105, 0.3);
 }
 
 .btn-outline {
   background-color: transparent;
-  color: #3498db;
-  border: 1px solid #3498db;
+  color: #778e69;
+  border: 2px solid #778e69;
 }
 
 .btn-outline:hover {
-  background-color: #f8f9fa;
+  background-color: #f2f3ed;
+  color: #0a6847;
+  border-color: #0a6847;
 }
 
 .icon {

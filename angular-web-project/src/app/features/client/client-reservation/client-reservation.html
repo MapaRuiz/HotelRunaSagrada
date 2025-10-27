@@ -108,9 +108,7 @@
                           [(ngModel)]="draft.check_out"
                         />
                       </div>
-                      <div
-                        class="col-12 d-flex flex-wrap justify-content-end gap-2"
-                      >
+                      <div class="col-12 d-flex flex-wrap justify-content-end gap-2">
                         <button
                           type="button"
                           class="btn btn-sm btn-outline-secondary"
@@ -140,7 +138,7 @@
       <ng-template #detailView>
         <div *ngIf="selected; else noSelection" class="detail-container">
           <div class="d-flex justify-content-between align-items-center mb-3">
-            <h6 class="mb-0">Detalle de la reserva #{{ selected?.reservation_id }}</h6>
+            <h6 class="mb-0">Detalle de la reserva #{{ selected.reservation_id }}</h6>
             <button type="button" class="btn btn-sm btn-outline-secondary" (click)="backToList()">
               Volver al listado
             </button>

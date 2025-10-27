@@ -26,6 +26,7 @@ public class ReservationController {
 
     private final ReservationService service;
     private final PaymentService paymentService;
+    private final com.runasagrada.hotelapi.service.ReceiptService receiptService;
 
     @GetMapping
     public List<Reservation> all(@RequestParam(required = false) Integer userId) {
@@ -95,16 +96,25 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<Reservation> create(@RequestBody Map<String, Object> body) {
-        Integer userId = asInt(body.get("userId"));
-        Long hotelId = asLong(body.get("hotelId"));
-        Integer roomId = asInt(body.get("roomId"));
-        LocalDate checkIn = asDate(body.get("checkIn"));
-        LocalDate checkOut = asDate(body.get("checkOut"));
-        Reservation.Status status = asStatus(body.get("status")); // puede venir null
+    public ResponseEntity<?> create(@RequestBody Map<String, Object> body) {
+        try {
+            Integer userId = asInt(body.get("userId"));
+            Long hotelId = asLong(body.get("hotelId"));
+            Integer roomId = asInt(body.get("roomId"));
+            LocalDate checkIn = asDate(body.get("checkIn"));
+            LocalDate checkOut = asDate(body.get("checkOut"));
+            Reservation.Status status = asStatus(body.get("status")); // puede venir null
 
-        Reservation created = service.create(userId, hotelId, roomId, checkIn, checkOut, status);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+            Reservation created = service.create(userId, hotelId, roomId, checkIn, checkOut, status);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            // Usuario, hotel o habitación no encontrados
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", "Bad Request", "message", e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", "Bad Request", "message", e.getMessage()));
+        }
     }
 
     @GetMapping("/lumpsum/{id}")
@@ -153,6 +163,21 @@ public class ReservationController {
         paymentService.deleteByReservationId(id);
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/receipt")
+    public ResponseEntity<Map<String, String>> sendReceipt(
+            @PathVariable Integer id, 
+            @RequestParam(required = false, defaultValue = "true") boolean attachPdf,
+            @RequestParam(required = false) String confirmationCode) {
+        try {
+            receiptService.sendReservationReceipt(id, attachPdf, confirmationCode);
+            return ResponseEntity.ok(Map.of("message", "Receipt sent successfully"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to send receipt: " + e.getMessage()));
+        }
     }
 
     // GET /api/reservations/current?userId=...

@@ -44,12 +44,12 @@
         <div class="success-icon">✓</div>
         <h2>¡Gracias por su reserva!</h2>
         <p class="confirmation-message">Su reserva ha sido procesada exitosamente.</p>
-        
+
         <div class="confirmation-code-box">
           <span class="confirmation-label">Código de confirmación:</span>
           <span class="confirmation-code">{{ confirmationCode }}</span>
         </div>
-        
+
         <p class="save-info">Por favor guarde este código para futuras referencias.</p>
       </div>
 
@@ -71,11 +71,11 @@
           </div>
           <div class="detail-row">
             <span class="detail-label">Fecha de llegada:</span>
-            <span class="detail-value">{{ reservation.check_in | date:'dd/MM/yyyy' }}</span>
+            <span class="detail-value">{{ reservation.check_in | date : 'dd/MM/yyyy' }}</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Fecha de salida:</span>
-            <span class="detail-value">{{ reservation.check_out | date:'dd/MM/yyyy' }}</span>
+            <span class="detail-value">{{ reservation.check_out | date : 'dd/MM/yyyy' }}</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Estado:</span>
@@ -90,15 +90,15 @@
         <div class="card-content">
           <div class="detail-row">
             <span class="detail-label">Subtotal:</span>
-            <span class="detail-value">{{ subtotal | currency:'USD' }}</span>
+            <span class="detail-value">{{ subtotal | currency : 'USD' }}</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Impuestos:</span>
-            <span class="detail-value">{{ taxes | currency:'USD' }}</span>
+            <span class="detail-value">{{ taxes | currency : 'USD' }}</span>
           </div>
           <div class="detail-row total-row">
             <span class="detail-label">Total:</span>
-            <span class="detail-value">{{ total | currency:'USD' }}</span>
+            <span class="detail-value">{{ total | currency : 'USD' }}</span>
           </div>
         </div>
       </div>

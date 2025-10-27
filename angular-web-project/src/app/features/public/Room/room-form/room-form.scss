@@ -77,6 +77,18 @@
     margin-top: .5rem;
 }
 
+.error-hint {
+    display: block;
+    margin-top: 8px;
+    color: #666;
+    font-weight: 400;
+}
+
+.error-link {
+    color: #0a6847;
+    text-decoration: underline;
+}
+
 /* Botón primario */
 .primary {
     display: inline-flex;

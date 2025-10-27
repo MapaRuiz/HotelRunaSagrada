@@ -40,7 +40,12 @@
       * Se te asignará automáticamente una habitación disponible de esta categoría.
     </p>
 
-    <div *ngIf="submitError" class="error">{{ submitError }}</div>
+    <div *ngIf="submitError" class="error">
+      {{ submitError }}
+      <small class="error-hint" *ngIf="submitError.includes('User not found')">
+        Si el problema persiste, <a routerLink="/login" class="error-link">inicia sesión nuevamente</a>.
+      </small>
+    </div>
 
     <button class="primary" type="submit" [disabled]="isSubmitting || reserveForm.invalid">
       <span *ngIf="!isSubmitting">Reservar</span>

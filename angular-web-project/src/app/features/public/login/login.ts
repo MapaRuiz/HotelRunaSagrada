@@ -3,8 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth';
-import { roleNames } from '../../../utils/roles';
-import { BlindsBgComponent } from '../cppn-bg/cppn-bg'; // <-- importa tu bg
+import { roleNames } from '../../../utils/roles'; // <-- importa tu bg
 import { ActivatedRoute } from '@angular/router';
 
 // ⚙️ Utiliza la misma lógica de baseURL que me pasaste
@@ -13,7 +12,7 @@ import { environment } from '../../../../environments/environment';
 @Component({
   standalone: true,
   selector: 'app-login',
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, BlindsBgComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrls: ['./login.css'],
 })

@@ -50,6 +50,7 @@ export class ReservationConfirmationComponent implements OnInit {
   // Estados
   isLoading = true;
   loadError = '';
+  isSendingReceipt = false;
 
   ngOnInit() {
     this.reservationId = Number(this.route.snapshot.queryParamMap.get('reservationId'));
@@ -81,15 +82,18 @@ export class ReservationConfirmationComponent implements OnInit {
                   next: (roomType) => {
                     this.roomType = roomType;
                     this.isLoading = false;
+                    this.sendReceiptAutomatically();
                   },
                   error: (err) => {
                     console.error('Error loading room type:', err);
                     this.isLoading = false;
+                    this.sendReceiptAutomatically();
                   }
                 });
               } else {
                 console.warn('room_type_id está undefined');
                 this.isLoading = false;
+                this.sendReceiptAutomatically();
               }
             },
             error: (err) => {
@@ -175,5 +179,37 @@ export class ReservationConfirmationComponent implements OnInit {
 
   printConfirmation(): void {
     window.print();
+  }
+
+  onSendReceipt(): void {
+    if (!this.reservationId) return;
+    this.isSendingReceipt = true;
+    this.reservationSvc.sendReceipt(this.reservationId, true, this.confirmationCode).subscribe({
+      next: () => {
+        this.isSendingReceipt = false;
+        // Simple feedback - replace with nicer toast if available
+        alert('Recibo enviado correctamente a su correo.');
+      },
+      error: (err) => {
+        console.error('Error sending receipt:', err);
+        this.isSendingReceipt = false;
+        alert('No se pudo enviar el recibo. Intente más tarde.');
+      }
+    });
+  }
+
+  private sendReceiptAutomatically(): void {
+    if (!this.reservationId || this.isSendingReceipt) return;
+    this.isSendingReceipt = true;
+    this.reservationSvc.sendReceipt(this.reservationId, true, this.confirmationCode).subscribe({
+      next: () => {
+        console.log('Recibo enviado automáticamente');
+        this.isSendingReceipt = false;
+      },
+      error: (err) => {
+        console.error('Error enviando recibo automáticamente:', err);
+        this.isSendingReceipt = false;
+      }
+    });
   }
 }

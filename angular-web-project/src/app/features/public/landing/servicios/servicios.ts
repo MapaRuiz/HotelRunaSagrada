@@ -22,15 +22,12 @@ export class Servicios implements AfterViewInit {
   private st: any;
 
   private images = [
-    'https://raw.githubusercontent.com/jankohlbach/canary-islands/main/assets/images/slider-1.jpeg',
-    'https://raw.githubusercontent.com/jankohlbach/canary-islands/main/assets/images/slider-2.jpeg',
-    'https://raw.githubusercontent.com/jankohlbach/canary-islands/main/assets/images/slider-3.jpeg',
-    'https://raw.githubusercontent.com/jankohlbach/canary-islands/main/assets/images/slider-4.jpeg',
-    'https://raw.githubusercontent.com/jankohlbach/canary-islands/main/assets/images/slider-5.jpeg',
-    'https://raw.githubusercontent.com/jankohlbach/canary-islands/main/assets/images/slider-6.jpeg',
-    'https://raw.githubusercontent.com/jankohlbach/canary-islands/main/assets/images/slider-7.jpeg',
-    'https://raw.githubusercontent.com/jankohlbach/canary-islands/main/assets/images/slider-8.jpeg',
-    'https://raw.githubusercontent.com/jankohlbach/canary-islands/main/assets/images/slider-9.jpeg'
+    'https://images.unsplash.com/photo-1761487184147-1a1b17af05d5?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Y3VsdHVyYSUyMGNvbG9tYmlhbmF8ZW58MHwwfDB8fHww&auto=format&fit=crop&q=60&w=700',
+    'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800',
+    'https://images.unsplash.com/photo-1565310561246-a399c7659d12?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8Y3VsdHVyYSUyMGNvbG9tYmlhbmF8ZW58MHwwfDB8fHww&auto=format&fit=crop&q=60&w=700',
+    'https://images.unsplash.com/photo-1567649543804-9e2cd1796342?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGN1bHR1cmElMjBjb2xvbWJpYW5hfGVufDB8MHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=700',
+    'https://images.unsplash.com/photo-1589682449071-d13c27d1c298?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fGN1bHR1cmElMjBjb2xvbWJpYW5hfGVufDB8MHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=700',
+    'https://images.unsplash.com/photo-1717521232674-e9a48c6a6fb5?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fHZhY2FjaW9uZXMlMjBjb2xvbWJpYXxlbnwwfDB8MHx8fDA%3D&auto=format&fit=crop&q=60&w=700'
   ];
 
   ngAfterViewInit(): void {
@@ -57,11 +54,7 @@ export class Servicios implements AfterViewInit {
     this.camera.rotation.z = 2 * Math.PI * 0.01;
 
     const textureLoader = new THREE.TextureLoader();
-    const imgs = [...this.images];
-    imgs.unshift(imgs[imgs.length - 2], imgs[imgs.length - 1]);
-    imgs.splice(imgs.length - 2, 2);
-
-    const textures = imgs.map(image => textureLoader.load(image));
+    const textures = this.images.map(image => textureLoader.load(image));
     const geometry = new THREE.PlaneGeometry(1, 0.75, 10, 10);
 
     for (let i = 0; i < textures.length; i++) {
@@ -88,18 +81,12 @@ export class Servicios implements AfterViewInit {
             }
           `,
           fragmentShader: `
-            uniform vec2 uOffset;
             uniform sampler2D uTexture;
             uniform float uAlpha;
             varying vec2 vUv;
-            vec3 rgbShift(sampler2D textureImage, vec2 uv, vec2 offset) {
-              vec2 rg = texture2D(textureImage, uv).rg;
-              float b = texture2D(textureImage, uv + offset).b;
-              return vec3(rg, b);
-            }
             void main() {
-              vec3 color = rgbShift(uTexture, vUv, uOffset);
-              gl_FragColor = vec4(color, uAlpha);
+              vec4 color = texture2D(uTexture, vUv);
+              gl_FragColor = vec4(color.rgb, uAlpha);
             }
           `
         })
@@ -119,17 +106,16 @@ export class Servicios implements AfterViewInit {
     this.st = ScrollTrigger.create({
       trigger: wrap,
       start: 'top top',
-      end: '+=500%',
+      end: '+=200%',
       pin: true
     });
   }
 
   private updateMeshes(): void {
     const width = 1.1;
-    const wholeWidth = this.items.length * width;
     this.items.forEach(item => {
-      item.mesh.position.x =
-        ((width * item.index) - (this.st.progress * 10) + (42069 * wholeWidth)) % wholeWidth - 2 * width;
+      const scrollOffset = this.st.progress * (this.items.length * width);
+      item.mesh.position.x = (width * item.index) - scrollOffset;
       item.mesh.rotation.y = 2 * Math.PI * 0.03;
     });
   }
