@@ -29,9 +29,10 @@ public class ReceiptServiceImpl implements ReceiptService {
     private final JavaMailSender mailSender;
 
     @Override
-    public void sendReservationReceipt(Integer reservationId, boolean attachPdf, String confirmationCode) throws Exception {
+    public void sendReservationReceipt(Integer reservationId, boolean attachPdf, String confirmationCode)
+            throws Exception {
         Reservation reservation = reservationRepository.findById(reservationId)
-            .orElseThrow(() -> new IllegalArgumentException("Reservation not found: " + reservationId));
+                .orElseThrow(() -> new IllegalArgumentException("Reservation not found: " + reservationId));
 
         // Force lazy load of user relation
         User user = reservation.getUser();
@@ -52,11 +53,15 @@ public class ReceiptServiceImpl implements ReceiptService {
         if (confirmationCode != null && !confirmationCode.isBlank()) {
             body.append("Código de confirmación: ").append(confirmationCode).append("\n");
         }
-        body.append("Hotel: ").append(reservation.getHotel() != null ? reservation.getHotel().getName() : "").append("\n");
-        body.append("Habitación: ").append(reservation.getRoom() != null ? reservation.getRoom().getNumber() : "").append("\n");
+        body.append("Hotel: ").append(reservation.getHotel() != null ? reservation.getHotel().getName() : "")
+                .append("\n");
+        body.append("Habitación: ").append(reservation.getRoom() != null ? reservation.getRoom().getNumber() : "")
+                .append("\n");
         DateTimeFormatter df = DateTimeFormatter.ISO_LOCAL_DATE;
-        body.append("Check-in: ").append(reservation.getCheckIn() != null ? reservation.getCheckIn().format(df) : "").append("\n");
-        body.append("Check-out: ").append(reservation.getCheckOut() != null ? reservation.getCheckOut().format(df) : "").append("\n\n");
+        body.append("Check-in: ").append(reservation.getCheckIn() != null ? reservation.getCheckIn().format(df) : "")
+                .append("\n");
+        body.append("Check-out: ").append(reservation.getCheckOut() != null ? reservation.getCheckOut().format(df) : "")
+                .append("\n\n");
 
         List<Payment> payments = paymentRepository.findByReservationId_ReservationId(reservationId);
         double total = payments.stream().mapToDouble(p -> p.getAmount()).sum();
@@ -79,10 +84,11 @@ public class ReceiptServiceImpl implements ReceiptService {
         mailSender.send(message);
     }
 
-    private byte[] generatePdf(Reservation reservation, List<Payment> payments, String confirmationCode) throws Exception {
-        try (PDDocument doc = new PDDocument(); 
-             ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            
+    private byte[] generatePdf(Reservation reservation, List<Payment> payments, String confirmationCode)
+            throws Exception {
+        try (PDDocument doc = new PDDocument();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+
             PDPage page = new PDPage();
             doc.addPage(page);
 
@@ -103,15 +109,19 @@ public class ReceiptServiceImpl implements ReceiptService {
                     contents.showText("Codigo de confirmacion: " + confirmationCode);
                     contents.newLineAtOffset(0, -15);
                 }
-                contents.showText("Usuario: " + (reservation.getUser() != null ? reservation.getUser().getFullName() : ""));
+                contents.showText(
+                        "Usuario: " + (reservation.getUser() != null ? reservation.getUser().getFullName() : ""));
                 contents.newLineAtOffset(0, -15);
                 contents.showText("Hotel: " + (reservation.getHotel() != null ? reservation.getHotel().getName() : ""));
                 contents.newLineAtOffset(0, -15);
-                contents.showText("Habitación: " + (reservation.getRoom() != null ? reservation.getRoom().getNumber() : ""));
+                contents.showText(
+                        "Habitación: " + (reservation.getRoom() != null ? reservation.getRoom().getNumber() : ""));
                 contents.newLineAtOffset(0, -15);
-                contents.showText("Check-in: " + (reservation.getCheckIn() != null ? reservation.getCheckIn().toString() : ""));
+                contents.showText(
+                        "Check-in: " + (reservation.getCheckIn() != null ? reservation.getCheckIn().toString() : ""));
                 contents.newLineAtOffset(0, -15);
-                contents.showText("Check-out: " + (reservation.getCheckOut() != null ? reservation.getCheckOut().toString() : ""));
+                contents.showText("Check-out: "
+                        + (reservation.getCheckOut() != null ? reservation.getCheckOut().toString() : ""));
                 contents.newLineAtOffset(0, -30);
                 contents.showText("Pagos:");
                 for (Payment p : payments) {

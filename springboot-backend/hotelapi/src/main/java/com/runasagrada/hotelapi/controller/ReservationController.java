@@ -110,10 +110,10 @@ public class ReservationController {
         } catch (jakarta.persistence.EntityNotFoundException e) {
             // Usuario, hotel o habitación no encontrados
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error", "Bad Request", "message", e.getMessage()));
+                    .body(Map.of("error", "Bad Request", "message", e.getMessage()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error", "Bad Request", "message", e.getMessage()));
+                    .body(Map.of("error", "Bad Request", "message", e.getMessage()));
         }
     }
 
@@ -167,7 +167,7 @@ public class ReservationController {
 
     @PostMapping("/{id}/receipt")
     public ResponseEntity<Map<String, String>> sendReceipt(
-            @PathVariable Integer id, 
+            @PathVariable Integer id,
             @RequestParam(required = false, defaultValue = "true") boolean attachPdf,
             @RequestParam(required = false) String confirmationCode) {
         try {

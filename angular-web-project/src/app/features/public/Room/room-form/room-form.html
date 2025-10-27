@@ -43,7 +43,8 @@
     <div *ngIf="submitError" class="error">
       {{ submitError }}
       <small class="error-hint" *ngIf="submitError.includes('User not found')">
-        Si el problema persiste, <a routerLink="/login" class="error-link">inicia sesión nuevamente</a>.
+        Si el problema persiste,
+        <a routerLink="/login" class="error-link">inicia sesión nuevamente</a>.
       </small>
     </div>
 
