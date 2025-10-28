@@ -5,11 +5,31 @@
   border: 1px solid rgba(21, 21, 19, 0.06);
 }
 
+/* Titles and labels with Quantico */
+h5,
+.fw-semibold {
+  font-family: var(--font-title);
+  font-weight: 600;
+  color: var(--c-ink);
+}
+
+/* Text content with Lato */
+.text-secondary,
+.small {
+  font-family: var(--font-body);
+}
+
+/* Numbers bold */
+.fs-4 {
+  font-family: var(--font-title);
+}
+
+/* AG Grid styling */
 .soft-grid {
   --ag-foreground-color: var(--c-ink);
   --ag-background-color: var(--c-ivory);
-  --ag-header-background-color: var(--c-ink);
-  --ag-header-foreground-color: #fff;
+  --ag-header-background-color: #151513;
+  --ag-header-foreground-color: #BCC399;
   --ag-odd-row-background-color: rgba(119, 142, 105, 0.06);
   --ag-row-border-color: rgba(21, 21, 19, 0.08);
   --ag-border-color: rgba(21, 21, 19, 0.1);
@@ -18,13 +38,35 @@
   --ag-font-family: inherit;
   border-radius: 12px;
   overflow: hidden;
+  width: 100%;
+  height: 400px;
 }
 
-/* Reservation cards */
+.soft-grid .ag-header {
+  font-family: var(--font-title);
+}
+
+/* No hover animation on dashboard */
+.soft-grid .ag-header-cell:hover {
+  background-color: #151513 !important;
+}
+
+/* Loading spinner color */
+.spinner-border.text-olive {
+  color: var(--c-olive) !important;
+}
+
+/* Chart container */
+.chart-loading-container {
+  height: 300px;
+}
+
+/* Reservation cards (mobile / quick view) - Keep for backward compatibility */
 .reservation-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 12px;
+  margin-bottom: 1rem;
 }
 
 .reservation-card {
@@ -43,6 +85,7 @@
 }
 
 .reservation-card .id {
+  font-family: var(--font-title);
   font-weight: 600;
 }
 
@@ -54,9 +97,22 @@
 
 .reservation-card .card-body .line {
   margin-bottom: 6px;
+  font-family: var(--font-body);
 }
 
 .reservation-card .small {
   color: var(--c-muted, #6b6b6b);
-  font-size: 12px
+  font-size: 12px;
+}
+
+/* Buttons */
+.btn-olive {
+  font-family: var(--font-title);
+  background: var(--c-olive);
+  border-color: var(--c-olive);
+  color: #fff;
+}
+
+.btn-olive:hover {
+  filter: brightness(0.95);
 }

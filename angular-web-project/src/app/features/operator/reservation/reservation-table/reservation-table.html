@@ -22,7 +22,7 @@
     [rowData]="rowData"
     [pagination]="true"
     [ngClass]="{ 'compact-grid': compactLayout }"
-    style="width: 100%; height: 400px"
+    class="reservations-main-grid"
   >
     <div *ngIf="!loading && rowData.length === 0" class="text-center p-4">
       <p class="text-muted">No hay reservas disponibles.</p>

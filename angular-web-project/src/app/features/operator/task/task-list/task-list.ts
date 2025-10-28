@@ -32,6 +32,7 @@ export class TaskList implements OnInit {
   private platformId = inject(PLATFORM_ID);
 
   @Input() staffId?: number;
+  @Input() tasks?: Task[]; // Pre-loaded tasks (for hotel mode)
   @Input() showAllTasks = false;
   @Output() backToParent = new EventEmitter<void>();
 
@@ -40,7 +41,7 @@ export class TaskList implements OnInit {
   error: string | null = null;
 
   // Fuente de datos
-  tasks: Task[] = [];
+  allTasks: Task[] = [];
   rowData: Task[] = [];
 
   // ag-grid
@@ -190,7 +191,15 @@ export class TaskList implements OnInit {
   };
 
   ngOnInit() {
-    this.loadTasks();
+    // If tasks are pre-loaded (hotel mode), use them directly
+    if (this.tasks && this.tasks.length > 0) {
+      this.allTasks = this.tasks;
+      this.rowData = this.tasks;
+      this.loadRoomDetails(this.tasks);
+    } else {
+      // Otherwise load tasks normally
+      this.loadTasks();
+    }
   }
 
   loadTasks() {
@@ -203,7 +212,7 @@ export class TaskList implements OnInit {
 
     request.subscribe({
       next: (tasks) => {
-        this.tasks = tasks;
+        this.allTasks = tasks;
         this.rowData = tasks;
         this.loadRoomDetails(tasks);
       },
@@ -223,7 +232,7 @@ export class TaskList implements OnInit {
     ));
 
     if (roomIds.length === 0) {
-      this.rowData = [...this.tasks];
+      this.rowData = [...this.allTasks];
       this.loading = false;
       return;
     }
@@ -241,18 +250,18 @@ export class TaskList implements OnInit {
           }
         });
 
-        this.tasks.forEach(task => {
+        this.allTasks.forEach(task => {
           if (task.room_id && roomMap.has(task.room_id)) {
             task.room = roomMap.get(task.room_id);
           }
         });
 
-        this.rowData = [...this.tasks];
+        this.rowData = [...this.allTasks];
         this.loading = false;
       },
       error: (error) => {
         console.error('Error loading room details:', error);
-        this.rowData = [...this.tasks];
+        this.rowData = [...this.allTasks];
         this.loading = false;
       }
     });

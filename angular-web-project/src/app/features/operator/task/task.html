@@ -9,7 +9,13 @@
     <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
   </div>
 
-  <div *ngIf="!loading && !error && currentUserStaffId">
+  <!-- Staff member mode: show tasks for specific staff -->
+  <div *ngIf="!loading && !error && !useHotelMode && currentUserStaffId">
     <app-task-list [staffId]="currentUserStaffId"></app-task-list>
+  </div>
+
+  <!-- Hotel mode: show all tasks for hotel (for operators without staff records) -->
+  <div *ngIf="!loading && !error && useHotelMode">
+    <app-task-list [tasks]="hotelTasks" [showAllTasks]="true"></app-task-list>
   </div>
 </div>

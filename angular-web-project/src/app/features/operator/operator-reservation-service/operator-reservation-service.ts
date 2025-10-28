@@ -3,12 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RoomService } from '../../../services/room';
 import { AuthService } from '../../../services/auth';
-import { StaffMemberService } from '../../../services/staff-member';
+import { OperatorHotelResolver } from '../../../services/operator-hotel-resolver';
 import { ReservationService } from '../../../services/reservation';
 import { PaymentService } from '../../../services/payment';
 import { Reservation } from '../../../model/reservation';
 import { SearchResultTable } from './search-result-table/search-result-table';
 import { ReservationDetailOp } from '../reservation/reservation-detail-op/reservation-detail-op';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-operator-reservation-service',
@@ -28,14 +29,13 @@ export class ReservationServiceComponent {
   selected?: Reservation;
   loading: boolean = true;
   hotelId: number = 0;
+  hasHotelAccess: boolean = false;
 
   private auth = inject(AuthService);
-  constructor(
-    private roomService: RoomService,
-    private staffService: StaffMemberService,
-    private reservationService: ReservationService,
-    private paymentService: PaymentService
-  ) {}
+  private hotelResolver = inject(OperatorHotelResolver);
+  private roomService = inject(RoomService);
+  private reservationService = inject(ReservationService);
+  private paymentService = inject(PaymentService);
 
   ngOnInit() {
     this.loadData();
@@ -43,17 +43,26 @@ export class ReservationServiceComponent {
 
   loadData() {
     this.loading = true;
-    const uid = this.auth.userSnapshot()?.user_id;
-    if (!uid) {
-      this.loading = false;
-      return;
-    }
-
-    this.staffService.getByUser(uid).subscribe({
-      next: (staff) => {
-        this.hotelId = staff.hotel_id;
+    
+    // Use hotel resolver instead of manually checking staff
+    this.hotelResolver.resolveHotelId().pipe(
+      finalize(() => {
         this.loading = false;
+      })
+    ).subscribe({
+      next: (hotelId) => {
+        if (hotelId) {
+          this.hotelId = hotelId;
+          this.hasHotelAccess = true;
+        } else {
+          console.error('No se pudo resolver el hotel del operador');
+          this.hasHotelAccess = false;
+        }
       },
+      error: (err) => {
+        console.error('Error cargando datos del hotel', err);
+        this.hasHotelAccess = false;
+      }
     });
   }
 
@@ -66,10 +75,17 @@ export class ReservationServiceComponent {
       this.errorMessage = 'El número de habitación debe estar entre 101 y 504';
       this.reservations = [];
       return;
-    } else {
-      this.roomQuery = this.hotelId + '-' + this.roomNumber;
+    }
+    
+    // Validate hotel ID is loaded
+    if (!this.hotelId) {
+      this.errorMessage = 'No se pudo determinar el hotel del operador';
+      this.reservations = [];
+      return;
     }
 
+    // Construct query with hotel ID to ensure scoping
+    this.roomQuery = this.hotelId + '-' + this.roomNumber;
     this.fetchReservations(this.roomQuery);
   }
 

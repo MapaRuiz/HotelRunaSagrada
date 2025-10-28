@@ -1,10 +1,3 @@
-/* Estilos base y variables de color */
-:host {
-  --c-olive: #8b966d;
-  --c-ivory: #f7f5e6;
-  --c-ink: #2c3531;
-}
-
 /* Contenedor principal */
 .container-fluid {
   padding: 20px;
@@ -16,6 +9,7 @@
 h4 {
   color: var(--c-ink);
   font-weight: 600;
+  font-family: var(--font-title);
 }
 
 /* Search input styling */
@@ -24,6 +18,7 @@ h4 {
   border-radius: 8px;
   padding: 10px 15px;
   transition: all 0.3s ease;
+  font-family: var(--font-body);
 }
 
 .input-soft:focus {
@@ -48,29 +43,52 @@ h4 {
   min-height: 400px;
 }
 
-/* AG Grid custom styling */
-::ng-deep .ag-theme-quartz {
-  --ag-font-family: inherit;
+.tasks-grid-container {
+  height: calc(100vh - 280px);
+  min-height: 600px;
+}
+
+.tasks-grid-container .soft-grid {
+  width: 100%;
+  height: 100%;
+}
+
+/* AG Grid custom styling - consistent with admin */
+::ng-deep .soft-grid {
+  --ag-foreground-color: var(--c-ink);
+  --ag-background-color: var(--c-ivory);
+  --ag-header-background-color: #151513;
+  --ag-header-foreground-color: #BCC399;
+  --ag-odd-row-background-color: rgba(119, 142, 105, 0.06);
+  --ag-row-border-color: rgba(21, 21, 19, 0.08);
+  --ag-border-color: rgba(21, 21, 19, 0.1);
+  --ag-selected-row-background-color: rgba(188, 195, 153, 0.25);
   --ag-font-size: 14px;
-  --ag-header-background-color: var(--c-ink);
-  --ag-header-foreground-color: white;
-  --ag-odd-row-background-color: rgba(139, 150, 109, 0.05);
-  --ag-row-hover-color: rgba(139, 150, 109, 0.1);
-  --ag-selected-row-background-color: rgba(139, 150, 109, 0.2);
+  --ag-font-family: var(--font-body);
+  border-radius: 12px;
+  overflow: hidden;
   border: none;
 }
 
-::ng-deep .ag-header-cell-text {
+::ng-deep .soft-grid .ag-header {
+  font-family: var(--font-title);
+}
+
+::ng-deep .soft-grid .ag-header-cell:hover {
+  background-color: rgba(119, 142, 105, 0.9) !important;
+}
+
+::ng-deep .soft-grid .ag-header-cell-text {
   font-weight: 600 !important;
 }
 
-::ng-deep .ag-cell {
+::ng-deep .soft-grid .ag-cell {
   display: flex;
   align-items: center;
   padding: 8px 12px;
 }
 
-::ng-deep .ag-row {
+::ng-deep .soft-grid .ag-row {
   border-bottom: 1px solid #f0f0f0;
 }
 

@@ -3,11 +3,42 @@
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  height: calc(100vh - 200px);
+  min-height: 600px;
 }
 
 .reservations-grid-wrap ag-grid-angular {
   display: block;
   min-width: 720px;
+}
+
+.reservations-main-grid {
+  width: 100%;
+  height: 100%;
+}
+
+/* AG Grid styling - consistent with admin */
+:host ::ng-deep .soft-grid {
+  --ag-foreground-color: var(--c-ink);
+  --ag-background-color: var(--c-ivory);
+  --ag-header-background-color: #151513;
+  --ag-header-foreground-color: #BCC399;
+  --ag-odd-row-background-color: rgba(119, 142, 105, 0.06);
+  --ag-row-border-color: rgba(21, 21, 19, 0.08);
+  --ag-border-color: rgba(21, 21, 19, 0.1);
+  --ag-selected-row-background-color: rgba(188, 195, 153, 0.25);
+  --ag-font-size: 14px;
+  --ag-font-family: var(--font-body);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+:host ::ng-deep .soft-grid .ag-header {
+  font-family: var(--font-title);
+}
+
+:host ::ng-deep .soft-grid .ag-header-cell:hover {
+  background-color: rgba(119, 142, 105, 0.9) !important;
 }
 
 @media (max-width: 1366px) {

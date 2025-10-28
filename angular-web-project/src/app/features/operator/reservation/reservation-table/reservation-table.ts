@@ -118,6 +118,9 @@ export class ReservationTableOperatorComponent implements OnInit, OnDestroy {
   gridOptions: GridOptions<Reservation> = {
     localeText: AG_GRID_LOCALE,
     rowSelection: 'single',
+    pagination: true,
+    paginationPageSize: 9,
+    paginationPageSizeSelector: [9, 15, 20, 30],
     defaultColDef: {
       resizable: true,
       wrapText: true,

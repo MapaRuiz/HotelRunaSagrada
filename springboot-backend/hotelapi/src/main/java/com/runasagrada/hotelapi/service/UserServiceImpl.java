@@ -163,12 +163,32 @@ public class UserServiceImpl implements UserService {
     }
 
     public void deleteCascade(Integer id) {
-        // 1) Borrar reservas del usuario (usa el service para que limpie RoomLocks)
+        // 1) Borrar reservas del usuario (esto limpia RoomLocks)
         var reservas = reservationRepo.findByUserUserId(id);
         for (var r : reservas) {
+            // Primero eliminar pagos asociados a esta reserva
+            var pagos = paymentRepo.findByReservationId_ReservationId(r.getReservationId());
+            for (var p : pagos) {
+                paymentRepo.deleteById(p.getPaymentId());
+            }
+            // Luego eliminar la reserva (esto limpia RoomLocks)
             reservationService.delete(r.getReservationId());
         }
-        // 2) Borrar el usuario
+
+        // 2) Borrar TODOS los pagos que usan los métodos de pago del usuario
+        // (pueden ser pagos de reservas de otros usuarios que usaron este método)
+        var paymentMethods = paymentMethodRepo.findByUserId_UserId(id);
+        for (var pm : paymentMethods) {
+            // Eliminar pagos que usan este método de pago
+            var pagosDelMetodo = paymentRepo.findByPaymentMethodId_PaymentMethodId(pm.getPaymentMethodId());
+            for (var p : pagosDelMetodo) {
+                paymentRepo.deleteById(p.getPaymentId());
+            }
+            // Ahora sí eliminar el método de pago
+            paymentMethodRepo.deleteById(pm.getPaymentMethodId());
+        }
+
+        // 3) Borrar el usuario
         users.deleteById(id);
         helper.resyncIdentity("users", "user_id");
     }

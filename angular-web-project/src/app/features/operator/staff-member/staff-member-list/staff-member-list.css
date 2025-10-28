@@ -14,25 +14,40 @@
   }
 }
 
-.ag-theme-quartz .ag-header {
+/* AG Grid styling - consistent with admin */
+.soft-grid {
+  --ag-foreground-color: var(--c-ink);
+  --ag-background-color: var(--c-ivory);
+  --ag-header-background-color: #151513;
+  --ag-header-foreground-color: #BCC399;
+  --ag-odd-row-background-color: rgba(119, 142, 105, 0.06);
+  --ag-row-border-color: rgba(21, 21, 19, 0.08);
+  --ag-border-color: rgba(21, 21, 19, 0.1);
+  --ag-selected-row-background-color: rgba(188, 195, 153, 0.25);
+  --ag-font-size: 14px;
+  --ag-font-family: var(--font-body);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.soft-grid .ag-header {
   font-family: var(--font-title);
 }
-.ag-theme-quartz .ag-header-group-cell {
-  font-weight: normal;
-  font-size: 22px;
-}
-.ag-theme-quartz .ag-header-cell {
-  font-size: 18px;
+
+.soft-grid .ag-header-cell:hover {
+  background-color: rgba(119, 142, 105, 0.9) !important;
 }
 
 /* Form styles consistent with services */
 .form-label {
   color: var(--c-olive);
   font-weight: 600;
+  font-family: var(--font-body);
 }
 
 label {
   font-weight: bold;
+  font-family: var(--font-body);
 }
 
 /* Badge styling */

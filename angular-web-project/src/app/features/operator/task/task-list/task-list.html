@@ -41,14 +41,13 @@
   </div>
 
   <!-- AG Grid Container -->
-  <div *ngIf="!loading && isBrowser" class="grid-wrapper">
+  <div *ngIf="!loading && isBrowser" class="grid-wrapper tasks-grid-container">
     <ag-grid-angular
       #agGrid
       [theme]="gridTheme"
       [rowData]="rowData"
       [gridOptions]="gridOptions"
-      [domLayout]="'autoHeight'"
-      class="ag-theme-quartz"
+      class="ag-theme-quartz soft-grid"
     >
     </ag-grid-angular>
   </div>

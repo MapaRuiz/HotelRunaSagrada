@@ -1,161 +1,247 @@
-<!-- Título principal -->
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h4 class="fw-semibold m-0">Dashboard</h4>
-</div>
+<div class="dashboard-container">
+  <!-- Título principal -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="page-title mb-0"><i class="bi bi-speedometer2 me-2"></i>Dashboard de Cliente</h3>
+  </div>
 
-<!-- KPIs en fila -->
-<div class="row g-3 mb-4">
-  <div class="col-6 col-sm-4 col-md-3" *ngFor="let c of cards">
-    <div class="card-elev p-3 h-100">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <div class="text-secondary small">{{ c.label }}</div>
-          <div class="fs-4 fw-bold">{{ c.value }}</div>
-          <div class="small" [class.text-success]="c.delta >= 0" [class.text-danger]="c.delta < 0">
-            <i class="bi"
-               [ngClass]="{ 'bi-arrow-up-right': c.delta >= 0, 'bi-arrow-down-right': c.delta < 0 }"></i>
-            {{ c.delta | number : '1.0-1' }}%
+  <!-- KPIs en fila -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-sm-6 col-md-3" *ngFor="let c of cards; let i = index">
+      <div class="card-elev p-3 h-100">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="kpi-label">{{ c.label }}</div>
+            <div class="kpi-value">{{ c.value }}</div>
+          </div>
+          <i
+            class="bi kpi-icon"
+            [ngClass]="{
+              'bi-calendar-check text-info': i === 0,
+              'bi-wallet2 text-success': i === 1,
+              'bi-clock text-warning': i === 2,
+              'bi-credit-card text-danger': i === 3
+            }"
+          ></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart + Resumen -->
+  <div class="row g-3 mb-4">
+    <!-- Gráfica -->
+    <div class="col-lg-8">
+      <div class="card-elev p-4 h-100">
+        <h5 class="fw-semibold mb-3">
+          <i class="bi bi-bar-chart-line me-2 text-olive"></i>Reservas por mes
+        </h5>
+        <div class="chart-wrapper">
+          <apx-chart
+            #chart
+            [series]="chartOptions.series"
+            [chart]="chartOptions.chart"
+            [xaxis]="chartOptions.xaxis"
+            [dataLabels]="chartOptions.dataLabels"
+            [stroke]="chartOptions.stroke"
+            [grid]="chartOptions.grid"
+            [legend]="chartOptions.legend"
+            [fill]="chartOptions.fill"
+            [colors]="chartOptions.colors || []"
+          ></apx-chart>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resumen rápido -->
+    <div class="col-lg-4">
+      <div class="card-elev p-4 h-100 d-flex flex-column">
+        <h5 class="fw-semibold mb-3">
+          <i class="bi bi-info-circle me-2 text-olive"></i>Resumen rápido
+        </h5>
+        <div class="mb-3 pb-3 border-bottom">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-secondary small">Reservas activas</span>
+            <span class="badge bg-info">{{ cards[0].value }}</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-secondary small">Total gastado</span>
+            <span class="badge bg-success">{{ cards[2].value }}</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="text-secondary small">Próximo check-in</span>
+            <span class="badge bg-warning text-dark">{{ cards[3].value }}</span>
           </div>
         </div>
-        <i class="bi fs-2" [ngClass]="c.icon"></i>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Chart + Resumen -->
-<div class="row g-3 mb-4">
-  <!-- Gráfica -->
-  <div class="col-lg-8">
-    <div class="card-elev p-3 h-100">
-      <div class="fw-semibold mb-2">Reservas por mes</div>
-      <apx-chart
-        #chart
-        [series]="chartOptions.series"
-        [chart]="chartOptions.chart"
-        [xaxis]="chartOptions.xaxis"
-        [dataLabels]="chartOptions.dataLabels"
-        [stroke]="chartOptions.stroke"
-        [grid]="chartOptions.grid"
-        [legend]="chartOptions.legend"
-        [fill]="chartOptions.fill"
-        [colors]="chartOptions.colors || []"
-      ></apx-chart>
-    </div>
-  </div>
-
-  <!-- Resumen rápido -->
-  <div class="col-lg-4">
-    <div class="card-elev p-3 h-100 d-flex flex-column">
-      <div class="fw-semibold mb-2">Resumen rápido</div>
-      <div class="small text-secondary mb-1">Reservas activas: {{ summaryActive }}</div>
-      <div class="small text-secondary mb-3">Finalizadas: {{ summaryFinished }}</div>
-      <div class="mt-auto small text-muted">
-        Actualizado: 
-        {{ reservations.length ? (reservations[0].checkIn || '') : '' }}
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Lista de reservas -->
-<div class="mb-4">
-  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
-    <div class="fw-semibold">
-      {{ showHistory ? 'Historial de reservas' : 'Reservas activas' }}
-    </div>
-
-    <div class="d-flex align-items-center">
-      <div class="small text-secondary me-3 d-none d-md-block">
-        Mostrando {{ reservations.length || 0 }} resultados
-      </div>
-      <div>
-        <button class="btn btn-sm btn-outline-primary me-2"
-                [class.active]="!showHistory"
-                (click)="(showHistory=false); loadCurrentReservations()">Activas</button>
-        <button class="btn btn-sm btn-outline-secondary"
-                [class.active]="showHistory"
-                (click)="(showHistory=true); loadHistoryReservations()">Historial</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Loader -->
-  <div *ngIf="loading" class="d-flex justify-content-center py-4">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Cargando...</span>
-    </div>
-  </div>
-
-  <!-- Tarjetas de reservas -->
-  <ng-container *ngIf="!loading">
-    <div *ngIf="reservations.length; else noCards" class="row g-3">
-      <div class="col-12 col-sm-6 col-md-4" *ngFor="let r of reservations">
-        <div class="card h-100 border-0 shadow-sm hover-pointer"
-             (click)="openInvoice(r)">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start">
-              <div>
-                <div class="text-muted small mb-1">Reserva #{{ r.reservationId }}</div>
-                <div class="fw-semibold">{{ hotelName(r) }}</div>
-                <div class="small text-secondary">Habitación: {{ roomName(r) }}</div>
-              </div>
-              <div class="text-end">
-                <ng-container *ngIf="isActiveReservation(r); else normalStatus">
-                  <span class="badge bg-primary text-white">En proceso</span>
-                </ng-container>
-                <ng-template #normalStatus>
-                  <span class="badge bg-info text-dark">{{ r.status }}</span>
-                </ng-template>
-              </div>
-            </div>
-            <div class="mt-3 small">
-              <div>Check-in: {{ r.checkIn }}</div>
-              <div>Check-out: {{ r.checkOut }}</div>
-            </div>
+        <div class="mt-auto">
+          <div class="small text-muted">
+            <i class="bi bi-clock-history me-1"></i>
+            Actualizado: {{ reservations.length ? reservations[0].checkIn || 'Hoy' : 'Hoy' }}
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <ng-template #noCards>
-      <div class="text-center text-secondary py-4">
-        No hay reservas para mostrar en esta vista.
+  <!-- Lista de reservas -->
+  <div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+      <h5 class="fw-semibold mb-0">
+        <i class="bi bi-list-ul me-2 text-olive"></i>
+        {{ showHistory ? 'Historial de reservas' : 'Reservas activas' }}
+      </h5>
+
+      <div class="d-flex align-items-center gap-2">
+        <div class="small text-secondary me-2 d-none d-md-block">
+          Mostrando {{ reservations.length || 0 }} resultados
+        </div>
+        <div class="btn-group" role="group">
+          <button
+            class="btn btn-sm"
+            [class.btn-olive]="!showHistory"
+            [class.btn-outline-secondary]="showHistory"
+            (click)="showHistory = false; loadCurrentReservations()"
+          >
+            <i class="bi bi-calendar-check me-1"></i>Activas
+          </button>
+          <button
+            class="btn btn-sm"
+            [class.btn-olive]="showHistory"
+            [class.btn-outline-secondary]="!showHistory"
+            (click)="showHistory = true; loadHistoryReservations()"
+          >
+            <i class="bi bi-clock-history me-1"></i>Historial
+          </button>
+        </div>
       </div>
-    </ng-template>
-  </ng-container>
-</div>
+    </div>
 
-<!-- Gestión avanzada de reservas -->
-<div class="mb-5">
-  <app-client-reservation (changes)="handleReservationsChanged()"></app-client-reservation>
-</div>
-
-<!-- Modal de factura -->
-<div class="modal fade" id="invoiceModal" tabindex="-1" aria-labelledby="invoiceModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow">
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title" id="invoiceModalLabel">Factura de la Reserva #{{ selectedReservation?.reservationId }}</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- Loader -->
+    <div *ngIf="loading" class="d-flex justify-content-center py-5">
+      <div class="spinner-border text-olive" role="status">
+        <span class="visually-hidden">Cargando...</span>
       </div>
+    </div>
 
-      <div class="modal-body">
-        <p><strong>Hotel:</strong> {{ selectedReservation?.hotel?.name }}</p>
-        <p><strong>Habitación:</strong> {{ selectedReservation?.room?.name }}</p>
-        <p><strong>Check-in:</strong> {{ selectedReservation?.checkIn }}</p>
-        <p><strong>Check-out:</strong> {{ selectedReservation?.checkOut }}</p>
+    <!-- Tarjetas de reservas -->
+    <ng-container *ngIf="!loading">
+      <div *ngIf="reservations.length; else noCards" class="row g-3">
+        <div class="col-12 col-sm-6 col-lg-4" *ngFor="let r of reservations">
+          <div
+            class="card reservation-card h-100 border-0 shadow-sm hover-pointer"
+            (click)="openInvoice(r)"
+          >
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                  <div class="text-muted small mb-1">
+                    <i class="bi bi-hash"></i>{{ r.reservationId }}
+                  </div>
+                  <h6 class="fw-bold mb-1">{{ hotelName(r) }}</h6>
+                  <div class="small text-secondary">
+                    <i class="bi bi-door-open me-1"></i>{{ roomName(r) }}
+                  </div>
+                </div>
+                <span
+                  class="badge"
+                  [ngClass]="{
+                    'badge-confirmed': r.status === 'CONFIRMED',
+                    'badge-checkin': r.status === 'CHECKIN',
+                    'badge-finished': r.status === 'FINISHED',
+                    'badge-pending': r.status === 'PENDING'
+                  }"
+                >
+                  {{
+                    r.status === 'CONFIRMED'
+                      ? 'Confirmada'
+                      : r.status === 'CHECKIN'
+                      ? 'Check-in'
+                      : r.status === 'FINISHED'
+                      ? 'Finalizada'
+                      : 'Pendiente'
+                  }}
+                </span>
+              </div>
 
-        <div class="mt-3">
-          <app-bill-services
-            *ngIf="selectedReservation?.reservationId"
-            [reservationId]="selectedReservation?.reservationId">
-          </app-bill-services>
+              <div class="border-top pt-3 mt-3">
+                <div class="d-flex justify-content-between small mb-2">
+                  <span class="text-secondary">
+                    <i class="bi bi-calendar-check me-1"></i>Check-in
+                  </span>
+                  <span class="fw-semibold">{{ r.checkIn }}</span>
+                </div>
+                <div class="d-flex justify-content-between small mb-2">
+                  <span class="text-secondary">
+                    <i class="bi bi-calendar-x me-1"></i>Check-out
+                  </span>
+                  <span class="fw-semibold">{{ r.checkOut }}</span>
+                </div>
+                <div
+                  *ngIf="r.pendingAmount && r.pendingAmount > 0"
+                  class="alert alert-warning p-2 mb-0 mt-2 small"
+                >
+                  <i class="bi bi-exclamation-triangle me-1"></i>
+                  Pendiente: <strong>${{ r.pendingAmount.toFixed(2) }}</strong>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      <ng-template #noCards>
+        <div class="card-elev p-5 text-center">
+          <i class="bi bi-inbox display-1 text-muted mb-3"></i>
+          <p class="text-secondary mb-0">No hay reservas para mostrar en esta vista.</p>
+        </div>
+      </ng-template>
+    </ng-container>
+  </div>
+
+  <!-- Gestión avanzada de reservas -->
+  <div class="mb-5">
+    <app-client-reservation (changes)="handleReservationsChanged()"></app-client-reservation>
+  </div>
+
+  <!-- Modal de factura -->
+  <div
+    class="modal fade"
+    id="invoiceModal"
+    tabindex="-1"
+    aria-labelledby="invoiceModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="invoiceModalLabel">
+            Factura de la Reserva #{{ selectedReservation?.reservationId }}
+          </h5>
+          <button
+            type="button"
+            class="btn-close btn-close-white"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+
+        <div class="modal-body">
+          <p><strong>Hotel:</strong> {{ selectedReservation?.hotel?.name }}</p>
+          <p><strong>Habitación:</strong> {{ selectedReservation?.room?.name }}</p>
+          <p><strong>Check-in:</strong> {{ selectedReservation?.checkIn }}</p>
+          <p><strong>Check-out:</strong> {{ selectedReservation?.checkOut }}</p>
+
+          <div class="mt-3">
+            <app-bill-services
+              *ngIf="selectedReservation?.reservationId"
+              [reservationId]="selectedReservation?.reservationId"
+            >
+            </app-bill-services>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
       </div>
     </div>
   </div>

@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, ViewChild, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { forkJoin } from 'rxjs';
+import { forkJoin, switchMap } from 'rxjs';
 import {
   NgApexchartsModule,
   ChartComponent,
@@ -19,6 +19,8 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { environment } from '../../../../environments/environment';
 import { UsersService } from '../../../services/users';
+import { ReservationService } from '../../../services/reservation';
+import { PaymentService } from '../../../services/payment';
 import { Router } from '@angular/router';
 import * as bootstrap from 'bootstrap';
 import { BillServicesComponent } from '../../operator/reservation/bill-services/bill-services';
@@ -27,10 +29,12 @@ import { ClientReservationComponent } from '../client-reservation/client-reserva
 export interface Reservation {
   reservationId: number;
   hotel: { name: string } | string;
-  room: { name: string } | string;
+  room: { number: string } | string;
   checkIn: string;
   checkOut: string;
-  status: string;
+  status: 'PENDING' | 'CONFIRMED' | 'CHECKIN' | 'FINISHED';
+  totalPaid?: number;
+  pendingAmount?: number;
 }
 
 export type ChartOptions = {
@@ -61,22 +65,28 @@ export class ClientDashboardComponent implements OnInit {
   invoiceModal: any;
 
   private api = inject(UsersService);
+  private reservationApi = inject(ReservationService);
+  private paymentApi = inject(PaymentService);
   private router = inject(Router);
+  
   me: any = null;
   reservations: Reservation[] = [];
-  // Combined set of all reservations (current + history) used for charts and historial counts
   allReservations: Reservation[] = [];
   showHistory = false;
   loading = false;
+  
   private base = environment.apiBaseUrl;
+  
   cards = [
     { label: 'Reservas activas', value: '0', delta: 0.0, icon: 'bi-calendar-check text-info' },
     { label: 'Historial', value: '0', delta: 0.0, icon: 'bi-clock-history text-warning' },
-    { label: 'Gastos totales', value: '$0', delta: 0.0, icon: 'bi-wallet2 text-success' },
-    { label: 'Puntos fidelidad', value: '300', delta: 5.0, icon: 'bi-gift text-primary' },
+    { label: 'Total gastado', value: '$0', delta: 0.0, icon: 'bi-wallet2 text-success' },
+    { label: 'Próximo check-in', value: '--', delta: 0.0, icon: 'bi-clock text-primary' },
   ];
+  
   summaryActive = 0;
   summaryFinished = 0;
+  totalSpent = 0;
 
   @ViewChild('chart') chart!: ChartComponent;
 
@@ -109,7 +119,7 @@ export class ClientDashboardComponent implements OnInit {
     this.api.getMe().subscribe({
       next: (u) => {
         this.me = u;
-        this.loadAllReservations();
+        this.loadAllReservationsWithPayments();
         this.loadCurrentReservations();
       },
       error: (err) => {
@@ -123,27 +133,43 @@ export class ClientDashboardComponent implements OnInit {
     });
   }
 
-  private loadAllReservations() {
+  private loadAllReservationsWithPayments() {
     if (!this.me?.user_id) return;
-    const cur$ = this.api.getCurrentReservations(this.me.user_id);
-    const hist$ = this.api.getHistoryReservations(this.me.user_id);
-    forkJoin([cur$, hist$]).subscribe({
-      next: ([cur, hist]) => {
-        const normalizedCur = (cur || []).map((r: any) => this.normalizeReservation(r));
-        const normalizedHist = (hist || []).map((r: any) => this.normalizeReservation(r));
+    
+    // Get all user reservations
+    this.reservationApi.getByUser(this.me.user_id).pipe(
+      switchMap(reservations => {
+        // Get payments for all reservations
+        const paymentRequests = reservations.map(r => 
+          this.paymentApi.getByReservation(r.reservation_id)
+        );
+        
+        return forkJoin({
+          reservations: [reservations],
+          payments: paymentRequests.length > 0 ? forkJoin(paymentRequests) : [[]]
+        });
+      })
+    ).subscribe({
+      next: ({ reservations, payments }) => {
+        // Calculate totals
+        this.totalSpent = payments.flat().reduce((sum, p) => sum + (p.amount || 0), 0);
+        
+        // Enrich reservations with payment data
+        this.allReservations = reservations.map((r, idx) => {
+          const reservationPayments = payments[idx] || [];
+          const totalPaid = reservationPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+          
+          return {
+            ...this.normalizeReservation(r),
+            totalPaid,
+            pendingAmount: 0 // Will calculate based on services
+          };
+        });
 
-        // Merge unique by reservationId (prefer current entries)
-        const map = new Map<number | null, Reservation>();
-        normalizedHist.forEach(r => map.set(r.reservationId ?? null, r));
-        normalizedCur.forEach(r => map.set(r.reservationId ?? null, r));
-        this.allReservations = Array.from(map.values());
-
-        // Update chart & summary now that we have the combined dataset
         this.updateSummaryAndChart();
       },
       error: (err) => {
-        console.error('Error cargando reservas combinadas:', err);
-        // fallback: don't set allReservations, charts will use per-view reservations
+        console.error('Error cargando reservas con pagos:', err);
       }
     });
   }
@@ -151,21 +177,25 @@ export class ClientDashboardComponent implements OnInit {
   loadCurrentReservations() {
     if (!this.me?.user_id) return;
     this.loading = true;
-    this.api.getCurrentReservations(this.me.user_id).subscribe({
+    
+    this.reservationApi.getByUser(this.me.user_id).subscribe({
       next: (res) => {
-        console.debug('loadCurrentReservations response sample:', res?.[0]);
         const normalized = (res || []).map((r: any) => this.normalizeReservation(r));
 
         const today = new Date();
-        const current = (normalized || []).filter((r: any) => {
+        // Active: CONFIRMED, CHECKIN or future checkOut
+        const current = normalized.filter((r: any) => {
           if (!r) return false;
+          // Status-based filtering
+          if (r.status === 'CONFIRMED' || r.status === 'CHECKIN') return true;
+          // Date-based filtering for pending checkouts
           if (!r.checkOut) return true;
           const co = new Date(r.checkOut);
           return co >= today;
         });
+        
         this.reservations = current;
         this.updateSummaryAndChart();
-
         this.loading = false;
       },
       error: (err) => {
@@ -178,21 +208,23 @@ export class ClientDashboardComponent implements OnInit {
   loadHistoryReservations() {
     if (!this.me?.user_id) return;
     this.loading = true;
-    this.api.getHistoryReservations(this.me.user_id).subscribe({
+    
+    this.reservationApi.getByUser(this.me.user_id).subscribe({
       next: (res) => {
-        console.debug('loadHistoryReservations response sample:', res?.[0]);
         const normalized = (res || []).map((r: any) => this.normalizeReservation(r));
-        // History: only reservations with checkOut before today (no están vigentes)
+        
         const today = new Date();
-        const past = (normalized || []).filter((r: any) => {
-          if (!r || !r.checkOut) return false;
+        // History: FINISHED status or past checkOut
+        const past = normalized.filter((r: any) => {
+          if (!r) return false;
+          if (r.status === 'FINISHED') return true;
+          if (!r.checkOut) return false;
           const co = new Date(r.checkOut);
           return co < today;
         });
+        
         this.reservations = past;
-
         this.updateSummaryAndChart();
-
         this.loading = false;
       },
       error: (err) => {
@@ -240,6 +272,8 @@ export class ClientDashboardComponent implements OnInit {
       checkIn,
       checkOut,
       status,
+      totalPaid: r.totalPaid || 0,
+      pendingAmount: r.pendingAmount || 0
     } as Reservation;
   }
 
@@ -248,17 +282,39 @@ export class ClientDashboardComponent implements OnInit {
     const active = this.reservations.filter(r => r.checkOut && new Date(r.checkOut) >= today).length;
     const finished = this.reservations.filter(r => r.checkOut && new Date(r.checkOut) < today).length;
     const total = this.reservations.length;
+    
+    // Update KPI cards
     this.cards[0].value = String(active);
+    
     let historialCount = total;
     if (this.allReservations && this.allReservations.length > 0) {
       historialCount = this.allReservations.filter(r => r.checkOut && new Date(r.checkOut) < today).length;
     }
     this.cards[1].value = String(historialCount);
+    
     this.summaryActive = active;
     this.summaryFinished = finished;
 
-    this.cards[2].value = '$0';
-
+    // Total spent - calculated from allReservations
+    this.cards[2].value = '$' + this.totalSpent.toFixed(2);
+    
+    // Next check-in date
+    const futureReservations = this.reservations.filter(r => {
+      if (!r.checkIn) return false;
+      const ci = new Date(r.checkIn);
+      return ci > today;
+    });
+    
+    if (futureReservations.length > 0) {
+      const sorted = futureReservations.sort((a, b) => {
+        const dateA = new Date(a.checkIn);
+        const dateB = new Date(b.checkIn);
+        return dateA.getTime() - dateB.getTime();
+      });
+      this.cards[3].value = sorted[0].checkIn;
+    } else {
+      this.cards[3].value = '--';
+    }
 
     const months: string[] = [];
     const counts: number[] = [];
@@ -314,7 +370,7 @@ export class ClientDashboardComponent implements OnInit {
   }
 
   handleReservationsChanged(): void {
-    this.loadAllReservations();
+    this.loadAllReservationsWithPayments();
     if (this.showHistory) {
       this.loadHistoryReservations();
     } else {

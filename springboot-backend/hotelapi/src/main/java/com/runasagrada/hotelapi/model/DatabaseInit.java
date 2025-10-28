@@ -1442,13 +1442,22 @@ public class DatabaseInit implements CommandLineRunner {
                                 checkOut = LocalDate.of(2025, 12, 31);
                         }
 
+                        // Si la reserva es para antes de hoy, debe tener status FINISHED
+                        Reservation.Status status;
+                        if (checkIn.isBefore(LocalDate.now())) {
+                                status = Reservation.Status.FINISHED;
+                        } else {
+                                status = random.nextBoolean() ? Reservation.Status.CONFIRMED
+                                                : Reservation.Status.CHECKIN;
+                        }
+
                         Reservation res = new Reservation();
                         res.setUser(user);
                         res.setHotel(hotel);
                         res.setRoom(room);
                         res.setCheckIn(checkIn);
                         res.setCheckOut(checkOut);
-                        res.setStatus(Reservation.Status.CONFIRMED);
+                        res.setStatus(status);
 
                         Reservation saved = reservationRepo.save(res);
 
@@ -1460,7 +1469,6 @@ public class DatabaseInit implements CommandLineRunner {
                                 d = d.plusDays(1);
                         }
                 }
-
         }
 
         private String pickIcon(int i) {
@@ -1649,8 +1657,8 @@ public class DatabaseInit implements CommandLineRunner {
                 if (clients.isEmpty())
                         return;
 
-		// Crear un método de pago para cada cliente (mock simple)
-		List<PaymentMethod> createdMethods = new ArrayList<>();
+                // Crear un método de pago para cada cliente (mock simple)
+                List<PaymentMethod> createdMethods = new ArrayList<>();
                 for (int i = 0; i < clients.size(); i++) {
                         User c = clients.get(i);
                         String last4 = String.format("%04d", 4000 + i);
@@ -1696,84 +1704,84 @@ public class DatabaseInit implements CommandLineRunner {
                 if (reservations.isEmpty())
                         return;
 
-		// Crear 10 pagos con diferentes estados
-		Payment payment1 = new Payment();
-		payment1.setReservationId(reservations.get(0));
-		payment1.setPaymentMethodId(pm1);
-		payment1.setAmount(450000.00);
-		payment1.setStatus("PAID");
-		savePaymentWithDefaultRef(payment1);
+                // Crear 10 pagos con diferentes estados
+                Payment payment1 = new Payment();
+                payment1.setReservationId(reservations.get(0));
+                payment1.setPaymentMethodId(pm1);
+                payment1.setAmount(450000.00);
+                payment1.setStatus("PAID");
+                savePaymentWithDefaultRef(payment1);
 
-		Payment payment2 = new Payment();
-		payment2.setReservationId(reservations.get(1 % reservations.size()));
-		payment2.setPaymentMethodId(pm2);
-		payment2.setAmount(680000.00);
-		payment2.setStatus("PENDING");
-		savePaymentWithDefaultRef(payment2);
+                Payment payment2 = new Payment();
+                payment2.setReservationId(reservations.get(1 % reservations.size()));
+                payment2.setPaymentMethodId(pm2);
+                payment2.setAmount(680000.00);
+                payment2.setStatus("PENDING");
+                savePaymentWithDefaultRef(payment2);
 
-		Payment payment3 = new Payment();
-		payment3.setReservationId(reservations.get(2 % reservations.size()));
-		payment3.setPaymentMethodId(pm3);
-		payment3.setAmount(320000.00);
-		payment3.setStatus("PAID");
-		savePaymentWithDefaultRef(payment3);
+                Payment payment3 = new Payment();
+                payment3.setReservationId(reservations.get(2 % reservations.size()));
+                payment3.setPaymentMethodId(pm3);
+                payment3.setAmount(320000.00);
+                payment3.setStatus("PAID");
+                savePaymentWithDefaultRef(payment3);
 
-		Payment payment4 = new Payment();
-		payment4.setReservationId(reservations.get(3 % reservations.size()));
-		payment4.setPaymentMethodId(pm1);
-		payment4.setAmount(550000.00);
-		payment4.setStatus("FAILED");
-		savePaymentWithDefaultRef(payment4);
+                Payment payment4 = new Payment();
+                payment4.setReservationId(reservations.get(3 % reservations.size()));
+                payment4.setPaymentMethodId(pm1);
+                payment4.setAmount(550000.00);
+                payment4.setStatus("FAILED");
+                savePaymentWithDefaultRef(payment4);
 
-		Payment payment5 = new Payment();
-		payment5.setReservationId(reservations.get(4 % reservations.size()));
-		payment5.setPaymentMethodId(pm2);
-		payment5.setAmount(890000.00);
-		payment5.setStatus("PAID");
-		savePaymentWithDefaultRef(payment5);
+                Payment payment5 = new Payment();
+                payment5.setReservationId(reservations.get(4 % reservations.size()));
+                payment5.setPaymentMethodId(pm2);
+                payment5.setAmount(890000.00);
+                payment5.setStatus("PAID");
+                savePaymentWithDefaultRef(payment5);
 
-		Payment payment6 = new Payment();
-		payment6.setReservationId(reservations.get(5 % reservations.size()));
-		payment6.setPaymentMethodId(pm3);
-		payment6.setAmount(420000.00);
-		payment6.setStatus("PENDING");
-		savePaymentWithDefaultRef(payment6);
+                Payment payment6 = new Payment();
+                payment6.setReservationId(reservations.get(5 % reservations.size()));
+                payment6.setPaymentMethodId(pm3);
+                payment6.setAmount(420000.00);
+                payment6.setStatus("PENDING");
+                savePaymentWithDefaultRef(payment6);
 
-		Payment payment7 = new Payment();
-		payment7.setReservationId(reservations.get(6 % reservations.size()));
-		payment7.setPaymentMethodId(pm1);
-		payment7.setAmount(760000.00);
-		payment7.setStatus("PAID");
-		savePaymentWithDefaultRef(payment7);
+                Payment payment7 = new Payment();
+                payment7.setReservationId(reservations.get(6 % reservations.size()));
+                payment7.setPaymentMethodId(pm1);
+                payment7.setAmount(760000.00);
+                payment7.setStatus("PAID");
+                savePaymentWithDefaultRef(payment7);
 
-		Payment payment8 = new Payment();
-		payment8.setReservationId(reservations.get(7 % reservations.size()));
-		payment8.setPaymentMethodId(pm2);
-		payment8.setAmount(290000.00);
-		payment8.setStatus("REFUNDED");
-		savePaymentWithDefaultRef(payment8);
+                Payment payment8 = new Payment();
+                payment8.setReservationId(reservations.get(7 % reservations.size()));
+                payment8.setPaymentMethodId(pm2);
+                payment8.setAmount(290000.00);
+                payment8.setStatus("REFUNDED");
+                savePaymentWithDefaultRef(payment8);
 
-		Payment payment9 = new Payment();
-		payment9.setReservationId(reservations.get(8 % reservations.size()));
-		payment9.setPaymentMethodId(pm3);
-		payment9.setAmount(1250000.00);
-		payment9.setStatus("PAID");
-		savePaymentWithDefaultRef(payment9);
+                Payment payment9 = new Payment();
+                payment9.setReservationId(reservations.get(8 % reservations.size()));
+                payment9.setPaymentMethodId(pm3);
+                payment9.setAmount(1250000.00);
+                payment9.setStatus("PAID");
+                savePaymentWithDefaultRef(payment9);
 
-		Payment payment10 = new Payment();
-		payment10.setReservationId(reservations.get(9 % reservations.size()));
-		payment10.setPaymentMethodId(pm1);
-		payment10.setAmount(510000.00);
-		payment10.setStatus("PENDING");
-		savePaymentWithDefaultRef(payment10);
-	}
+                Payment payment10 = new Payment();
+                payment10.setReservationId(reservations.get(9 % reservations.size()));
+                payment10.setPaymentMethodId(pm1);
+                payment10.setAmount(510000.00);
+                payment10.setStatus("PENDING");
+                savePaymentWithDefaultRef(payment10);
+        }
 
-	private Payment savePaymentWithDefaultRef(Payment payment) {
-		if (payment.getTxReference() == null || payment.getTxReference().isBlank()) {
-			payment.setTxReference("Cobro#pending");
-		}
-		Payment saved = paymentRepo.save(payment);
-		saved.setTxReference("Cobro#" + saved.getPaymentId());
-		return paymentRepo.save(saved);
-	}
+        private Payment savePaymentWithDefaultRef(Payment payment) {
+                if (payment.getTxReference() == null || payment.getTxReference().isBlank()) {
+                        payment.setTxReference("Cobro#pending");
+                }
+                Payment saved = paymentRepo.save(payment);
+                saved.setTxReference("Cobro#" + saved.getPaymentId());
+                return paymentRepo.save(saved);
+        }
 }

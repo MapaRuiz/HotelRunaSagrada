@@ -9,6 +9,7 @@ import { HotelsService } from '../../../services/hotels';
 import { UsersService } from '../../../services/users';
 import { RoomService } from '../../../services/room';
 import { AuthService } from '../../../services/auth';
+import { OperatorHotelResolver } from '../../../services/operator-hotel-resolver';
 
 @Component({
   selector: 'app-reservation',
@@ -76,33 +77,35 @@ export class ReservationFacade {
   private usersService = inject(UsersService);
   private roomService = inject(RoomService);
   private resServicesApi = inject(ReservationServiceApi);
+  private hotelResolver = inject(OperatorHotelResolver);
 
   // Loads all reservations for the current operator's hotel, enriched with user, room, and hotel
   getHotelReservationsForOperator() {
-    const uid = this.auth.userSnapshot()?.user_id;
-    if (!uid) return of<Reservation[]>([]);
-
-    return this.staffService.getByUser(uid).pipe(
-      switchMap((staff) =>
-        forkJoin({
-          reservations: this.reservationsApi.getAllByHotel(staff.hotel_id),
-          hotel: this.hotelsService.get(Number(staff.hotel_id)),
-          rooms: this.roomService.listByHotel(Number(staff.hotel_id)),
-        })
-      ),
+    return this.hotelResolver.resolveHotelId().pipe(
+      switchMap((hotelId) => {
+        if (!hotelId) return of({ reservations: [] as Reservation[], hotel: null, rooms: [] });
+        
+        return forkJoin({
+          reservations: this.reservationsApi.getAllByHotel(hotelId),
+          hotel: this.hotelsService.get(hotelId),
+          rooms: this.roomService.listByHotel(hotelId),
+        });
+      }),
       switchMap(({ reservations, hotel, rooms }) => {
-        const userIds = Array.from(new Set(reservations.map((r) => r.user_id)));
+        if (!reservations.length) return of({ reservations: [] as Reservation[], hotel, rooms, users: [] });
+        
+        const userIds = Array.from(new Set(reservations.map((r: Reservation) => r.user_id)));
         const userRequests = userIds.length
-          ? forkJoin(userIds.map((id) => this.usersService.getById(id)))
+          ? forkJoin(userIds.map((id: number) => this.usersService.getById(id)))
           : of([]);
         return userRequests.pipe(map((users) => ({ reservations, hotel, rooms, users })));
       }),
       map(({ reservations, hotel, rooms, users }) => {
         const usersById = new Map(users.map((u) => [u.user_id, u] as const));
         const roomsById = new Map(rooms.map((r) => [r.room_id, r] as const));
-        return reservations.map((r) => ({
+        return reservations.map((r: Reservation) => ({
           ...r,
-          hotel,
+          hotel: hotel ?? undefined,
           user: usersById.get(r.user_id),
           room: roomsById.get(r.room_id),
         }));

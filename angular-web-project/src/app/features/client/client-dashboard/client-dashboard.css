@@ -1,8 +1,148 @@
+.dashboard-container {
+  padding: 20px;
+  font-family: var(--font-body, 'Lato', sans-serif);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.dashboard-container h4,
+.dashboard-container .fw-semibold {
+  font-family: var(--font-title, 'Quantico', sans-serif);
+  color: var(--c-ink, #151513);
+  font-weight: 600;
+}
+
+.card-elev {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 12px 36px rgba(21, 21, 19, 0.1);
+  border: 1px solid rgba(21, 21, 19, 0.06);
+  transition: all 0.3s ease;
+}
+
+.card-elev:hover {
+  box-shadow: 0 16px 48px rgba(21, 21, 19, 0.15);
+  transform: translateY(-4px);
+}
+
+.chart-wrapper {
+  height: 300px;
+  overflow: hidden;
+}
+
 .hover-pointer {
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
 .hover-pointer:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(21, 21, 19, 0.12);
+}
+
+.text-olive {
+  color: var(--c-olive, #778E69);
+}
+
+.btn-olive {
+  background-color: var(--c-olive, #778E69);
+  color: white;
+  border: none;
+  font-family: var(--font-title, 'Quantico', sans-serif);
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 8px 20px;
+  transition: all 0.3s ease;
+}
+
+.btn-olive:hover {
+  background-color: #6a7a58;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(119, 142, 105, 0.3);
+}
+
+.badge-confirmed {
+  background-color: #ffc107;
+  color: #000;
+  font-family: var(--font-body);
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+.badge-checkin {
+  background-color: #0dcaf0;
+  color: #000;
+  font-family: var(--font-body);
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+.badge-finished {
+  background-color: #198754;
+  color: #fff;
+  font-family: var(--font-body);
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+.badge-pending {
+  background-color: #6c757d;
+  color: #fff;
+  font-family: var(--font-body);
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+.kpi-icon {
+  font-size: 2.5rem;
+  opacity: 0.3;
+}
+
+.kpi-value {
+  font-family: var(--font-title);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--c-ink);
+}
+
+.kpi-label {
+  font-family: var(--font-body);
+  color: var(--c-ink);
+  opacity: 0.6;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-sm {
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  padding: 6px 16px;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-secondary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.spinner-border.text-olive {
+  color: var(--c-olive) !important;
+}
+
+.reservation-card {
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.reservation-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(21, 21, 19, 0.12);
 }

@@ -90,6 +90,9 @@ export class SearchResultTable implements OnChanges {
   gridOptions: GridOptions<Reservation> = {
     localeText: AG_GRID_LOCALE,
     rowSelection: 'single',
+    pagination: true,
+    paginationPageSize: 5,
+    paginationPageSizeSelector: [5, 10, 15, 20],
     getRowId: (params) => params.data.reservation_id?.toString() || '',
     onGridReady: (params) => {
       this.gridApi = params.api;

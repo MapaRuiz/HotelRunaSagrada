@@ -1,0 +1,144 @@
+﻿.profile-container {
+  padding: 20px;
+  font-family: var(--font-body, 'Lato', sans-serif);
+}
+
+.profile-container h4,
+.profile-container h5,
+.profile-container .fw-semibold {
+  font-family: var(--font-title, 'Quantico', sans-serif);
+  color: var(--c-ink, #151513);
+}
+
+.card-elev {
+  background: var(--c-ivory, #F2F3ED);
+  border: 1px solid var(--c-sage, #BCC399);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.avatar-section {
+  background: linear-gradient(135deg, var(--c-olive, #778E69) 0%, var(--c-sage, #BCC399) 100%);
+  padding: 30px 20px;
+  border-radius: 8px;
+  margin: -16px;
+  margin-bottom: 20px;
+}
+
+.avatar-section .fw-semibold {
+  color: white;
+}
+
+.avatar-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.avatar-preview {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid white;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease;
+}
+
+.avatar-wrapper:hover .avatar-preview {
+  transform: scale(1.05);
+}
+
+.avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  cursor: pointer;
+}
+
+.avatar-wrapper:hover .avatar-overlay {
+  opacity: 1;
+}
+
+.avatar-overlay i {
+  color: white;
+  font-size: 2rem;
+}
+
+.input-soft {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--c-sage, #BCC399);
+  border-radius: 6px;
+  background: white;
+  font-family: var(--font-body, 'Lato', sans-serif);
+  transition: all 0.2s ease;
+}
+
+.input-soft:focus {
+  outline: none;
+  border-color: var(--c-olive, #778E69);
+  box-shadow: 0 0 0 3px rgba(119, 142, 105, 0.1);
+}
+
+.input-soft:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
+
+.btn-olive {
+  background-color: var(--c-olive, #778E69);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font-title, 'Quantico', sans-serif);
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-olive:hover {
+  background-color: #6a7d5f;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(119, 142, 105, 0.3);
+}
+
+.payment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.payment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: white;
+  border: 1px solid var(--c-sage, #BCC399);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.payment-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.payment-info {
+  flex: 1;
+}
+
+.payment-actions {
+  display: flex;
+  gap: 8px;
+}

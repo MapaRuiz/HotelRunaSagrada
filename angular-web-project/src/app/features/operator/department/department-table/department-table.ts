@@ -5,16 +5,16 @@ import { Department } from '../../../../model/department';
 import { Hotel } from '../../../../model/hotel';
 import { DepartmentService } from '../../../../services/department';
 import { HotelsService } from '../../../../services/hotels';
+import { OperatorHotelResolver } from '../../../../services/operator-hotel-resolver';
 import { StaffMemberList } from '../../staff-member/staff-member-list/staff-member-list';
 import { ColDef, GridOptions, GridApi, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ActionButtonsParams, AdditionalButton } from '../../../admin/action-buttons-cell/action-buttons-param';
 import { ActionButtonsComponent } from '../../../admin/action-buttons-cell/action-buttons-cell';
-import { AG_GRID_LOCALE } from '../../../admin/sharedTable';
+import { AG_GRID_LOCALE, gridTheme as sharedGridTheme, PAGINATION_CONFIG } from '../../../admin/sharedTable';
 import { MultiSelectFilterComponent } from '../../../admin/filters/multi-select-filter/multi-select-filter';
-import { gridTheme as sharedGridTheme } from '../../../admin/sharedTable';
 import type { ITextFilterParams } from 'ag-grid-community';
-import { zip } from 'rxjs';
+import { switchMap, of, finalize } from 'rxjs';
 
 
 const TEXT_FILTER_CONFIG: ITextFilterParams = {
@@ -32,10 +32,12 @@ const TEXT_FILTER_CONFIG: ITextFilterParams = {
 export class DepartmentTable implements OnInit {
   private departmentService = inject(DepartmentService);
   private hotelsService = inject(HotelsService);
+  private hotelResolver = inject(OperatorHotelResolver);
   private platformId = inject(PLATFORM_ID);
   
   isBrowser: boolean = false;
   loading: boolean = true;
+  currentHotelId: number | null = null;
   
   // Fuente de datos
   departments: Department[] = [];
@@ -76,12 +78,30 @@ export class DepartmentTable implements OnInit {
   loadData() {
     this.loading = true;
     
-    zip([
-      this.departmentService.list(),
-      this.hotelsService.list()
-    ]).subscribe({
-      next: ([departments, hotels]) => {
+    // First resolve the operator's hotel ID
+    this.hotelResolver.resolveHotelId().pipe(
+      switchMap(hotelId => {
+        this.currentHotelId = hotelId;
+        
+        // If no hotel ID, load all departments (fallback)
+        if (!hotelId) {
+          return this.departmentService.list();
+        }
+        
+        // Load departments filtered by hotel
+        return this.departmentService.getByHotel(hotelId);
+      }),
+      switchMap(departments => {
         this.departments = departments || [];
+        
+        // Load hotel information
+        return this.hotelsService.list();
+      }),
+      finalize(() => {
+        this.loading = false;
+      })
+    ).subscribe({
+      next: (hotels) => {
         this.hotels = hotels || [];
 
         // Enriquecer departments con datos de hotel
@@ -91,11 +111,11 @@ export class DepartmentTable implements OnInit {
         }));
         
         this.rowData = enrichedDepartments;
-        this.loading = false;
       },
       error: (error) => {
         console.error('Error loading departments data:', error);
-        this.loading = false;
+        this.departments = [];
+        this.rowData = [];
       }
     });
   }
@@ -103,6 +123,9 @@ export class DepartmentTable implements OnInit {
   gridOptions: GridOptions<Department> = {
     localeText: AG_GRID_LOCALE,
     rowSelection: 'single',
+    pagination: true,
+    paginationPageSize: 7,
+    paginationPageSizeSelector: [7, 10, 15, 20],
     getRowId: params => params.data.department_id?.toString() || '',
     onGridReady: params => { 
       this.gridApi = params.api;

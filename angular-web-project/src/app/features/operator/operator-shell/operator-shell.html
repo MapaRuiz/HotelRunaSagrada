@@ -1,7 +1,7 @@
 <div class="shell d-flex">
   <!-- Sidebar -->
   <aside class="sidebar d-flex flex-column p-3">
-    <div class="d-flex align-items-center gap-2 mb-4 brand" style="cursor: pointer;" routerLink="/">
+    <div class="d-flex align-items-center gap-2 mb-4 brand" style="cursor: pointer" routerLink="/">
       <img [src]="logoSrc" alt="Logo" class="logo-img" />
     </div>
 
@@ -32,6 +32,7 @@
         <i class="bi bi-person-badge me-2"></i> Perfil
       </a>
       <a
+        *ngIf="hasHotelAccess"
         routerLink="/operator/reservation-service"
         class="nav-link px-2 py-2 rounded-3"
         routerLinkActive="active"
@@ -39,6 +40,7 @@
         <i class="bi bi-calendar-event me-2"></i> Contratar Servicios
       </a>
       <a
+        *ngIf="hasHotelAccess"
         routerLink="/operator/reservation-table"
         class="nav-link px-2 py-2 rounded-3"
         routerLinkActive="active"
