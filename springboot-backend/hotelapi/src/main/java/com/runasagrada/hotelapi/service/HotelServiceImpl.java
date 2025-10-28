@@ -100,49 +100,50 @@ public class HotelServiceImpl implements HotelService {
     @Transactional
     public void delete(Long id) {
         Hotel db = get(id);
-        
-        // 1. Eliminar reservaciones del hotel (esto elimina payments, services, room locks)
+
+        // 1. Eliminar reservaciones del hotel (esto elimina payments, services, room
+        // locks)
         var reservations = reservationRepo.findByHotelHotelId(id);
         for (var reservation : reservations) {
             reservationService.delete(reservation.getReservationId());
         }
-        
+
         // 2. Eliminar tasks asociadas a staff members y rooms de este hotel
         var staffMembers = staffMemberRepo.findByHotelId(id);
         for (var staffMember : staffMembers) {
             taskRepo.deleteByStaffId(staffMember.getStaffId());
         }
-        
+
         var rooms = roomRepo.findByHotelId(id);
         for (var room : rooms) {
             taskRepo.deleteByRoomId(room.getRoomId());
         }
-        
+
         // 3. Eliminar staff members del hotel
         if (!staffMembers.isEmpty()) {
             staffMemberRepo.deleteAll(staffMembers);
         }
-        
+
         // 4. Eliminar service offerings del hotel
         var serviceOfferings = serviceOfferingRepo.findByHotel_HotelId(id);
         if (!serviceOfferings.isEmpty()) {
             serviceOfferingRepo.deleteAll(serviceOfferings);
         }
-        
+
         // 5. Eliminar rooms del hotel
         if (!rooms.isEmpty()) {
             roomRepo.deleteAll(rooms);
         }
-        
+
         // 6. Eliminar departments del hotel
         var departments = departmentRepo.findByHotelId(id);
         if (!departments.isEmpty()) {
             departmentRepo.deleteAll(departments);
         }
-        
+
         // 7. Limpiar amenities (relación many-to-many)
         db.getAmenities().clear();
-        
+
         // 8. Finalmente eliminar el hotel
         hotels.delete(db);
         helper.resyncIdentity("hotels", "hotel_id");

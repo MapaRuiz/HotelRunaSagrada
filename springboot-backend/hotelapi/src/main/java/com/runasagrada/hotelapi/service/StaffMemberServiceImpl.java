@@ -20,7 +20,7 @@ public class StaffMemberServiceImpl implements StaffMemberService {
 
 	@Autowired
 	private ServiceHelper helper;
-	
+
 	@Autowired
 	private TaskRepository taskRepository;
 

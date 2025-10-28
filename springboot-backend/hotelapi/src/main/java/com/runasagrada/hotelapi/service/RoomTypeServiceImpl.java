@@ -50,20 +50,20 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     public void delete(Integer id) {
         RoomType rt = roomTypeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("RoomType not found: " + id));
-        
+
         // Obtener lista de IDs de rooms antes de cualquier operación
-        List<Integer> roomIds = rt.getRooms() != null 
-            ? rt.getRooms().stream()
-                .filter(room -> room != null && room.getRoomId() != null)
-                .map(Room::getRoomId)
-                .toList()
-            : List.of();
-        
+        List<Integer> roomIds = rt.getRooms() != null
+                ? rt.getRooms().stream()
+                        .filter(room -> room != null && room.getRoomId() != null)
+                        .map(Room::getRoomId)
+                        .toList()
+                : List.of();
+
         // Eliminar cada room (esto maneja reservations, locks, etc.)
         for (Integer roomId : roomIds) {
             roomService.delete(roomId);
         }
-        
+
         // Ahora eliminar el room type
         roomTypeRepository.delete(rt);
     }

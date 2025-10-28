@@ -148,7 +148,7 @@ public class RoomServiceImpl implements RoomService {
 
         // Step 3: Delete room locks
         roomLockRepository.deleteByRoomId(id);
-        
+
         // Step 4: Delete the room
         roomRepository.delete(room);
     }
