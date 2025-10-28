@@ -9,6 +9,7 @@ import {
   Output,
   PLATFORM_ID,
   ViewChild,
+  NgZone,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -23,6 +24,8 @@ const DEFAULT_LAT = 4.711; // Bogotá
 const DEFAULT_LNG = -74.0721;
 const DEFAULT_ZOOM = 13;
 
+const DEFAULT_COORDINATES: MapCoordinates = { lat: DEFAULT_LAT, lng: DEFAULT_LNG };
+
 @Component({
   selector: 'app-map-preview',
   standalone: true,
@@ -33,15 +36,31 @@ const DEFAULT_ZOOM = 13;
 export class MapPreview implements AfterViewInit, OnDestroy {
   @Input()
   set coordinates(value: MapCoordinates | null | undefined) {
+    let lat = DEFAULT_COORDINATES.lat;
+    let lng = DEFAULT_COORDINATES.lng;
+
     if (value != null) {
-      const lat = Number(value.lat);
-      const lng = Number(value.lng);
-      if (Number.isFinite(lat) && Number.isFinite(lng)) {
-        this.applyExternalCoordinates(lat, lng);
-        return;
+      const latCandidate = Number(value.lat);
+      const lngCandidate = Number(value.lng);
+      if (Number.isFinite(latCandidate) && Number.isFinite(lngCandidate)) {
+        lat = latCandidate;
+        lng = lngCandidate;
       }
     }
-    this.applyExternalCoordinates(DEFAULT_LAT, DEFAULT_LNG);
+
+    const normalizedLat = +Number(lat).toFixed(6);
+    const normalizedLng = +Number(lng).toFixed(6);
+
+    if (
+      this.lastExternalCoordinates &&
+      this.lastExternalCoordinates.lat === normalizedLat &&
+      this.lastExternalCoordinates.lng === normalizedLng
+    ) {
+      return;
+    }
+
+    this.lastExternalCoordinates = { lat: normalizedLat, lng: normalizedLng };
+    this.applyExternalCoordinates(normalizedLat, normalizedLng);
   }
 
   @Input()
@@ -66,12 +85,16 @@ export class MapPreview implements AfterViewInit, OnDestroy {
   private marker?: Leaflet.Marker;
   private readonly markerColor = '#0a6847';
   private _editable = false;
+  private lastExternalCoordinates?: MapCoordinates;
+  private homeCoordinates: MapCoordinates = { ...DEFAULT_COORDINATES };
 
   lat = DEFAULT_LAT;
   lng = DEFAULT_LNG;
+  inputLat = DEFAULT_LAT;
+  inputLng = DEFAULT_LNG;
   mapReady = false;
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+  constructor(@Inject(PLATFORM_ID) private platformId: Object, private zone: NgZone) {}
 
   async ngAfterViewInit(): Promise<void> {
     if (!isPlatformBrowser(this.platformId)) return;
@@ -91,47 +114,52 @@ export class MapPreview implements AfterViewInit, OnDestroy {
       shadowUrl: 'assets/leaflet/marker-shadow.png',
     });
 
-    const mapInstance = L.map(host, {
-      center: [this.lat, this.lng],
-      zoom: DEFAULT_ZOOM,
-      preferCanvas: true,
+    this.zone.runOutsideAngular(() => {
+      const mapInstance = L.map(host, {
+        center: [this.lat, this.lng],
+        zoom: DEFAULT_ZOOM,
+        preferCanvas: true,
+      });
+      this.map = mapInstance;
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }).addTo(mapInstance);
+
+      const markerInstance = L.marker([this.lat, this.lng], {
+        draggable: this._editable,
+        icon: this.createBaseIcon(),
+      }).addTo(mapInstance);
+      this.marker = markerInstance;
+      this.homeCoordinates = { lat: this.lat, lng: this.lng };
+
+      this.syncMarkerDraggable();
+
+      markerInstance.on('moveend', (event: Leaflet.LeafletEvent) => {
+        if (!this._editable) return;
+        const target = event.target as Leaflet.Marker;
+        const pos = target.getLatLng();
+        const currentZoom = this.map?.getZoom() ?? DEFAULT_ZOOM;
+        this.zone.run(() =>
+          this.setMarkerAndView(pos.lat, pos.lng, currentZoom, { animate: false })
+        );
+      });
+
+      this.zone.run(() =>
+        this.setMarkerAndView(this.lat, this.lng, mapInstance.getZoom(), {
+          emit: false,
+          animate: false,
+        })
+      );
+
+      setTimeout(() => mapInstance.invalidateSize(), 0);
     });
-    this.map = mapInstance;
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    }).addTo(mapInstance);
-
-    const markerInstance = L.marker([this.lat, this.lng], {
-      draggable: this._editable,
-      icon: this.createBaseIcon(),
-    }).addTo(mapInstance);
-    this.marker = markerInstance;
-
-    this.syncMarkerDraggable();
-
-    markerInstance.on('moveend', (event: Leaflet.LeafletEvent) => {
-      if (!this._editable) return;
-      const target = event.target as Leaflet.Marker;
-      const pos = target.getLatLng();
-      const currentZoom = this.map?.getZoom() ?? DEFAULT_ZOOM;
-      this.setMarkerAndView(pos.lat, pos.lng, currentZoom, { animate: false });
+    this.zone.run(() => {
+      this.mapReady = true;
     });
-
-    mapInstance.on('click', (event: Leaflet.LeafletMouseEvent) => {
-      if (!this._editable) return;
-      this.setMarkerAndView(event.latlng.lat, event.latlng.lng, 15);
-    });
-
-    this.setMarkerAndView(this.lat, this.lng, mapInstance.getZoom(), {
-      emit: false,
-      animate: false,
-    });
-
-    setTimeout(() => mapInstance.invalidateSize(), 0);
-    this.mapReady = true;
   }
 
   ngOnDestroy(): void {
@@ -145,8 +173,13 @@ export class MapPreview implements AfterViewInit, OnDestroy {
   goToLatLng(): void {
     if (!this._editable) return;
 
-    const lat = Number(this.lat);
-    const lng = Number(this.lng);
+    const latRaw = this.inputLat ?? '';
+    const lngRaw = this.inputLng ?? '';
+
+    const lat =
+      typeof latRaw === 'number' ? latRaw : Number.parseFloat(String(latRaw).replace(',', '.'));
+    const lng =
+      typeof lngRaw === 'number' ? lngRaw : Number.parseFloat(String(lngRaw).replace(',', '.'));
 
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
       alert('Coordenadas inválidas');
@@ -159,7 +192,13 @@ export class MapPreview implements AfterViewInit, OnDestroy {
   recenter(): void {
     if (!this.map) return;
     const zoom = this.map.getZoom() ?? DEFAULT_ZOOM;
-    this.map.setView([this.lat, this.lng], zoom, { animate: true });
+    this.map.setView([this.homeCoordinates.lat, this.homeCoordinates.lng], zoom, {
+      animate: true,
+    });
+    this.setMarkerAndView(this.homeCoordinates.lat, this.homeCoordinates.lng, zoom, {
+      emit: false,
+      animate: false,
+    });
   }
 
   private applyExternalCoordinates(lat: number, lng: number): void {
@@ -170,6 +209,9 @@ export class MapPreview implements AfterViewInit, OnDestroy {
 
     this.lat = normalizedLat;
     this.lng = normalizedLng;
+    this.inputLat = normalizedLat;
+    this.inputLng = normalizedLng;
+    this.homeCoordinates = { lat: normalizedLat, lng: normalizedLng };
 
     if (changed && (this.map || this.marker)) {
       this.setMarkerAndView(normalizedLat, normalizedLng, this.map?.getZoom(), {
@@ -190,9 +232,28 @@ export class MapPreview implements AfterViewInit, OnDestroy {
 
     this.lat = normalizedLat;
     this.lng = normalizedLng;
+    this.inputLat = normalizedLat;
+    this.inputLng = normalizedLng;
 
     if (this.marker) {
       this.marker.setLatLng([normalizedLat, normalizedLng]);
+    } else if (this.leaflet && this.map) {
+      const markerInstance = this.leaflet
+        .marker([normalizedLat, normalizedLng], {
+          draggable: this._editable,
+          icon: this.createBaseIcon(),
+        })
+        .addTo(this.map);
+      this.marker = markerInstance;
+      this.syncMarkerDraggable();
+
+      markerInstance.on('moveend', (event: Leaflet.LeafletEvent) => {
+        if (!this._editable) return;
+        const target = event.target as Leaflet.Marker;
+        const pos = target.getLatLng();
+        const currentZoom = this.map?.getZoom() ?? DEFAULT_ZOOM;
+        this.setMarkerAndView(pos.lat, pos.lng, currentZoom, { animate: false });
+      });
     }
 
     if (this.map) {
@@ -201,8 +262,11 @@ export class MapPreview implements AfterViewInit, OnDestroy {
       this.map.setView([normalizedLat, normalizedLng], targetZoom, { animate });
     }
 
-    if (options?.emit !== false && this._editable) {
-      this.coordinatesChange.emit({ lat: this.lat, lng: this.lng });
+    if (options?.emit !== false) {
+      this.homeCoordinates = { lat: this.lat, lng: this.lng };
+      if (this._editable) {
+        this.coordinatesChange.emit({ lat: this.lat, lng: this.lng });
+      }
     }
   }
 
