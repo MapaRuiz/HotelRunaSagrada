@@ -105,6 +105,13 @@
   margin: 0;
 }
 
+.coords-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  font-size: 0.95rem;
+}
+
 .carousel-control-prev,
 .carousel-control-next {
   width: 3rem;

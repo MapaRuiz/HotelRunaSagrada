@@ -35,3 +35,44 @@
 .services-detail .badge.text-bg-danger {
   background: #c34f4f !important;
 }
+
+.services-detail .media-row {
+  align-items: stretch;
+}
+
+.services-detail .media-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.services-detail .media-column .imagenes-wrapper,
+.services-detail .map-column .map-holder {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.services-detail .media-column .imagenes-body {
+  flex: 1 1 auto;
+}
+
+.services-detail .map-column app-map-preview {
+  flex: 1 1 auto;
+  display: block;
+}
+
+.services-detail .coords-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.services-detail .map-column ::ng-deep .map-wrapper {
+  height: 100%;
+}
+
+.services-detail .map-column ::ng-deep .map-preview-map {
+  height: 100%;
+  min-height: 360px;
+}

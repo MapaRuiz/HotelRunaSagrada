@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { ServiceOffering } from '../../../../model/service-offering';
-import { ServicesScheduleTable } from "../services-schedule-table/services-schedule-table";
+import { ServicesScheduleTable } from '../services-schedule-table/services-schedule-table';
 import { ServiceSchedule } from '../../../../model/service-schedule';
+import { MapPreview } from '../map-preview/map-preview';
 
 @Component({
   selector: 'app-services-detail',
   standalone: true,
-  imports: [CommonModule, ServicesScheduleTable],
+  imports: [CommonModule, ServicesScheduleTable, MapPreview],
   templateUrl: './services-detail.html',
   styleUrls: ['./services-detail.css', '../services-form/services-form.css'],
 })
@@ -25,7 +26,9 @@ export class ServicesDetail implements OnChanges {
     this.syncImageStatus();
   }
 
-  trackByIndex(index: number): number { return index; }
+  trackByIndex(index: number): number {
+    return index;
+  }
 
   setDisplayMode(mode: 'carousel' | 'list'): void {
     if (this.displayMode !== mode) this.displayMode = mode;
@@ -43,8 +46,12 @@ export class ServicesDetail implements OnChanges {
     this.activeSlide = (this.activeSlide + 1) % total;
   }
 
-  onImageLoaded(index: number): void { this.imageStatus[index] = 'loaded'; }
-  onImageError(index: number): void { this.imageStatus[index] = 'error'; }
+  onImageLoaded(index: number): void {
+    this.imageStatus[index] = 'loaded';
+  }
+  onImageError(index: number): void {
+    this.imageStatus[index] = 'error';
+  }
 
   beginEdit(): void {
     if (!this.service) return;
