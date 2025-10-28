@@ -57,5 +57,5 @@
 }
 
 .payment-method-item .method-details {
-  font-family: 'Courier New', monospace;
+  font-family: var(--font-body);
 }

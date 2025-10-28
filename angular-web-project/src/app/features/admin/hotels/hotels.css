@@ -3,8 +3,8 @@
   flex-direction: column;
   width: 100%;
   min-height: 300px;
-  height: 100%;
-  max-height: 80vh;
+  height: 70vh;
+  max-height: 70vh;
 }
 
 @media (max-width: 768px) {
@@ -13,16 +13,7 @@
   }
 }
 
-.ag-theme-quartz .ag-header {
-  font-family: cursive;
-}
-.ag-theme-quartz .ag-header-group-cell {
-  font-weight: normal;
-  font-size: 22px;
-}
-.ag-theme-quartz .ag-header-cell {
-  font-size: 18px;
-}
+/* AG-Grid headers use Quantico via sharedTable.ts gridTheme config */
 
 /* Estilos para el formulario de crear hotel (inspirado en services-form) */
 .hotel-create-form, .hotel-edit-form {

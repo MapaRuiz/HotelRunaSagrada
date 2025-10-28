@@ -42,13 +42,17 @@ public class RoomTypeController {
 
     @PutMapping("/room-types/{id}")
     public ResponseEntity<RoomType> update(@PathVariable Integer id, @RequestBody RoomTypeRequest body) {
-        RoomType data = new RoomType();
-        data.setName(body.getName());
-        data.setCapacity(body.getCapacity());
-        data.setBasePrice(body.getBasePrice());
-        data.setDescription(body.getDescription());
-        data.setImage(body.getImage());
-        return ResponseEntity.ok(service.update(id, data));
+        try {
+            RoomType data = new RoomType();
+            data.setName(body.getName());
+            data.setCapacity(body.getCapacity());
+            data.setBasePrice(body.getBasePrice());
+            data.setDescription(body.getDescription());
+            data.setImage(body.getImage());
+            return ResponseEntity.ok(service.update(id, data));
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/room-types/{id}")

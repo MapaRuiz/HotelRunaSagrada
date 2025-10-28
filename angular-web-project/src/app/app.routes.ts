@@ -79,6 +79,7 @@ export const routes: Routes = [
       { path: 'room-types', loadComponent: () => import('./features/admin/room-type/room-type').then(m => m.RoomType) },
       { path: 'room', loadComponent: () => import('./features/admin/room/room').then(m => m.Room) },
       { path: 'reservations', loadComponent: () => import('./features/admin/reservation/reservation').then(m => m.ReservationComponent) },
+      { path: 'reports', loadComponent: () => import('./features/admin/reports/reports').then(m => m.ReportsComponent) },
     ]
   },
 

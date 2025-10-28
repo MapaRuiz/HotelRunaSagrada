@@ -15,7 +15,7 @@
 }
 
 .ag-theme-quartz .ag-header {
-  font-family: cursive;
+  font-family: var(--font-title);
 }
 .ag-theme-quartz .ag-header-group-cell {
   font-weight: normal;

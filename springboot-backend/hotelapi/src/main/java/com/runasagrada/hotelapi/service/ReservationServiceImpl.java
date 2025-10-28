@@ -12,6 +12,7 @@ import com.runasagrada.hotelapi.repository.ReservationServiceRepository;
 import com.runasagrada.hotelapi.repository.RoomLockRepository;
 import com.runasagrada.hotelapi.repository.RoomRepository;
 import com.runasagrada.hotelapi.repository.UserRepository;
+import com.runasagrada.hotelapi.repository.PaymentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
@@ -46,6 +47,8 @@ public class ReservationServiceImpl implements ReservationService {
     private RoomRepository roomRepo;
     @Autowired
     private RoomLockRepository lockRepo;
+    @Autowired
+    private PaymentRepository paymentRepo;
 
     @Override
     public Reservation create(Integer userId, Long hotelId, Integer roomId,
@@ -121,13 +124,25 @@ public class ReservationServiceImpl implements ReservationService {
         return saved;
     }
 
-    // Delete reservation and associated locks and services
+    // Delete reservation and associated locks, services, and payments
     @Override
     public void delete(Integer id) {
         Reservation res = reservationRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Reservation not found: " + id));
+
+        // 1. Eliminar payments asociados a esta reservación
+        var payments = paymentRepo.findByReservationId_ReservationId(id);
+        if (!payments.isEmpty()) {
+            paymentRepo.deleteAll(payments);
+        }
+
+        // 2. Eliminar servicios asociados
         reservationServiceRepo.deleteByReservationReservationId(id);
+
+        // 3. Eliminar room locks
         lockRepo.deleteByReservationReservationId(id);
+
+        // 4. Finalmente eliminar la reservación
         reservationRepo.delete(res);
     }
 

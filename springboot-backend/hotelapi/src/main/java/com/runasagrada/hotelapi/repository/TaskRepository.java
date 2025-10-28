@@ -18,4 +18,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
 	List<Task> findByStaffIdAndStatus(Long staffId, TaskStatus status);
 
+	void deleteByRoomId(Integer roomId);
+
+	void deleteByStaffId(Long staffId);
+
 }

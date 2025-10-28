@@ -6,7 +6,7 @@ import { ColDef, GridApi, GridOptions, ModuleRegistry, AllCommunityModule, Pagin
 import { UsersService } from '../../../services/users';
 import { User, Role, RoleEntity } from '../../../model/user';
 import { environment } from '../../../../environments/environment';
-import { AG_GRID_LOCALE, gridTheme as sharedGridTheme } from '../sharedTable';
+import { AG_GRID_LOCALE, gridTheme as sharedGridTheme, PAGINATION_CONFIG } from '../sharedTable';
 import { ActionButtonsComponent } from '../action-buttons-cell/action-buttons-cell';
 import { ActionButtonsParams } from '../action-buttons-cell/action-buttons-param';
 import { UserFormComponent, UserFormPayload } from './user-form/user-form';
@@ -171,6 +171,7 @@ export class Users implements OnInit {
     localeText: AG_GRID_LOCALE,
     rowSelection: 'single',
     rowHeight: 80,
+    ...PAGINATION_CONFIG,
     getRowId: params => params.data.user_id?.toString(),
     onGridReady: params => { 
       this.gridApi = params.api

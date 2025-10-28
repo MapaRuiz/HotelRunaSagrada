@@ -111,6 +111,14 @@ export class ServicesTable {
   }
 
   gridOptions: GridOptions<ServiceOffering> = {
+    defaultColDef: { resizable: true, sortable: true, filter: true },
+    animateRows: true,
+    pagination: true,
+    paginationPageSize: 9,
+    paginationPageSizeSelector: [9, 15, 20, 50],
+    domLayout: 'normal',
+    rowHeight: 60,
+    headerHeight: 50,
     localeText: AG_GRID_LOCALE,
     rowSelection: 'single',
     getRowId: (params) => params.data.id?.toString(),

@@ -6,7 +6,7 @@ import { ColDef, GridApi, GridOptions, ModuleRegistry, AllCommunityModule, Pagin
 import { HotelsService } from '../../../services/hotels';
 import { AmenitiesService } from '../../../services/amenities';
 import { environment } from '../../../../environments/environment';
-import { AG_GRID_LOCALE, gridTheme as sharedGridTheme } from '../sharedTable';
+import { AG_GRID_LOCALE, gridTheme as sharedGridTheme, PAGINATION_CONFIG } from '../sharedTable';
 import { ActionButtonsComponent } from '../action-buttons-cell/action-buttons-cell';
 import { ActionButtonsParams } from '../action-buttons-cell/action-buttons-param';
 import { HotelDetailComponent } from './hotel-detail/hotel-detail';
@@ -93,6 +93,7 @@ export class HotelsComponent implements OnInit {
     localeText: AG_GRID_LOCALE,
     rowSelection: 'single',
     rowHeight: 100,
+    ...PAGINATION_CONFIG,
     getRowId: params => params.data.hotel_id?.toString(),
     onGridReady: params => { 
       this.gridApi = params.api
