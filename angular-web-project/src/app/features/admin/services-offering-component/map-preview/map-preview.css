@@ -26,6 +26,8 @@
 
 .coords-form button {
   padding: 6px 12px;
+  flex: 0 0 auto;
+  align-self: flex-end;
 }
 
 .coords-form input[readonly] {

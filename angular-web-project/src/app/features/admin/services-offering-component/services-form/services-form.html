@@ -221,16 +221,6 @@
 
     <div class="col-12">
       <label class="form-label d-block">Ubicación</label>
-      <div class="coords-display text-muted mb-2">
-        <span>
-          <strong class="text-dark">Latitud:</strong>
-          {{ draft.latitude != null ? (draft.latitude | number : '1.6-6') : '—' }}
-        </span>
-        <span>
-          <strong class="text-dark">Longitud:</strong>
-          {{ draft.longitude != null ? (draft.longitude | number : '1.6-6') : '—' }}
-        </span>
-      </div>
       <app-map-preview
         [coordinates]="currentCoordinates"
         [editable]="true"
