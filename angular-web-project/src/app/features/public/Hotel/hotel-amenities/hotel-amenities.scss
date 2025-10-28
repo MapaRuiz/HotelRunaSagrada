@@ -10,6 +10,8 @@
   /* ------------ sección ------------ */
   .amenities-section {
     padding-block: clamp(2rem, 4vw, 4rem);
+    position: relative;
+    z-index: auto; /* Resetear z-index para no interferir con modales */
   }
 
   /* ------------ header ------------ */
@@ -101,6 +103,7 @@
   /* ------------ card ------------ */
   .amenity-card {
     position: relative;
+    z-index: auto; /* No crear nuevo stacking context */
     height: 200px;
     border-radius: 16px;
     overflow: hidden;
@@ -149,7 +152,7 @@
 
       .card-content {
         position: relative;
-        z-index: 2;
+        z-index: 1; /* z-index bajo dentro del card */
         padding: 1.5rem;
         height: 100%;
         display: flex;

@@ -2,6 +2,9 @@
   min-height: 70vh;
   overflow-x: clip;
   /* o hidden si tu target no soporta clip */
+  padding-bottom: 4rem; /* Espacio inferior para separar del footer */
+  position: relative;
+  z-index: 1; /* z-index bajo para no interferir con modales */
 }
 .rooms-section {
   .container {
@@ -47,8 +50,8 @@
   /* ===== Overlay PNG a la derecha, superpuesto ===== */
   .overlay-img {
     position: absolute;
-    z-index: 3;
-    /* por encima del listado visualmente */
+    z-index: 2;
+    /* por encima del listado visualmente, pero bajo para no interferir con modales */
     pointer-events: none;
     /* no bloquea clics del menú */
     top: -10rem;

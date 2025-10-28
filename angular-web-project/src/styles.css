@@ -1,7 +1,19 @@
 @import 'leaflet/dist/leaflet.css';
+
+/* ===== CRÍTICO: Modal service debe tener máximo z-index ===== */
+/* Esto garantiza que el modal esté SIEMPRE por encima de cualquier layer o stacking context */
 app-service-modal {
-  isolation: isolate;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483647 !important; /* Máximo z-index posible en CSS */
+  pointer-events: none !important; /* Permite clicks a través del componente */
+  isolation: isolate !important;
 }
+
+app-service-modal > * {
+  pointer-events: auto; /* Los hijos del modal sí capturan eventos */
+}
+
 html,
 body {
   overflow-x: clip;

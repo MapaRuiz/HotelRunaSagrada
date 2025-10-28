@@ -74,7 +74,7 @@
     top: 0;
     left: 0;
     right: 0;
-    z-index: 2;
+    z-index: 1; /* z-index bajo para no interferir con modales */
     color: #fff;
     background: #d11;
     margin: 0;

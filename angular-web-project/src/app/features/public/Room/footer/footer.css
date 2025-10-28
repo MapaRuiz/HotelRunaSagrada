@@ -1,0 +1,82 @@
+/* Footer */
+.footer {
+  background-image: url("https://i.pinimg.com/1200x/ce/ec/77/ceec77f479bd81a777be38eaecfa3c25.jpg");
+  color: #f2f3ed;
+  padding: 10px 20px 15px;
+  text-align: center;
+  border-radius: 60px 60px 0 0;
+  background-repeat: no-repeat;
+  background-size: cover ;
+}
+
+/* Contenedor */
+.footer-container.centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Logo */
+.footer-logo img {
+  width: 120px;
+  height: auto;
+  margin-bottom: 4px;
+  border-radius: 8px;
+  box-shadow: 0px 1px 4px rgba(0,0,0,0.2);
+}
+
+.footer-logo h3 {
+  font-size: 20px;
+  color: #e0d4be;
+  margin: 3px 0;
+}
+
+.footer-lema {
+  font-size: 13px;
+  color: #f2f3ed;
+  font-style: italic;
+  margin: 0;
+}
+
+/* Iconos sociales */
+.footer-icons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.social-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background-color: rgba(242, 243, 237, 0.1);
+  color: #f2f3ed;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.social-btn:hover {
+  background-color: #bcc399;
+  color: #151513;
+  transform: scale(1.08);
+}
+
+/* Contacto */
+.footer-contacto p {
+  font-size: 14px;
+  color: #e0d4be;
+  margin: 0;
+}
+
+/* Copy */
+.footer-copy {
+  margin-top: 12px;
+  border-top: 1px solid rgba(242, 243, 237, 0.15);
+  padding-top: 8px;
+  font-size: 12px;
+  color: #eef0e5;
+}
+

@@ -3,19 +3,27 @@ body.has-modal-open {
     overflow: hidden !important;
 }
 
-/* ===== overlay/portal ===== */
-:root {
-    --z-modal: 20;
-    /* altísimo para ganar a cualquier stacking context */
+/* ===== overlay/portal - FUERA de cualquier @layer ===== */
+/* NO usar @layer aquí para que tenga máxima prioridad */
+app-service-modal {
+    /* El componente modal debe estar FUERA de layers */
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647 !important; /* Máximo z-index posible */
+    display: grid;
+    place-items: center;
+    pointer-events: auto;
+    isolation: isolate; /* Crea nuevo stacking context independiente */
 }
 
 .svc-wrap {
     position: fixed;
     inset: 0;
-    z-index: var(--z-modal);
+    z-index: 2147483647; /* Usar el mismo z-index máximo */
     display: grid;
     place-items: center;
     pointer-events: auto;
+    isolation: isolate;
 }
 
 .svc-backdrop {

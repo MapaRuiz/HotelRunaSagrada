@@ -64,7 +64,9 @@
         <span class="v">{{ capacity }}</span>
       </span>
       <span class="chip">
-        <span class="k">{{ selectedCheckIn && selectedCheckOut ? 'Disponibles' : 'Disponibles hoy' }}</span>
+        <span class="k">{{
+          selectedCheckIn && selectedCheckOut ? 'Disponibles' : 'Disponibles hoy'
+        }}</span>
         <span class="v">{{ availableCount }}</span>
       </span>
       <span class="chip">
@@ -107,9 +109,10 @@
       </div>
 
       <aside class="aside-col" #reserveSection>
-        <app-room-form 
+        <app-room-form
           (reservationCreated)="onReservationCreated($event)"
-          (datesChanged)="onDatesChanged($event)">
+          (datesChanged)="onDatesChanged($event)"
+        >
         </app-room-form>
       </aside>
     </div>
@@ -138,4 +141,5 @@
     >
     </app-room-rv>
   </div>
+  <app-footer></app-footer>
 </section>

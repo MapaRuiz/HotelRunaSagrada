@@ -13,11 +13,12 @@ import { Reservation } from '../../../../model/reservation';
 import { RoomFormComponent } from '../room-form/room-form';
 import { RoomRvComponent } from '../room-rv/room-rv';
 import { RoomGalleryComponent } from '../room-gallery/room-gallery';
+import { Footer } from '../footer/footer';
 
 @Component({
   selector: 'app-room-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, RoomFormComponent, RoomRvComponent, RoomGalleryComponent],
+  imports: [CommonModule, RouterModule, RoomFormComponent, RoomRvComponent, RoomGalleryComponent, Footer],
   templateUrl: './room-detail.html',
   styleUrls: ['./room-detail.scss'],
 })

@@ -10,3 +10,7 @@
 :host app-hotel-hero * {
   background-color: transparent;
 }
+
+:host app-footer {
+  margin-top: 0; /* El espacio lo maneja rooms-section con padding-bottom */
+}
