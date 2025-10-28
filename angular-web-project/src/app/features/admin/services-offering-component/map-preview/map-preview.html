@@ -1,0 +1,51 @@
+<div class="coords-form">
+  <div class="coords-field">
+    <label class="form-label mb-1">Latitud</label>
+    <input
+      type="number"
+      class="form-control input-soft"
+      step="any"
+      placeholder="Latitud"
+      [(ngModel)]="inputLat"
+      name="lat"
+      inputmode="decimal"
+      [readonly]="!editable"
+    />
+  </div>
+  <div class="coords-field">
+    <label class="form-label mb-1">Longitud</label>
+    <input
+      type="number"
+      class="form-control input-soft"
+      step="any"
+      placeholder="Longitud"
+      [(ngModel)]="inputLng"
+      name="lng"
+      inputmode="decimal"
+      [readonly]="!editable"
+    />
+  </div>
+  <button
+    *ngIf="editable"
+    class="btn btn-olive"
+    type="button"
+    (click)="goToLatLng()"
+    [disabled]="!editable"
+  >
+    <i class="bi bi-arrow-right"></i>
+  </button>
+</div>
+
+<div class="map-wrapper">
+  <button
+    type="button"
+    class="btn btn-olive map-home-btn"
+    (click)="recenter()"
+    [disabled]="!mapReady"
+    title="Volver al marcador"
+  >
+    <i class="bi bi-crosshair"></i>
+    <span class="btn-label">Centrar</span>
+  </button>
+  <div #mapContainer class="map-preview-map"></div>
+</div>

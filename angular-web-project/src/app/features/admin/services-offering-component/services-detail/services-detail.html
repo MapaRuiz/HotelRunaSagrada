@@ -3,9 +3,7 @@
     <div class="card-body row g-3">
       <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2 mb-1">
         <h5 class="card-title mb-0">Detalle del servicio</h5>
-        <button type="button" class="btn btn-olive btn-sm" (click)="beginEdit()">
-          Editar
-        </button>
+        <button type="button" class="btn btn-olive btn-sm" (click)="beginEdit()">Editar</button>
       </div>
 
       <div class="col-md-6">
@@ -60,24 +58,6 @@
         <div class="form-control-plaintext">
           <ng-container *ngIf="current.base_price != null; else emptyField">
             {{ current.base_price | currency : 'USD' : 'symbol-narrow' : '1.2-2' }}
-          </ng-container>
-        </div>
-      </div>
-
-      <div class="col-md-4">
-        <label class="form-label">Latitud</label>
-        <div class="form-control-plaintext">
-          <ng-container *ngIf="current.latitude != null; else emptyField">
-            {{ current.latitude }}
-          </ng-container>
-        </div>
-      </div>
-
-      <div class="col-md-4">
-        <label class="form-label">Longitud</label>
-        <div class="form-control-plaintext">
-          <ng-container *ngIf="current.longitude != null; else emptyField">
-            {{ current.longitude }}
           </ng-container>
         </div>
       </div>
@@ -186,6 +166,17 @@
             </ng-container>
           </div>
         </div>
+      </div>
+
+      <div class="col-12">
+        <app-map-preview
+          [coordinates]="
+            current.latitude != null && current.longitude != null
+              ? { lat: current.latitude, lng: current.longitude }
+              : null
+          "
+          [editable]="false"
+        ></app-map-preview>
       </div>
       <div class="col-12">
         <label class="form-label">Horarios</label>

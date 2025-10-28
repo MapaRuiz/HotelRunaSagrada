@@ -25,12 +25,22 @@
 
     <div class="col-md-6">
       <label class="form-label">Subcategoria</label>
-      <input class="form-control input-soft" [(ngModel)]="draft.subcategory" name="subcategory" required />
+      <input
+        class="form-control input-soft"
+        [(ngModel)]="draft.subcategory"
+        name="subcategory"
+        required
+      />
     </div>
 
     <div class="col-md-6">
       <label class="form-label">Descripcion</label>
-      <input class="form-control input-soft" [(ngModel)]="draft.description" name="description" required />
+      <input
+        class="form-control input-soft"
+        [(ngModel)]="draft.description"
+        name="description"
+        required
+      />
     </div>
 
     <div class="col-md-4">
@@ -67,30 +77,6 @@
         min="0"
         required
       />
-    </div>
-
-    <div class="col-md-4">
-      <label class="form-label">Coordenadas</label>
-      <div class="row g-2">
-        <div class="col-6">
-          <input
-            type="text"
-            class="form-control input-soft"
-            [(ngModel)]="draft.latitude"
-            name="latitude"
-            required
-          />
-        </div>
-        <div class="col-6">
-          <input
-            type="text"
-            class="form-control input-soft"
-            [(ngModel)]="draft.longitude"
-            name="longitude"
-            required
-          />
-        </div>
-      </div>
     </div>
 
     <!-- image_urls-->
@@ -231,6 +217,15 @@
           Quitar imagen actual
         </button>
       </div>
+    </div>
+
+    <div class="col-12">
+      <label class="form-label d-block">Ubicación</label>
+      <app-map-preview
+        [coordinates]="currentCoordinates"
+        [editable]="true"
+        (coordinatesChange)="onCoordinatesChange($event)"
+      ></app-map-preview>
     </div>
 
     <div class="col-12">

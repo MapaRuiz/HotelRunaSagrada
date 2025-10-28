@@ -6,6 +6,8 @@ import { ServicesScheduleTable } from "../services-schedule-table/services-sched
 import { ServiceSchedule } from '../../../../model/service-schedule';
 import { ServiceScheduleForm } from "../service-schedule-form/service-schedule-form";
 import { ServiceScheduleRequest } from '../../../../services/service-offering-service';
+import { MapPreview } from '../map-preview/map-preview';
+import type { MapCoordinates } from '../map-preview/map-preview';
 
 export interface ServicesFormPayload {
   draft: Partial<ServiceOffering>;
@@ -28,7 +30,7 @@ interface PendingScheduleUpdate {
 @Component({
   selector: 'app-services-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, ServicesScheduleTable, ServiceScheduleForm],
+  imports: [CommonModule, FormsModule, ServicesScheduleTable, ServiceScheduleForm, MapPreview],
   templateUrl: './services-form.html',
   styleUrls: ['./services-form.css']
 })
@@ -58,6 +60,34 @@ export class ServicesFormComponent {
   private pendingUpdates: PendingScheduleUpdate[] = [];
 
   constructor() {}
+
+  get currentCoordinates(): MapCoordinates | null {
+    const rawLat = this.draft.latitude;
+    const rawLng = this.draft.longitude;
+    if (rawLat === null || rawLat === undefined || rawLng === null || rawLng === undefined) {
+      return null;
+    }
+
+    const lat = Number(rawLat);
+    const lng = Number(rawLng);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      return null;
+    }
+
+    return { lat, lng };
+  }
+
+  onCoordinatesChange(coords: MapCoordinates): void {
+    const lat = Number(coords.lat.toFixed(6));
+    const lng = Number(coords.lng.toFixed(6));
+
+    this.draft = {
+      ...this.draft,
+      latitude: lat,
+      longitude: lng,
+    };
+  }
 
   get carouselId(): string {
     const id = this.draft.id ?? 'temp';
