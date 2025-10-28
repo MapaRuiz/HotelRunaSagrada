@@ -2,6 +2,7 @@ package com.runasagrada.hotelapi.service;
 
 import com.runasagrada.hotelapi.model.StaffMember;
 import com.runasagrada.hotelapi.repository.StaffMemberRepository;
+import com.runasagrada.hotelapi.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,9 @@ public class StaffMemberServiceImpl implements StaffMemberService {
 
 	@Autowired
 	private ServiceHelper helper;
+	
+	@Autowired
+	private TaskRepository taskRepository;
 
 	@Override
 	@Transactional(readOnly = true)
@@ -64,6 +68,8 @@ public class StaffMemberServiceImpl implements StaffMemberService {
 	@Override
 	public void delete(Long id) {
 		StaffMember db = findById(id);
+		// Delete tasks associated with this staff member first
+		taskRepository.deleteByStaffId(id);
 		staffMembers.delete(db);
 		helper.resyncIdentity("staff_members", "staff_id");
 	}

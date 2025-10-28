@@ -38,7 +38,7 @@ public class RoomType {
     @Column(name = "image")
     private String image; // 1 url
 
-    // Borrado en cascada de Rooms cuando se elimina un RoomType
-    @OneToMany(mappedBy = "roomType", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    // Relación con Rooms - borrado manual en servicio para control fino
+    @OneToMany(mappedBy = "roomType", fetch = FetchType.LAZY)
     private Set<Room> rooms = new LinkedHashSet<>();
 }

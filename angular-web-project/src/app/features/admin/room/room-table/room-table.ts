@@ -137,6 +137,9 @@ export class RoomsTableComponent implements OnInit {
   gridOptions: GridOptions<Room> = {
     localeText: AG_GRID_LOCALE,
     rowSelection: 'single',
+    pagination: true,
+    paginationPageSize: 9,
+    paginationPageSizeSelector: [9, 15, 20, 50],
     getRowId: params => params.data.room_id?.toString() || '',
     onGridReady: params => {
       this.gridApi = params.api

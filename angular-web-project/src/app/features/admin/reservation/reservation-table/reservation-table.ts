@@ -115,6 +115,9 @@ export class ReservationTableComponent implements OnInit {
   gridOptions: GridOptions<Reservation> = {
     localeText: AG_GRID_LOCALE,
     rowSelection: 'single',
+    pagination: true,
+    paginationPageSize: 9,
+    paginationPageSizeSelector: [9, 15, 20, 50],
     getRowId: params => params.data.reservation_id?.toString() || '',
     onGridReady: params => { 
       this.gridApi = params.api

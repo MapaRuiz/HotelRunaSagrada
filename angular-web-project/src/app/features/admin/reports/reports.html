@@ -1,0 +1,243 @@
+<div class="container-fluid p-4">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-1">Reportes</h2>
+      <p class="text-secondary mb-0">Genera reportes personalizados del sistema</p>
+    </div>
+  </div>
+
+  <!-- Filters Card -->
+  <div class="card-elev p-4 mb-4">
+    <h4 class="mb-3"><i class="bi bi-funnel me-2"></i>Filtros de Reporte</h4>
+
+    <div class="row g-3">
+      <!-- Report Type -->
+      <div class="col-md-6">
+        <label class="form-label">Tipo de Reporte</label>
+        <select class="form-select" [(ngModel)]="filter.reportType" (change)="resetReport()">
+          <option value="hotels">Hoteles - Resumen General</option>
+          <option value="reservations">Reservas por Rango de Fechas</option>
+          <option value="financial">Financiero - Ingresos y Pagos</option>
+          <option value="services">Servicios Más Solicitados</option>
+        </select>
+      </div>
+
+      <!-- Hotel Filter (conditional) -->
+      <div class="col-md-6" *ngIf="filter.reportType !== 'hotels'">
+        <label class="form-label">Hotel (Opcional)</label>
+        <select class="form-select" [(ngModel)]="filter.hotelId">
+          <option [value]="undefined">Todos los hoteles</option>
+          <option *ngFor="let hotel of hotels" [value]="hotel.hotel_id">
+            {{ hotel.name }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Date Range -->
+      <div class="col-md-3">
+        <label class="form-label">Fecha Inicio</label>
+        <input
+          type="date"
+          class="form-control"
+          [(ngModel)]="filter.startDate"
+          (change)="resetReport()"
+        />
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Fecha Fin</label>
+        <input
+          type="date"
+          class="form-control"
+          [(ngModel)]="filter.endDate"
+          (change)="resetReport()"
+        />
+      </div>
+
+      <!-- Generate Button -->
+      <div class="col-md-12">
+        <button class="btn btn-olive btn-lg w-100" (click)="generateReport()" [disabled]="loading">
+          <i
+            class="bi"
+            [ngClass]="loading ? 'bi-hourglass-split' : 'bi-file-earmark-bar-graph'"
+          ></i>
+          {{ loading ? 'Generando...' : 'Generar Reporte' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Results -->
+  <div class="card-elev p-4" *ngIf="reportGenerated">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4 class="mb-0"><i class="bi bi-file-text me-2"></i>Resultados del Reporte</h4>
+      <div class="d-flex gap-2 align-items-center">
+        <!-- Success message -->
+        <div class="alert alert-success mb-0 py-1 px-3 export-success" *ngIf="exportSuccess">
+          <i class="bi bi-check-circle me-1"></i>
+          Exportado correctamente
+        </div>
+        <!-- Export buttons -->
+        <div class="btn-group">
+          <button class="btn btn-sm btn-outline-olive" (click)="exportToPDF()">
+            <i class="bi bi-file-pdf me-1"></i>PDF
+          </button>
+          <button class="btn btn-sm btn-outline-olive" (click)="exportToExcel()">
+            <i class="bi bi-file-excel me-1"></i>Excel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hotels Report -->
+    <div *ngIf="filter.reportType === 'hotels' && reportData.hotels">
+      <div class="table-responsive">
+        <table class="table table-modern">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Ubicación</th>
+              <th>Check-in / Check-out</th>
+              <th>Amenities</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let hotel of reportData.hotels">
+              <td data-label="ID">{{ hotel.hotel_id }}</td>
+              <td data-label="Nombre">{{ hotel.name }}</td>
+              <td data-label="Ubicación">{{ hotel.latitude }}, {{ hotel.longitude }}</td>
+              <td data-label="Horarios">
+                {{ hotel.check_in_after || '—' }} / {{ hotel.check_out_before || '—' }}
+              </td>
+              <td data-label="Amenities">
+                {{ hotel.amenities?.length || 0 }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="alert alert-info mt-3">
+        <strong>Total de hoteles:</strong> {{ reportData.hotels.length }}
+      </div>
+    </div>
+
+    <!-- Reservations Report -->
+    <div *ngIf="filter.reportType === 'reservations' && reportData.reservations">
+      <div class="table-responsive">
+        <table class="table table-modern">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Usuario</th>
+              <th>Habitación</th>
+              <th>Check-in</th>
+              <th>Check-out</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let reservation of reportData.reservations">
+              <td data-label="ID">{{ reservation.reservation_id }}</td>
+              <td data-label="Usuario">{{ reservation.user_id }}</td>
+              <td data-label="Habitación">{{ reservation.room_id }}</td>
+              <td data-label="Check-in">{{ reservation.check_in | date : 'short' }}</td>
+              <td data-label="Check-out">{{ reservation.check_out | date : 'short' }}</td>
+              <td data-label="Estado">
+                <span
+                  class="badge"
+                  [class.bg-success]="reservation.status === 'CONFIRMED'"
+                  [class.bg-warning]="reservation.status === 'PENDING'"
+                  [class.bg-info]="reservation.status === 'CHECKIN'"
+                  [class.bg-secondary]="reservation.status === 'FINISHED'"
+                >
+                  {{ reservation.status }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="alert alert-info mt-3">
+        <strong>Total de reservas:</strong> {{ reportData.reservations.length }}
+      </div>
+    </div>
+
+    <!-- Financial Report -->
+    <div *ngIf="filter.reportType === 'financial' && reportData.financial">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="card-elev p-3 text-center">
+            <div class="text-secondary small mb-1">Ingresos Totales</div>
+            <div class="fs-2 fw-bold text-success">
+              ${{ reportData.financial.totalIncome | number : '1.2-2' }}
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card-elev p-3 text-center">
+            <div class="text-secondary small mb-1">Total Reservas</div>
+            <div class="fs-2 fw-bold text-primary">
+              {{ reportData.financial.totalReservations }}
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card-elev p-3 text-center">
+            <div class="text-secondary small mb-1">Ingreso Promedio</div>
+            <div class="fs-2 fw-bold text-info">
+              ${{ reportData.financial.averageRevenue | number : '1.2-2' }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Services Report -->
+    <div *ngIf="filter.reportType === 'services' && reportData.services">
+      <div class="table-responsive">
+        <table class="table table-modern">
+          <thead>
+            <tr>
+              <th>Servicio</th>
+              <th>Cantidad Solicitada</th>
+              <th>Ingreso Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let service of reportData.services">
+              <td data-label="Servicio">{{ service.name }}</td>
+              <td data-label="Cantidad">{{ service.count }}</td>
+              <td data-label="Ingreso">
+                <span class="text-success fw-semibold">
+                  ${{ service.totalPrice | number : '1.2-2' }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="row g-3 mt-2">
+        <div class="col-md-6">
+          <div class="alert alert-info mb-0">
+            <strong>Total servicios solicitados:</strong>
+            {{ getTotalServicesCount() }}
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="alert alert-success mb-0">
+            <strong>Ingreso total:</strong>
+            ${{ getTotalServicesRevenue() | number : '1.2-2' }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="card-elev p-5 text-center text-secondary" *ngIf="!reportGenerated && !loading">
+    <i class="bi bi-file-earmark-text display-1 mb-3"></i>
+    <p class="lead">Selecciona los filtros y genera un reporte</p>
+  </div>
+</div>

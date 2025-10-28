@@ -5,10 +5,14 @@ import com.runasagrada.hotelapi.model.User;
 import com.runasagrada.hotelapi.repository.ReservationRepository;
 import com.runasagrada.hotelapi.repository.RoleRepository;
 import com.runasagrada.hotelapi.repository.UserRepository;
+import com.runasagrada.hotelapi.repository.StaffMemberRepository;
+import com.runasagrada.hotelapi.repository.PaymentMethodRepository;
+import com.runasagrada.hotelapi.repository.PaymentRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -32,6 +36,12 @@ public class UserServiceImpl implements UserService {
     private ReservationRepository reservationRepo;
     @Autowired
     private ReservationService reservationService;
+    @Autowired
+    private StaffMemberRepository staffMemberRepo;
+    @Autowired
+    private PaymentMethodRepository paymentMethodRepo;
+    @Autowired
+    private PaymentRepository paymentRepo;
 
     @Override
     public User register(User u, String roleName) {
@@ -78,7 +88,41 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void delete(Integer id) {
+        // Verificar que el usuario existe
+        if (!users.existsById(id)) {
+            throw new NoSuchElementException("User not found: " + id);
+        }
+
+        // 1. Eliminar staff members asociados al usuario
+        var staffMembers = staffMemberRepo.findByUserId(id.longValue());
+        if (staffMembers != null) {
+            staffMemberRepo.delete(staffMembers);
+        }
+
+        // 2. Eliminar pagos asociados a los payment methods del usuario
+        var paymentMethods = paymentMethodRepo.findByUserId_UserId(id);
+        for (var paymentMethod : paymentMethods) {
+            var payments = paymentRepo.findByPaymentMethodId_PaymentMethodId(paymentMethod.getPaymentMethodId());
+            if (!payments.isEmpty()) {
+                paymentRepo.deleteAll(payments);
+            }
+        }
+
+        // 3. Eliminar payment methods del usuario
+        if (!paymentMethods.isEmpty()) {
+            paymentMethodRepo.deleteAll(paymentMethods);
+        }
+
+        // 4. Eliminar reservas del usuario (esto también limpia room locks y sus
+        // payments)
+        var reservations = reservationRepo.findByUserUserId(id);
+        for (var reservation : reservations) {
+            reservationService.delete(reservation.getReservationId());
+        }
+
+        // 5. Finalmente eliminar el usuario
         users.deleteById(id);
         helper.resyncIdentity("users", "user_id");
     }

@@ -10,6 +10,7 @@ import com.runasagrada.hotelapi.repository.ReservationRepository;
 import com.runasagrada.hotelapi.repository.RoomLockRepository;
 import com.runasagrada.hotelapi.repository.RoomRepository;
 import com.runasagrada.hotelapi.repository.RoomTypeRepository;
+import com.runasagrada.hotelapi.repository.TaskRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
@@ -33,6 +34,7 @@ public class RoomServiceImpl implements RoomService {
     private final ReservationRepository reservationRepository;
     private final ReservationService reservationService;
     private final PaymentService paymentService;
+    private final TaskRepository taskRepository;
 
     @Override
     public List<Room> findAll() {
@@ -131,6 +133,10 @@ public class RoomServiceImpl implements RoomService {
         Room room = roomRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Room not found: " + id));
 
+        // Step 1: Delete tasks associated with this room
+        taskRepository.deleteByRoomId(id);
+
+        // Step 2: Delete reservations (which handles payments, services, locks)
         List<Reservation> reservations = reservationRepository.findByRoomRoomId(id);
         for (Reservation reservation : reservations) {
             Integer reservationId = reservation.getReservationId();
@@ -140,7 +146,10 @@ public class RoomServiceImpl implements RoomService {
             }
         }
 
+        // Step 3: Delete room locks
         roomLockRepository.deleteByRoomId(id);
+        
+        // Step 4: Delete the room
         roomRepository.delete(room);
     }
 

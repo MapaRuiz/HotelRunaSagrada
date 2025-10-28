@@ -76,8 +76,8 @@ export class RoomTypesTableComponent implements OnInit {
     defaultColDef: { resizable: true, sortable: true, filter: true },
     animateRows: true,
     pagination: true,
-    paginationPageSize: 50,
-    paginationPageSizeSelector: [50, 100, 200],
+    paginationPageSize: 5,
+    paginationPageSizeSelector: [5, 10, 20],
     domLayout: 'normal',
     rowHeight: 100,
     headerHeight: 50,
@@ -91,7 +91,8 @@ export class RoomTypesTableComponent implements OnInit {
       {
         headerName: 'ID',
         field: 'room_type_id',
-        width: 80,
+        width: 70,
+        flex: 0,
         cellRenderer: (params: ICellRendererParams<RoomType>) => {
           const id = params.data?.room_type_id;
           return `<div style="display: flex; align-items: center; height: 100%; justify-content: center;">${id || ''}</div>`;
@@ -100,7 +101,8 @@ export class RoomTypesTableComponent implements OnInit {
       { 
         headerName: 'Nombre', 
         field: 'name', 
-        width: 180,
+        flex: 1,
+        minWidth: 120,
         cellRenderer: (params: ICellRendererParams<RoomType>) => {
           const name = params.data?.name || '';
           return `<div style="display: flex; align-items: center; height: 100%; padding: 0 8px;">${name}</div>`;
@@ -109,16 +111,18 @@ export class RoomTypesTableComponent implements OnInit {
       { 
         headerName: 'Capacidad', 
         field: 'capacity',
-        width: 150,
+        width: 100,
+        flex: 0,
         cellRenderer: (params: ICellRendererParams<RoomType>) => {
           const capacity = params.data?.capacity || 0;
           return `<div style="display: flex; align-items: center; height: 100%; justify-content: center;">${capacity}</div>`;
         }
       },
       { 
-        headerName: 'Precio Base', 
+        headerName: 'Precio', 
         field: 'base_price',
-        width: 180,
+        width: 100,
+        flex: 0,
         cellRenderer: (params: ICellRendererParams<RoomType>) => {
           const price = params.data?.base_price || 0;
           return `<div style="display: flex; align-items: center; height: 100%; justify-content: center;">$${price.toLocaleString()}</div>`;
@@ -127,7 +131,8 @@ export class RoomTypesTableComponent implements OnInit {
       { 
         headerName: 'Descripción', 
         field: 'description',
-        width: 450,
+        flex: 2,
+        minWidth: 150,
         cellRenderer: (params: ICellRendererParams<RoomType>) => {
           const description = params.data?.description || '';
           const truncated = description.length > 40 ? description.substring(0, 40) + '...' : description;
@@ -137,7 +142,8 @@ export class RoomTypesTableComponent implements OnInit {
       {
         headerName: 'Imagen',
         field: 'image',
-        width: 200,
+        width: 110,
+        flex: 0,
         cellRenderer: (params: ICellRendererParams<RoomType>) => {
           const image = params.data?.image;
           if (!image) return '<div style="display: flex; align-items: center; height: 100%; justify-content: center;">Sin imagen</div>';
@@ -148,7 +154,8 @@ export class RoomTypesTableComponent implements OnInit {
       },
       {
         headerName: 'Acciones',
-        width: 350,
+        width: 180,
+        flex: 0,
         cellRenderer: ActionButtonsComponent,
         cellRendererParams: {
           onEdit: (data: RoomType) => this.beginEdit(data),
@@ -281,6 +288,17 @@ export class RoomTypesTableComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error updating room type:', err);
+        
+        // Si el room type no existe (404), recargar los datos
+        if (err.status === 404) {
+          console.warn('Room type not found, reloading data...');
+          this.fetchData();
+          this.cancelEdit();
+          alert('Este tipo de habitación ya no existe. Los datos han sido actualizados.');
+        } else {
+          alert('Error al actualizar el tipo de habitación. Por favor, intenta de nuevo.');
+        }
+        
         this.loading = false;
       }
     });
@@ -310,6 +328,15 @@ export class RoomTypesTableComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error deleting room type:', err);
+          
+          // Si el room type no existe (404), recargar los datos de todos modos
+          if (err.status === 404) {
+            console.warn('Room type not found, reloading data...');
+            this.fetchData();
+            alert('Este tipo de habitación ya no existe. Los datos han sido actualizados.');
+          } else {
+            alert('Error al eliminar el tipo de habitación. Por favor, intenta de nuevo.');
+          }
         }
       });
     }

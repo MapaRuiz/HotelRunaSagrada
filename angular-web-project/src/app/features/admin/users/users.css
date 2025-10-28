@@ -112,7 +112,7 @@
   max-width: 100%;
   margin: 0 auto;
   background: var(--c-ivory);
-  border: 1px solid rgba(21, 21, 19, 0.08);
+  border: 1px solid var(--c-sand);
   color: var(--c-ink);
   border-radius: 0.5rem;
 }
@@ -184,18 +184,20 @@
   flex-direction: column;
   width: 100%;
   min-height: 300px;
-  height: 100%;
-  max-height: 80vh;
+  height: 70vh;
+  max-height: 70vh;
+}
+
+.grid-wrapper {
+  height: 70vh;
+  max-height: 70vh;
+  width: 100%;
 }
 
 @media (max-width: 768px) {
   .users-grid-wrap {
     height: auto;
   }
-}
-
-.ag-theme-quartz .ag-header {
-  font-family: cursive;
 }
 .ag-theme-quartz .ag-header-group-cell {
   font-weight: normal;

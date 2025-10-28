@@ -6,7 +6,7 @@ import { ColDef, GridApi, GridOptions, ModuleRegistry, AllCommunityModule, Pagin
 import { AmenitiesService } from '../../../services/amenities';
 import { Amenity, AmenityType } from '../../../model/amenity';
 import { environment } from '../../../../environments/environment';
-import { AG_GRID_LOCALE, gridTheme as sharedGridTheme } from '../sharedTable';
+import { AG_GRID_LOCALE, gridTheme as sharedGridTheme, PAGINATION_CONFIG } from '../sharedTable';
 import { ActionButtonsComponent } from '../action-buttons-cell/action-buttons-cell';
 import { ActionButtonsParams } from '../action-buttons-cell/action-buttons-param';
 import { AmenityDetail } from './amenity-detail/amenity-detail';
@@ -75,6 +75,7 @@ export class AmenitiesComponent implements OnInit {
     localeText: AG_GRID_LOCALE,
     rowSelection: 'single',
     rowHeight: 100,
+    ...PAGINATION_CONFIG,
     getRowId: params => params.data.amenity_id?.toString(),
     onGridReady: params => { 
       this.gridApi = params.api

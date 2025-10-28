@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ViewChild, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, AfterViewInit, inject, ViewChild, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import {
   NgApexchartsModule, ChartComponent, ApexAxisChartSeries, ApexChart, ApexXAxis,
@@ -8,10 +8,14 @@ import { HotelsService } from '../../../../services/hotels';
 import { AmenitiesService } from '../../../../services/amenities';
 import { Hotel } from '../../../../model/hotel';
 import { AgGridAngular } from 'ag-grid-angular';
-import { ColDef } from 'ag-grid-community';
+import { ColDef, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
 import { PaymentService } from '../../../../services/payment';
 import { ReservationService } from '../../../../services/reservation';
 import { UsersService } from '../../../../services/users';
+import { AG_GRID_LOCALE, gridTheme } from '../../sharedTable';
+
+// Register AG Grid modules
+ModuleRegistry.registerModules([AllCommunityModule]);
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
@@ -32,13 +36,14 @@ export type ChartOptions = {
   templateUrl: './admin-dashboard.html',
   styleUrls: ['./admin-dashboard.css']
 })
-export class AdminDashboardComponent implements OnInit {
+export class AdminDashboardComponent implements OnInit, AfterViewInit {
   private hotelsApi = inject(HotelsService);
   private amenitiesApi = inject(AmenitiesService);
   readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private paymentApi = inject(PaymentService);
   private reservationApi = inject(ReservationService);
   private userService = inject(UsersService);
+  private cdr = inject(ChangeDetectorRef);
 
   hotels: Hotel[] = [];
   hotelsLoading = false;
@@ -51,6 +56,14 @@ export class AdminDashboardComponent implements OnInit {
   reservationDelta = 0;
   usersValue = 0;
   usersDelta = 0;
+  
+  // Chart loading states
+  chartDataLoaded = false;
+  amenitiesChartLoaded = false;
+  
+  // AG-Grid
+  readonly gridTheme = gridTheme;
+  readonly AG_GRID_LOCALE = AG_GRID_LOCALE;
 
   @ViewChild('chart') chart!: ChartComponent;
   public chartOptions: ChartOptions = {
@@ -86,32 +99,37 @@ export class AdminDashboardComponent implements OnInit {
   ];
 
   ngOnInit() {
-    this.loadHotels();
-    this.amenitiesApi.list().subscribe(a => this.amenitiesCount = a.length);
+    if (this.isBrowser) {
+      this.amenitiesApi.list().subscribe(a => this.amenitiesCount = a.length);
 
-    this.calcIncome();
-    this.calcReservations();
-    this.calcUsers();
+      this.calcIncome();
+      this.calcReservations();
+      this.calcUsers();
 
-    this.loadReservationsByRoomType();
-    this.loadAmenitiesByHotel();
-
+      this.loadReservationsByRoomType();
+      this.loadAmenitiesByHotel();
+    }
   }
 
-  private loadHotels(attempt = 1) {
+  ngAfterViewInit() {
+    if (this.isBrowser) {
+      // Use setTimeout to avoid ExpressionChangedAfterItHasBeenCheckedError
+      setTimeout(() => {
+        this.loadHotels();
+      });
+    }
+  }
+
+  loadHotels() {
     this.hotelsLoading = true;
     this.hotelsApi.list().subscribe({
-      next: (h) => {
-        this.hotels = h;
+      next: hotels => {
+        this.hotels = hotels;
         this.hotelsLoading = false;
       },
-      error: (err) => {
-        console.error('Error cargando hoteles (intento', attempt, '):', err);
+      error: () => {
         this.hotels = [];
         this.hotelsLoading = false;
-        if (attempt < 3) {
-          setTimeout(() => this.loadHotels(attempt + 1), 500);
-        }
       }
     });
   }
@@ -140,6 +158,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   private loadReservationsByRoomType() {
+    this.chartDataLoaded = false;
     this.reservationApi.countByRoomType().subscribe({
       next: (map) => {
         const entries = Object.entries(map).sort((a, b) => b[1] - a[1]);
@@ -152,19 +171,24 @@ export class AdminDashboardComponent implements OnInit {
           xaxis: { ...this.chartOptions.xaxis, categories },
           series: [{ name: 'Reservas', data }]
         };
+        
+        // Mark as loaded after data is set
+        this.chartDataLoaded = true;
       },
       error: (err: any) => {
         console.error('Error cargando reservas por tipo', err);
         this.chartOptions = {
           ...this.chartOptions,
-          xaxis: { ...this.chartOptions.xaxis, categories: ['—'] },
+          xaxis: { ...this.chartOptions.xaxis, categories: ['Sin datos'] },
           series: [{ name: 'Reservas', data: [0] }]
         };
+        this.chartDataLoaded = true;
       }
     });
   }
 
   private loadAmenitiesByHotel() {
+    this.amenitiesChartLoaded = false;
     this.hotelsApi.amenitiesSummary().subscribe({
       next: (map) => {
         const entries = Object.entries(map).sort((a, b) => b[1] - a[1]);
@@ -180,14 +204,18 @@ export class AdminDashboardComponent implements OnInit {
           xaxis: { ...this.amenitiesChart.xaxis, categories },
           series: [{ name: 'Amenities', data }]
         };
+        
+        // Mark as loaded after data is set
+        this.amenitiesChartLoaded = true;
       },
       error: (err) => {
         console.error('Error cargando amenities por hotel', err);
         this.amenitiesChart = {
           ...this.amenitiesChart,
-          xaxis: { ...this.amenitiesChart.xaxis, categories: ['—'] },
+          xaxis: { ...this.amenitiesChart.xaxis, categories: ['Sin datos'] },
           series: [{ name: 'Amenities', data: [0] }]
         };
+        this.amenitiesChartLoaded = true;
       }
     });
   }

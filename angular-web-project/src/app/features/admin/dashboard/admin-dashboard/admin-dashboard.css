@@ -5,6 +5,23 @@
   border: 1px solid rgba(21, 21, 19, 0.06);
 }
 
+/* Titles and labels with Quantico */
+h5, .fw-semibold {
+  font-family: var(--font-title);
+  font-weight: 600;
+  color: var(--c-ink);
+}
+
+/* Text content with Lato */
+.text-secondary, .small {
+  font-family: var(--font-body);
+}
+
+/* Numbers bold */
+.fs-4 {
+  font-family: var(--font-title);
+}
+
 .soft-grid {
   --ag-foreground-color: var(--c-ink);
   --ag-background-color: var(--c-ivory);
@@ -18,4 +35,9 @@
   --ag-font-family: inherit;
   border-radius: 12px;
   overflow: hidden;
+}
+
+/* Loading spinner color */
+.spinner-border.text-olive {
+  color: var(--c-olive) !important;
 }

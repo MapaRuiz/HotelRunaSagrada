@@ -36,6 +36,14 @@ export const gridTheme = themeQuartz.withParams({
   headerCellMovingBackgroundColor: 'rgba(119, 142, 105, 0.9)',
 });
 
+// Shared pagination configuration for all admin tables
+export const PAGINATION_CONFIG = {
+  pagination: true,
+  paginationPageSize: 5,
+  paginationPageSizeSelector: [5, 10, 15, 20, 50],
+  suppressPaginationPanel: false,
+};
+
 export function formatDisplayDate(
   dateInput?: string | Date,
   fallback = 'Sin información',
