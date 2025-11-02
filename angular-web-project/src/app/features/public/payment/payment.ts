@@ -8,9 +8,12 @@ import { PaymentService } from '../../../services/payment';
 import { PaymentMethodService } from '../../../services/payment-method';
 import { ReservationService } from '../../../services/reservation';
 import { UsersService } from '../../../services/users';
+import { AmenitiesService } from '../../../services/amenities';
 import { PaymentMethod } from '../../../model/payment-method';
 import { Reservation } from '../../../model/reservation';
 import { User } from '../../../model/user';
+import { Amenity } from '../../../model/amenity';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-payment',
@@ -26,12 +29,24 @@ export class PaymentComponent implements OnInit {
   private paymentMethodSvc = inject(PaymentMethodService);
   private reservationSvc = inject(ReservationService);
   private usersSvc = inject(UsersService);
+  private amenitiesSvc = inject(AmenitiesService);
+
+  // Base del backend para imágenes
+  private backendBase =
+    (environment as any).backendBaseUrl ||
+    (environment.apiBaseUrl ? environment.apiBaseUrl.replace(/\/api\/?$/, '') : '');
 
   // Datos
   reservationId: number | null = null;
   reservation: Reservation | null = null;
   currentUser: User | null = null;
   paymentMethods: PaymentMethod[] = [];
+
+  // ✨ Amenities disponibles y seleccionados
+  availableAmenities: Amenity[] = [];
+  selectedAmenities: Set<number> = new Set();
+  amenitiesTotal: number = 0;
+  readonly AMENITY_PRICE = 50000; // Precio por amenity en COP
 
   // Formulario
   selectedPaymentMethodId: number | null = null;
@@ -60,6 +75,12 @@ export class PaymentComponent implements OnInit {
   taxes: number = 0;
   total: number = 0;
 
+  // 🎮 Konami Code Easter Egg - Solo flechas
+  private konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight'];
+  private konamiIndex = 0;
+  konamiActivated = false;
+  showKonamiMessage = false;
+
   ngOnInit() {
     this.reservationId = Number(this.route.snapshot.queryParamMap.get('reservationId'));
 
@@ -70,6 +91,72 @@ export class PaymentComponent implements OnInit {
     }
 
     this.loadData();
+    this.setupKonamiListener();
+  }
+
+  // 🎮 Setup Konami Code listener
+  private setupKonamiListener(): void {
+    if (this.isBrowser()) {
+      console.log('🎮 Konami Code listener activado. Secuencia: ↑↑↓↓←→←→');
+      console.log('📋 Código esperado:', this.konamiCode);
+      window.addEventListener('keydown', (e: KeyboardEvent) => this.handleKonamiKey(e));
+    }
+  }
+
+  // 🎮 Handle Konami Code input
+  private handleKonamiKey(e: KeyboardEvent): void {
+    if (this.konamiActivated) return; // Ya activado
+
+    const key = e.key;
+    const expectedKey = this.konamiCode[this.konamiIndex];
+
+    // 🐛 DEBUG: Mostrar qué tecla se presionó
+    console.log('🎮 Konami Debug:', {
+      teclaPresionada: key,
+      teclaEsperada: expectedKey,
+      progreso: `${this.konamiIndex}/${this.konamiCode.length}`,
+      coincide: key === expectedKey
+    });
+
+    if (key === expectedKey) {
+      this.konamiIndex++;
+      console.log(`✅ ¡Correcto! Progreso: ${this.konamiIndex}/${this.konamiCode.length}`);
+
+      if (this.konamiIndex === this.konamiCode.length) {
+        console.log('🎉 ¡CÓDIGO KONAMI COMPLETADO!');
+        this.activateKonami();
+        this.konamiIndex = 0;
+      }
+    } else {
+      if (this.konamiIndex > 0) {
+        console.log('❌ Tecla incorrecta - Reiniciando secuencia');
+      }
+      this.konamiIndex = 0; // Reset si falla
+    }
+  }
+
+  // 🎮 Activate Konami Code bonus!
+  private activateKonami(): void {
+    console.log('🎮 Activando Konami Code...');
+    this.konamiActivated = true;
+    this.showKonamiMessage = true;
+
+    // Recalcular solo el total (que será 0), pero mantener los valores reales
+    this.updateTotal();
+
+    console.log('💰 Precios con Konami activado:', {
+      subtotal: this.subtotal,
+      taxes: this.taxes,
+      amenitiesTotal: this.amenitiesTotal,
+      total: this.total // Este será 0
+    });
+
+    // Ocultar mensaje después de 5 segundos
+    setTimeout(() => {
+      this.showKonamiMessage = false;
+    }, 5000);
+
+    console.log('🎮 KONAMI CODE ACTIVATED! Free reservation! 🎉');
   }
 
   private loadData(): void {
@@ -78,11 +165,26 @@ export class PaymentComponent implements OnInit {
         this.currentUser = user;
         this.loadReservation();
         this.loadPaymentMethods();
+        this.loadAmenities();
       },
       error: (err) => {
         console.error('Error loading user:', err);
         this.loadError = 'Error al cargar los datos del usuario.';
         this.isLoading = false;
+      },
+    });
+  }
+
+  private loadAmenities(): void {
+    this.amenitiesSvc.list().subscribe({
+      next: (amenities) => {
+        // Filtrar solo amenities de tipo ROOM
+        this.availableAmenities = (amenities || []).filter(
+          (a) => a.type === 'ROOM'
+        );
+      },
+      error: (err) => {
+        console.error('Error loading amenities:', err);
       },
     });
   }
@@ -130,13 +232,51 @@ export class PaymentComponent implements OnInit {
           const pricing = JSON.parse(priceData);
           this.subtotal = pricing.subtotal || 0;
           this.taxes = pricing.taxes || 0;
-          this.total = pricing.total || 0;
+          this.updateTotal();
           return;
         } catch (error) {
           console.error('Error parsing price data from localStorage:', error);
         }
       }
     }
+  }
+
+  // ✨ Alternar selección de amenity
+  toggleAmenity(amenityId: number): void {
+    if (this.selectedAmenities.has(amenityId)) {
+      this.selectedAmenities.delete(amenityId);
+    } else {
+      this.selectedAmenities.add(amenityId);
+    }
+    this.updateTotal();
+  }
+
+  // ✨ Actualizar el total con amenities
+  private updateTotal(): void {
+    // Calcular amenities siempre
+    this.amenitiesTotal = this.selectedAmenities.size * this.AMENITY_PRICE;
+    const baseTotal = this.subtotal + this.taxes;
+    
+    // 🎮 Si Konami está activado, solo el total es 0 (cliente ve el valor real pero no paga)
+    if (this.konamiActivated) {
+      this.total = 0;
+      return;
+    }
+
+    this.total = baseTotal + this.amenitiesTotal;
+  }
+
+  // ✨ Obtener URL de imagen con backend base
+  getAmenityImage(amenity: Amenity): string {
+    if (!amenity.image) return '';
+    return amenity.image.startsWith('http')
+      ? amenity.image
+      : `${this.backendBase}${amenity.image}`;
+  }
+
+  // ✨ Verificar si un amenity está seleccionado
+  isAmenitySelected(amenityId: number): boolean {
+    return this.selectedAmenities.has(amenityId);
   }
 
   toggleNewPaymentForm(): void {
@@ -210,13 +350,18 @@ export class PaymentComponent implements OnInit {
         return;
       }
 
+      // 🎮 Referencia especial si Konami está activado
+      const txRef = this.konamiActivated 
+        ? '🎮KONAMI-FREE-' + this.reservationId 
+        : 'RESERVATION-' + this.reservationId;
+
       const payment = await firstValueFrom(
         this.paymentSvc.create({
           reservation_id: this.reservationId!,
           payment_method_id: paymentMethodId,
-          amount: this.total,
+          amount: this.total, // Ya es 0 si Konami está activado
           status: 'PAID',
-          tx_reference: 'RESERVATION-' + this.reservationId,
+          tx_reference: txRef,
         })
       );
 
@@ -287,6 +432,8 @@ export class PaymentComponent implements OnInit {
   }
   trackMethod = (_: number, m: PaymentMethod) =>
     this.toNumber((m as any).method_id ?? (m as any).id ?? (m as any).payment_method_id);
+  
+  trackAmenity = (_: number, a: Amenity) => a.amenity_id;
 
   get canPay(): boolean {
     if (this.isProcessing) return false;

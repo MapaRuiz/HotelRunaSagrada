@@ -76,7 +76,15 @@ public class ReservationServiceImpl implements ReservationService {
         res.setStatus(status != null ? status : Reservation.Status.PENDING);
 
         Reservation saved = reservationRepo.save(res);
-        createLocks(saved);
+
+        // ✅ Solo crear locks si la reserva está CONFIRMADA o en CHECKIN
+        // Las reservas PENDING no deben bloquear habitaciones hasta que se complete el
+        // pago
+        if (saved.getStatus() == Reservation.Status.CONFIRMED ||
+                saved.getStatus() == Reservation.Status.CHECKIN) {
+            createLocks(saved);
+        }
+
         return saved;
     }
 
@@ -88,8 +96,13 @@ public class ReservationServiceImpl implements ReservationService {
         Reservation res = reservationRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Reservation not found: " + id));
 
-        // 1) eliminar locks viejos
-        lockRepo.deleteByReservationReservationId(id);
+        // Guardar el estado anterior para saber si necesitamos recrear locks
+        Reservation.Status oldStatus = res.getStatus();
+
+        // 1) eliminar locks viejos solo si ya existían (CONFIRMED o CHECKIN)
+        if (oldStatus == Reservation.Status.CONFIRMED || oldStatus == Reservation.Status.CHECKIN) {
+            lockRepo.deleteByReservationReservationId(id);
+        }
 
         // 2) re-asignar relaciones si llegaron nuevas
         if (userId != null && (res.getUser() == null || !userId.equals(res.getUser().getUserId()))) {
@@ -118,9 +131,16 @@ public class ReservationServiceImpl implements ReservationService {
         if (status != null)
             res.setStatus(status);
 
-        // 5) guardar y recrear locks
+        // 5) guardar
         Reservation saved = reservationRepo.save(res);
-        createLocks(saved);
+
+        // 6) ✅ Solo crear locks si la reserva está CONFIRMADA o en CHECKIN
+        // Esto permite transiciones de PENDING → CONFIRMED al confirmar el pago
+        if (saved.getStatus() == Reservation.Status.CONFIRMED ||
+                saved.getStatus() == Reservation.Status.CHECKIN) {
+            createLocks(saved);
+        }
+
         return saved;
     }
 
@@ -246,9 +266,20 @@ public class ReservationServiceImpl implements ReservationService {
     public Reservation updateStatus(Integer id, String status) {
         Reservation res = reservationRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Reservation not found: " + id));
+
+        Reservation.Status oldStatus = res.getStatus();
         Reservation.Status newStatus = Reservation.Status.valueOf(status.toUpperCase());
+
         res.setStatus(newStatus);
-        return reservationRepo.save(res);
+        Reservation saved = reservationRepo.save(res);
+
+        // ✅ Si cambiamos de PENDING a CONFIRMED, crear los locks
+        if (oldStatus == Reservation.Status.PENDING &&
+                (newStatus == Reservation.Status.CONFIRMED || newStatus == Reservation.Status.CHECKIN)) {
+            createLocks(saved);
+        }
+
+        return saved;
     }
 
     @Override

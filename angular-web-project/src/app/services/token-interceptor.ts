@@ -33,13 +33,18 @@ export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authReq).pipe(
     catchError(err => {
-      if (err?.status === 401) {
-        console.warn('Token inválido o expirado. Cerrando sesión.');
-        if (isBrowser) {
-          try { localStorage.removeItem('access_token'); } catch (e) { /* ignore */ }
-        }
-
-        router.navigateByUrl('/login');
+      if (err?.status === 401 && isBrowser) {
+        console.warn('Token inválido o expirado (401)');
+        
+        // Limpiar token inválido
+        try { 
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('user'); 
+        } catch (e) { /* ignore */ }
+        
+        // ✅ NO redirigir automáticamente desde el interceptor
+        // Dejar que cada componente maneje su propia redirección
+        // Esto evita sobrescribir navegaciones con returnUrl
       }
 
       return throwError(() => err);

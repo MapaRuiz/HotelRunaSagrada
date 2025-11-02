@@ -69,8 +69,9 @@ public class PaymentServiceImpl implements PaymentService {
 			throw new IllegalArgumentException("Reservation is required");
 		if (payment.getPaymentMethodId() == null || payment.getPaymentMethodId().getPaymentMethodId() == null)
 			throw new IllegalArgumentException("Payment method is required");
-		if (payment.getAmount() <= 0)
-			throw new IllegalArgumentException("Amount must be greater than 0");
+		// 🎮 Permitir amount = 0 para códigos Konami / reservas gratuitas
+		if (payment.getAmount() < 0)
+			throw new IllegalArgumentException("Amount cannot be negative");
 		if (payment.getStatus() == null || payment.getStatus().isBlank())
 			throw new IllegalArgumentException("Status is required");
 

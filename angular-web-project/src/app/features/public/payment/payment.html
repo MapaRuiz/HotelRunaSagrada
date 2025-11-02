@@ -1,4 +1,15 @@
 <div class="payment-container">
+  <!-- 🎮 Konami Code Activation Message -->
+  <div *ngIf="showKonamiMessage" class="konami-message">
+    <div class="konami-content">
+      <div class="konami-icon">🎮</div>
+      <h2 class="konami-title">¡CÓDIGO KONAMI ACTIVADO!</h2>
+      <p class="konami-text">🎉 ¡Tu reserva es GRATIS! 🎉</p>
+      <p class="konami-sequence">↑↑↓↓←→←→</p>
+      <div class="konami-sparkles">✨ ✨ ✨</div>
+    </div>
+  </div>
+
   <!-- Loading State -->
   <div *ngIf="isLoading" class="loading-state">
     <div class="spinner"></div>
@@ -59,25 +70,30 @@
           <div class="card-content">
             <!-- Métodos guardados -->
             <div *ngIf="(paymentMethods?.length ?? 0) > 0" class="payment-methods-list">
-              <label *ngFor="let method of paymentMethods; trackBy: trackMethod"
-                  class="payment-method-item"
-                  [class.selected]="selectedPaymentMethodId === getMethodId(method)"
-                  [class.disabled]="getMethodId(method) === null">
-              <input
-                type="radio"
-                [id]="'method-' + (getMethodId(method) ?? 'x')"
-                name="paymentMethod"
-                [value]="getMethodId(method)"
-                [(ngModel)]="selectedPaymentMethodId"
-                [disabled]="getMethodId(method) === null" />
-              <span class="method-label">
-                <span class="method-icon">{{ getPaymentTypeIcon(method.type) }}</span>
-                <span class="method-info">
-                  <span class="method-type">{{ getPaymentTypeName(method.type) }}</span>
-                  <span class="method-details" *ngIf="method.last4">•••• {{ method.last4 }}</span>
-                  <span class="method-holder" *ngIf="method.holder_name">{{ method.holder_name }}</span>
+              <label
+                *ngFor="let method of paymentMethods; trackBy: trackMethod"
+                class="payment-method-item"
+                [class.selected]="selectedPaymentMethodId === getMethodId(method)"
+                [class.disabled]="getMethodId(method) === null"
+              >
+                <input
+                  type="radio"
+                  [id]="'method-' + (getMethodId(method) ?? 'x')"
+                  name="paymentMethod"
+                  [value]="getMethodId(method)"
+                  [(ngModel)]="selectedPaymentMethodId"
+                  [disabled]="getMethodId(method) === null"
+                />
+                <span class="method-label">
+                  <span class="method-icon">{{ getPaymentTypeIcon(method.type) }}</span>
+                  <span class="method-info">
+                    <span class="method-type">{{ getPaymentTypeName(method.type) }}</span>
+                    <span class="method-details" *ngIf="method.last4">•••• {{ method.last4 }}</span>
+                    <span class="method-holder" *ngIf="method.holder_name">{{
+                      method.holder_name
+                    }}</span>
+                  </span>
                 </span>
-              </span>
               </label>
             </div>
 
@@ -107,40 +123,48 @@
             <div *ngIf="newPaymentMethod.type === 'TARJETA'">
               <div class="form-group">
                 <label>Número de Tarjeta</label>
-                <input type="text"
-                       class="form-input"
-                       [(ngModel)]="cardNumber"
-                       (input)="formatCardNumber()"
-                       maxlength="19"
-                       placeholder="1234 5678 9012 3456">
+                <input
+                  type="text"
+                  class="form-input"
+                  [(ngModel)]="cardNumber"
+                  (input)="formatCardNumber()"
+                  maxlength="19"
+                  placeholder="1234 5678 9012 3456"
+                />
               </div>
 
               <div class="form-row">
                 <div class="form-group">
                   <label>Fecha de Expiración</label>
-                  <input type="text"
-                         class="form-input"
-                         [(ngModel)]="cardExpiry"
-                         (input)="formatExpiry()"
-                         maxlength="5"
-                         placeholder="MM/YY">
+                  <input
+                    type="text"
+                    class="form-input"
+                    [(ngModel)]="cardExpiry"
+                    (input)="formatExpiry()"
+                    maxlength="5"
+                    placeholder="MM/YY"
+                  />
                 </div>
                 <div class="form-group">
                   <label>CVV</label>
-                  <input type="text"
-                         class="form-input"
-                         [(ngModel)]="cardCVV"
-                         maxlength="4"
-                         placeholder="123">
+                  <input
+                    type="text"
+                    class="form-input"
+                    [(ngModel)]="cardCVV"
+                    maxlength="4"
+                    placeholder="123"
+                  />
                 </div>
               </div>
 
               <div class="form-group">
                 <label>Nombre del Titular</label>
-                <input type="text"
-                       class="form-input"
-                       [(ngModel)]="newPaymentMethod.holderName"
-                       placeholder="Como aparece en la tarjeta">
+                <input
+                  type="text"
+                  class="form-input"
+                  [(ngModel)]="newPaymentMethod.holderName"
+                  placeholder="Como aparece en la tarjeta"
+                />
               </div>
             </div>
 
@@ -148,20 +172,65 @@
             <div *ngIf="newPaymentMethod.type !== 'TARJETA'">
               <div class="form-group">
                 <label>Nombre del Titular</label>
-                <input type="text"
-                       class="form-input"
-                       [(ngModel)]="newPaymentMethod.holderName"
-                       placeholder="Nombre completo">
+                <input
+                  type="text"
+                  class="form-input"
+                  [(ngModel)]="newPaymentMethod.holderName"
+                  placeholder="Nombre completo"
+                />
               </div>
             </div>
 
             <!-- Dirección de facturación -->
             <div class="form-group">
               <label>Dirección de Facturación</label>
-              <textarea class="form-input"
-                        [(ngModel)]="newPaymentMethod.billingAddress"
-                        rows="2"
-                        placeholder="Dirección completa"></textarea>
+              <textarea
+                class="form-input"
+                [(ngModel)]="newPaymentMethod.billingAddress"
+                rows="2"
+                placeholder="Dirección completa"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- ✨ Amenities Adicionales -->
+        <div *ngIf="availableAmenities.length > 0" class="section-card amenities-section">
+          <h3 class="card-title">Amenities Adicionales</h3>
+
+          <div class="card-content">
+            <div class="amenities-grid">
+              <div
+                *ngFor="let amenity of availableAmenities; trackBy: trackAmenity"
+                class="amenity-item"
+                [class.selected]="isAmenitySelected(amenity.amenity_id)"
+                (click)="toggleAmenity(amenity.amenity_id)"
+              >
+                <div class="amenity-checkbox">
+                  <input
+                    type="checkbox"
+                    [id]="'amenity-' + amenity.amenity_id"
+                    [attr.aria-label]="'Agregar ' + amenity.name"
+                    [checked]="isAmenitySelected(amenity.amenity_id)"
+                    (click)="$event.stopPropagation()"
+                  />
+                  <span class="checkmark">✓</span>
+                </div>
+                <div class="amenity-image-wrapper">
+                  <img
+                    [src]="getAmenityImage(amenity)"
+                    [alt]="amenity.name"
+                    [title]="amenity.name"
+                    class="amenity-image"
+                    loading="lazy"
+                    onerror="this.src='https://via.placeholder.com/100x100?text=No+Image'"
+                  />
+                </div>
+                <div class="amenity-info">
+                  <h4 class="amenity-name">{{ amenity.name }}</h4>
+                  <p class="amenity-price">+{{ formatCurrency(AMENITY_PRICE) }}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -173,10 +242,9 @@
         </div>
 
         <!-- Botón de Pago -->
-        <button class="btn-pay"
-                (click)="processPayment()"
-                [disabled]="!canPay">
-          <span *ngIf="!isProcessing">Procesar Pago - {{ formatCurrency(total) }}</span>
+        <button class="btn-pay" [class.btn-konami]="konamiActivated" (click)="processPayment()" [disabled]="!canPay">
+          <span *ngIf="!isProcessing && !konamiActivated">Procesar Pago - {{ formatCurrency(total) }}</span>
+          <span *ngIf="!isProcessing && konamiActivated">🎮 Confirmar Reserva GRATIS 🎉</span>
           <span *ngIf="isProcessing">
             <span class="spinner-small"></span>
             Procesando...
@@ -206,17 +274,32 @@
             </div>
             <div class="summary-divider"></div>
             <div class="summary-row">
-              <span class="label">Subtotal</span>
+              <span class="label">Subtotal Habitación</span>
               <span class="value">{{ formatCurrency(subtotal) }}</span>
             </div>
             <div class="summary-row">
               <span class="label">Impuestos (19%)</span>
               <span class="value">{{ formatCurrency(taxes) }}</span>
             </div>
+            <div *ngIf="selectedAmenities.size > 0" class="summary-row amenities-row">
+              <span class="label">
+                <span class="amenity-icon-small">✨</span>
+                Amenities ({{ selectedAmenities.size }})
+              </span>
+              <span class="value">{{ formatCurrency(amenitiesTotal) }}</span>
+            </div>
             <div class="summary-divider"></div>
-            <div class="summary-row total">
-              <span class="label">Total a Pagar</span>
-              <span class="value">{{ formatCurrency(total) }}</span>
+            <div class="summary-row total" [class.konami-active]="konamiActivated">
+              <span class="label">
+                Total a Pagar
+                <span *ngIf="konamiActivated" class="konami-badge">🎮 GRATIS</span>
+              </span>
+              <span class="value" [class.strikethrough]="konamiActivated">
+                {{ formatCurrency(total) }}
+              </span>
+            </div>
+            <div *ngIf="konamiActivated" class="konami-note">
+              🎉 ¡Código Konami activado! Reserva gratis 🎉
             </div>
           </div>
         </div>

@@ -69,6 +69,7 @@ export class RoomDetailComponent {
   }
 
   // Check if room has confirmed reservation for selected dates
+  // SOLO reservas CONFIRMED o CHECKIN bloquean habitaciones (no PENDING)
   private hasConfirmedReservationForDates(roomId: number): boolean {
     if (!this.selectedCheckIn || !this.selectedCheckOut) return false;
 
@@ -78,7 +79,7 @@ export class RoomDetailComponent {
     return this.allReservations.some((reservation) => {
       if (
         reservation.room?.room_id !== roomId ||
-        !['CONFIRMED', 'CHECKIN', 'PENDING'].includes((reservation.status || '').toUpperCase())
+        !['CONFIRMED', 'CHECKIN'].includes((reservation.status || '').toUpperCase())
       ) {
         return false;
       }
@@ -203,6 +204,9 @@ export class RoomDetailComponent {
 
       this.startAuto(); // autoplay más rápido
       this.restartTitleAnim();
+
+      // ✅ Revisar si hay una reserva pendiente después del login
+      this.checkPendingReservation();
     });
   }
 
@@ -232,13 +236,41 @@ export class RoomDetailComponent {
   }
 
   // ======= Acciones UI existentes =======
+  
+  /**
+   * Revisa si hay una reserva pendiente en sessionStorage después del login
+   * y automáticamente hace scroll a la sección de reserva
+   */
+  private checkPendingReservation(): void {
+    const pending = safeSessionGet('pendingReservation');
+    if (!pending) return;
+
+    // Verificar que la reserva pendiente coincida con este hotel/tipo
+    if (pending.hotelId === this.hotelId && pending.typeId === this.typeId) {
+      // Limpiar la reserva pendiente
+      safeSessionRemove('pendingReservation');
+      
+      // Hacer scroll automáticamente a la sección de reserva
+      setTimeout(() => {
+        if (this.reserveSection?.nativeElement) {
+          this.reserveSection.nativeElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+          });
+        }
+      }, 300);
+    }
+  }
+
   beginReservation(room?: any) {
     safeSessionSet('pendingReservation', {
       hotelId: this.hotelId,
       typeId: this.typeId,
       roomId: room?.room_id ?? null,
     });
-    this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+    // Construir la URL de retorno con todos los parámetros
+    const returnUrl = `/room-type/${this.typeId}?hotelId=${this.hotelId}`;
+    this.router.navigate(['/login'], { queryParams: { returnUrl } });
   }
 
   onDatesChanged(dates: { checkIn: string; checkOut: string }): void {
@@ -295,5 +327,20 @@ function safeSessionSet(key: string, val: any): void {
   if (!isBrowser()) return;
   try {
     sessionStorage.setItem(key, JSON.stringify(val));
+  } catch {}
+}
+function safeSessionGet(key: string): any | null {
+  if (!isBrowser()) return null;
+  try {
+    const raw = sessionStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+function safeSessionRemove(key: string): void {
+  if (!isBrowser()) return;
+  try {
+    sessionStorage.removeItem(key);
   } catch {}
 }

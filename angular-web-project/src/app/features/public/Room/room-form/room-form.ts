@@ -146,12 +146,16 @@ export class RoomFormComponent {
     }
   }
 
+  // SOLO reservas CONFIRMED o CHECKIN bloquean habitaciones (no PENDING)
   private hasConfirmedReservationForDates(roomId: number, checkIn: string, checkOut: string): boolean {
     const selectedStart = new Date(checkIn);
     const selectedEnd = new Date(checkOut);
 
     return this.allReservations.some(reservation => {
-      if (reservation.room?.room_id !== roomId || reservation.status !== 'CONFIRMED') {
+      if (
+        reservation.room?.room_id !== roomId || 
+        !['CONFIRMED', 'CHECKIN'].includes((reservation.status || '').toUpperCase())
+      ) {
         return false;
       }
 
@@ -202,7 +206,9 @@ export class RoomFormComponent {
         checkIn: checkIn,
         checkOut: checkOut,
       });
-      this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+      // Construir la URL de retorno con todos los parámetros
+      const returnUrl = `/room-type/${this.typeId}?hotelId=${this.hotelId}`;
+      this.router.navigate(['/login'], { queryParams: { returnUrl } });
       return null;
     }
 
@@ -211,6 +217,12 @@ export class RoomFormComponent {
 
   reserve() {
     this.submitError = '';
+
+    // ✅ Protección contra múltiples clicks
+    if (this.isSubmitting) {
+      console.warn('Ya hay una reserva en proceso, ignorando click adicional');
+      return;
+    }
 
     const uid = this.ensureLoggedInClient();
     if (!uid) return;
@@ -296,7 +308,9 @@ export class RoomFormComponent {
             checkOut: checkOut,
           });
           setTimeout(() => {
-            this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+            // Construir la URL de retorno con todos los parámetros
+            const returnUrl = `/room-type/${this.typeId}?hotelId=${this.hotelId}`;
+            this.router.navigate(['/login'], { queryParams: { returnUrl } });
           }, 2000);
         } else {
           this.submitError = errorMsg ?? 'No fue posible crear la reserva. Prueba con otras fechas o habitación.';
