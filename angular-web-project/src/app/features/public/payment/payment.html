@@ -242,8 +242,15 @@
         </div>
 
         <!-- Botón de Pago -->
-        <button class="btn-pay" [class.btn-konami]="konamiActivated" (click)="processPayment()" [disabled]="!canPay">
-          <span *ngIf="!isProcessing && !konamiActivated">Procesar Pago - {{ formatCurrency(total) }}</span>
+        <button
+          class="btn-pay"
+          [class.btn-konami]="konamiActivated"
+          (click)="processPayment()"
+          [disabled]="!canPay"
+        >
+          <span *ngIf="!isProcessing && !konamiActivated"
+            >Procesar Pago - {{ formatCurrency(total) }}</span
+          >
           <span *ngIf="!isProcessing && konamiActivated">🎮 Confirmar Reserva GRATIS 🎉</span>
           <span *ngIf="isProcessing">
             <span class="spinner-small"></span>
