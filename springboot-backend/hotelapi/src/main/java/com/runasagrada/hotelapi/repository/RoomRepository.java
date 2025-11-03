@@ -26,4 +26,13 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
     List<Room> findByHotelIdAndTypeId(@Param("hotelId") Long hotelId,
             @Param("typeId") Long roomTypeId);
 
+    @Query("SELECT r FROM Room r LEFT JOIN FETCH r.roomType WHERE r.hotel.hotelId = :hotelId")
+    List<Room> findByHotelIdWithRoomType(@Param("hotelId") Long hotelId);
+
+    @Query("SELECT r FROM Room r LEFT JOIN FETCH r.roomType LEFT JOIN FETCH r.hotel WHERE r.roomId = :roomId")
+    Optional<Room> findByIdWithDetails(@Param("roomId") Integer roomId);
+
+    @Query("SELECT r FROM Room r LEFT JOIN FETCH r.roomType")
+    List<Room> findAllWithRoomType();
+
 }

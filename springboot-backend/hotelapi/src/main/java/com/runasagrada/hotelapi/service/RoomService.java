@@ -11,11 +11,17 @@ import java.util.Optional;
 public interface RoomService {
     List<Room> findAll();
 
+    List<Room> findAllWithRoomType();
+
     List<Room> findByHotel(Long hotelId);
+
+    List<Room> findByHotelWithRoomType(Long hotelId);
 
     List<Room> findByType(Integer roomTypeId);
 
     Optional<Room> findById(Integer id);
+
+    Optional<Room> findByIdWithDetails(Integer id);
 
     Optional<Room> findByNumber(String number);
 

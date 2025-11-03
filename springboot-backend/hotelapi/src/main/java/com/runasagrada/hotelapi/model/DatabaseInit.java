@@ -1503,9 +1503,11 @@ public class DatabaseInit implements CommandLineRunner {
                 if (staffMemberRepo.count() > 0)
                         return; // no duplicar
 
-                // Obtener todos los users con rol OPERATOR
+                // Obtener todos los users con rol OPERATOR ordenados por nationalId (OP-001,
+                // OP-002, etc.)
                 List<User> operators = userRepo.findAll().stream()
                                 .filter(u -> u.getRoles().stream().anyMatch(r -> r.getName().equals("OPERATOR")))
+                                .sorted(Comparator.comparing(User::getNationalId))
                                 .toList();
 
                 if (operators.isEmpty()) {
@@ -1513,35 +1515,56 @@ public class DatabaseInit implements CommandLineRunner {
                 }
 
                 List<Department> allDepartments = departmentRepo.findAll();
-                Random random = new Random();
 
-                // Índice para distribuir operadores de manera equitativa
-                int operatorIndex = 0;
+                // Asignar operadores a hoteles de manera específica
+                // OP-001 (op1@hotel.com) -> Hotel 1
+                // OP-002 (op2@hotel.com) -> Hotel 2
+                // OP-003 (op3@hotel.com) -> Hotel 3
+                // etc.
+                for (int i = 0; i < Math.min(operators.size(), hotelList.size()); i++) {
+                        Hotel hotel = hotelList.get(i);
+                        User operator = operators.get(i);
 
-                for (Hotel hotel : hotelList) {
+                        // Obtener todos los departamentos de este hotel
                         List<Department> hotelDepts = allDepartments.stream()
                                         .filter(d -> d.getHotelId().equals(hotel.getHotelId()))
                                         .toList();
 
-                        // Asignar 1-2 staff members por departamento de cada hotel
-                        for (Department dept : hotelDepts) {
-                                int staffCount = random.nextInt(2) + 1; // 1-2 staff members por departamento
+                        // Asignar este operador al primer departamento del hotel (Recepción
+                        // típicamente)
+                        if (!hotelDepts.isEmpty()) {
+                                Department mainDept = hotelDepts.get(0);
 
-                                for (int i = 0; i < staffCount && operatorIndex < operators.size(); i++) {
-                                        User user = operators.get(operatorIndex % operators.size());
+                                StaffMember staff = new StaffMember();
+                                staff.setUserId(operator.getUserId());
+                                staff.setHotelId(hotel.getHotelId());
+                                staff.setDepartmentId(mainDept.getDepartmentId());
 
-                                        // Verificar que este user no esté ya asignado como staff member en este hotel
-                                        if (!staffMemberRepo.existsByUserIdAndHotelId(user.getUserId(),
-                                                        hotel.getHotelId())) {
-                                                StaffMember staff = new StaffMember();
-                                                staff.setUserId(user.getUserId());
-                                                staff.setHotelId(hotel.getHotelId());
-                                                staff.setDepartmentId(dept.getDepartmentId());
+                                staffMemberRepo.save(staff);
+                        }
+                }
 
-                                                staffMemberRepo.save(staff);
-                                        }
+                // Los operadores restantes se asignan aleatoriamente a hoteles adicionales
+                Random random = new Random();
+                for (int i = hotelList.size(); i < operators.size(); i++) {
+                        User operator = operators.get(i);
+                        Hotel randomHotel = hotelList.get(random.nextInt(hotelList.size()));
 
-                                        operatorIndex++;
+                        List<Department> hotelDepts = allDepartments.stream()
+                                        .filter(d -> d.getHotelId().equals(randomHotel.getHotelId()))
+                                        .toList();
+
+                        if (!hotelDepts.isEmpty()) {
+                                Department dept = hotelDepts.get(random.nextInt(hotelDepts.size()));
+
+                                if (!staffMemberRepo.existsByUserIdAndHotelId(operator.getUserId(),
+                                                randomHotel.getHotelId())) {
+                                        StaffMember staff = new StaffMember();
+                                        staff.setUserId(operator.getUserId());
+                                        staff.setHotelId(randomHotel.getHotelId());
+                                        staff.setDepartmentId(dept.getDepartmentId());
+
+                                        staffMemberRepo.save(staff);
                                 }
                         }
                 }

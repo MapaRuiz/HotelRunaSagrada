@@ -42,8 +42,18 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
+    public List<Room> findAllWithRoomType() {
+        return roomRepository.findAllWithRoomType();
+    }
+
+    @Override
     public List<Room> findByHotel(Long hotelId) {
         return roomRepository.findByHotelHotelId(hotelId);
+    }
+
+    @Override
+    public List<Room> findByHotelWithRoomType(Long hotelId) {
+        return roomRepository.findByHotelIdWithRoomType(hotelId);
     }
 
     @Override
@@ -54,6 +64,11 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public java.util.Optional<Room> findById(Integer id) {
         return roomRepository.findById(id);
+    }
+
+    @Override
+    public Optional<Room> findByIdWithDetails(Integer id) {
+        return roomRepository.findByIdWithDetails(id);
     }
 
     @Override
