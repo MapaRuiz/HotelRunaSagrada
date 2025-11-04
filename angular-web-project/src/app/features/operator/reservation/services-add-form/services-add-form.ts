@@ -216,7 +216,6 @@ export class ServicesAddForm implements OnInit, OnChanges {
           const selectedService = this.services.find(s => s.id === this.service_id);
           console.log(this.reservation);
           if (selectedService) {
-            const currentUser = this.authService.userSnapshot();
             const category = selectedService.category.toLowerCase();
             let type: 'DELIVERY' | 'GUIDING' | 'TO_DO' | undefined;
             if (category === 'gastronomía') type = 'DELIVERY';

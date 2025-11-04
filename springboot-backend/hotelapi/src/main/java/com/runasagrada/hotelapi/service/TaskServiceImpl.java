@@ -12,9 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.runasagrada.hotelapi.model.StaffMember;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -34,6 +38,47 @@ public class TaskServiceImpl implements TaskService {
 
 	@Autowired
 	private ServiceHelper helper;
+
+	private static final Set<Long> FORBIDDEN_STAFF_IDS = Set.of(1L, 2L, 3L, 4L, 5L);
+
+	private List<StaffMember> filterAllowed(List<StaffMember> list) {
+		if (list == null)
+			return List.of();
+		return list.stream()
+				.filter(Objects::nonNull)
+				.filter(s -> s.getStaffId() != null && !FORBIDDEN_STAFF_IDS.contains(s.getStaffId()))
+				.collect(Collectors.toList());
+	}
+
+	private List<StaffMember> pickCandidatesByType(Task.TaskType type) {
+		List<StaffMember> base = null;
+		if (type == Task.TaskType.TO_DO) {
+			base = staffMembers.findByDepartmentNames(List.of("limpieza", "mantenimiento"));
+		} else if (type == Task.TaskType.GUIDING) {
+			base = staffMembers.findByDepartmentNames(List.of("recepción", "servicio al cliente",
+					"servicio_cliente", "servicioalcliente"));
+		} else if (type == Task.TaskType.DELIVERY) {
+			base = staffMembers.findByDepartmentNames(List.of("cocina"));
+		}
+
+		// Primero intentamos con candidatos del departamento, excluyendo prohibidos:
+		List<StaffMember> allowed = filterAllowed(base);
+
+		// Si quedó vacío, fallback a cualquier operador permitido:
+		if (allowed.isEmpty()) {
+			allowed = filterAllowed(staffMembers.findByUserRole("OPERATOR"));
+		}
+
+		return allowed;
+	}
+
+	private Long chooseAllowedAssignee(Task.TaskType type) {
+		List<StaffMember> allowed = pickCandidatesByType(type);
+		if (allowed.isEmpty())
+			return null;
+		int idx = (int) (Math.random() * allowed.size());
+		return allowed.get(idx).getStaffId();
+	}
 
 	@Override
 	@Transactional(readOnly = true)
@@ -56,28 +101,23 @@ public class TaskServiceImpl implements TaskService {
 			task.setReservationService(reservationService);
 		}
 
-		if (task.getStaffId() == null) {
-			List<com.runasagrada.hotelapi.model.StaffMember> candidates = null;
-			if (task.getType() == TaskType.TO_DO) {
-				// Limpieza o Mantenimiento
-				candidates = staffMembers.findByDepartmentNames(List.of("limpieza", "mantenimiento"));
-			} else if (task.getType() == TaskType.GUIDING) {
-				// Recepción o Servicio al cliente
-				candidates = staffMembers.findByDepartmentNames(List.of("recepción", "servicio al cliente",
-						"servicio_cliente", "servicioalcliente"));
-			} else if (task.getType() == TaskType.DELIVERY) {
-				// Cocina
-				candidates = staffMembers.findByDepartmentNames(List.of("cocina"));
-			}
-
-			if (candidates == null || candidates.isEmpty()) {
-				// Fallback: any operator
-				candidates = staffMembers.findByUserRole("OPERATOR");
-			}
-
-			if (candidates != null && !candidates.isEmpty()) {
-				int idx = (int) (Math.random() * candidates.size());
-				task.setStaffId(candidates.get(idx).getStaffId());
+		// === CAMBIO: reasignación si viene prohibido, o autoasignación excluyendo 1-5
+		// ===
+		if (task.getStaffId() == null || FORBIDDEN_STAFF_IDS.contains(task.getStaffId())) {
+			Long chosen = chooseAllowedAssignee(task.getType());
+			if (chosen != null) {
+				task.setStaffId(chosen);
+			} else {
+				// Si no hay nadie permitido, último fallback: cualquier staff que no sea
+				// prohibido
+				List<StaffMember> anyone = filterAllowed(staffMembers.findAll());
+				if (!anyone.isEmpty()) {
+					int idx = (int) (Math.random() * anyone.size());
+					task.setStaffId(anyone.get(idx).getStaffId());
+				} else {
+					// Si realmente no hay nadie, lanzamos error explícito
+					throw new NoSuchElementException("No hay StaffMembers válidos para asignar (IDs 1-5 vetados).");
+				}
 			}
 		}
 
@@ -92,8 +132,27 @@ public class TaskServiceImpl implements TaskService {
 	public Task update(Long id, Task partial, Long resServiceId) {
 		Task db = findById(id);
 
-		if (partial.getStaffId() != null)
-			db.setStaffId(partial.getStaffId());
+		// === CAMBIO: si llega staffId prohibido, reasignar a otro permitido ===
+		if (partial.getStaffId() != null) {
+			Long incoming = partial.getStaffId();
+			if (FORBIDDEN_STAFF_IDS.contains(incoming)) {
+				Long chosen = chooseAllowedAssignee(
+						partial.getType() != null ? partial.getType() : db.getType());
+				if (chosen == null) {
+					List<StaffMember> anyone = filterAllowed(staffMembers.findAll());
+					if (anyone.isEmpty()) {
+						throw new NoSuchElementException("No hay StaffMembers válidos para asignar (IDs 1-5 vetados).");
+					}
+					int idx = (int) (Math.random() * anyone.size());
+					db.setStaffId(anyone.get(idx).getStaffId());
+				} else {
+					db.setStaffId(chosen);
+				}
+			} else {
+				db.setStaffId(incoming);
+			}
+		}
+
 		if (partial.getRoomId() != null)
 			db.setRoomId(partial.getRoomId());
 
@@ -160,15 +219,12 @@ public class TaskServiceImpl implements TaskService {
 		if (task.getStatus() == null)
 			throw new IllegalArgumentException("Task status is required");
 
-		// Verificar que el staff member existe
 		if (!staffMembers.existsById(task.getStaffId()))
 			throw new NoSuchElementException("StaffMember not found with id: " + task.getStaffId());
 
-		// Verificar que el room existe
 		if (task.getRoomId() != null && !rooms.existsById(task.getRoomId()))
 			throw new NoSuchElementException("Room not found with id: " + task.getRoomId());
 
-		// Verificar que el reservation service existe si está establecido
 		if (task.getReservationService() != null && task.getReservationService().getId() != null) {
 			if (!reservationServices.existsById(task.getReservationService().getId()))
 				throw new NoSuchElementException(
