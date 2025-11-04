@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -45,6 +46,7 @@ public class DatabaseInitTest implements CommandLineRunner {
         private final PaymentRepository paymentRepo;
 
         @Override
+        @Transactional
         public void run(String... args) {
                 // Datos originales: roles, usuarios y hoteles
                 seedBasicData();
@@ -1478,44 +1480,62 @@ public class DatabaseInitTest implements CommandLineRunner {
                         LocalDate today = LocalDate.now();
                         LocalDate tomorrow = today.plusDays(1);
 
-                        Optional<Reservation> existing = reservationRepo.findByUserUserId(client.getUserId()).stream()
-                                        .filter(reservation -> reservation.getHotel() != null
-                                                        && Objects.equals(reservation.getHotel().getHotelId(),
-                                                                        hotel.getHotelId())
-                                                        && today.equals(reservation.getCheckIn())
-                                                        && tomorrow.equals(reservation.getCheckOut())
-                                                        && reservation.getStatus() == Reservation.Status.CONFIRMED)
-                                        .findFirst();
+                        String preferredRoomNumber = "1-101";
+                        Room preferredRoom = roomRepository.findByHotelHotelId(hotel.getHotelId()).stream()
+                                        .filter(room -> preferredRoomNumber.equalsIgnoreCase(room.getNumber()))
+                                        .findFirst()
+                                        .orElseGet(() -> roomRepository.findByHotelHotelId(hotel.getHotelId()).stream()
+                                                        .findFirst().orElse(null));
 
-                        if (existing.isPresent()) {
-                                ensurePaidRoomPayment(existing.get());
+                        if (preferredRoom == null) {
                                 return;
                         }
 
-                        List<Room> hotelRooms = roomRepository.findByHotelHotelId(hotel.getHotelId());
-                        Optional<Room> availableRoom = hotelRooms.stream()
-                                        .filter(room -> !roomLockRepo.existsByRoomIdAndLockDate(room.getRoomId(), today))
+                        Optional<Reservation> existing = reservationRepo.findByUserUserId(client.getUserId()).stream()
+                                        .filter(reservation -> reservation.getHotel() != null
+                                                        && Objects.equals(reservation.getHotel().getHotelId(),
+                                                                        hotel.getHotelId()))
                                         .findFirst();
 
-                        availableRoom.or(() -> hotelRooms.stream().findFirst()).ifPresent(room -> {
-                                Reservation reservation = new Reservation();
-                                reservation.setUser(client);
-                                reservation.setHotel(hotel);
-                                reservation.setRoom(room);
+                        if (existing.isPresent()) {
+                                Reservation reservation = existing.get();
+                                reservation.setRoom(preferredRoom);
                                 reservation.setCheckIn(today);
                                 reservation.setCheckOut(tomorrow);
                                 reservation.setStatus(Reservation.Status.CONFIRMED);
 
                                 Reservation saved = reservationRepo.save(reservation);
 
+                                roomLockRepo.deleteByReservationReservationId(saved.getReservationId());
                                 LocalDate lockDate = today;
                                 while (lockDate.isBefore(tomorrow)) {
-                                        roomLockRepo.save(new RoomLock(room.getRoomId(), lockDate, saved));
+                                        roomLockRepo.save(new RoomLock(preferredRoom.getRoomId(), lockDate, saved));
                                         lockDate = lockDate.plusDays(1);
                                 }
 
                                 ensurePaidRoomPayment(saved);
-                        });
+                                return;
+                        }
+
+                        roomLockRepo.deleteByRoomId(preferredRoom.getRoomId());
+
+                        Reservation reservation = new Reservation();
+                        reservation.setUser(client);
+                        reservation.setHotel(hotel);
+                        reservation.setRoom(preferredRoom);
+                        reservation.setCheckIn(today);
+                        reservation.setCheckOut(tomorrow);
+                        reservation.setStatus(Reservation.Status.CONFIRMED);
+
+                        Reservation saved = reservationRepo.save(reservation);
+
+                        LocalDate lockDate = today;
+                        while (lockDate.isBefore(tomorrow)) {
+                                roomLockRepo.save(new RoomLock(preferredRoom.getRoomId(), lockDate, saved));
+                                lockDate = lockDate.plusDays(1);
+                        }
+
+                        ensurePaidRoomPayment(saved);
                 }));
         }
 

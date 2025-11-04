@@ -8,6 +8,7 @@ import {
   DATE_FILTER_CONFIG,
   gridTheme as sharedGridTheme,
   TEXT_FILTER_CONFIG,
+  formatDate,
 } from '../../../sharedTableConfig';
 import { updateResponsiveColumns as setResponsiveColumnsVisibility } from '../../../admin/sharedTable';
 import {
@@ -188,6 +189,7 @@ export class ReservationTableOperatorComponent implements OnInit, OnDestroy {
           params.data?.room?.number || `Habitación ${params.data?.room_id || 'N/A'}`,
         filter: 'agTextColumnFilter',
         filterParams: TEXT_FILTER_CONFIG,
+        cellClass: 'row-room',
         minWidth: 140,
       },
       {
@@ -195,17 +197,22 @@ export class ReservationTableOperatorComponent implements OnInit, OnDestroy {
         field: 'check_in',
         filter: 'agDateColumnFilter',
         filterParams: DATE_FILTER_CONFIG,
+        cellClass: 'row-check-in',
         minWidth: 140,
+        valueFormatter: (params) => formatDate(params.value),
       },
       {
         headerName: 'Check-out',
         field: 'check_out',
         filter: 'agDateColumnFilter',
         filterParams: DATE_FILTER_CONFIG,
+        cellClass: 'row-check-out',
         minWidth: 140,
+        valueFormatter: (params) => formatDate(params.value),
       },
       {
         headerName: 'Estado',
+        cellClass: 'row-reserv-status',
         field: 'status',
         filter: MultiSelectFilterComponent,
         filterParams: {
@@ -228,7 +235,8 @@ export class ReservationTableOperatorComponent implements OnInit, OnDestroy {
         cellRenderer: ActionButtonsComponent<Reservation>,
         cellRendererParams: (p: { data: Reservation }) => {
           const row = p.data as Reservation;
-          const status = row?.status;
+          const status = this.normalizeStatus(row?.status);
+          row.status = status;
           const canEditDelete =
             status === 'PENDING' || status === 'CONFIRMED' || status === 'CHECKIN';
 
@@ -236,7 +244,7 @@ export class ReservationTableOperatorComponent implements OnInit, OnDestroy {
           const extraButton = ['CONFIRMED', 'PENDING'].includes(status)
             ? {
                 label: 'Activar',
-                class: 'btn-details',
+                class: 'btn-details btn-ack',
                 action: (r: Reservation) => this.activateReservation(r),
               }
             : status === 'CHECKIN'
@@ -273,9 +281,14 @@ export class ReservationTableOperatorComponent implements OnInit, OnDestroy {
   }
 
   activateReservation(reservation: Reservation): void {
-    if (!reservation.reservation_id) return;
-    this.service.activate(reservation.reservation_id).subscribe({
+    const id = this.getReservationId(reservation);
+    if (!id) {
+      console.warn('No reservation id available to activate', reservation);
+      return;
+    }
+    this.service.activate(id).subscribe({
       next: () => {
+        this.updateRowStatus(id, 'CHECKIN');
         this.loadData();
       },
       error: () => {
@@ -285,7 +298,7 @@ export class ReservationTableOperatorComponent implements OnInit, OnDestroy {
   }
 
   deactivateReservation(reservation: Reservation): void {
-    const id = reservation.reservation_id;
+    const id = this.getReservationId(reservation);
     if (!id) return;
     this.payments.allPaid(id).subscribe({
       next: (sum) => {
@@ -294,7 +307,10 @@ export class ReservationTableOperatorComponent implements OnInit, OnDestroy {
           return;
         }
         this.service.deactivate(id).subscribe({
-          next: () => this.loadData(),
+          next: () => {
+            this.updateRowStatus(id, 'FINISHED');
+            this.loadData();
+          },
           error: () => alert('Error desactivando la reserva'),
         });
       },
@@ -307,18 +323,19 @@ export class ReservationTableOperatorComponent implements OnInit, OnDestroy {
   }
   // Delete
   deleteReservation(reservation: Reservation): void {
-    if (!reservation.reservation_id) return;
+    const id = this.getReservationId(reservation);
+    if (!id) return;
     if (!confirm('¿Cancelar (eliminar) esta reserva?')) return;
 
-    this.service.delete(reservation.reservation_id).subscribe({
+    this.service.delete(id).subscribe({
       next: () => {
         this.reservations = this.reservations.filter(
-          (r) => r.reservation_id !== reservation.reservation_id
+          (r) => this.getReservationId(r) !== id
         );
-        this.rowData = this.rowData.filter((r) => r.reservation_id !== reservation.reservation_id);
+        this.rowData = this.rowData.filter((r) => this.getReservationId(r) !== id);
 
         this.withGridApi((api) => {
-          api.applyTransaction({ remove: [reservation] });
+          api.setGridOption('rowData', this.rowData);
           api.deselectAll();
         });
 
@@ -340,6 +357,54 @@ export class ReservationTableOperatorComponent implements OnInit, OnDestroy {
   }
 
   // Edit Reservation Services
+
+  private normalizeStatus(value: unknown): Reservation['status'] {
+    const raw = (value ?? '').toString().trim();
+    if (!raw) return 'PENDING';
+    const upper = raw.toUpperCase();
+    const compact = upper.replace(/[\s_-]+/g, '');
+
+    if (compact === 'CHECKIN') return 'CHECKIN';
+    if (compact === 'CHECKOUT') return 'FINISHED';
+
+    if (upper === 'CHECK-IN' || upper === 'CHECK IN') return 'CHECKIN';
+    if (upper === 'CHECK-OUT' || upper === 'CHECK OUT') return 'FINISHED';
+    if (upper === 'CONFIRMADA' || upper === 'CONFIRMADO') return 'CONFIRMED';
+    if (upper === 'PENDIENTE') return 'PENDING';
+    if (upper === 'FINALIZADA' || upper === 'FINALIZADO') return 'FINISHED';
+
+    if ((['PENDING', 'CONFIRMED', 'CHECKIN', 'FINISHED'] as const).includes(upper as Reservation['status'])) {
+      return upper as Reservation['status'];
+    }
+    return 'PENDING';
+  }
+
+  private getReservationId(row: Reservation | any): number | undefined {
+    if (!row) return undefined;
+    const rawId = row.reservation_id ?? row.reservationId ?? row.id ?? row._id;
+    if (rawId === null || rawId === undefined || rawId === '') return undefined;
+    const parsed = Number(rawId);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+
+  private updateRowStatus(id: number, next: Reservation['status']): void {
+    const mutate = (list: Reservation[]) => {
+      let touched = false;
+      list.forEach((row) => {
+        if (this.getReservationId(row) === id) {
+          row.status = next;
+          touched = true;
+        }
+      });
+      return touched;
+    };
+
+    const updated = mutate(this.reservations) || mutate(this.rowData);
+
+    if (updated) {
+      this.withGridApi((api) => api.refreshCells({ force: true }));
+    }
+  }
 
   private withGridApi(action: (api: GridApi<Reservation>) => void): void {
     const api = this.gridApi;
