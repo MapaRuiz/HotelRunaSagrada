@@ -8,7 +8,7 @@
     <div class="col-12 col-md-6">
       <label class="form-label">Servicio</label>
       <select
-        class="form-select"
+        class="form-select service-selector"
         [(ngModel)]="service_id"
         name="service_id"
         (ngModelChange)="onServiceChange()"
@@ -18,7 +18,7 @@
           {{ s.name }} — {{ formatCurrency(s.base_price) }}
         </option>
       </select>
-      <small class="text-muted d-block mt-1" *ngIf="selectedService as svc">
+      <small class="text-muted d-block mt-1 service-option" *ngIf="selectedService as svc">
         {{ svc.name }} · Precio base: {{ formatCurrency(svc.base_price) }}
       </small>
     </div>
@@ -27,7 +27,7 @@
     <div class="col-12 col-md-6">
       <label class="form-label">Horario</label>
       <select
-        class="form-select"
+        class="form-select schedule-selector"
         [(ngModel)]="schedule_id"
         name="schedule_id"
         (ngModelChange)="onScheduleChange()"
@@ -39,7 +39,7 @@
           {{ formatDaysLabel(sch.days_of_week) }} — {{ sch.start_time }} - {{ sch.end_time }}
         </option>
       </select>
-      <small class="text-muted d-block mt-1" *ngIf="selectedSchedule as sch">
+      <small class="text-muted d-block mt-1 schedule-option" *ngIf="selectedSchedule as sch">
         {{ formatDaysLabel(sch.days_of_week) }} · {{ sch.start_time }} - {{ sch.end_time }}
       </small>
       <small class="text-danger d-block mt-1" *ngIf="service_id && !schedules.length"
@@ -52,7 +52,7 @@
       <label class="form-label">Cantidad</label>
       <input
         type="number"
-        class="form-control"
+        class="form-control qty-option"
         [(ngModel)]="qty"
         name="qty"
         min="1"
@@ -76,7 +76,11 @@
 
     <div class="col-12 d-flex gap-2 justify-content-end">
       <button type="button" class="btn btn-outline-secondary" (click)="onCancel()">Cancelar</button>
-      <button type="submit" class="btn btn-olive" [disabled]="loading || schedule_id == null">
+      <button
+        type="submit"
+        class="btn btn-olive create-reservation-service"
+        [disabled]="loading || schedule_id == null"
+      >
         {{ edit ? 'Actualizar' : 'Agregar' }} servicio
       </button>
     </div>

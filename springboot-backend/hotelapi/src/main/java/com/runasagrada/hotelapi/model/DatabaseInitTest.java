@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -45,6 +46,7 @@ public class DatabaseInitTest implements CommandLineRunner {
         private final PaymentRepository paymentRepo;
 
         @Override
+        @Transactional
         public void run(String... args) {
                 // Datos originales: roles, usuarios y hoteles
                 seedBasicData();
