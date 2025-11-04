@@ -40,19 +40,26 @@
                   (click)="select(reservation)"
                   [class.table-active]="selected?.reservation_id === reservation.reservation_id"
                 >
-                  <td class="fw-semibold" data-label="Reserva">
+                  <td class="fw-semibold reservation-id" data-label="Reserva">
                     #{{ reservation.reservation_id }}
                   </td>
                   <td data-label="Hotel">
                     {{ reservation.hotel?.name || 'Hotel ' + (reservation.hotel_id || '') }}
                   </td>
-                  <td data-label="Habitación">
+                  <td class="room-row" data-label="Habitación">
                     {{ reservation.room?.number || 'Habitación ' + (reservation.room_id || '') }}
                   </td>
-                  <td data-label="Check-in">{{ formatDate(reservation.check_in) }}</td>
-                  <td data-label="Check-out">{{ formatDate(reservation.check_out) }}</td>
-                  <td data-label="Estado">
-                    <span class="badge" [class]="badgeClass(reservation.status)">
+                  <td class="check-in-row" data-label="Check-in">
+                    {{ formatDate(reservation.check_in) }}
+                  </td>
+                  <td class="check-out-row" data-label="Check-out">
+                    {{ formatDate(reservation.check_out) }}
+                  </td>
+                  <td class="reservation-status-row" data-label="Estado">
+                    <span
+                      class="badge reservation-status-bg"
+                      [class]="badgeClass(reservation.status)"
+                    >
                       {{ formatStatus(reservation.status) }}
                     </span>
                   </td>

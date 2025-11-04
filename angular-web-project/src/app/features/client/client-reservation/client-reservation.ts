@@ -111,42 +111,36 @@ export class ClientReservationComponent implements OnInit {
       status: this.draft.status,
     };
 
-    this.reservationsApi
-      .update(this.editing.reservation_id, payload)
-      .subscribe({
-        next: (updated) => {
-          const mapped = this.mapReservation(updated);
-          this.reservations = this.reservations.map((r) =>
-            r.reservation_id === mapped.reservation_id ? mapped : r
-          );
-          this.editing = undefined;
-          this.draft = this.emptyDraft();
-          this.saving = false;
-          this.selected =
-            this.selected?.reservation_id === mapped.reservation_id
-              ? mapped
-              : this.selected;
-          this.showAlert('success', 'Reserva actualizada correctamente.');
-          this.changes.emit();
-          if (this.returnToDetailAfterEdit) {
-            this.showDetail = true;
-            this.returnToDetailAfterEdit = false;
-            this.selected = mapped;
-          }
-        },
-        error: (error) => {
-          console.error('Error updating reservation', error);
-          this.showAlert('danger', 'No se pudo actualizar la reserva.');
-          this.saving = false;
-        },
-      });
+    this.reservationsApi.update(this.editing.reservation_id, payload).subscribe({
+      next: (updated) => {
+        const mapped = this.mapReservation(updated);
+        this.reservations = this.reservations.map((r) =>
+          r.reservation_id === mapped.reservation_id ? mapped : r
+        );
+        this.editing = undefined;
+        this.draft = this.emptyDraft();
+        this.saving = false;
+        this.selected =
+          this.selected?.reservation_id === mapped.reservation_id ? mapped : this.selected;
+        this.showAlert('success', 'Reserva actualizada correctamente.');
+        this.changes.emit();
+        if (this.returnToDetailAfterEdit) {
+          this.showDetail = true;
+          this.returnToDetailAfterEdit = false;
+          this.selected = mapped;
+        }
+      },
+      error: (error) => {
+        console.error('Error updating reservation', error);
+        this.showAlert('danger', 'No se pudo actualizar la reserva.');
+        this.saving = false;
+      },
+    });
   }
 
   deleteReservation(reservation: Reservation): void {
     if (!reservation?.reservation_id) return;
-    const confirmed = confirm(
-      `¿Deseas cancelar la reserva #${reservation.reservation_id}?`
-    );
+    const confirmed = confirm(`¿Deseas cancelar la reserva #${reservation.reservation_id}?`);
     if (!confirmed) return;
 
     this.deletingId = reservation.reservation_id;
@@ -178,10 +172,7 @@ export class ClientReservationComponent implements OnInit {
   }
 
   isEditing(reservation: Reservation): boolean {
-    return (
-      !!this.editing &&
-      this.editing.reservation_id === reservation.reservation_id
-    );
+    return !!this.editing && this.editing.reservation_id === reservation.reservation_id;
   }
 
   formatStatus(status: Reservation['status']): string {
@@ -217,14 +208,14 @@ export class ClientReservationComponent implements OnInit {
   formatDate(value?: string): string {
     if (!value) return 'Sin definir';
     try {
-      const date = new Date(value);
+      const date = new Date(value + 'T12:00:00');
       if (Number.isNaN(date.getTime())) {
         return value;
       }
       return date.toLocaleDateString('es-CO', {
-        year: 'numeric',
-        month: 'short',
         day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
       });
     } catch {
       return value;
@@ -252,18 +243,13 @@ export class ClientReservationComponent implements OnInit {
         }),
         catchError((error) => {
           console.error('Error loading client reservations', error);
-          this.showAlert(
-            'danger',
-            'No se pudieron cargar tus reservas. Inicia sesión nuevamente.'
-          );
+          this.showAlert('danger', 'No se pudieron cargar tus reservas. Inicia sesión nuevamente.');
           this.loading = false;
           return of([]);
         })
       )
       .subscribe((list) => {
-        this.reservations = (list || []).map((r, idx) =>
-          this.mapReservation(r, idx)
-        );
+        this.reservations = (list || []).map((r, idx) => this.mapReservation(r, idx));
         this.loading = false;
       });
   }
@@ -274,17 +260,12 @@ export class ClientReservationComponent implements OnInit {
       .pipe(
         catchError((error) => {
           console.error('Error loading client reservations', error);
-          this.showAlert(
-            'danger',
-            'No se pudieron cargar tus reservas. Intenta más tarde.'
-          );
+          this.showAlert('danger', 'No se pudieron cargar tus reservas. Intenta más tarde.');
           return of([]);
         })
       )
       .subscribe((list) => {
-        this.reservations = (list || []).map((r, idx) =>
-          this.mapReservation(r, idx)
-        );
+        this.reservations = (list || []).map((r, idx) => this.mapReservation(r, idx));
         this.loading = false;
       });
   }
@@ -292,16 +273,10 @@ export class ClientReservationComponent implements OnInit {
   private mapReservation(raw: any, index?: number): Reservation {
     const fallback = index != null ? 1000 + index : undefined;
     const reservationId =
-      this.toInt(raw?.reservation_id ?? raw?.reservationId ?? raw?.id) ??
-      fallback ??
-      0;
+      this.toInt(raw?.reservation_id ?? raw?.reservationId ?? raw?.id) ?? fallback ?? 0;
     const userId =
       this.toInt(
-        raw?.user_id ??
-          raw?.userId ??
-          raw?.user?.user_id ??
-          raw?.user?.userId ??
-          this.meId
+        raw?.user_id ?? raw?.userId ?? raw?.user?.user_id ?? raw?.user?.userId ?? this.meId
       ) ?? this.meId;
     const hotelId =
       this.toInt(
@@ -313,9 +288,7 @@ export class ClientReservationComponent implements OnInit {
           raw?.room?.hotelId
       ) ?? 0;
     const roomId =
-      this.toInt(
-        raw?.room_id ?? raw?.roomId ?? raw?.room?.room_id ?? raw?.room?.roomId
-      ) ?? 0;
+      this.toInt(raw?.room_id ?? raw?.roomId ?? raw?.room?.room_id ?? raw?.room?.roomId) ?? 0;
 
     return {
       reservation_id: reservationId,
