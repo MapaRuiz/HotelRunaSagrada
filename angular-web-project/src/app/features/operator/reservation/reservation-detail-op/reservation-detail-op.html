@@ -171,6 +171,7 @@
           <h5 class="mb-0">
             <button
               class="accordion-title"
+              id="payment-services"
               type="button"
               data-bs-toggle="collapse"
               data-bs-target="#collapseThree"
@@ -198,6 +199,7 @@
                 <button
                   type="button"
                   class="btn btn-olive btn-sm"
+                  id="pay-total"
                   (click)="togglePayment()"
                   [disabled]="billDueTotal <= 0 || current.status !== 'CHECKIN'"
                 >
@@ -249,6 +251,7 @@
                   <button
                     type="button"
                     class="btn btn-primary btn-sm"
+                    id="confirm-payment"
                     (click)="confirmPayTotal()"
                     [disabled]="!selectedPaymentMethodId"
                   >

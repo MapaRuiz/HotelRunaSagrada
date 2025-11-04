@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.text.Normalizer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -23,9 +24,12 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+
+import com.runasagrada.hotelapi.repository.ServiceOfferingRepository;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 
@@ -38,6 +42,8 @@ public class UserOperatorTest {
 
     private WebDriver driver;
     private WebDriverWait wait;
+    @Autowired
+    private ServiceOfferingRepository serviceOfferingRepository;
     String room;
     String checkInDate;
     String checkOutDate;
@@ -87,6 +93,12 @@ public class UserOperatorTest {
         addTwoReservationServices(driver, wait,
                 "Bandeja Paisa Auténtica",
                 "Ajiaco Santafereño");
+
+        verifyServiceTotal(driver, wait,
+                "Bandeja Paisa Auténtica",
+                "Ajiaco Santafereño");
+
+        payServices(driver, wait);
 
         // el usuario va donde el operador y decide pagar todos los servicios pendientes
 
@@ -270,7 +282,13 @@ public class UserOperatorTest {
         for (String name : serviceNames) {
             WebElement addButton = wt.until(ExpectedConditions.elementToBeClickable(
                     By.xpath("//button[contains(@class,'btn-olive') and contains(.,'Agregar servicios')]")));
-            addButton.click();
+            ((org.openqa.selenium.JavascriptExecutor) drv)
+                    .executeScript("arguments[0].scrollIntoView({block:'center'});", addButton);
+            try {
+                addButton.click();
+            } catch (Exception e) {
+                ((org.openqa.selenium.JavascriptExecutor) drv).executeScript("arguments[0].click();", addButton);
+            }
 
             pickService(drv, wt, name);
         }
@@ -280,11 +298,17 @@ public class UserOperatorTest {
         WebElement form = wt
                 .until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("app-services-add-form form")));
 
+        wt.until(driver -> {
+            Select sel = new Select(
+                    driver.findElement(By.cssSelector("app-services-add-form form select.service-selector")));
+            return sel.getOptions().size() > 1;
+        });
         WebElement serviceSelectEl = form.findElement(By.cssSelector("select.service-selector"));
         Select serviceSelect = new Select(serviceSelectEl);
         boolean selected = false;
         for (WebElement option : serviceSelect.getOptions()) {
-            if (option.getText().toLowerCase().contains(serviceName.toLowerCase())) {
+            String optionText = option.getText();
+            if (normalize(optionText).contains(normalize(serviceName))) {
                 serviceSelect.selectByVisibleText(option.getText());
                 selected = true;
                 break;
@@ -318,6 +342,120 @@ public class UserOperatorTest {
         wt.until(ExpectedConditions.stalenessOf(form));
     }
 
+    private void verifyServiceTotal(WebDriver drv, WebDriverWait wt, String... serviceNames) {
+        WebElement paymentBtn = wt.until(ExpectedConditions.elementToBeClickable(By.id("payment-services")));
+        ((org.openqa.selenium.JavascriptExecutor) drv)
+                .executeScript("arguments[0].scrollIntoView({block:'center'});", paymentBtn);
+        try {
+            paymentBtn.click();
+        } catch (Exception e) {
+            ((org.openqa.selenium.JavascriptExecutor) drv).executeScript("arguments[0].click();", paymentBtn);
+        }
+
+        wt.until(ExpectedConditions.attributeContains(By.id("collapseThree"), "class", "show"));
+
+        WebElement totalValueEl = wt.until(ExpectedConditions.visibilityOfElementLocated(
+                By.cssSelector("#services-total-taxed + span.value")));
+
+        double displayedTotal = parseCurrencyValue(totalValueEl.getText());
+        double expectedTotal = calculateExpectedServiceTotal(serviceNames);
+
+        // diferencia absoluta de hasta 0.1 entre el valor esperado y el mostrado; sirve
+        // para compensar redondeos o variaciones al trabajar con doubles.
+        assertEquals(expectedTotal, displayedTotal, 0.1,
+                "El total de servicios con impuestos no coincide con los servicios agregados");
+    }
+
+    private double calculateExpectedServiceTotal(String... serviceNames) {
+        double subtotal = 0.0;
+        var offerings = serviceOfferingRepository.findAll();
+        for (String name : serviceNames) {
+            double price = offerings.stream()
+                    .filter(o -> normalize(o.getName()).equals(normalize(name)))
+                    .mapToDouble(o -> o.getBasePrice())
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("No se encontró el servicio en la BD: " + name));
+            subtotal += price;
+        }
+        double total = subtotal * 1.19;
+        return Math.round(total * 100.0) / 100.0;
+    }
+
+    private double parseCurrencyValue(String text) {
+        if (text == null)
+            return 0.0;
+        String cleaned = text.replaceAll("[^0-9,.-]", "");
+        cleaned = cleaned.replace(".", "").replace(",", ".");
+        if (cleaned.isBlank())
+            return 0.0;
+        double value = Double.parseDouble(cleaned);
+        return Math.round(value * 100.0) / 100.0;
+    }
+
+    private String normalize(String input) {
+        if (input == null)
+            return "";
+        String decomposed = Normalizer.normalize(input, Normalizer.Form.NFD);
+        return decomposed.replaceAll("\\p{InCombiningDiacriticalMarks}+", "").toLowerCase().trim();
+    }
+
+    private void payServices(WebDriver drv, WebDriverWait wt) {
+        WebElement paymentSectionBtn = wt.until(ExpectedConditions.presenceOfElementLocated(By.id("payment-services")));
+        WebElement paymentCollapse = wt.until(ExpectedConditions.presenceOfElementLocated(By.id("collapseThree")));
+        if (!paymentCollapse.getAttribute("class").contains("show")) {
+            ((org.openqa.selenium.JavascriptExecutor) drv)
+                    .executeScript("arguments[0].scrollIntoView({block:'center'});", paymentSectionBtn);
+            try {
+                paymentSectionBtn.click();
+            } catch (Exception e) {
+                ((org.openqa.selenium.JavascriptExecutor) drv).executeScript("arguments[0].click();",
+                        paymentSectionBtn);
+            }
+            wt.until(ExpectedConditions.attributeContains(By.id("collapseThree"), "class", "show"));
+        }
+
+        WebElement payButton = wt.until(ExpectedConditions.presenceOfElementLocated(By.id("pay-total")));
+        wt.until(driver -> payButton.isDisplayed() && payButton.isEnabled());
+        ((org.openqa.selenium.JavascriptExecutor) drv)
+                .executeScript("arguments[0].scrollIntoView({block:'center'});", payButton);
+        try {
+            payButton.click();
+        } catch (Exception e) {
+            ((org.openqa.selenium.JavascriptExecutor) drv).executeScript("arguments[0].click();", payButton);
+        }
+
+        WebElement methodsContainer = wt.until(ExpectedConditions.visibilityOfElementLocated(
+                By.cssSelector(".payment-method-item")));
+
+        WebElement firstMethodLabel = methodsContainer;
+        ((org.openqa.selenium.JavascriptExecutor) drv)
+                .executeScript("arguments[0].scrollIntoView({block:'center'});", firstMethodLabel);
+        try {
+            firstMethodLabel.click();
+        } catch (Exception e) {
+            ((org.openqa.selenium.JavascriptExecutor) drv).executeScript("arguments[0].click();", firstMethodLabel);
+        }
+
+        WebElement confirmBtn = wt.until(ExpectedConditions.presenceOfElementLocated(By.id("confirm-payment")));
+        wt.until(driver -> confirmBtn.isDisplayed() && confirmBtn.isEnabled());
+        ((org.openqa.selenium.JavascriptExecutor) drv)
+                .executeScript("arguments[0].scrollIntoView({block:'center'});", confirmBtn);
+        try {
+            confirmBtn.click();
+        } catch (Exception e) {
+            ((org.openqa.selenium.JavascriptExecutor) drv).executeScript("arguments[0].click();", confirmBtn);
+        }
+
+        try {
+            wt.until(ExpectedConditions.alertIsPresent());
+            drv.switchTo().alert().accept();
+        } catch (org.openqa.selenium.TimeoutException ignored) {
+            // no alert appeared within the wait window
+        }
+
+        wt.until(ExpectedConditions.invisibilityOf(confirmBtn));
+    }
+
     private String getCellText(WebElement row, String... selectors) {
         for (String selector : selectors) {
             try {
@@ -331,5 +469,4 @@ public class UserOperatorTest {
         }
         return "";
     }
-
 }

@@ -31,10 +31,7 @@
         <div class="summary-row" *ngFor="let pay of otherPayments">
           <span class="label">
             {{ pay.tx_reference || 'Pago #' + pay.payment_id }}
-            <span
-              class="badge ms-2"
-              [ngClass]="getPaymentStatusBadge(pay.status || '')"
-            >
+            <span class="badge ms-2" [ngClass]="getPaymentStatusBadge(pay.status || '')">
               {{ getPaymentStatusText(pay.status || '') }}
             </span>
           </span>
@@ -95,11 +92,8 @@
         <div class="summary-items" *ngIf="otherPayments?.length">
           <div class="summary-row" *ngFor="let pay of otherPayments">
             <span class="label">
-              {{ pay.tx_reference || ('Pago #' + pay.payment_id) }}
-              <span
-                class="badge ms-2"
-                [ngClass]="getPaymentStatusBadge(pay.status || '')"
-              >
+              {{ pay.tx_reference || 'Pago #' + pay.payment_id }}
+              <span class="badge ms-2" [ngClass]="getPaymentStatusBadge(pay.status || '')">
                 {{ getPaymentStatusText(pay.status || '') }}
               </span>
             </span>
@@ -125,7 +119,7 @@
         </div>
         <div class="summary-divider"></div>
         <div class="summary-row total">
-          <span class="label">Total servicios (con impuestos)</span>
+          <span id="services-total-taxed" class="label">Total servicios (con impuestos)</span>
           <span class="value">{{ formatCurrency(total) }}</span>
         </div>
         <div class="summary-row total" *ngIf="otherPayments?.length">
