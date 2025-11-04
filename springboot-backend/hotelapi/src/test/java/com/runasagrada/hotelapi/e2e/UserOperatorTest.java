@@ -12,11 +12,14 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Profile;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserOperatorTest {
 
@@ -31,23 +34,21 @@ public class UserOperatorTest {
     @BeforeEach
     void setUp() {
         WebDriverManager.chromedriver().setup();
-        ChromeOptions chromeOptions = new ChromeOptions();
-        chromeOptions.addArguments("--disable-notifications");
-        chromeOptions.addArguments("--disable-extensions");
+        ChromeOptions chromeOptions = new ChromeOptions()
+                .addArguments("--disable-notifications", "--disable-extensions");
 
-        setUserConfig(driverUser, waitUser, chromeOptions);
-        setUserConfig(driverOp, waitOp, chromeOptions);
-    }
+        this.driverUser = new ChromeDriver(chromeOptions);
+        this.waitUser = new WebDriverWait(driverUser, Duration.ofSeconds(5));
 
-    private void setUserConfig(WebDriver driver, WebDriverWait wait, ChromeOptions chromeOptions) {
-        driver = new ChromeDriver(chromeOptions);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+        this.driverOp = new ChromeDriver(chromeOptions);
+        this.waitOp = new WebDriverWait(driverOp, Duration.ofSeconds(5));
     }
 
     @Test
     void serviceReservationUseCase() {
         // Un usuario ya registrado realiza login con su perfil
         driverUser.get(BASE_URL + "/login");
+        login(driverUser, waitUser, "client01@demo.com", "client123");
     }
 
     private void login(WebDriver drv, WebDriverWait wait, String email, String pass) {
