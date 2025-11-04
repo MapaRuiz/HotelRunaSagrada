@@ -1,12 +1,14 @@
 package com.runasagrada.hotelapi.e2e;
 
 import java.time.Duration;
+import java.util.List;
 
 import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -49,6 +51,9 @@ public class UserOperatorTest {
         // Un usuario ya registrado realiza login con su perfil
         driverUser.get(BASE_URL + "/login");
         login(driverUser, waitUser, "client01@demo.com", "client123");
+
+        // Revisa sus próximas reservas
+        checkReservation(driverOp, waitOp);
     }
 
     private void login(WebDriver drv, WebDriverWait wait, String email, String pass) {
@@ -56,5 +61,17 @@ public class UserOperatorTest {
         drv.findElement(By.id("password")).sendKeys(pass);
         drv.findElement(By.id("btnLogin")).click();
         wait.until(ExpectedConditions.urlContains("/client"));
+    }
+
+    private void checkReservation(WebDriver drv, WebDriverWait wait) {
+        // aparece una que realizó tiempo atrás que todavía está sin iniciarç
+        List<WebElement> badges = wait.until(
+                ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector(".reservation-status")));
+        WebElement confirmada = badges.stream()
+                .filter(b -> "Confirmada".equalsIgnoreCase(b.getText().trim()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No se encontró reserva confirmada"));
+
+        String estado = confirmada.getText().trim();
     }
 }
