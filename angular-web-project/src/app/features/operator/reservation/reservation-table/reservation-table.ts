@@ -8,6 +8,7 @@ import {
   DATE_FILTER_CONFIG,
   gridTheme as sharedGridTheme,
   TEXT_FILTER_CONFIG,
+  formatDate,
 } from '../../../sharedTableConfig';
 import { updateResponsiveColumns as setResponsiveColumnsVisibility } from '../../../admin/sharedTable';
 import {
@@ -188,6 +189,7 @@ export class ReservationTableOperatorComponent implements OnInit, OnDestroy {
           params.data?.room?.number || `Habitación ${params.data?.room_id || 'N/A'}`,
         filter: 'agTextColumnFilter',
         filterParams: TEXT_FILTER_CONFIG,
+        cellClass: 'row-room',
         minWidth: 140,
       },
       {
@@ -195,17 +197,22 @@ export class ReservationTableOperatorComponent implements OnInit, OnDestroy {
         field: 'check_in',
         filter: 'agDateColumnFilter',
         filterParams: DATE_FILTER_CONFIG,
+        cellClass: 'row-check-in',
         minWidth: 140,
+        valueFormatter: (params) => formatDate(params.value),
       },
       {
         headerName: 'Check-out',
         field: 'check_out',
         filter: 'agDateColumnFilter',
         filterParams: DATE_FILTER_CONFIG,
+        cellClass: 'row-check-out',
         minWidth: 140,
+        valueFormatter: (params) => formatDate(params.value),
       },
       {
         headerName: 'Estado',
+        cellClass: 'row-reserv-status',
         field: 'status',
         filter: MultiSelectFilterComponent,
         filterParams: {
@@ -236,7 +243,7 @@ export class ReservationTableOperatorComponent implements OnInit, OnDestroy {
           const extraButton = ['CONFIRMED', 'PENDING'].includes(status)
             ? {
                 label: 'Activar',
-                class: 'btn-details',
+                class: 'btn-details btn-ack',
                 action: (r: Reservation) => this.activateReservation(r),
               }
             : status === 'CHECKIN'

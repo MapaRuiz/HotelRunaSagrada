@@ -8,6 +8,7 @@ import { ReservationService } from '../../../services/reservation';
 import { UsersService } from '../../../services/users';
 import { ReservationDetail } from '../../admin/reservation/reservation-detail/reservation-detail';
 import { AuthService } from '../../../services/auth';
+import { formatDate as formatGridDate } from '../../sharedTableConfig';
 
 type AlertKind = 'success' | 'danger';
 
@@ -19,6 +20,7 @@ type AlertKind = 'success' | 'danger';
   styleUrls: ['./client-reservation.css'],
 })
 export class ClientReservationComponent implements OnInit {
+  formatDate = formatGridDate;
   @Output() changes = new EventEmitter<void>();
 
   private users = inject(UsersService);
@@ -202,23 +204,6 @@ export class ClientReservationComponent implements OnInit {
         return 'bg-secondary';
       default:
         return 'bg-light text-dark';
-    }
-  }
-
-  formatDate(value?: string): string {
-    if (!value) return 'Sin definir';
-    try {
-      const date = new Date(value + 'T12:00:00');
-      if (Number.isNaN(date.getTime())) {
-        return value;
-      }
-      return date.toLocaleDateString('es-CO', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      });
-    } catch {
-      return value;
     }
   }
 
