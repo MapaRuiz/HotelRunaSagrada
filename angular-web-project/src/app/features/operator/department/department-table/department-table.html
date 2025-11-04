@@ -2,7 +2,13 @@
   <details #createDetails (toggle)="onCreateToggle($event)">
     <summary>Crear departamento</summary>
 
-    <form *ngIf="showCreate" class="card mt-4 department-form">
+    <form
+      *ngIf="showCreate"
+      class="card mt-4 department-form"
+      (ngSubmit)="saveCreate($event)"
+      #deptForm="ngForm"
+      novalidate
+    >
       <div class="card-body row g-3">
         <h5 class="card-title col-12">Nuevo departamento</h5>
 
@@ -30,17 +36,18 @@
 
         <div class="col-12 text-end">
           <button
+            type="button"
             class="btn btn-outline-olive me-2"
             (click)="cancelCreate()"
             [disabled]="createLoading"
           >
             Cancelar
           </button>
+
           <button
             type="submit"
             class="btn btn-olive"
-            (click)="saveCreate()"
-            [disabled]="createLoading"
+            [disabled]="createLoading || deptForm.invalid"
           >
             {{ createLoading ? 'Guardando...' : 'Guardar' }}
           </button>
