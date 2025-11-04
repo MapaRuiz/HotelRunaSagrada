@@ -103,12 +103,15 @@ export class ReservationFacade {
       map(({ reservations, hotel, rooms, users }) => {
         const usersById = new Map(users.map((u) => [u.user_id, u] as const));
         const roomsById = new Map(rooms.map((r) => [r.room_id, r] as const));
-        return reservations.map((r: Reservation) => ({
-          ...r,
-          hotel: hotel ?? undefined,
-          user: usersById.get(r.user_id),
-          room: roomsById.get(r.room_id),
-        }));
+        return reservations.map((raw: Reservation | any) => {
+          const normalized = this.normalizeReservation(raw);
+          return {
+            ...normalized,
+            hotel: normalized.hotel ?? hotel ?? undefined,
+            user: normalized.user ?? usersById.get(normalized.user_id),
+            room: normalized.room ?? roomsById.get(normalized.room_id),
+          };
+        });
       })
     );
   }
@@ -129,5 +132,86 @@ export class ReservationFacade {
 
   selectReservationService(row: ReservationServiceModel) {
     this.selectedReservationServiceSubject.next(row);
+  }
+
+  private normalizeReservation(raw: any): Reservation {
+    const copy: any = { ...raw };
+
+    const reservationId = this.toInt(raw?.reservation_id ?? raw?.reservationId ?? raw?.id ?? raw?._id);
+    if (reservationId != null) {
+      copy.reservation_id = reservationId;
+      copy.reservationId = reservationId;
+    }
+
+    const userId = this.toInt(
+      raw?.user_id ?? raw?.userId ?? raw?.user?.user_id ?? raw?.user?.userId ?? copy.user_id ?? copy.userId
+    );
+    if (userId != null) {
+      copy.user_id = userId;
+    }
+
+    const hotelId = this.toInt(
+      raw?.hotel_id ??
+        raw?.hotelId ??
+        raw?.hotel?.hotel_id ??
+        raw?.hotel?.hotelId ??
+        raw?.room?.hotel_id ??
+        raw?.room?.hotelId ??
+        copy.hotel_id ??
+        copy.hotelId
+    );
+    if (hotelId != null) {
+      copy.hotel_id = hotelId;
+    }
+
+    const roomId = this.toInt(
+      raw?.room_id ?? raw?.roomId ?? raw?.room?.room_id ?? raw?.room?.roomId ?? copy.room_id ?? copy.roomId
+    );
+    if (roomId != null) {
+      copy.room_id = roomId;
+    }
+
+    copy.check_in = this.normalizeDateString(raw?.check_in ?? raw?.checkIn ?? copy.check_in ?? '');
+    copy.check_out = this.normalizeDateString(raw?.check_out ?? raw?.checkOut ?? copy.check_out ?? '');
+    copy.status = this.normalizeStatus(raw?.status ?? raw?.state ?? copy.status);
+    copy.created_at = raw?.created_at ?? raw?.createdAt ?? copy.created_at;
+
+    return copy as Reservation;
+  }
+
+  private normalizeStatus(value: unknown): Reservation['status'] {
+    const raw = (value ?? '').toString().trim();
+    if (!raw) return 'PENDING';
+    const upper = raw.toUpperCase();
+    const compact = upper.replace(/[\s_-]+/g, '');
+
+    if (compact === 'CHECKIN') return 'CHECKIN';
+    if (compact === 'CHECKOUT') return 'FINISHED';
+
+    if (upper === 'CHECK-OUT' || upper === 'CHECK OUT') return 'FINISHED';
+    if (upper === 'CHECK-IN' || upper === 'CHECK IN') return 'CHECKIN';
+
+    if (upper === 'CONFIRMADA' || upper === 'CONFIRMADO') return 'CONFIRMED';
+    if (upper === 'PENDIENTE') return 'PENDING';
+    if (upper === 'FINALIZADA' || upper === 'FINALIZADO') return 'FINISHED';
+
+    if ((['PENDING', 'CONFIRMED', 'CHECKIN', 'FINISHED'] as const).includes(upper as Reservation['status'])) {
+      return upper as Reservation['status'];
+    }
+    return 'PENDING';
+  }
+
+  private toInt(value: unknown): number | undefined {
+    if (value === null || value === undefined || value === '') return undefined;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+
+  private normalizeDateString(value: unknown): string {
+    if (!value) return '';
+    if (value instanceof Date) {
+      return value.toISOString().split('T')[0];
+    }
+    return String(value);
   }
 }

@@ -7,11 +7,15 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WindowType;
@@ -33,7 +37,7 @@ public class UserOperatorTest {
 
     private final String BASE_URL = "http://localhost:4200";
 
-    private WebDriver drv;
+    private WebDriver driver;
     private WebDriverWait wait;
     String room;
     String checkInDate;
@@ -42,28 +46,44 @@ public class UserOperatorTest {
     @BeforeEach
     void setUp() {
         WebDriverManager.chromedriver().setup();
-        ChromeOptions chromeOptions = new ChromeOptions()
-                .addArguments("--disable-notifications", "--disable-extensions");
 
-        this.drv = new ChromeDriver(chromeOptions);
-        this.drv.manage().window().setSize(new org.openqa.selenium.Dimension(1280, 900));
-        this.wait = new WebDriverWait(drv, Duration.ofSeconds(5));
+        Map<String, Object> prefs = new HashMap<>();
+        prefs.put("credentials_enable_service", false);
+        prefs.put("profile.password_manager_enabled", false);
+        prefs.put("autofill.profile_enabled", false);
+        // Deshabilitar la verificación de contraseñas comprometidas
+        prefs.put("profile.password_manager_leak_detection", false);
+        prefs.put("safebrowsing.enabled", false);
+
+        ChromeOptions chromeOptions = new ChromeOptions()
+                .addArguments("--disable-notifications")
+                .addArguments("--disable-extensions")
+                .addArguments("--disable-save-password-bubble")
+                .addArguments("--disable-password-manager-reauthentication")
+                // Deshabilitar la detección de contraseñas comprometidas
+                .addArguments("--disable-features=PasswordLeakDetection")
+                .setExperimentalOption("prefs", prefs)
+                .setExperimentalOption("excludeSwitches", new String[] { "enable-automation" });
+
+        this.driver = new ChromeDriver(chromeOptions);
+        this.driver.manage().window().setSize(new org.openqa.selenium.Dimension(1280, 900));
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(5));
     }
 
     @Test
     void serviceReservationUseCase() {
         // Un usuario ya registrado realiza login con su perfil
-        drv.get(BASE_URL + "/login");
-        login(drv, wait, "client01@demo.com", "client123", false);
+        driver.get(BASE_URL + "/login");
+        login(driver, wait, "client01@demo.com", "client123", false);
 
         // Revisa sus próximas reservas
-        checkReservation(drv, wait);
+        checkReservation(driver, wait);
 
         // En otra Ventana ingresa un operador con su usuario y contraseña.
-        login(drv, wait, "op1@hotel.com", "op123", true);
+        login(driver, wait, "op1@hotel.com", "op123", true);
 
         // Va al perfil de reservas y activa (realiza checkin) la reserva del usuario.
-        checkInReservation(drv, wait);
+        checkInReservation(driver, wait);
 
         // Agrega 2 servicios a esta reserva
 
@@ -131,74 +151,41 @@ public class UserOperatorTest {
     }
 
     private void checkInReservation(WebDriver drv, WebDriverWait wait) {
-        // 1) Ir a la tabla del operador
         drv.get(BASE_URL + "/operator/reservation-table");
 
-        // 2) Esperar a que el grid esté listo (ajusta el selector si hace falta)
         wait.withTimeout(Duration.ofSeconds(15))
                 .until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".ag-root")));
 
-        // 3) Re-localizar la fila objetivo con el estado "confirmada"
         WebElement row = wait.until(d -> locateReservationRow(d, room, checkInDate, checkOutDate, "confirmada"));
         if (row == null)
             throw new IllegalStateException("No se encontró la fila confirmada para check-in");
 
-        // 4) Asegurar que la fila esté visible en el contenedor de AG Grid (scroll)
-        WebElement viewport = drv.findElement(By.cssSelector(".ag-center-cols-viewport"));
         ((org.openqa.selenium.JavascriptExecutor) drv)
-                .executeScript("arguments[0].scrollTop = arguments[1];", viewport, row.getRect().y);
+                .executeScript("arguments[0].scrollIntoView({block:'center'});", row);
 
-        // 5) Re-localizar el botón *después* del scroll (evita stale)
         By btnBy = By.cssSelector("app-action-buttons-cell .btn-ack");
-
-        // Esperar a que el botón esté presente y usable
-        WebElement btn = wait.until(d -> {
-            WebElement freshRow = locateReservationRow(d, room, checkInDate, checkOutDate, "confirmada");
-            if (freshRow == null)
+        WebElement button = wait.until(driver -> {
+            WebElement refreshed = locateReservationRow(driver, room, checkInDate, checkOutDate, "confirmada");
+            if (refreshed == null)
                 return null;
-            List<WebElement> buttons = freshRow.findElements(btnBy);
-            if (buttons.isEmpty())
-                return null;
-            WebElement candidate = buttons.get(0);
-            if (!candidate.isDisplayed()) {
-                ((org.openqa.selenium.JavascriptExecutor) d)
-                        .executeScript("arguments[0].scrollIntoView({block:'center'});", candidate);
-            }
-            return candidate.isEnabled() ? candidate : null;
+            List<WebElement> buttons = refreshed.findElements(btnBy);
+            return buttons.isEmpty() ? null : buttons.get(0);
         });
-        System.out.println("Texto del botón Activar: " + btn.getText());
 
-        // Asegurar visibilidad y clickeabilidad
-        ((org.openqa.selenium.JavascriptExecutor) drv)
-                .executeScript("arguments[0].scrollIntoView({block:'center'});", btn);
+        System.out.println("Click en: " + button.getText());
         try {
-            new Actions(drv).moveToElement(btn).pause(Duration.ofMillis(150)).click().perform();
-        } catch (Exception clickEx) {
-            // Fallback si hay overlay/intercepción o stale
-            WebElement fallback = locateReservationRow(drv, room, checkInDate, checkOutDate, "confirmada");
-            if (fallback != null) {
-                List<WebElement> buttons = fallback.findElements(btnBy);
-                if (!buttons.isEmpty()) {
-                    btn = buttons.get(0);
-                }
-            }
-            ((org.openqa.selenium.JavascriptExecutor) drv).executeScript("arguments[0].click();", btn);
+            wait.until(ExpectedConditions.elementToBeClickable(button)).click();
+        } catch (Exception e) {
+            ((org.openqa.selenium.JavascriptExecutor) drv).executeScript("arguments[0].click();", button);
         }
 
-        // 7) Verificar cambio de estado a "check-in"
-        new WebDriverWait(drv, Duration.ofSeconds(20)).until(d -> {
+        wait.withTimeout(Duration.ofSeconds(15)).until(d -> {
             WebElement updated = locateReservationRow(d, room, checkInDate, checkOutDate, "check-in");
             if (updated == null)
                 return false;
-            String statusText = getCellText(updated, ".ag-cell[col-id='status']", ".row-reserv-status");
-            return statusText.toLowerCase().contains("check-in");
+            String status = getCellText(updated, ".ag-cell[col-id='status']", ".row-reserv-status");
+            return status.toLowerCase().contains("check-in");
         });
-    }
-
-    private WebElement findReservation(WebDriver drv, WebDriverWait wait, String room, String checkInDate,
-            String checkOutDate, String expectedStatus) {
-        return wait.until(driver -> locateReservationRow(driver, room, checkInDate, checkOutDate, expectedStatus));
-
     }
 
     private WebElement locateReservationRow(WebDriver driver, String room, String checkInDate, String checkOutDate,
