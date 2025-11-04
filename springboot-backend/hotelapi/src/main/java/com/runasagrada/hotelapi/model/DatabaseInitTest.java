@@ -1414,6 +1414,8 @@ public class DatabaseInitTest implements CommandLineRunner {
         }
 
         private void seedReservations(List<Hotel> hotelList) {
+                ensureConfirmedReservationForClient();
+
                 if (reservationRepo.count() > 0)
                         return; // no duplicar
 
@@ -1469,6 +1471,81 @@ public class DatabaseInitTest implements CommandLineRunner {
                                 d = d.plusDays(1);
                         }
                 }
+        }
+
+        private void ensureConfirmedReservationForClient() {
+                userRepo.findByEmail("client01@demo.com").ifPresent(client -> hotels.findById(1L).ifPresent(hotel -> {
+                        LocalDate today = LocalDate.now();
+                        LocalDate tomorrow = today.plusDays(1);
+
+                        Optional<Reservation> existing = reservationRepo.findByUserUserId(client.getUserId()).stream()
+                                        .filter(reservation -> reservation.getHotel() != null
+                                                        && Objects.equals(reservation.getHotel().getHotelId(),
+                                                                        hotel.getHotelId())
+                                                        && today.equals(reservation.getCheckIn())
+                                                        && tomorrow.equals(reservation.getCheckOut())
+                                                        && reservation.getStatus() == Reservation.Status.CONFIRMED)
+                                        .findFirst();
+
+                        if (existing.isPresent()) {
+                                ensurePaidRoomPayment(existing.get());
+                                return;
+                        }
+
+                        List<Room> hotelRooms = roomRepository.findByHotelHotelId(hotel.getHotelId());
+                        Optional<Room> availableRoom = hotelRooms.stream()
+                                        .filter(room -> !roomLockRepo.existsByRoomIdAndLockDate(room.getRoomId(), today))
+                                        .findFirst();
+
+                        availableRoom.or(() -> hotelRooms.stream().findFirst()).ifPresent(room -> {
+                                Reservation reservation = new Reservation();
+                                reservation.setUser(client);
+                                reservation.setHotel(hotel);
+                                reservation.setRoom(room);
+                                reservation.setCheckIn(today);
+                                reservation.setCheckOut(tomorrow);
+                                reservation.setStatus(Reservation.Status.CONFIRMED);
+
+                                Reservation saved = reservationRepo.save(reservation);
+
+                                LocalDate lockDate = today;
+                                while (lockDate.isBefore(tomorrow)) {
+                                        roomLockRepo.save(new RoomLock(room.getRoomId(), lockDate, saved));
+                                        lockDate = lockDate.plusDays(1);
+                                }
+
+                                ensurePaidRoomPayment(saved);
+                        });
+                }));
+        }
+
+        private void ensurePaidRoomPayment(Reservation reservation) {
+                paymentRepo.deleteByReservationId_ReservationId(reservation.getReservationId());
+
+                PaymentMethod method = paymentMethodRepo.findByUserId_UserId(reservation.getUser().getUserId())
+                                .stream()
+                                .findFirst()
+                                .orElseGet(() -> createPaymentMethodForUser(reservation.getUser(), "TARJETA", "9999",
+                                                Optional.ofNullable(reservation.getUser().getFullName())
+                                                                .orElse("Cliente Demo"),
+                                                "Dirección Cliente"));
+
+                double amount = 0.0;
+                Room room = reservation.getRoom();
+                if (room != null) {
+                        room = roomRepository.findByIdWithDetails(room.getRoomId()).orElse(room);
+                        if (room.getRoomType() != null && room.getRoomType().getBasePrice() != null) {
+                                amount = room.getRoomType().getBasePrice().doubleValue();
+                        }
+                }
+
+                Payment payment = new Payment();
+                payment.setReservationId(reservation);
+                payment.setPaymentMethodId(method);
+                payment.setAmount(amount);
+                payment.setStatus("PAID");
+                payment.setTxReference("Cobro#habitacion");
+                savePaymentWithDefaultRef(payment);
         }
 
         private String pickIcon(int i) {

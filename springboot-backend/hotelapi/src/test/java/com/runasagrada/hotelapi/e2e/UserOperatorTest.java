@@ -1,22 +1,27 @@
 package com.runasagrada.hotelapi.e2e;
 
 import java.time.Duration;
+import java.util.List;
 
 import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Profile;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserOperatorTest {
 
@@ -31,23 +36,24 @@ public class UserOperatorTest {
     @BeforeEach
     void setUp() {
         WebDriverManager.chromedriver().setup();
-        ChromeOptions chromeOptions = new ChromeOptions();
-        chromeOptions.addArguments("--disable-notifications");
-        chromeOptions.addArguments("--disable-extensions");
+        ChromeOptions chromeOptions = new ChromeOptions()
+                .addArguments("--disable-notifications", "--disable-extensions");
 
-        setUserConfig(driverUser, waitUser, chromeOptions);
-        setUserConfig(driverOp, waitOp, chromeOptions);
-    }
+        this.driverUser = new ChromeDriver(chromeOptions);
+        this.waitUser = new WebDriverWait(driverUser, Duration.ofSeconds(5));
 
-    private void setUserConfig(WebDriver driver, WebDriverWait wait, ChromeOptions chromeOptions) {
-        driver = new ChromeDriver(chromeOptions);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+        this.driverOp = new ChromeDriver(chromeOptions);
+        this.waitOp = new WebDriverWait(driverOp, Duration.ofSeconds(5));
     }
 
     @Test
     void serviceReservationUseCase() {
         // Un usuario ya registrado realiza login con su perfil
         driverUser.get(BASE_URL + "/login");
+        login(driverUser, waitUser, "client01@demo.com", "client123");
+
+        // Revisa sus próximas reservas
+        checkReservation(driverOp, waitOp);
     }
 
     private void login(WebDriver drv, WebDriverWait wait, String email, String pass) {
@@ -55,5 +61,17 @@ public class UserOperatorTest {
         drv.findElement(By.id("password")).sendKeys(pass);
         drv.findElement(By.id("btnLogin")).click();
         wait.until(ExpectedConditions.urlContains("/client"));
+    }
+
+    private void checkReservation(WebDriver drv, WebDriverWait wait) {
+        // aparece una que realizó tiempo atrás que todavía está sin iniciarç
+        List<WebElement> badges = wait.until(
+                ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector(".reservation-status")));
+        WebElement confirmada = badges.stream()
+                .filter(b -> "Confirmada".equalsIgnoreCase(b.getText().trim()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No se encontró reserva confirmada"));
+
+        String estado = confirmada.getText().trim();
     }
 }
