@@ -1,11 +1,11 @@
 package com.runasagrada.hotelapi.controller;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.runasagrada.hotelapi.DTOs.PaymentRequest;
+import com.runasagrada.hotelapi.DTOs.PaymentStatusSummary;
 import com.runasagrada.hotelapi.model.Payment;
 import com.runasagrada.hotelapi.model.PaymentMethod;
 import com.runasagrada.hotelapi.model.Reservation;
 import com.runasagrada.hotelapi.service.PaymentService;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -117,23 +117,5 @@ public class PaymentController {
 	@GetMapping("/payments/income/{hotelId}")
 	public double[] getIncomeForHotel(@PathVariable Long hotelId) {
 		return service.calculateIncome(hotelId);
-	}
-
-	@Data
-	public static class PaymentRequest {
-		private Integer reservationId;
-		private Integer paymentMethodId;
-		private double amount;
-		private String status;
-		@JsonProperty("tx_reference")
-		private String txReference;
-	}
-
-	@Data
-	public static class PaymentStatusSummary {
-		private final Integer reservationId;
-		private final int total;
-		private final int paid;
-		private final boolean allPaid;
 	}
 }

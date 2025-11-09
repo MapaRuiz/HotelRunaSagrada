@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.runasagrada.hotelapi.DTOs.ServiceOfferingRequest;
 import com.runasagrada.hotelapi.model.Hotel;
 import com.runasagrada.hotelapi.model.ServiceOffering;
 import com.runasagrada.hotelapi.model.ServiceSchedule;
@@ -31,8 +32,6 @@ import com.runasagrada.hotelapi.service.ServiceScheduleService;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.Data;
 
 @RestController
@@ -283,21 +282,5 @@ public class ServiceOfferingController {
         private LocalTime endTime;
 
         private Boolean active;
-    }
-
-    @Data
-    static class ServiceOfferingRequest {
-        private String name;
-        private String category;
-        private String subcategory;
-        private String description;
-        private double basePrice;
-        private int durationMinutes;
-        private List<String> imageUrls;
-        private int maxParticipants;
-        private double latitude;
-        private double longitude;
-        @JsonProperty("hotel_id")
-        private Long hotelId;
     }
 }

@@ -1,8 +1,8 @@
 package com.runasagrada.hotelapi.controller;
 
+import com.runasagrada.hotelapi.DTOs.LoginRequest;
 import com.runasagrada.hotelapi.model.User;
 import com.runasagrada.hotelapi.service.UserService;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -56,11 +56,5 @@ public class AuthController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid token");
         }
         return uid;
-    }
-
-    @Data
-    static class LoginRequest {
-        String email;
-        String password;
     }
 }

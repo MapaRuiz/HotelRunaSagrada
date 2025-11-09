@@ -1,11 +1,11 @@
 package com.runasagrada.hotelapi.controller;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.runasagrada.hotelapi.DTOs.TaskRequest;
+import com.runasagrada.hotelapi.DTOs.TaskStatusRequest;
 import com.runasagrada.hotelapi.model.Task;
 import com.runasagrada.hotelapi.model.Task.TaskStatus;
 import com.runasagrada.hotelapi.model.Task.TaskType;
 import com.runasagrada.hotelapi.service.TaskService;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -86,21 +86,5 @@ public class TaskController {
 	public ResponseEntity<Void> delete(@PathVariable Long id) {
 		service.delete(id);
 		return ResponseEntity.noContent().build();
-	}
-
-	@Data
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	public static class TaskRequest {
-		private Long staffId;
-		private Integer roomId;
-		private Long resServiceId;
-		private TaskType type;
-		private TaskStatus status;
-	}
-
-	@Data
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	public static class TaskStatusRequest {
-		private TaskStatus status;
 	}
 }

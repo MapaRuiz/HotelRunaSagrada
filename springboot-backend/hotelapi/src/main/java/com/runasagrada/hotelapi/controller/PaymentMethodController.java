@@ -1,18 +1,15 @@
 package com.runasagrada.hotelapi.controller;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.runasagrada.hotelapi.DTOs.PaymentMethodRequest;
 import com.runasagrada.hotelapi.model.PaymentMethod;
 import com.runasagrada.hotelapi.model.User;
 import com.runasagrada.hotelapi.repository.PaymentMethodRepository;
 import com.runasagrada.hotelapi.service.PaymentMethodService;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 import java.util.Map;
-
-
 
 import java.util.List;
 
@@ -65,43 +62,23 @@ public class PaymentMethodController {
 		return ResponseEntity.ok(service.update(id, partial));
 	}
 
-@DeleteMapping("/payment-methods/{id}")
-public ResponseEntity<?> deactivate(@PathVariable Integer id) {
-    Optional<PaymentMethod> pm = paymentMethodRepository.findById(id);
-    if (pm.isEmpty()) {
-        return ResponseEntity.notFound().build();
-    }
+	@DeleteMapping("/payment-methods/{id}")
+	public ResponseEntity<?> deactivate(@PathVariable Integer id) {
+		Optional<PaymentMethod> pm = paymentMethodRepository.findById(id);
+		if (pm.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
 
-    paymentMethodRepository.deactivateById(id);
+		paymentMethodRepository.deactivateById(id);
 
-    // ✅ Devuelve JSON
-    return ResponseEntity.ok(Map.of(
-        "message", "Método de pago desactivado correctamente",
-        "id", id
-    ));
-}
+		// ✅ Devuelve JSON
+		return ResponseEntity.ok(Map.of(
+				"message", "Método de pago desactivado correctamente",
+				"id", id));
+	}
 
-	
-
-@Data
-public static class PaymentMethodRequest {
-    private Integer userId;
-    private String type;
-
-    @JsonProperty("last4")
-    private String lastfour;
-
-    @JsonProperty("holder_name")
-    private String holderName;
-
-    @JsonProperty("billing_address")
-    private String billingAddress;
-}
-
-@GetMapping("/user/{userId}")
-public ResponseEntity<?> getActiveByUser(@PathVariable Integer userId) {
-    return ResponseEntity.ok(paymentMethodRepository.findActiveByUserId(userId));
-}
-
-
+	@GetMapping("/user/{userId}")
+	public ResponseEntity<?> getActiveByUser(@PathVariable Integer userId) {
+		return ResponseEntity.ok(paymentMethodRepository.findActiveByUserId(userId));
+	}
 }

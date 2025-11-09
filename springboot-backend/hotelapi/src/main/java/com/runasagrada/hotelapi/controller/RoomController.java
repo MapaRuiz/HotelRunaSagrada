@@ -1,6 +1,6 @@
 package com.runasagrada.hotelapi.controller;
 
-import com.runasagrada.hotelapi.controller.ReservationController.ReservationDTO;
+import com.runasagrada.hotelapi.DTOs.ReservationDTO;
 import com.runasagrada.hotelapi.model.Reservation;
 import com.runasagrada.hotelapi.model.Room;
 import com.runasagrada.hotelapi.model.RoomLock;

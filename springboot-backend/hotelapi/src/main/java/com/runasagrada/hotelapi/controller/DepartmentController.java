@@ -1,9 +1,8 @@
 package com.runasagrada.hotelapi.controller;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.runasagrada.hotelapi.DTOs.DepartmentRequest;
 import com.runasagrada.hotelapi.model.Department;
 import com.runasagrada.hotelapi.service.DepartmentService;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -53,12 +52,5 @@ public class DepartmentController {
 	public ResponseEntity<Void> delete(@PathVariable Long id) {
 		service.delete(id);
 		return ResponseEntity.noContent().build();
-	}
-
-	@Data
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	public static class DepartmentRequest {
-		private Long hotelId;
-		private String name;
 	}
 }

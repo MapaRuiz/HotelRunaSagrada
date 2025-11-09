@@ -1,13 +1,12 @@
 package com.runasagrada.hotelapi.controller;
 
+import com.runasagrada.hotelapi.DTOs.RoomTypeRequest;
 import com.runasagrada.hotelapi.model.RoomType;
 import com.runasagrada.hotelapi.service.RoomTypeService;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -59,15 +58,5 @@ public class RoomTypeController {
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
-    }
-
-    // Clase interna para request
-    @Data
-    public static class RoomTypeRequest {
-        private String name;
-        private Integer capacity;
-        private BigDecimal basePrice;
-        private String description;
-        private String image;
     }
 }

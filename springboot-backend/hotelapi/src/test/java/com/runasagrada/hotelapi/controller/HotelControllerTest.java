@@ -1,6 +1,7 @@
 package com.runasagrada.hotelapi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.runasagrada.hotelapi.DTOs.HotelRequest;
 import com.runasagrada.hotelapi.model.Hotel;
 import com.runasagrada.hotelapi.service.HotelService;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +41,7 @@ class HotelControllerTest {
     private HotelService hotelService;
 
     private Hotel mockHotel;
-    private HotelController.HotelRequest mockRequest;
+    private HotelRequest mockRequest;
 
     @BeforeEach
     void setUp() {
@@ -56,7 +57,7 @@ class HotelControllerTest {
         mockHotel.setImage("/images/hotel1.jpg");
         mockHotel.setAmenities(new HashSet<>());
 
-        mockRequest = new HotelController.HotelRequest();
+        mockRequest = new HotelRequest();
         mockRequest.setName("Hotel Test");
         mockRequest.setLatitude("10.0");
         mockRequest.setLongitude("-84.0");
@@ -318,7 +319,7 @@ class HotelControllerTest {
     @Test
     void testUpdateHotel_WithPartialData_ProcessesCorrectly() throws Exception {
         // Arrange: Request con solo algunos campos
-        HotelController.HotelRequest partialRequest = new HotelController.HotelRequest();
+        HotelRequest partialRequest = new HotelRequest();
         partialRequest.setName("Nombre Parcial");
         partialRequest.setAmenityIds(null);
 

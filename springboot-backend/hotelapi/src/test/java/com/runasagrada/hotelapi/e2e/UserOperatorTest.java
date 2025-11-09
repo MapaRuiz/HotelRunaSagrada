@@ -173,6 +173,7 @@ public class UserOperatorTest {
         if (row == null)
             throw new IllegalStateException("No se encontró la fila confirmada para check-in");
 
+        // Fallback using JavaScript
         ((org.openqa.selenium.JavascriptExecutor) drv)
                 .executeScript("arguments[0].scrollIntoView({block:'center'});", row);
 

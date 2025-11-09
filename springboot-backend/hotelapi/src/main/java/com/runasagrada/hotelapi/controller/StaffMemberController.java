@@ -1,10 +1,9 @@
 package com.runasagrada.hotelapi.controller;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.runasagrada.hotelapi.model.StaffMemberWithUserDto;
+import com.runasagrada.hotelapi.DTOs.StaffMemberRequest;
 import com.runasagrada.hotelapi.model.StaffMember;
 import com.runasagrada.hotelapi.service.StaffMemberService;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -77,14 +76,5 @@ public class StaffMemberController {
 	public ResponseEntity<Void> delete(@PathVariable Long id) {
 		service.delete(id);
 		return ResponseEntity.noContent().build();
-	}
-
-	@Data
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	public static class StaffMemberRequest {
-		private Integer userId;
-		private Long hotelId;
-		private Long departmentId;
-		private String name;
 	}
 }

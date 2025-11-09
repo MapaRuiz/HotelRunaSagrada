@@ -1,6 +1,7 @@
 package com.runasagrada.hotelapi.controller;
 
 import com.runasagrada.hotelapi.model.Reservation;
+import com.runasagrada.hotelapi.DTOs.ReservationDTO;
 import com.runasagrada.hotelapi.model.Payment;
 import com.runasagrada.hotelapi.service.PaymentService;
 import com.runasagrada.hotelapi.service.ReservationService;
@@ -226,22 +227,4 @@ public class ReservationController {
     public Map<String, Long> countByRoomTypeAndHotel(@PathVariable Long hotelId) {
         return service.countByRoomTypeAndHotel(hotelId);
     }
-
-    @Data
-    @AllArgsConstructor
-    public static class ReservationDTO {
-        private Integer reservationId;
-        private Integer userId;
-        private Long hotelId;
-        private Integer roomId;
-        private LocalDate checkIn;
-        private LocalDate checkOut;
-        private Reservation.Status status;
-
-        public static ReservationDTO buildDTO(Reservation r) {
-            return new ReservationDTO(r.getReservationId(), r.getUser().getUserId(), r.getHotel().getHotelId(),
-                    r.getRoom().getRoomId(), r.getCheckIn(), r.getCheckOut(), r.getStatus());
-        }
-    }
-
 }

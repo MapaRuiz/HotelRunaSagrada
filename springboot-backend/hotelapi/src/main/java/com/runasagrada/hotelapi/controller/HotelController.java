@@ -1,9 +1,8 @@
 package com.runasagrada.hotelapi.controller;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.runasagrada.hotelapi.DTOs.HotelRequest;
 import com.runasagrada.hotelapi.model.Hotel;
 import com.runasagrada.hotelapi.service.HotelService;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -71,22 +70,5 @@ public class HotelController {
     @GetMapping("/summary/amenities")
     public Map<String, Long> getAmenitiesCountByHotel() {
         return service.amenitiesCountByHotel();
-    }
-
-    @Data
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class HotelRequest {
-        private String name;
-        private String latitude;
-        private String longitude;
-        private String description;
-
-        // NUEVOS
-        private String checkInAfter; // "15:00"
-        private String checkOutBefore; // "12:00"
-        private String image; // ruta/URL
-
-        // null = no tocar; [] = limpiar; valores = reemplazar
-        private List<Integer> amenityIds;
     }
 }

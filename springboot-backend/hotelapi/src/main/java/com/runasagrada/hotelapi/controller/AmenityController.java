@@ -1,12 +1,11 @@
 package com.runasagrada.hotelapi.controller;
 
 import com.runasagrada.hotelapi.model.Amenity;
-import com.runasagrada.hotelapi.model.AmenityType;
 import com.runasagrada.hotelapi.service.AmenityService;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.runasagrada.hotelapi.DTOs.AmenityRequest;
 
 import java.util.List;
 
@@ -42,12 +41,5 @@ public class AmenityController {
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @Data
-    public static class AmenityRequest {
-        private String name;
-        private String image;
-        private AmenityType type;
     }
 }

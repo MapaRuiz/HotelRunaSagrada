@@ -17,15 +17,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.runasagrada.hotelapi.DTOs.ReservationServiceDTO;
 import com.runasagrada.hotelapi.model.ReservationServiceEntity;
 import com.runasagrada.hotelapi.service.ReservationServiceService;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
 @RestController
 @RequestMapping("/api/reservservice")
@@ -158,50 +154,5 @@ public class ReservationServiceController {
             return existing.getSchedule().getId();
         }
         return null;
-    }
-
-    @Data
-    @AllArgsConstructor
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-    public static class ReservationServiceDTO {
-        // Explicit identifier for row mapping on the frontend
-        private Long resServiceId;
-        @Schema(name = "reservation_id")
-        private Long reservationId;
-        @Schema(name = "service_id")
-        private Long serviceId;
-        @Schema(name = "schedule_id")
-        private Long scheduleId;
-        private Integer qty;
-        @Schema(name = "unit_price")
-        private Double unitPrice;
-        private ReservationServiceEntity.Status status;
-
-        public static ReservationServiceDTO from(ReservationServiceEntity rService) {
-            return new ReservationServiceDTO(
-                    rService.getId(),
-                    rService.getReservation().getReservationId().longValue(),
-                    rService.getService().getId(),
-                    rService.getSchedule() != null ? rService.getSchedule().getId() : null,
-                    rService.getQty(),
-                    rService.getUnitPrice(),
-                    rService.getStatus());
-        }
-
-        boolean hasRequiredIdentifiers() {
-            return hasReservationId() && hasServiceId();
-        }
-
-        boolean hasReservationId() {
-            return reservationId != null;
-        }
-
-        boolean hasServiceId() {
-            return serviceId != null;
-        }
-
-        boolean hasScheduleId() {
-            return scheduleId != null;
-        }
     }
 }

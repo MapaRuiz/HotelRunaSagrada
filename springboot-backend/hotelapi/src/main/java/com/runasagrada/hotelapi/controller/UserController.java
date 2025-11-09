@@ -1,9 +1,8 @@
 package com.runasagrada.hotelapi.controller;
 
+import com.runasagrada.hotelapi.DTOs.AdminUpdateUserRequest;
 import com.runasagrada.hotelapi.model.User;
 import com.runasagrada.hotelapi.service.UserService;
-
-import lombok.Data;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -109,17 +108,4 @@ public class UserController {
     public double[] summary() {
         return service.usersSummary();
     }
-
-    @Data
-    static class AdminUpdateUserRequest {
-        private String email;
-        private String password;
-        private String fullName;
-        private String phone;
-        private String nationalId;
-        private String selectedPet;
-        private Boolean enabled;
-        private List<String> roles; // ['ADMIN','OPERATOR','CLIENT']
-    }
-
 }
