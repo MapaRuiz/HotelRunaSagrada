@@ -6,8 +6,6 @@ import com.runasagrada.hotelapi.model.Payment;
 import com.runasagrada.hotelapi.service.PaymentService;
 import com.runasagrada.hotelapi.service.ReservationService;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
