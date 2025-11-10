@@ -26,5 +26,7 @@ public interface UserService {
 
     User findById(Integer userId);
 
+    User findByEmail(String email);
+
     double[] usersSummary();
 }

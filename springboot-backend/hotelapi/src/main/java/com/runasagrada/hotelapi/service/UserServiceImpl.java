@@ -207,6 +207,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User findByEmail(String email) {
+        return users.findByEmail(email).orElseThrow(() -> new NoSuchElementException("User not found: " + email));
+    }
+
+    @Override
     public double[] usersSummary() {
         ZoneId zone = ZoneId.systemDefault();
 

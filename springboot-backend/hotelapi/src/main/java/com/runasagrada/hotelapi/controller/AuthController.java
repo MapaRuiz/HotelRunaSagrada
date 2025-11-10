@@ -72,19 +72,22 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String token = jwtGenerator.generateToken(authentication);
+        User user = service.findByEmail(authentication.getName());
 
         Map<String, Object> payload = Map.of(
-                "message", token,
-                "user", authentication.getPrincipal());
+                "access_token", token,
+                "user", user);
 
         return ResponseEntity.ok(payload);
 
     }
 
     @GetMapping("/me")
-    public User me(@RequestHeader(value = "Authorization", required = false) String auth) {
-        Integer uid = getUserId(auth);
-        return service.me(uid);
+    public User me(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "no token");
+        }
+        return service.findByEmail(authentication.getName());
     }
 
     Integer getUserId(String authHeader) {

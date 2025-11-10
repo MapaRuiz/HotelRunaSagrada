@@ -5,8 +5,11 @@ import com.runasagrada.hotelapi.model.User;
 import com.runasagrada.hotelapi.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,20 +22,16 @@ public class UserController {
 
     @Autowired
     private UserService service;
-    @Autowired
-    private AuthController auth; // para leer el userId del token (simple)
 
     @GetMapping("/users/me")
-    public User getMe(@RequestHeader(value = "Authorization", required = false) String authHeader) {
-        Integer uid = auth.getUserId(authHeader);
-        return service.me(uid);
+    public User getMe(Authentication authentication) {
+        return service.me(resolveUserId(authentication));
     }
 
     @PutMapping("/users/me")
-    public User updateMe(@RequestHeader("Authorization") String authHeader, @RequestBody User partial) {
-        Integer uid = auth.getUserId(authHeader);
+    public User updateMe(Authentication authentication, @RequestBody User partial) {
         // Más adelante: allowEmailChange=false si el rol es OPERATOR
-        return service.updateMe(uid, partial, true);
+        return service.updateMe(resolveUserId(authentication), partial, true);
     }
 
     // Admin:
@@ -60,9 +59,9 @@ public class UserController {
 
     @DeleteMapping("/users/me")
     public ResponseEntity<?> deleteMe(
-            @RequestHeader("Authorization") String authHeader,
+            Authentication authentication,
             @RequestParam(name = "cascade", defaultValue = "false") boolean cascade) {
-        var uid = auth.getUserId(authHeader);
+        var uid = resolveUserId(authentication);
         if (cascade) {
             service.deleteCascade(uid);
         } else {
@@ -75,11 +74,11 @@ public class UserController {
     public ResponseEntity<User> updateById(
             @PathVariable Integer id,
             @RequestBody AdminUpdateUserRequest body,
-            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+            Authentication authentication) {
 
         // Opcional: aquí solo validamos que el token exista; si quieres, agrega
         // validación de rol ADMIN
-        auth.getUserId(authHeader);
+        ensureAuthenticated(authentication);
 
         User partial = new User();
         partial.setEmail(body.getEmail());
@@ -107,5 +106,22 @@ public class UserController {
     @GetMapping("/users/summary")
     public double[] summary() {
         return service.usersSummary();
+    }
+
+    private Integer resolveUserId(Authentication authentication) {
+        return resolveCurrentUser(authentication).getUserId();
+    }
+
+    private User resolveCurrentUser(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "no token");
+        }
+        return service.findByEmail(authentication.getName());
+    }
+
+    private void ensureAuthenticated(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "no token");
+        }
     }
 }
