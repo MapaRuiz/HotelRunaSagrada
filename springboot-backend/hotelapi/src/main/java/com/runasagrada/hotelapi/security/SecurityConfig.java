@@ -30,6 +30,8 @@ public class SecurityConfig {
                                 .requestMatchers("/api/auth/login").permitAll()
                                 .requestMatchers("/api/auth/register").permitAll()
                                 .requestMatchers("/api/users/me").authenticated()
+                                .requestMatchers("/api/task/**").hasAuthority("OPERATOR")
+                                .requestMatchers("/api/departments/**").hasAuthority("OPERATOR")
                                 .anyRequest().permitAll())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthEntryPoint));
 
