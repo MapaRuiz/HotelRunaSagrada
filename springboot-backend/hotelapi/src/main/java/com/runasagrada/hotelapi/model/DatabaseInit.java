@@ -3,8 +3,11 @@ package com.runasagrada.hotelapi.model;
 import com.runasagrada.hotelapi.repository.*;
 import com.runasagrada.hotelapi.service.ServiceScheduleService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -44,6 +47,9 @@ public class DatabaseInit implements CommandLineRunner {
         private final PaymentMethodRepository paymentMethodRepo;
         private final PaymentRepository paymentRepo;
 
+        @Autowired
+        private PasswordEncoder passwordEncoder;
+
         @Override
         public void run(String... args) {
                 // Datos originales: roles, usuarios y hoteles
@@ -75,48 +81,39 @@ public class DatabaseInit implements CommandLineRunner {
                                 .orElseGet(() -> roleRepo.save(new Role(null, "CLIENT")));
 
                 // --- 1 Admin ---
-                userRepo.findByEmail("admin@hotel.com").orElseGet(() -> {
-                        User u = new User();
-                        u.setEmail("admin@hotel.com");
-                        u.setPassword("admin123");
-                        u.setFullName("Admin");
-                        u.setPhone("3000000000");
-                        u.setNationalId("CC-ADMIN-001");
-                        u.setSelectedPet("/images/icons/icono1.png");
-                        u.setRoles(Set.of(adminRole));
-                        return userRepo.save(u);
-                });
+                userRepo.findByEmail("admin@hotel.com").orElseGet(() -> createUser(
+                                "admin@hotel.com",
+                                "admin123",
+                                "Admin",
+                                "3000000000",
+                                "CC-ADMIN-001",
+                                "/images/icons/icono1.png",
+                                adminRole));
 
                 // --- 15 Operadores ---
                 IntStream.rangeClosed(1, 15).forEach(i -> {
                         String email = "op" + i + "@hotel.com";
-                        userRepo.findByEmail(email).orElseGet(() -> {
-                                User u = new User();
-                                u.setEmail(email);
-                                u.setPassword("op123");
-                                u.setFullName("Operador Hotel " + i);
-                                u.setPhone("301000000" + String.format("%02d", i));
-                                u.setNationalId("OP-" + String.format("%03d", i));
-                                u.setSelectedPet(pickIcon(i));
-                                u.setRoles(Set.of(operatorRole));
-                                return userRepo.save(u);
-                        });
+                        userRepo.findByEmail(email).orElseGet(() -> createUser(
+                                        email,
+                                        "op123",
+                                        "Operador Hotel " + i,
+                                        "301000000" + String.format("%02d", i),
+                                        "OP-" + String.format("%03d", i),
+                                        pickIcon(i),
+                                        operatorRole));
                 });
 
                 // --- 10 Clientes ---
                 IntStream.rangeClosed(1, 10).forEach(i -> {
                         String email = "client" + String.format("%02d", i) + "@demo.com";
-                        userRepo.findByEmail(email).orElseGet(() -> {
-                                User u = new User();
-                                u.setEmail(email);
-                                u.setPassword("client123");
-                                u.setFullName("Cliente " + String.format("%02d", i));
-                                u.setPhone("30200000" + String.format("%02d", i));
-                                u.setNationalId("CLI-" + String.format("%04d", i));
-                                u.setSelectedPet(pickIcon(i));
-                                u.setRoles(Set.of(clientRole));
-                                return userRepo.save(u);
-                        });
+                        userRepo.findByEmail(email).orElseGet(() -> createUser(
+                                        email,
+                                        "client123",
+                                        "Cliente " + String.format("%02d", i),
+                                        "30200000" + String.format("%02d", i),
+                                        "CLI-" + String.format("%04d", i),
+                                        pickIcon(i),
+                                        clientRole));
                 });
 
                 // --- Hoteles + amenities ---
@@ -1806,5 +1803,18 @@ public class DatabaseInit implements CommandLineRunner {
                 Payment saved = paymentRepo.save(payment);
                 saved.setTxReference("Cobro#" + saved.getPaymentId());
                 return paymentRepo.save(saved);
+        }
+
+        private User createUser(String email, String password, String fullName, String phone, String nationalId,
+                        String selectedPet, Role role) {
+                User user = new User();
+                user.setEmail(email);
+                user.setPassword(passwordEncoder.encode(password));
+                user.setFullName(fullName);
+                user.setPhone(phone);
+                user.setNationalId(nationalId);
+                user.setSelectedPet(selectedPet);
+                user.setRoles(Set.of(role));
+                return userRepo.save(user);
         }
 }

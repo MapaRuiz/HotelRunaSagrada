@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Component
-@Profile({ "dev", "test" })
+@Profile("test")
 @RequiredArgsConstructor
 public class DatabaseInitTest implements CommandLineRunner {
 
