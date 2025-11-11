@@ -1,9 +1,25 @@
-import { Component, OnInit, AfterViewInit, inject, ViewChild, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  inject,
+  ViewChild,
+  PLATFORM_ID,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import {
-  NgApexchartsModule, ChartComponent, ApexAxisChartSeries, ApexChart, ApexXAxis,
-  ApexDataLabels, ApexStroke, ApexGrid, ApexLegend, ApexFill
+  NgApexchartsModule,
+  ChartComponent,
+  ApexAxisChartSeries,
+  ApexChart,
+  ApexXAxis,
+  ApexDataLabels,
+  ApexStroke,
+  ApexGrid,
+  ApexLegend,
+  ApexFill,
 } from 'ng-apexcharts';
 import { HotelsService } from '../../../../services/hotels';
 import { AmenitiesService } from '../../../../services/amenities';
@@ -36,7 +52,7 @@ export type ChartOptions = {
   selector: 'app-admin-dashboard',
   imports: [CommonModule, NgApexchartsModule, AgGridAngular],
   templateUrl: './admin-dashboard.html',
-  styleUrls: ['./admin-dashboard.css']
+  styleUrls: ['./admin-dashboard.css'],
 })
 export class AdminDashboardComponent implements OnInit, AfterViewInit {
   private hotelsApi = inject(HotelsService);
@@ -60,11 +76,11 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
   reservationDelta = 0;
   usersValue = 0;
   usersDelta = 0;
-  
+
   // Chart loading states
   chartDataLoaded = false;
   amenitiesChartLoaded = false;
-  
+
   // AG-Grid
   readonly gridTheme = gridTheme;
   readonly AG_GRID_LOCALE = AG_GRID_LOCALE;
@@ -78,8 +94,8 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
     stroke: { show: true, width: 2 },
     grid: { borderColor: '#e6e8e1' },
     legend: { show: false },
-    fill: { opacity: .9 },
-    colors: ['#778E69']
+    fill: { opacity: 0.9 },
+    colors: ['#778E69'],
   };
 
   public amenitiesChart: ChartOptions = {
@@ -90,30 +106,38 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
     stroke: { show: true, width: 2 },
     grid: { borderColor: '#e6e8e1' },
     legend: { show: false },
-    fill: { opacity: .9 },
-    colors: ['#5C7CFA']
+    fill: { opacity: 0.9 },
+    colors: ['#5C7CFA'],
   };
 
   colDefs: ColDef[] = [
     { headerName: 'ID', field: 'hotel_id', width: 90 },
     { headerName: 'Hotel', field: 'name', flex: 1 },
-    { headerName: 'Check', valueGetter: p => `${p.data.check_in_after || '—'} / ${p.data.check_out_before || '—'}`, width: 150 },
-    { headerName: 'Lat/Lon', valueGetter: p => `${p.data.latitude || '—'}, ${p.data.longitude || '—'}`, width: 200 },
-    { headerName: 'Amenities', valueGetter: p => (p.data.amenities || []).length, width: 120 }
+    {
+      headerName: 'Check',
+      valueGetter: (p) => `${p.data.check_in_after || '—'} / ${p.data.check_out_before || '—'}`,
+      width: 150,
+    },
+    {
+      headerName: 'Lat/Lon',
+      valueGetter: (p) => `${p.data.latitude || '—'}, ${p.data.longitude || '—'}`,
+      width: 200,
+    },
+    { headerName: 'Amenities', valueGetter: (p) => (p.data.amenities || []).length, width: 120 },
   ];
 
   logout() {
     this.authService.logout();
     // Limpiar historial del navegador para evitar volver atrás
     if (this.isBrowser) {
-      window.history.replaceState(null, '', window.location.origin + '/login');
+      window.history.replaceState(null, '', window.location.origin + '/');
     }
-    this.router.navigate(['/login']);
+    this.router.navigate(['/']);
   }
 
   ngOnInit() {
     if (this.isBrowser) {
-      this.amenitiesApi.list().subscribe(a => this.amenitiesCount = a.length);
+      this.amenitiesApi.list().subscribe((a) => (this.amenitiesCount = a.length));
 
       this.calcIncome();
       this.calcReservations();
@@ -136,20 +160,20 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
   loadHotels() {
     this.hotelsLoading = true;
     this.hotelsApi.list().subscribe({
-      next: hotels => {
+      next: (hotels) => {
         this.hotels = hotels;
         this.hotelsLoading = false;
       },
       error: () => {
         this.hotels = [];
         this.hotelsLoading = false;
-      }
+      },
     });
   }
 
   calcIncome() {
     this.incomeLoading = true;
-    this.paymentApi.calculateIncome().subscribe(p => {
+    this.paymentApi.calculateIncome().subscribe((p) => {
       this.incomeValue = `$${p[0]}`;
       this.incomeDelta = p[1];
       this.incomeLoading = false;
@@ -157,14 +181,14 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
   }
 
   calcReservations() {
-    this.reservationApi.count().subscribe(p => {
+    this.reservationApi.count().subscribe((p) => {
       this.reservationValue = p[0];
       this.reservationDelta = p[1];
     });
   }
 
   calcUsers() {
-    this.userService.summary().subscribe(p => {
+    this.userService.summary().subscribe((p) => {
       this.usersValue = p[0];
       this.usersDelta = p[1];
     });
@@ -182,9 +206,9 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
         this.chartOptions = {
           ...this.chartOptions,
           xaxis: { ...this.chartOptions.xaxis, categories },
-          series: [{ name: 'Reservas', data }]
+          series: [{ name: 'Reservas', data }],
         };
-        
+
         // Mark as loaded after data is set
         this.chartDataLoaded = true;
       },
@@ -193,10 +217,10 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
         this.chartOptions = {
           ...this.chartOptions,
           xaxis: { ...this.chartOptions.xaxis, categories: ['Sin datos'] },
-          series: [{ name: 'Reservas', data: [0] }]
+          series: [{ name: 'Reservas', data: [0] }],
         };
         this.chartDataLoaded = true;
-      }
+      },
     });
   }
 
@@ -215,9 +239,9 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
         this.amenitiesChart = {
           ...this.amenitiesChart,
           xaxis: { ...this.amenitiesChart.xaxis, categories },
-          series: [{ name: 'Amenities', data }]
+          series: [{ name: 'Amenities', data }],
         };
-        
+
         // Mark as loaded after data is set
         this.amenitiesChartLoaded = true;
       },
@@ -226,10 +250,10 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
         this.amenitiesChart = {
           ...this.amenitiesChart,
           xaxis: { ...this.amenitiesChart.xaxis, categories: ['Sin datos'] },
-          series: [{ name: 'Amenities', data: [0] }]
+          series: [{ name: 'Amenities', data: [0] }],
         };
         this.amenitiesChartLoaded = true;
-      }
+      },
     });
   }
 }
