@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import com.runasagrada.hotelapi.model.Role;
 import com.runasagrada.hotelapi.model.User;
-import com.runasagrada.hotelapi.repository.RoleRepository;
 import com.runasagrada.hotelapi.repository.UserRepository;
 
 @Service
