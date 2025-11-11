@@ -24,6 +24,7 @@ import { AG_GRID_LOCALE, gridTheme, PAGINATION_CONFIG } from '../../admin/shared
 import { finalize, forkJoin, map, switchMap } from 'rxjs';
 import { UsersService } from '../../../services/users';
 import { RoomService } from '../../../services/room';
+import { Router } from '@angular/router';
 
 // Register AG Grid modules
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -52,6 +53,7 @@ export class OperatorDashboardComponent implements OnInit, AfterViewInit {
   private paymentApi = inject(PaymentService);
   private reservationApi = inject(ReservationService);
   private authService = inject(AuthService);
+  private router = inject(Router);
   private hotelsApi = inject(HotelsService);
   private hotelResolver = inject(OperatorHotelResolver);
   private cdr = inject(ChangeDetectorRef);
@@ -98,6 +100,15 @@ export class OperatorDashboardComponent implements OnInit, AfterViewInit {
     { headerName: 'Check-out', field: 'check_out', width: 120 },
     { headerName: 'Estado', field: 'status', width: 120 }
   ];
+
+  logout() {
+    this.authService.logout();
+    // Limpiar historial del navegador para evitar volver atrás
+    if (this.isBrowser) {
+      window.history.replaceState(null, '', window.location.origin + '/login');
+    }
+    this.router.navigate(['/login']);
+  }
 
   ngOnInit() {
     if (!this.isBrowser) return;

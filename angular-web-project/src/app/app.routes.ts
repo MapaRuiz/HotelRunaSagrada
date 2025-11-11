@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './services/auth.guard';
 
 export const routes: Routes = [
   { path: '', loadComponent: () => import('./features/public/landing/landing').then(m => m.Landing) },
@@ -33,6 +34,7 @@ export const routes: Routes = [
   // CLIENT - shell con children
   {
     path: 'client',
+    canActivate: [authGuard],
     loadComponent: () => import('./features/client/client-shell/client-shell')
       .then(m => m.ClientShellComponent),
     children: [
@@ -53,6 +55,7 @@ export const routes: Routes = [
   // OPERATOR
   {
     path: 'operator',
+    canActivate: [authGuard],
     loadComponent: () => import('./features/operator/operator-shell/operator-shell')
       .then(m => m.OperatorShellComponent),
     children: [
@@ -68,6 +71,7 @@ export const routes: Routes = [
   // ADMIN - shell con children
   {
     path: 'admin',
+    canActivate: [authGuard],
     loadComponent: () => import('./features/admin/shell/admin-shell/admin-shell')
       .then(m => m.AdminShellComponent),
     children: [

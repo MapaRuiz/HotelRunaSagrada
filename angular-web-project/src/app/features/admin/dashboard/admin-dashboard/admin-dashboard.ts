@@ -1,11 +1,13 @@
 import { Component, OnInit, AfterViewInit, inject, ViewChild, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Router } from '@angular/router';
 import {
   NgApexchartsModule, ChartComponent, ApexAxisChartSeries, ApexChart, ApexXAxis,
   ApexDataLabels, ApexStroke, ApexGrid, ApexLegend, ApexFill
 } from 'ng-apexcharts';
 import { HotelsService } from '../../../../services/hotels';
 import { AmenitiesService } from '../../../../services/amenities';
+import { AuthService } from '../../../../services/auth';
 import { Hotel } from '../../../../model/hotel';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
@@ -43,6 +45,8 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
   private paymentApi = inject(PaymentService);
   private reservationApi = inject(ReservationService);
   private userService = inject(UsersService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
 
   hotels: Hotel[] = [];
@@ -97,6 +101,15 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
     { headerName: 'Lat/Lon', valueGetter: p => `${p.data.latitude || '—'}, ${p.data.longitude || '—'}`, width: 200 },
     { headerName: 'Amenities', valueGetter: p => (p.data.amenities || []).length, width: 120 }
   ];
+
+  logout() {
+    this.authService.logout();
+    // Limpiar historial del navegador para evitar volver atrás
+    if (this.isBrowser) {
+      window.history.replaceState(null, '', window.location.origin + '/login');
+    }
+    this.router.navigate(['/login']);
+  }
 
   ngOnInit() {
     if (this.isBrowser) {

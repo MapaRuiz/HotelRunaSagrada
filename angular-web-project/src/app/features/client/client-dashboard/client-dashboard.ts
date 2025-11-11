@@ -21,6 +21,7 @@ import { environment } from '../../../../environments/environment';
 import { UsersService } from '../../../services/users';
 import { ReservationService } from '../../../services/reservation';
 import { PaymentService } from '../../../services/payment';
+import { AuthService } from '../../../services/auth';
 import { Router } from '@angular/router';
 import * as bootstrap from 'bootstrap';
 import { BillServicesComponent } from '../../operator/reservation/bill-services/bill-services';
@@ -68,6 +69,7 @@ export class ClientDashboardComponent implements OnInit {
   private reservationApi = inject(ReservationService);
   private paymentApi = inject(PaymentService);
   private router = inject(Router);
+  private auth = inject(AuthService);
   
   me: any = null;
   reservations: Reservation[] = [];
@@ -114,6 +116,15 @@ export class ClientDashboardComponent implements OnInit {
     { headerName: 'Check-out', field: 'checkOut', width: 150 },
     { headerName: 'Estado', field: 'status', width: 130 }
   ];
+
+  logout() {
+    this.auth.logout();
+
+    if (this.isBrowser) {
+      window.history.replaceState(null, '', window.location.origin + '/login');
+    }
+    this.router.navigate(['/login']);
+  }
 
   ngOnInit() {
     this.api.getMe().subscribe({
