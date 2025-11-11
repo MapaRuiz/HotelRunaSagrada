@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth';
@@ -21,6 +21,8 @@ export class Login {
   private auth = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private location = inject(Location);
+  private readonly requestedReturnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
 
   // Base del backend para imágenes (/images/...)
   private backendBase =
@@ -45,6 +47,10 @@ export class Login {
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
   });
+
+  constructor() {
+    this.stripReturnUrlFromAddressBar();
+  }
 
   get f() {
     return this.form.controls;
@@ -88,7 +94,7 @@ export class Login {
         }));
 
         // Si veníamos de /room-type/:id?hotelId=...
-        const ret = this.route.snapshot.queryParamMap.get('returnUrl');
+        const ret = this.requestedReturnUrl;
         if (ret) {
           this.router.navigateByUrl(ret);
           return;
@@ -108,9 +114,17 @@ export class Login {
   }
 
   get returnUrl() {
-    return this.route.snapshot.queryParamMap.get('returnUrl') || this.router.url;
+    return this.requestedReturnUrl || this.router.url;
   }
 
+  private stripReturnUrlFromAddressBar() {
+    if (!this.requestedReturnUrl) return;
+    const tree = this.router.createUrlTree([], {
+      relativeTo: this.route,
+      queryParams: { returnUrl: null },
+      queryParamsHandling: 'merge',
+    });
+    const cleanUrl = this.router.serializeUrl(tree);
+    this.location.replaceState(cleanUrl);
+  }
 }
-
-
