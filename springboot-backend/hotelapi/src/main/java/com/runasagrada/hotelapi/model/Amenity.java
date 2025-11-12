@@ -1,15 +1,17 @@
 package com.runasagrada.hotelapi.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 @Entity
 @Table(name = "amenities")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Amenity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

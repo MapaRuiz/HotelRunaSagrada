@@ -8,6 +8,7 @@ import { Testimonials } from './testimonials/testimonials';
 import { Footer } from './footer/footer';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth';
+import { roleNames } from '../../../utils/roles';
 
 @Component({
   selector: 'app-landing',
@@ -20,40 +21,30 @@ export class Landing implements OnInit {
   private router = inject(Router);
 
   ngOnInit(): void {
-    try {
-      // Detectar token/usuario (solo en browser)
-      const hasToken = typeof window !== 'undefined' && !!localStorage.getItem('access_token');
-      const rawUser = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+    if (typeof window === 'undefined') return;
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
 
-      // Preferir snapshot del servicio, fallback a localStorage
-      let user = this.auth.userSnapshot() as any;
-      if (!user && rawUser) {
-        try { user = JSON.parse(rawUser); } catch (e) { user = null; }
-      }
+    const user = this.auth.userSnapshot() ?? this.readStoredUser();
+    if (!user) return;
 
-      if (hasToken || user) {
-        // Calcular rol
-        let roleName = 'CLIENT';
-        try {
-          if (user?.roles && Array.isArray(user.roles) && user.roles.length > 0) {
-            const r = user.roles[0];
-            roleName = typeof r === 'string' ? r : (r.name || r?.role || r?.role_id ? 'OPERATOR' : 'CLIENT');
-          }
-        } catch {}
-
-        // Hacer logout para limpiar token/session
-        this.auth.logout();
-
-        // Redirigir según rol detectado
-        const rn = (roleName || '').toString().toUpperCase();
-        if (rn.includes('ADMIN')) this.router.navigate(['/admin']);
-        else if (rn.includes('OPERATOR')) this.router.navigate(['/operator']);
-        else this.router.navigate(['/client']);
-      }
-    } catch (err) {
-      // No bloquear la carga si algo falla
-      console.error('Landing init redirect error:', err);
+    const roles = roleNames(user.roles);
+    if (roles.includes('ADMIN')) {
+      this.router.navigate(['/admin']);
+      return;
+    }
+    if (roles.includes('OPERATOR')) {
+      this.router.navigate(['/operator']);
     }
   }
 
+  private readStoredUser() {
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = localStorage.getItem('user');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }
 }

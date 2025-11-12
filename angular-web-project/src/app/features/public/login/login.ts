@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -16,7 +16,7 @@ import { environment } from '../../../../environments/environment';
   templateUrl: './login.html',
   styleUrls: ['./login.css'],
 })
-export class Login {
+export class Login implements OnInit {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private router = inject(Router);
@@ -48,8 +48,9 @@ export class Login {
     password: ['', Validators.required],
   });
 
-  constructor() {
+  ngOnInit(): void {
     this.stripReturnUrlFromAddressBar();
+    this.redirectIfAlreadyLoggedIn();
   }
 
   get f() {
@@ -126,5 +127,26 @@ export class Login {
     });
     const cleanUrl = this.router.serializeUrl(tree);
     this.location.replaceState(cleanUrl);
+  }
+
+  private redirectIfAlreadyLoggedIn() {
+    if (typeof window === 'undefined') return;
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
+
+    const user = this.auth.userSnapshot() ?? this.readStoredUser();
+    if (!user) return;
+
+    this.router.navigate([this.dashboardBy(user.roles)]);
+  }
+
+  private readStoredUser() {
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = localStorage.getItem('user');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
   }
 }

@@ -1327,7 +1327,11 @@ public class DatabaseInitTest implements CommandLineRunner {
                 if (a == null) {
                         AmenityType type = determineAmenityType(name);
                         String image = getAmenityImage(name);
-                        a = amenities.save(new Amenity(null, name, image, type));
+                        a = amenities.save(Amenity.builder()
+                                        .name(name)
+                                        .image(image)
+                                        .type(type)
+                                        .build());
                         map.put(name, a);
                 }
                 return a;
