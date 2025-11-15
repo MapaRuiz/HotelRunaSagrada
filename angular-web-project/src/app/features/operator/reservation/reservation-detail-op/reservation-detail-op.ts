@@ -281,19 +281,32 @@ export class ReservationDetailOp {
     }
     if (!this.reservation?.reservation_id || !this.selectedPaymentMethodId) return;
     const reservationId = this.reservation.reservation_id;
-    // Payload encargado de registrar el cobro de los servicios contratados (si es que existen)
-    const payload =
-      this.billTotal > 0
-        ? {
-            reservation_id: reservationId,
-            payment_method_id: this.selectedPaymentMethodId,
+    const serviceRef = `SERVICIOS RESERVA ${reservationId}`;
+    const createOrUpdateServicePayment$ = this.paymentSvc.getByReservation(reservationId).pipe(
+      switchMap((payments) => {
+        const existing = (payments || []).find((p) =>
+          (p.tx_reference ?? '').toString().trim().toUpperCase().includes(serviceRef)
+        );
+        if (this.billTotal <= 0 && !existing) {
+          return of(null);
+        }
+        if (existing?.payment_id) {
+          return this.paymentSvc.update(existing.payment_id, {
             amount: this.billTotal,
-            status: 'PAID' as const,
-            tx_reference: 'Servicios Reserva',
-          }
-        : null;
+            status: 'PAID',
+          });
+        }
+        return this.paymentSvc.create({
+          reservation_id: reservationId,
+          payment_method_id: this.selectedPaymentMethodId!,
+          amount: this.billTotal,
+          status: 'PAID' as const,
+          tx_reference: 'Servicios Reserva',
+        });
+      })
+    );
     const pendingOthers = this.billComp?.pendingOtherPayments ?? [];
-    if (!payload && pendingOthers.length === 0) {
+    if (this.billTotal <= 0 && pendingOthers.length === 0) {
       alert('No hay cargos pendientes por pagar.');
       return;
     }
@@ -306,11 +319,8 @@ export class ReservationDetailOp {
           )
         )
       : of([]);
-    // Observable que dispara la creación del pago de servicios o completa de inmediato si no aplica
-    const createService$ = (
-      payload ? this.paymentSvc.create(payload) : of(null)
-    ) as Observable<unknown>;
-    createService$
+    // Observable que dispara la creación/actualización del pago de servicios o completa si no aplica
+    createOrUpdateServicePayment$
       .pipe(
         switchMap(() => settleOther$),
         switchMap(() => this.service.deactivate(reservationId)),

@@ -26,6 +26,9 @@ import { formatDaysLabel } from '../../../admin/services-offering-component/serv
 import { TaskService } from '../../../../services/task';
 import { AuthService } from '../../../../services/auth';
 import { Task } from '../../../../model/task';
+import { PaymentService } from '../../../../services/payment';
+import { PaymentMethodService } from '../../../../services/payment-method';
+import { of, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-services-add-form',
@@ -59,6 +62,8 @@ export class ServicesAddForm implements OnInit, OnChanges {
   private resServiceApi = inject(ReservationServiceApi);
   private taskService = inject(TaskService);
   private authService = inject(AuthService);
+  private paymentSvc = inject(PaymentService);
+  private paymentMethodSvc = inject(PaymentMethodService);
   readonly formatDaysLabel = formatDaysLabel;
 
   ngOnInit(): void {
@@ -169,8 +174,10 @@ export class ServicesAddForm implements OnInit, OnChanges {
       return;
     }
     this.selectedSchedule = found;
-    if (this.errorMsg === 'Seleccione un horario válido para el servicio.' ||
-      this.errorMsg === 'Debe seleccionar un horario para el servicio.') {
+    if (
+      this.errorMsg === 'Seleccione un horario válido para el servicio.' ||
+      this.errorMsg === 'Debe seleccionar un horario para el servicio.'
+    ) {
       this.errorMsg = '';
     }
   }
@@ -213,7 +220,9 @@ export class ServicesAddForm implements OnInit, OnChanges {
     } else {
       this.resServiceApi.add(body).subscribe({
         next: (resService) => {
-          const selectedService = this.services.find(s => s.id === this.service_id);
+          // Registrar/actualizar un pago pendiente por los servicios contratados
+          this.ensureServicePayment(body);
+          const selectedService = this.services.find((s) => s.id === this.service_id);
           console.log(this.reservation);
           if (selectedService) {
             const currentUser = this.authService.userSnapshot();
@@ -224,21 +233,23 @@ export class ServicesAddForm implements OnInit, OnChanges {
             else if (category === 'cultural') type = 'TO_DO';
 
             if (type) {
-              this.taskService.create({
-                type,
-                status: 'PENDING',
-                res_service_id: resService?.res_service_id,
-                room_id: this.reservation?.room_id ?? undefined,
-              }).subscribe({
-                next: () => {
-                  this.loading = false;
-                  this.saved.emit();
-                },
-                error: () => {
-                  this.loading = false;
-                  this.errorMsg = 'No se pudo crear la tarea.';
-                }
-              });
+              this.taskService
+                .create({
+                  type,
+                  status: 'PENDING',
+                  res_service_id: resService?.res_service_id,
+                  room_id: this.reservation?.room_id ?? undefined,
+                })
+                .subscribe({
+                  next: () => {
+                    this.loading = false;
+                    this.saved.emit();
+                  },
+                  error: () => {
+                    this.loading = false;
+                    this.errorMsg = 'No se pudo crear la tarea.';
+                  },
+                });
             } else {
               this.loading = false;
               this.saved.emit();
@@ -276,5 +287,65 @@ export class ServicesAddForm implements OnInit, OnChanges {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount)}`;
+  }
+
+  /**
+   * Crea o acumula un pago pendiente para los servicios de la reserva.
+   * Usa el primer método de pago del usuario; si ya existe un pago con
+   * referencia "Servicios Reserva", se incrementa su monto.
+   * No bloquea el flujo principal si falla.
+   */
+  private ensureServicePayment(body: ReservationServiceRequest) {
+    const reservationId = body.reservation_id;
+    const userId = this.reservation?.user?.user_id ?? this.reservation?.user_id;
+    if (!reservationId || !userId) return;
+
+    const amount = Number(body.qty ?? 0) * Number(body.unit_price ?? 0);
+    if (!amount || amount <= 0) return;
+
+    const serviceRef = `SERVICIOS RESERVA ${reservationId}`;
+
+    this.paymentMethodSvc
+      .getMy(userId)
+      .pipe(
+        switchMap((methods) => {
+          const firstId =
+            (methods[0] as any)?.method_id ??
+            (methods[0] as any)?.id ??
+            (methods[0] as any)?.payment_method_id;
+          const pmId = Number(firstId);
+          if (!Number.isFinite(pmId)) {
+            return of(null);
+          }
+          return this.paymentSvc.getByReservation(reservationId).pipe(
+            switchMap((payments) => {
+              const existing = (payments || []).find((p) =>
+                (p.tx_reference ?? '').toString().trim().toUpperCase().includes(serviceRef)
+              );
+              if (existing?.payment_id) {
+                const newAmount = Number(existing.amount || 0) + amount;
+                const normalized = (existing.status ?? 'PENDING').toString().trim().toUpperCase();
+                const safeStatus: 'PENDING' | 'PAID' | 'REFUNDED' =
+                  normalized === 'PAID' || normalized === 'REFUNDED' ? normalized : 'PENDING';
+                return this.paymentSvc.update(existing.payment_id, {
+                  amount: newAmount,
+                  status: safeStatus,
+                });
+              }
+              return this.paymentSvc.create({
+                reservation_id: reservationId,
+                payment_method_id: pmId,
+                amount,
+                status: 'PENDING',
+                tx_reference: 'Servicios Reserva',
+              });
+            })
+          );
+        })
+      )
+      .subscribe({
+        next: () => {},
+        error: () => {},
+      });
   }
 }

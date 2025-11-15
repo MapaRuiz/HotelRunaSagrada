@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -128,8 +129,12 @@ public class ReservationServiceImpl implements ReservationService {
             res.setCheckOut(checkOut);
 
         // 4) status si llegó (permite PENDING ⇄ CONFIRMED)
-        if (status != null)
+        if (status != null) {
+            if (status == Reservation.Status.FINISHED && hasPendingPayments(id)) {
+                throw new IllegalStateException("Cannot finish reservation with pending payments");
+            }
             res.setStatus(status);
+        }
 
         // 5) guardar
         Reservation saved = reservationRepo.save(res);
@@ -250,7 +255,11 @@ public class ReservationServiceImpl implements ReservationService {
     public Reservation activate(Integer id, String status) {
         Reservation res = reservationRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Reservation not found: " + id));
-        res.setStatus(Reservation.Status.valueOf(status));
+        Reservation.Status newStatus = Reservation.Status.valueOf(status);
+        if (newStatus == Reservation.Status.FINISHED && hasPendingPayments(id)) {
+            throw new IllegalStateException("Cannot finish reservation with pending payments");
+        }
+        res.setStatus(newStatus);
         return reservationRepo.save(res);
     }
 
@@ -258,9 +267,28 @@ public class ReservationServiceImpl implements ReservationService {
     public Reservation deactivate(Integer id) {
         Reservation res = reservationRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Reservation not found: " + id));
+        if (hasPendingPayments(id)) {
+            throw new IllegalStateException("Cannot deactivate reservation with pending payments");
+        }
         lockRepo.deleteByReservationReservationId(id);
         res.setStatus(Reservation.Status.FINISHED);
         return reservationRepo.save(res);
+    }
+
+    private boolean hasPendingPayments(Integer reservationId) {
+        var payments = paymentRepo.findByReservationId_ReservationId(reservationId);
+        if (payments.isEmpty()) {
+            return true;
+        }
+        return payments.stream()
+                .anyMatch(payment -> {
+                    String status = payment.getStatus();
+                    if (status == null) {
+                        return true;
+                    }
+                    String normalized = status.trim().toUpperCase(Locale.ROOT);
+                    return !("PAID".equals(normalized) || "REFUNDED".equals(normalized));
+                });
     }
 
     public Reservation updateStatus(Integer id, String status) {
@@ -269,6 +297,9 @@ public class ReservationServiceImpl implements ReservationService {
 
         Reservation.Status oldStatus = res.getStatus();
         Reservation.Status newStatus = Reservation.Status.valueOf(status.toUpperCase());
+        if (newStatus == Reservation.Status.FINISHED && hasPendingPayments(id)) {
+            throw new IllegalStateException("Cannot finish reservation with pending payments");
+        }
 
         res.setStatus(newStatus);
         Reservation saved = reservationRepo.save(res);

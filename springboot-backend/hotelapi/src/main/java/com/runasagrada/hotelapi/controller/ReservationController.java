@@ -126,7 +126,7 @@ public class ReservationController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Reservation> update(@PathVariable Integer id,
+    public ResponseEntity<?> update(@PathVariable Integer id,
             @RequestBody Map<String, Object> body) {
         Integer userId = asInt(body.get("userId")); // opcional
         Long hotelId = asLong(body.get("hotelId")); // opcional
@@ -135,26 +135,46 @@ public class ReservationController {
         LocalDate checkOut = asDate(body.get("checkOut")); // opcional
         Reservation.Status status = asStatus(body.get("status")); // opcional
 
-        Reservation updated = service.update(id, userId, hotelId, roomId, checkIn, checkOut, status);
-        return ResponseEntity.ok(updated);
+        try {
+            Reservation updated = service.update(id, userId, hotelId, roomId, checkIn, checkOut, status);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PutMapping("/activate/{id}")
-    public ResponseEntity<Reservation> activate(@PathVariable Integer id, @RequestParam String status) {
-        Reservation updated = service.activate(id, status);
-        return ResponseEntity.ok(updated);
+    public ResponseEntity<?> activate(@PathVariable Integer id, @RequestParam String status) {
+        try {
+            Reservation updated = service.activate(id, status);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PutMapping("/deactivate/{id}")
-    public ResponseEntity<Reservation> deactivate(@PathVariable Integer id) {
-        Reservation updated = service.deactivate(id);
-        return ResponseEntity.ok(updated);
+    public ResponseEntity<?> deactivate(@PathVariable Integer id) {
+        try {
+            Reservation updated = service.deactivate(id);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PutMapping("/{id}/status/{status}")
-    public ResponseEntity<Reservation> updateStatus(@PathVariable Integer id, @PathVariable String status) {
-        Reservation updated = service.updateStatus(id, status);
-        return ResponseEntity.ok(updated);
+    public ResponseEntity<?> updateStatus(@PathVariable Integer id, @PathVariable String status) {
+        try {
+            Reservation updated = service.updateStatus(id, status);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
 
     @DeleteMapping("/{id}")
