@@ -337,7 +337,7 @@ export class ServicesAddForm implements OnInit, OnChanges {
                 payment_method_id: pmId,
                 amount,
                 status: 'PENDING',
-                tx_reference: 'Servicios Reserva',
+                tx_reference: `SERVICIOS RESERVA ${reservationId}`,
               });
             })
           );

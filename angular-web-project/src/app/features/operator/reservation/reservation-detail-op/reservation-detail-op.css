@@ -29,6 +29,11 @@
   flex: 1;
 }
 
+.payment-method-item input[type='radio'],
+.payment-method-item input[type='checkbox'] {
+  accent-color: var(--c-olive);
+}
+
 .payment-method-item .method-label {
   display: flex;
   flex-direction: column;
