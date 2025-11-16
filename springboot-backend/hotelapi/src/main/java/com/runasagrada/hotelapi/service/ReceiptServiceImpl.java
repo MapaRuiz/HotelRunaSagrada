@@ -2,6 +2,7 @@ package com.runasagrada.hotelapi.service;
 
 import com.runasagrada.hotelapi.model.Payment;
 import com.runasagrada.hotelapi.model.Reservation;
+import com.runasagrada.hotelapi.model.ReservationServiceEntity;
 import com.runasagrada.hotelapi.model.User;
 import com.runasagrada.hotelapi.repository.PaymentRepository;
 import com.runasagrada.hotelapi.repository.ReservationRepository;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.mail.internet.MimeMessage;
 import java.io.ByteArrayOutputStream;
+import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -84,6 +86,54 @@ public class ReceiptServiceImpl implements ReceiptService {
         mailSender.send(message);
     }
 
+    @Override
+    public void sendReservationReceipt(List<ReservationServiceEntity> services) throws Exception {
+        if (services == null || services.isEmpty()) {
+            throw new IllegalArgumentException("La lista de servicios de la reserva está vacía");
+        }
+
+        Reservation reservation = services.get(0).getReservation();
+        if (reservation == null || reservation.getUser() == null) {
+            throw new IllegalArgumentException("No se encontró un usuario asociado a la reserva");
+        }
+
+        // Validamos que todos los servicios pertenezcan a la misma reserva
+        Integer reservationId = reservation.getReservationId();
+        for (ReservationServiceEntity item : services) {
+            Reservation itemReservation = item.getReservation();
+            Integer itemId = itemReservation != null ? itemReservation.getReservationId() : null;
+            if (itemReservation == null
+                    || (reservationId != null && itemId != null && !reservationId.equals(itemId))
+                    || (reservationId == null && itemReservation != reservation)) {
+                throw new IllegalArgumentException("Todos los servicios deben pertenecer a la misma reserva");
+            }
+        }
+
+        User user = reservation.getUser();
+        String to = user.getEmail();
+        if (to == null || to.isBlank()) {
+            throw new IllegalArgumentException("El usuario no tiene un correo registrado");
+        }
+
+        String subject = "Factura de servicios - Reserva " + reservation.getReservationId();
+        StringBuilder body = new StringBuilder();
+        body.append("Estimado/a ").append(user.getFullName() == null ? "" : user.getFullName()).append("\n\n");
+        body.append("Adjuntamos la factura en PDF con el detalle de los servicios solicitados.\n");
+        body.append("Gracias por su compra.");
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(body.toString());
+
+        byte[] pdfBytes = generateServicesPdf(reservation, services);
+        helper.addAttachment("factura-servicios-" + reservation.getReservationId() + ".pdf",
+                new ByteArrayResource(pdfBytes));
+
+        mailSender.send(message);
+    }
+
     private byte[] generatePdf(Reservation reservation, List<Payment> payments, String confirmationCode)
             throws Exception {
         try (PDDocument doc = new PDDocument();
@@ -133,6 +183,83 @@ public class ReceiptServiceImpl implements ReceiptService {
             } // PDPageContentStream is closed here
 
             // Now safe to save the document
+            doc.save(baos);
+            return baos.toByteArray();
+        }
+    }
+
+    private byte[] generateServicesPdf(Reservation reservation, List<ReservationServiceEntity> services)
+            throws Exception {
+        DecimalFormat money = new DecimalFormat("#,##0.00");
+
+        try (PDDocument doc = new PDDocument(); ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            PDPage page = new PDPage();
+            doc.addPage(page);
+
+            try (PDPageContentStream contents = new PDPageContentStream(doc, page)) {
+                contents.beginText();
+                contents.setFont(PDType1Font.COURIER_BOLD, 18);
+                contents.newLineAtOffset(50, 740);
+                contents.showText("Factura de Servicios - Reserva " + reservation.getReservationId());
+                contents.endText();
+
+                // Separator
+                contents.moveTo(50, 730);
+                contents.lineTo(550, 730);
+                contents.stroke();
+
+                contents.beginText();
+                contents.setFont(PDType1Font.COURIER, 13);
+                contents.newLineAtOffset(50, 710);
+                contents.showText("Cliente: "
+                        + (reservation.getUser() != null ? reservation.getUser().getFullName() : "N/A"));
+                contents.newLineAtOffset(0, -15);
+                contents.showText("Reserva: " + reservation.getReservationId());
+                contents.endText();
+
+                // Separator before line items
+                contents.moveTo(50, 690);
+                contents.lineTo(550, 690);
+                contents.stroke();
+
+                float y = 670;
+                double subtotal = 0;
+                for (ReservationServiceEntity item : services) {
+                    String serviceName = item.getService() != null ? item.getService().getName() : "Servicio";
+                    int qty = item.getQty();
+                    double unitPrice = item.getUnitPrice() != null ? item.getUnitPrice()
+                            : (item.getService() != null ? item.getService().getBasePrice() : 0d);
+                    double lineTotal = unitPrice * qty;
+                    subtotal += lineTotal;
+
+                    contents.beginText();
+                    contents.setFont(PDType1Font.COURIER, 12);
+                    contents.newLineAtOffset(50, y);
+                    contents.showText(serviceName + "  x" + qty + " @ " + money.format(unitPrice) + " = "
+                            + money.format(lineTotal));
+                    contents.endText();
+                    y -= 18;
+                }
+
+                double tax = subtotal * 0.19;
+                double total = subtotal + tax;
+
+                // Separator before totals
+                contents.moveTo(50, y - 5);
+                contents.lineTo(550, y - 5);
+                contents.stroke();
+
+                contents.beginText();
+                contents.setFont(PDType1Font.COURIER_BOLD, 14);
+                contents.newLineAtOffset(50, y - 20);
+                contents.showText("Subtotal: " + money.format(subtotal));
+                contents.newLineAtOffset(0, -15);
+                contents.showText("Impuestos (19%): " + money.format(tax));
+                contents.newLineAtOffset(0, -15);
+                contents.showText("Total: " + money.format(total));
+                contents.endText();
+            }
+
             doc.save(baos);
             return baos.toByteArray();
         }

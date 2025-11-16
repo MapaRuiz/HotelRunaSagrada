@@ -199,6 +199,22 @@ public class ReservationController {
         }
     }
 
+    @PostMapping("/{id}/services/receipt")
+    public ResponseEntity<Map<String, String>> sendServicesReceipt(@PathVariable Long id) {
+        try {
+            List<com.runasagrada.hotelapi.model.ReservationServiceEntity> services = service.findServicesByReservation(id);
+            if (services == null || services.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "La reserva no tiene servicios asociados"));
+            }
+            receiptService.sendReservationReceipt(services);
+            return ResponseEntity.ok(Map.of("message", "Receipt for services sent successfully"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to send services receipt: " + e.getMessage()));
+        }
+    }
+
     // GET /api/reservations/current?userId=...
     @GetMapping("/current")
     public List<Reservation> getCurrent(@RequestParam(required = false) Integer userId) {

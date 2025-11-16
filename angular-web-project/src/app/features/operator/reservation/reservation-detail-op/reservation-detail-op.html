@@ -257,8 +257,14 @@
                     }"
                     id="confirm-payment"
                     (click)="confirmPayTotal()"
-                    [disabled]="!selectedPaymentMethodId"
+                    [disabled]="!selectedPaymentMethodId || isPaying"
                   >
+                    <span
+                      *ngIf="isPaying"
+                      class="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
                     Confirmar pago de COP {{ billDueTotal | number : '1.0-0' }}
                   </button>
                 </div>

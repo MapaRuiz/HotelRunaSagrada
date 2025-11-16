@@ -113,4 +113,11 @@ export class ReservationService {
     }
     return this.http.post<void>(`${this.resource}/${reservationId}/receipt?${params.toString()}`, null);
   }
+
+  /**
+   * Solicita el envío del recibo de servicios asociados a la reserva.
+   */
+  sendServicesReceipt(reservationId: number) {
+    return this.http.post<void>(`${this.resource}/${reservationId}/services/receipt`, null);
+  }
 }

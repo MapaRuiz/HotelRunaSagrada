@@ -50,4 +50,9 @@ public interface ReservationService {
         double[] countByHotel(Long hotelId);
 
         Map<String, Long> countByRoomTypeAndHotel(Long hotelId);
+
+        /**
+         * Devuelve los servicios asociados a una reserva.
+         */
+        java.util.List<com.runasagrada.hotelapi.model.ReservationServiceEntity> findServicesByReservation(Long reservationId);
 }

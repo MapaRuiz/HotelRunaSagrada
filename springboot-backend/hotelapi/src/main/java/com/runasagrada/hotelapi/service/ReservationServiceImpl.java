@@ -323,6 +323,15 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<ReservationServiceEntity> findServicesByReservation(Long reservationId) {
+        if (reservationId == null) {
+            throw new IllegalArgumentException("reservationId es obligatorio");
+        }
+        return reservationServiceRepo.findByReservationReservationId(reservationId);
+    }
+
+    @Override
     public double[] count() {
         LocalDateTime now = LocalDateTime.now();
         YearMonth current = YearMonth.from(now);

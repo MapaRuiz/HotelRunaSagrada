@@ -10,7 +10,7 @@ import {
   inject,
 } from '@angular/core';
 import { Observable, Subscription, forkJoin, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { catchError, finalize, switchMap } from 'rxjs/operators';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Reservation } from '../../../../model/reservation';
@@ -77,6 +77,7 @@ export class ReservationDetailOp {
   paymentMethods: PaymentMethod[] = [];
   selectedPaymentMethodId: number | null = null;
   showingPayment = false;
+  isPaying = false;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['reservation'] && this.reservation?.reservation_id) {
@@ -279,6 +280,7 @@ export class ReservationDetailOp {
       alert('Solo puedes pagar cuando la reserva está en Check-in.');
       return;
     }
+    if (this.isPaying) return;
     if (!this.reservation?.reservation_id || !this.selectedPaymentMethodId) return;
     const reservationId = this.reservation.reservation_id;
     const serviceRef = `SERVICIOS RESERVA ${reservationId}`;
@@ -310,6 +312,7 @@ export class ReservationDetailOp {
       alert('No hay cargos pendientes por pagar.');
       return;
     }
+    this.isPaying = true;
     const settleOther$ = pendingOthers.length
       ? forkJoin(
           pendingOthers.map((p) =>
@@ -323,8 +326,16 @@ export class ReservationDetailOp {
     createOrUpdateServicePayment$
       .pipe(
         switchMap(() => settleOther$),
+        switchMap(() =>
+          this.service
+            .sendServicesReceipt(reservationId)
+            .pipe(catchError((err) => { console.error('Error enviando recibo de servicios', err); return of(null); }))
+        ),
         switchMap(() => this.service.deactivate(reservationId)),
-        switchMap(() => this.service.getById(reservationId))
+        switchMap(() => this.service.getById(reservationId)),
+        finalize(() => {
+          this.isPaying = false;
+        })
       )
       .subscribe({
         next: (updated) => {

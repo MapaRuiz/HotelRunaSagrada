@@ -8,4 +8,12 @@ public interface ReceiptService {
      * This method should throw an exception if reservation not found or send fails.
      */
     void sendReservationReceipt(Integer reservationId, boolean attachPdf, String confirmationCode) throws Exception;
+
+    /**
+     * Envía por correo un recibo/factura con el detalle de servicios solicitados
+     * (ReservationServiceEntity). Calcula subtotal por ítem (qty * unitPrice) y
+     * suma el 19% de impuestos al total.
+     */
+    void sendReservationReceipt(java.util.List<com.runasagrada.hotelapi.model.ReservationServiceEntity> services)
+            throws Exception;
 }
